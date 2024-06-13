@@ -7,92 +7,124 @@ import pandas as pd
 
 ParserElement.enablePackrat()
 
-def read_region_integrated_sdf(filename: str):
-    """Function that reads the sdf file and returns a dictionary of nuclide-reaction pairs and energy-dependent
-    sensitivities (with uncertainties)
-    
-    Parameters
-    ----------
-    - Filename: str, path to the sdf file
-    
-    Returns
-    -------
-    - energy_boundaries: np.ndarray, energy boundaries for the energy groups
-    - sdf_data: list of dict, list of dictionaries containing the nuclide-reaction pairs and the sensitivities
-        and uncertainties for the region-integrated sensitivity profile for each nuclide-reaction pair. The dictionary
-        keys are 'isotope', 'reaction_type', 'zaid', 'reaction_mt', 'zone_number', 'zone_volume', 'sensitivities',
-        and 'uncertainties'. The sensitivities and uncertainties are stored as unumpy.uarray objects."""
-    
-    with open(filename, 'r') as f:
-        data = f.read()
+class SdfReader:
+    def __init__(self, filename):
+        self.energy_boundaries, self.sdf_data = self._read_sdf(filename)
+        
+    def _read_sdf(self, filename):
+        """Function that reads the sdf file and returns a dictionary of nuclide-reaction pairs and energy-dependent
+        sensitivities (with uncertainties)
+        
+        Parameters
+        ----------
+        - Filename: str, path to the sdf file
+        
+        Returns
+        -------
+        - energy_boundaries: np.ndarray, energy boundaries for the energy groups
+        - sdf_data: list of dict, list of dictionaries containing the nuclide-reaction pairs and the sensitivities
+            and uncertainties for the region-integrated sensitivity profile for each nuclide-reaction pair. The dictionary
+            keys are 'isotope', 'reaction_type', 'zaid', 'reaction_mt', 'zone_number', 'zone_volume', 
+            'energy_integrated_sensitivity', 'abs_sum_groupwise_sensitivities', 'sum_opposite_sign_groupwise_sensitivities', 
+            'sensitivities', and 'uncertainties'. The sensitivities and uncertainties are stored as unumpy.uarray objects."""
+        with open(filename, 'r') as f:
+            data = f.read()
 
-    # ===========================================
-    # Get region integrated sensitivity profiles
-    # ===========================================
+        # ========================
+        # Get sensitivity profiles
+        # ========================
 
-    # Get number of energy groups
-    unused_lines = SkipTo(pyparsing_common.integer + "number of neutron groups")
-    num_groups_parser = Suppress(unused_lines) + pyparsing_common.integer + Suppress("number of neutron groups")
-    num_groups = num_groups_parser.parseString(data)[0]
+        # Get number of energy groups
+        unused_lines = SkipTo(pyparsing_common.integer + "number of neutron groups")
+        num_groups_parser = Suppress(unused_lines) + pyparsing_common.integer + Suppress("number of neutron groups")
+        num_groups = num_groups_parser.parseString(data)[0]
 
-    data_line = Group(OneOrMore(pyparsing_common.sci_real))
-    data_block = OneOrMore(data_line)
+        data_line = Group(OneOrMore(pyparsing_common.sci_real))
+        data_block = OneOrMore(data_line)
 
-    unused_lines = SkipTo("energy boundaries:")
-    energy_boundaries = Suppress(unused_lines + "energy boundaries:") + data_block
-    energy_boundaries = np.array(energy_boundaries.parseString(data)[0])
+        unused_lines = SkipTo("energy boundaries:")
+        energy_boundaries = Suppress(unused_lines + "energy boundaries:") + data_block
+        energy_boundaries = np.array(energy_boundaries.parseString(data)[0])
 
-    # ------------------
-    # SDF profile parser
-    # ------------------
-    atomic_number = Word(nums)
-    element = Word(alphas.lower(), exact=1) 
-    isotope_name = Combine(element + '-' + atomic_number)
+        # ------------------
+        # SDF profile parser
+        # ------------------
+        atomic_number = Word(nums)
+        element = Word(alphas.lower(), exact=1) 
+        isotope_name = Combine(element + '-' + atomic_number)
 
-    # Grammar for sdf header
-    reaction_type = Word(alphanums + ',\'')
-    zaid = Word(nums, max=6)
-    reaction_mt = Word(nums, max=4)
+        # Grammar for sdf header
+        reaction_type = Word(alphanums + ',\'')
+        zaid = Word(nums, max=6)
+        reaction_mt = Word(nums, max=4)
 
-    # Lines of the sdf header
-    sdf_header_first_line = isotope_name + reaction_type + zaid + reaction_mt + Suppress(LineEnd())
-    sdf_header_second_line = pyparsing_common.signed_integer + pyparsing_common.signed_integer + Suppress(LineEnd())
-    sdf_header_third_line = Suppress(pyparsing_common.sci_real + pyparsing_common.sci_real + pyparsing_common.signed_integer + \
-          pyparsing_common.signed_integer + LineEnd())
-    
-    # This line contains the total energy integrated sensitivity data for the given profile, along with uncertainties, etc.
-    sdf_data_first_line = pyparsing_common.sci_real + pyparsing_common.sci_real + pyparsing_common.sci_real + \
-                            pyparsing_common.sci_real + pyparsing_common.sci_real + LineEnd()
-    
-    # sdf_headers = sdf_header.searchString(data)
-    # The total sdf header
-    sdf_header = sdf_header_first_line + sdf_header_second_line + sdf_header_third_line
+        # Lines of the sdf header
+        sdf_header_first_line = isotope_name + reaction_type + zaid + reaction_mt + Suppress(LineEnd())
+        sdf_header_second_line = pyparsing_common.signed_integer + pyparsing_common.signed_integer + Suppress(LineEnd())
+        sdf_header_third_line = pyparsing_common.sci_real + pyparsing_common.sci_real + pyparsing_common.signed_integer + \
+                                    pyparsing_common.signed_integer + LineEnd()
+        
+        # This line contains the total energy integrated sensitivity data for the given profile, along with uncertainties, etc.
+        sdf_data_first_line = Group(pyparsing_common.sci_real + pyparsing_common.sci_real) + \
+                              pyparsing_common.sci_real + Group(pyparsing_common.sci_real + pyparsing_common.sci_real) + \
+                              Suppress(LineEnd())
+        
+        # The total sdf header
+        sdf_header = sdf_header_first_line + sdf_header_second_line + Suppress(sdf_header_third_line)
 
-    # SDF profile data
+        # SDF profile data
 
-    sdf_data_block = OneOrMore(data_line)
-    sdf_data = sdf_header + Suppress(sdf_data_first_line) + sdf_data_block
-    sdf_data = sdf_data.searchString(data)
-    # Now break the data blocks into two parts: the first part is the sensitivities and the second is the uncertainties
-    sdf_data = [match[:-1] + [np.array(match[-1][:num_groups]), np.array(match[-1][num_groups:])] for match in sdf_data]
+        sdf_data_block = OneOrMore(data_line)
+        sdf_data = sdf_header + sdf_data_first_line + sdf_data_block
+        sdf_data = sdf_data.searchString(data)
 
-    # --------------------------------------------------
-    # Now only return the region integrated sdf profiles
-    # --------------------------------------------------
-    # i.e. those with zone number and zone volume both equal to 0
+        # Now break the data blocks into two parts: the first part is the sensitivities and the second is the uncertainties
+        sdf_data = [match[:-1] + [np.array(match[-1][:num_groups]), np.array(match[-1][num_groups:])] for match in sdf_data]
 
-    sdf_data = [ match for match in sdf_data if match[4] == 0 and match[5] == 0 ]
+        # -------------------------------------------------
+        # Now parse each result into a readable dictionary
+        # -------------------------------------------------
 
-    # Now parse each result into a readable dictionary
-    names = ["isotope", "reaction_type", "zaid", "reaction_mt", "zone_number", "zone_volume", "sensitivities", "uncertainties"]
-    sdf_data = [dict(zip(names, match)) for match in sdf_data]
+        # NOTE sum_opposite_sign_groupwise_sensitivities referrs to the groupwise sensitivities with opposite sign to the
+        # integrated sensitivity coefficient
+        names = ["isotope", "reaction_type", "zaid", "reaction_mt", "zone_number", "zone_volume", \
+                 "energy_integrated_sensitivity", "abs_sum_groupwise_sensitivities", \
+                 "sum_opposite_sign_groupwise_sensitivities", "sensitivities", "uncertainties"]
+        sdf_data = [dict(zip(names, match)) for match in sdf_data]
 
-    # Convert the sensitivities and uncertainties to uncertainties.ufloat objects
-    for match in sdf_data:
-        match["sensitivities"] = unumpy.uarray(match['sensitivities'], match['uncertainties'])
-        del match["uncertainties"]
+        # Convert the sensitivities and uncertainties to uncertainties.ufloat objects
+        for match in sdf_data:
+            match["sensitivities"] = unumpy.uarray(match['sensitivities'], match['uncertainties'])
+            match["energy_integrated_sensitivity"] = \
+                ufloat(match['energy_integrated_sensitivity'][0], match['energy_integrated_sensitivity'][1])
+            match["sum_opposite_sign_groupwise_sensitivities"] = \
+                ufloat(match['sum_opposite_sign_groupwise_sensitivities'][0], match['sum_opposite_sign_groupwise_sensitivities'][1])
+            del match["uncertainties"]
 
-    return energy_boundaries, sdf_data
+        return energy_boundaries, sdf_data
+        
+class RegionIntegratedSdfReader(SdfReader):
+    def __init__(self, filename):
+        super().__init__(filename)
+        
+        # Now only return the region integrated sdf profiles
+        # i.e. those with zone number and zone volume both equal to 0
+        self.sdf_data = [ match for match in self.sdf_data if match['zone_number'] == 0 and match['zone_volume'] == 0 ]
+
+        # Transform the data into a dictionary keyed by nuclide and reaction type. Since data is region and mixture integrated
+        # we can assume that there is only one entry for each nuclide-reaction pair
+        sdf_data_dict = {}
+        for match in self.sdf_data:
+            nuclide = match['isotope']
+            reaction_type = match['reaction_type']
+            
+            if nuclide not in sdf_data_dict:
+                sdf_data_dict[nuclide] = {}
+
+            sdf_data_dict[nuclide][reaction_type] = match
+            
+        self.sdf_data = sdf_data_dict
+        
 
 def calculate_E(application_filenames: list, experiment_filenames: list, reaction_type='all', uncertainties='automatic'):
     """Calculates the similarity parameter, E for each application with each available experiment given the application 
@@ -114,12 +146,16 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
     # Read the application and experiment sdf files
 
     if reaction_type == "all":
-        application_sdfs = [ [ data['sensitivities'] for data in read_region_integrated_sdf(filename)[1] ] for filename in application_filenames ]
-        experiment_sdfs = [ [ data['sensitivities'] for data in read_region_integrated_sdf(filename)[1] ] for filename in experiment_filenames ]
-    else:
-        application_sdfs = [ [ data['sensitivities'] for data in read_region_integrated_sdf(filename)[1] if data['reaction_type'] == reaction_type ] \
+        application_sdfs = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data ] \
                             for filename in application_filenames ]
-        experiment_sdfs = [ [ data['sensitivities'] for data in read_region_integrated_sdf(filename)[1] if data['reaction_type'] == reaction_type ] \
+        experiment_sdfs  = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data ] \
+                            for filename in experiment_filenames ]
+    else:
+        application_sdfs = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data \
+                                if data['reaction_type'] == reaction_type ] \
+                            for filename in application_filenames ]
+        experiment_sdfs = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data \
+                             if data['reaction_type'] == reaction_type ] \
                             for filename in experiment_filenames ]
 
     def create_sensitivity_vector(sdfs):
@@ -245,7 +281,7 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
                     Returns
                     -------
                     - dot_product_uncertainty: float, uncertainty in the dot product of the two vectors"""
-                    
+
                     dot_product_uncertainty = 0
                     for i in range(len(vect1)):
                         if vect1[i].n == 0 or vect2[i].n == 0:
@@ -273,6 +309,9 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
                 E_vals[i, j] = ufloat(E, E_uncertainty)
 
     return E_vals
+
+def read_covariance_matrix(filename: str):
+    pass
 
 def read_tsunami_ip_ouput(filename):
     """Reads the output file from TSUNAMI-IP and returns the integral values for each application
