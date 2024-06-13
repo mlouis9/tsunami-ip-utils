@@ -110,7 +110,8 @@ class RegionIntegratedSdfReader(SdfReader):
         # Now only return the region integrated sdf profiles
         # i.e. those with zone number and zone volume both equal to 0
         self.sdf_data = [ match for match in self.sdf_data if match['zone_number'] == 0 and match['zone_volume'] == 0 ]
-
+    
+    def convert_to_dict(self):
         # Transform the data into a dictionary keyed by nuclide and reaction type. Since data is region and mixture integrated
         # we can assume that there is only one entry for each nuclide-reaction pair
         sdf_data_dict = {}
