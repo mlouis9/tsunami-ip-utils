@@ -113,6 +113,7 @@ class RegionIntegratedSdfReader(SdfReader):
         
         # Now only return the region integrated sdf profiles
         # i.e. those with zone number and zone volume both equal to 0
+        self.filename = filename
         self.sdf_data = [ match for match in self.sdf_data if match['zone_number'] == 0 and match['zone_volume'] == 0 ]
     
     def convert_to_dict(self):
@@ -129,7 +130,24 @@ class RegionIntegratedSdfReader(SdfReader):
             sdf_data_dict[nuclide][reaction_type] = match
             
         self.sdf_data = sdf_data_dict
+        return self
+    
+    def get_sensitivity_profiles(self, reaction_type='all'):
+        """Returns the sensitivity profiles for each nuclide-reaction pair in a list
         
+        Parameters
+        ----------
+        - reaction_type: str, the type of reaction to consider. Default is 'all' which considers all reactions
+        
+        Returns
+        -------
+        - sensitivity_profiles: list of unumpy.uarrays, list of sensitivity profiles for each nuclide-reaction pair"""
+        if reaction_type == 'all':
+            return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data ]
+        else:
+            return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data \
+                    if data['reaction_type'] == reaction_type ]
+
 def read_covariance_matrix(filename: str):
     pass
 
@@ -277,8 +295,9 @@ def dot_product_uncertainty_propagation(vect1, vect2):
 # Integral Index Calculation Utilities
 # =====================================
 
-def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, application_filename=None, experiment_filename=None, \
-                                      uncertainties='automatic'):
+def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, application_filename=None, \
+                                      experiment_filename=None, uncertainties='automatic', experiment_norm=None, \
+                                        application_norm=None):
     """Calculates E given the sensitivity vectors for an application and an experiment. 
     
     NOTE the application and experiment
@@ -293,16 +312,26 @@ def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, app
     - experiment_filename: str, filename of the experiment sdf file (only needed for automatic uncertianty propagation)
     - uncertainties: str, type of error propagation to use. Default is 'automatic' which uses the uncertainties package.
         If set to 'manual', then manual error propagation is used which is generally faster
+    - experiment_norm: ufloat, norm of the experiment vector. If not provided, it is calculated. This is mainly used for
+        calculating E contributions, where the denominator is not actually the norm of the application and experiment
+        vectors.
+    - application_norm: ufloat, norm of the application vector. If not provided, it is calculated. This is mainly used for
+        calculating E contributions, where the denominator is not actually the norm of the application and experiment
+        vectors.
         
     Returns
     -------
     - E: ufloat, similarity parameter between the application and the experiment"""
     
+    norms_not_provided = ( experiment_norm == None ) and ( application_norm == None )
+    print(norms_not_provided)
     if uncertainties == 'automatic': # Automatic error propagation with uncertainties package
         if application_filename == None or experiment_filename == None:
             raise ValueError("Application and experiment filenames must be provided for automatic error propagation")
-        application_norm = umath.sqrt(np.sum(application_vector**2))
-        experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
+        
+        if norms_not_provided:
+            application_norm = umath.sqrt(np.sum(application_vector**2))
+            experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
         
         application_unit_vector = application_vector / application_norm
         experiment_unit_vector = experiment_vector / experiment_norm
@@ -325,8 +354,11 @@ def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, app
         # Manual error propagation
 
         # Same calculation for E
-        application_norm = umath.sqrt(np.sum(application_vector**2))
-        experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
+        if norms_not_provided:
+            application_norm = umath.sqrt(np.sum(application_vector**2))
+            experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
+
+        print(f"NORMS: {application_norm}, {experiment_norm}")
 
         application_unit_vector = application_vector / application_norm
         experiment_unit_vector = experiment_vector / experiment_norm
@@ -396,18 +428,10 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
 
     # Read the application and experiment sdf files
 
-    if reaction_type == "all":
-        application_sdfs = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data ] \
-                            for filename in application_filenames ]
-        experiment_sdfs  = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data ] \
-                            for filename in experiment_filenames ]
-    else:
-        application_sdfs = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data \
-                                if data['reaction_type'] == reaction_type ] \
-                            for filename in application_filenames ]
-        experiment_sdfs = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).sdf_data \
-                             if data['reaction_type'] == reaction_type ] \
-                            for filename in experiment_filenames ]
+    application_sdfs = [ RegionIntegratedSdfReader(filename).get_sensitivity_profiles(reaction_type) \
+                        for filename in application_filenames ]
+    experiment_sdfs  = [ RegionIntegratedSdfReader(filename).get_sensitivity_profiles(reaction_type) \
+                        for filename in experiment_filenames ]
 
     # Create a matrix to store the similarity parameter E for each application with each experiment
     E_vals = unumpy.umatrix(np.zeros( ( len(experiment_sdfs), len(application_sdfs) ) ), \
@@ -425,7 +449,7 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
     return E_vals
 
 
-def get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions):
+def get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions, application_norm, experiment_norm):
     """Calculate contributions to the similarity parameter E for each reaction type for a given isotope
     
     Parameters
@@ -434,6 +458,8 @@ def get_reaction_wise_E_contributions(application, experiment, isotope, all_reac
     - experiment: dict, dictionary of experiment sensitivity profiles
     - isotope: str, isotope to consider
     - all_reactions: list of str, list of all possible reaction types
+    - application_norm: ufloat, norm of the application sensitivity vector
+    - experiment_norm: ufloat, norm of the experiment sensitivity vector
     
     Returns
     -------
@@ -442,10 +468,11 @@ def get_reaction_wise_E_contributions(application, experiment, isotope, all_reac
     
     E_contributions = []
     for reaction in all_reactions:
-        application_vector = create_sensitivity_vector( application[isotope][reaction]['sensitivities'] )
-        experiment_vector = create_sensitivity_vector( experiment[isotope][reaction]['sensitivities'] )
+        application_vector = application[isotope][reaction]['sensitivities']
+        experiment_vector = experiment[isotope][reaction]['sensitivities']
 
-        E_contribution = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, 'manual')
+        E_contribution = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, uncertainties='manual', \
+                                                           application_norm=application_norm, experiment_norm=experiment_norm)
         E_contributions.append({
             "isotope": isotope,
             "reaction_type": reaction,
@@ -454,20 +481,37 @@ def get_reaction_wise_E_contributions(application, experiment, isotope, all_reac
 
     return E_contributions
 
-def get_nuclide_and_reaction_wise_E_contributions(application, experiment):
+
+def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedSdfReader, experiment: RegionIntegratedSdfReader):
     """Calculate the contributions to the similarity parameter E for each nuclide and for each reaction type for a given
     application and experiment
     
     Parameters
     ----------
-    - application: dict, dictionary of application sensitivity profiles
-    - experiment: dict, dictionary of experiment sensitivity profiles
+    - application: RegionIntegratedSdfReader, contains application sensitivity profile dictionaries
+    - experiment: RegionIntegratedSdfReader, contains experiment sensitivity profile dictionaries
     
     Returns
     -------
     - nuclide_wise_contributions: list of dict, list of dictionaries containing the contribution to the similarity parameter E
         for each nuclide
     - nuclide_reaction_wise_contributions: list of dict, list of dictionaries containing the contribution to the similarity"""
+
+    # First, extract the sensitivity vectors for the application and experiment
+    
+    # Calculate |S_A| and |S_E| to normalize the E contributions properly
+
+    application_vector = create_sensitivity_vector(application.get_sensitivity_profiles())
+    experiment_vector = create_sensitivity_vector(experiment.get_sensitivity_profiles())
+
+    application_norm = umath.sqrt(np.sum(application_vector**2))
+    experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
+
+    print(f"NORMS: {application_norm}, {experiment_norm}")
+
+    # Now convert the application and experiment sdf's to dictionaries keyed by nuclide and reaction type
+    application = application.convert_to_dict().sdf_data
+    experiment  = experiment.convert_to_dict().sdf_data
 
     nuclide_wise_contributions = []
     nuclide_reaction_wise_contributions = []
@@ -493,11 +537,15 @@ def get_nuclide_and_reaction_wise_E_contributions(application, experiment):
             } for reaction_type in all_reactions ]
             continue
 
-        # For isotope-wise contribution, the sensitivity vector is just the total xs sensitivity profile
-        application_vector = create_sensitivity_vector( application[isotope]['total']['sensitivities'] )
-        experiment_vector = create_sensitivity_vector( experiment[isotope]['total']['sensitivities'] )
+        # For isotope-wise contribution, the sensitivity vector is all of the reaction sensitivities concatenated together
+        application_vector = create_sensitivity_vector([ application[isotope][reaction]['sensitivities'] \
+                                                        for reaction in all_reactions] )
+        experiment_vector  = create_sensitivity_vector([ experiment[isotope][reaction]['sensitivities'] \
+                                                        for reaction in all_reactions ])
 
-        E_isotope_contribution = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, 'manual')
+        E_isotope_contribution = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, uncertainties='manual',
+                                                                   application_norm=application_norm, \
+                                                                    experiment_norm=experiment_norm)
         nuclide_wise_contributions.append({
             "isotope": isotope,
             "contribution": E_isotope_contribution
@@ -505,7 +553,8 @@ def get_nuclide_and_reaction_wise_E_contributions(application, experiment):
 
         # For nuclide-reaction-wise contribution, we need to consider each reaction type
         nuclide_reaction_wise_contributions += \
-            get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions)
+            get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions, \
+                                              application_norm, experiment_norm)
         
     return nuclide_wise_contributions, nuclide_reaction_wise_contributions
 
@@ -526,10 +575,8 @@ def calculate_E_contributions(application_filenames: list, experiment_filenames:
     - E_contributions_nuclide_reaction: unumpy.uarray of contributions to the similarity parameter E for each application with
         each experiment on a nuclide-reaction basis"""
     
-    application_sdfs = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).convert_to_dict().sdf_data ] \
-                            for filename in application_filenames ]
-    experiment_sdfs  = [ [ data['sensitivities'] for data in RegionIntegratedSdfReader(filename).convert_to_dict().sdf_data ] \
-                            for filename in experiment_filenames ]
+    application_sdfs = [ RegionIntegratedSdfReader(filename) for filename in application_filenames ]
+    experiment_sdfs  = [ RegionIntegratedSdfReader(filename) for filename in experiment_filenames ]
     
     # Initialize np object arrays to store the E contributions
     E_nuclide_wise          = np.empty( ( len(experiment_sdfs), len(application_sdfs) ), dtype=object )
