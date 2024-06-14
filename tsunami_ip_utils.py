@@ -1,9 +1,9 @@
 from pyparsing import *
-from uncertainties import ufloat
-from uncertainties import unumpy, umath
+from uncertainties import ufloat, unumpy, umath
 import numpy as np
-import math
 import pandas as pd
+import matplotlib.pyplot as plt
+import re
 
 ParserElement.enablePackrat()
 
@@ -291,6 +291,43 @@ def dot_product_uncertainty_propagation(vect1, vect2):
 
     return dot_product_uncertainty
 
+# ============================
+# Format Conversion Utilities
+# ============================
+
+def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interest):
+    """Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of
+    interest, e.g. an sdf profile or a contribution) to a nested dictionary
+    
+    Parameters
+    ----------
+    - isotope_reaction_list: list of dict, list of dictionaries containing isotope-reaction pairs and some other key
+    - field_of_interest: str, the key in the dictionary that represents the value of interest
+
+    Returns
+    -------
+    - nested_dict: dict, nested dictionary containing the isotope-reaction pairs and the value of interest"""
+
+    isotope_reaction_dict = {}
+
+    def get_atomic_number(isotope):
+        return int(re.findall(r'\d+', isotope)[0])
+    
+    # Sort isotopes by atomic number so plots will have similar colors across different calls
+    all_isotopes = list(set([isotope_reaction['isotope'] for isotope_reaction in isotope_reaction_list]))
+    all_isotopes.sort(key=get_atomic_number)
+    isotope_reaction_dict = { isotope: {} for isotope in all_isotopes }
+
+    for isotope_reaction in isotope_reaction_list:
+        isotope = isotope_reaction['isotope']
+        reaction = isotope_reaction['reaction_type']
+        value = isotope_reaction[field_of_interest]
+
+        isotope_reaction_dict[isotope][reaction] = value
+
+    return isotope_reaction_dict
+
+
 # =====================================
 # Integral Index Calculation Utilities
 # =====================================
@@ -324,7 +361,6 @@ def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, app
     - E: ufloat, similarity parameter between the application and the experiment"""
     
     norms_not_provided = ( experiment_norm == None ) and ( application_norm == None )
-    print(norms_not_provided)
     if uncertainties == 'automatic': # Automatic error propagation with uncertainties package
         if application_filename == None or experiment_filename == None:
             raise ValueError("Application and experiment filenames must be provided for automatic error propagation")
@@ -357,8 +393,6 @@ def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, app
         if norms_not_provided:
             application_norm = umath.sqrt(np.sum(application_vector**2))
             experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
-
-        print(f"NORMS: {application_norm}, {experiment_norm}")
 
         application_unit_vector = application_vector / application_norm
         experiment_unit_vector = experiment_vector / experiment_norm
@@ -507,8 +541,6 @@ def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedS
     application_norm = umath.sqrt(np.sum(application_vector**2))
     experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
 
-    print(f"NORMS: {application_norm}, {experiment_norm}")
-
     # Now convert the application and experiment sdf's to dictionaries keyed by nuclide and reaction type
     application = application.convert_to_dict().sdf_data
     experiment  = experiment.convert_to_dict().sdf_data
@@ -591,6 +623,126 @@ def calculate_E_contributions(application_filenames: list, experiment_filenames:
             E_nuclide_reaction_wise[i, j] = nuclide_reaction_wise_contributions
 
     return E_nuclide_wise, E_nuclide_reaction_wise
+
+# ========================
+# Visualization Utilities
+# ========================
+
+def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
+    """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
+    
+    Parameters
+    ----------
+    - contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter for each
+        nuclide or nuclide-reaction pair
+    - plot_type: str, type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
+        a pie chart"""
+    
+    fig, axs = plt.subplots()
+
+    # Determine if the contributions are for nuclide-wise or nuclide-reaction-wise
+    if 'reaction_type' in contributions[0]:
+        # Nuclide-reaction-wise contributions
+        nested_plot = True # Nested plot by nuclide then by reaction type
+
+        # Create a dictionary of contributions keyed by isotope then by reaction type
+        contributions = isotope_reaction_list_to_nested_dict(contributions, 'contribution')
+    else:
+        # Nuclide-wise contributions
+        nested_plot = False
+        contributions = { contribution['isotope']: contribution['contribution'] for contribution in contributions }
+
+    # Now plot the contributions
+    if not nested_plot:
+        if plot_type == 'bar':
+            # Plot percent contributions
+            axs.bar(contributions.keys(), [ contribution.n for contribution in contributions.values() ], \
+                    yerr=[ contribution.s for contribution in contributions.values() ], capsize=5, elinewidth=0.5)
+        elif plot_type == 'pie':
+            axs.pie([ contribution.n for contribution in contributions.values() ], labels=contributions.keys())
+
+    else:
+        # -------------
+        # Nested plots
+        # -------------
+
+        # Colors for each reaction type
+        num_reactions = len(next(iter(contributions.values())))
+        cmap = plt.get_cmap('Set1')
+        colors = cmap(np.linspace(0, 1, num_reactions))
+
+        if plot_type == 'bar':
+            # Variables to hold the bar positions and labels
+            indices = range(len(contributions))
+            labels = list(contributions.keys())
+
+            # Bottom offset for each stack
+            bottoms = [0] * len(contributions)
+
+            color_index = 0
+            for reaction in next(iter(contributions.values())).keys():
+                values = [contributions[nuclide][reaction].n for nuclide in contributions]
+                errs = [contributions[nuclide][reaction].s for nuclide in contributions]
+                axs.bar(indices, values, label=reaction, bottom=bottoms, color=colors[color_index % len(colors)], \
+                        yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+                # Update the bottom positions
+                bottoms = [bottoms[i] + values[i] for i in range(len(bottoms))]
+                color_index += 1
+
+            axs.set_xticks(indices)
+            axs.set_xticklabels(labels)
+            axs.legend()
+
+        if plot_type == "pie":
+            # Create a nested ring chart
+            nuclide_colors = plt.get_cmap('autumn')(np.linspace(0, 1, len(contributions)))
+            nuclide_labels = list(contributions.keys())
+            nuclide_totals = [sum(contribution.n for contribution in contributions[nuclide].values()) for nuclide in contributions]
+
+            # Reverse nuclides to align with outer ring
+            nuclide_labels.reverse()
+            nuclide_totals.reverse()
+
+            # Plot the inner ring for nuclide totals
+            inner_ring, _ = axs.pie(nuclide_totals, radius=0.7, labels=nuclide_labels, \
+                                    colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
+                                        wedgeprops=dict(width=0.3, edgecolor='w'))
+
+            # Get colors for reactions from the "rainbow" colormap
+            reaction_colors = plt.get_cmap('spring')(np.linspace(0, 1, num_reactions))
+
+            # Plot the outer ring for reaction-specific contributions
+            outer_labels = []
+            outer_colors = []
+            outer_sizes = []
+            for i, (nuclide, reactions) in enumerate(contributions.items()):
+                for j, (reaction, contribution) in enumerate(list(reactions.items())):
+                    outer_labels.append(reaction)
+                    
+                    frac_rxn_color = 0.8
+                    blended_color = np.average([frac_rxn_color*reaction_colors[j], (1-frac_rxn_color)*nuclide_colors[i]], axis=0)
+                    outer_colors.append(blended_color)
+                    outer_sizes.append(contribution.n)
+
+            axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
+                    textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=False, \
+                        wedgeprops=dict(width=0.3, edgecolor='w'))
+
+
+
+
+    # Additional styling
+
+    if plot_type == 'bar':
+        axs.set_ylabel(f"Contribution to {integral_index_name}")
+        axs.set_xlabel("Isotope")
+    axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
+
+    return fig, axs
+
+# =====
+# Misc
+# =====
 
 def comparison(tsunami_ip_output_filename, application_filenames: list, experiment_filenames: list):
     """Function that compares the calculated similarity parameter E with the TSUNAMI-IP output for each application with each
