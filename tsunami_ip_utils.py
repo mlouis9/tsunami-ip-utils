@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import re
 
 ParserElement.enablePackrat()
+plt.rcParams['hatch.linewidth'] = 0.5
 
 # ==================
 # Reading Utilities
@@ -677,17 +678,29 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
             labels = list(contributions.keys())
 
             # Bottom offset for each stack
-            bottoms = [0] * len(contributions)
+            bottoms_pos = [0] * len(contributions)
+            bottoms_neg = [0] * len(contributions)
 
             color_index = 0
             for reaction in next(iter(contributions.values())).keys():
                 values = [contributions[nuclide][reaction].n for nuclide in contributions]
                 errs = [contributions[nuclide][reaction].s for nuclide in contributions]
-                axs.bar(indices, values, label=reaction, bottom=bottoms, color=colors[color_index % len(colors)], \
+                # Stacking positive values
+                pos_values = [max(0, v) for v in values]
+                neg_values = [min(0, v) for v in values]
+                axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=colors[color_index % len(colors)],
+                        yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+                axs.bar(indices, neg_values, bottom=bottoms_neg, color=colors[color_index % len(colors)],
                         yerr=errs, capsize=5, error_kw={'capthick': 0.5})
                 # Update the bottom positions
-                bottoms = [bottoms[i] + values[i] for i in range(len(bottoms))]
+                bottoms_pos = [bottoms_pos[i] + pos_values[i] for i in range(len(bottoms_pos))]
+                bottoms_neg = [bottoms_neg[i] + neg_values[i] for i in range(len(bottoms_neg))]
                 color_index += 1
+
+            # Adding 'effective' box with dashed border
+            total_values = [sum(contributions[label][r].n for r in contributions[label]) for label in labels]
+            for idx, val in zip(indices, total_values):
+                axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.5)
 
             axs.set_xticks(indices)
             axs.set_xticklabels(labels)
@@ -715,7 +728,7 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
             outer_labels = []
             outer_colors = []
             outer_sizes = []
-            for i, (nuclide, reactions) in enumerate(contributions.items()):
+            for i, (_, reactions) in enumerate(contributions.items()):
                 for j, (reaction, contribution) in enumerate(list(reactions.items())):
                     outer_labels.append(reaction)
                     
