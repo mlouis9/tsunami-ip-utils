@@ -726,9 +726,11 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
             wedge_widths = list(nuclide_totals.values())
             inner_wedge_hatches = [None] * len(wedge_widths)
 
+            def blend_colors(color1, color2, alpha):
+                return np.array( [ alpha * c1 + (1 - alpha) * c2 for c1, c2 in zip(color1, color2 ) ] )
+
             if len(nuclides_with_opposite_sign_contributions) > 0:
                 for nuclide in nuclides_with_opposite_sign_contributions:
-                    print(f"Nuclide: {nuclide}")
                     # First, determine the fraction of the contributions that are opposite (in sign) to the total
                     total_sign = np.sign(nuclide_totals[nuclide])
                     
@@ -741,15 +743,17 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
                     
                     # NOTE the sign function is needed to handle the case when the nuclide total is negative
                     lost_wedge_width = absolute_sum_of_contributions - total_sign * nuclide_totals[nuclide]
-                    print(f"Width of opposite sign wedge: {lost_wedge_width}")
 
                     # Now, insert the lost wedge width into the wedge widths list right after the nuclide
                     nuclide_index = list(nuclide_totals.keys()).index(nuclide)
                     wedge_widths.insert(nuclide_index + 1, lost_wedge_width)
                     nuclide_labels.insert(nuclide_index + 1, f"Lost wedge width for {nuclide}")
                     
+                    # The color of the lost wedge width will be a blend of the nuclide color and white
                     white_color = np.array([1, 1, 1, 1])
-                    nuclide_colors = np.insert(nuclide_colors, nuclide_index + 1, white_color, axis=0)
+                    opacity = 0.8
+                    blended_color = blend_colors(white_color, nuclide_colors[nuclide_index], opacity)
+                    nuclide_colors = np.insert(nuclide_colors, nuclide_index + 1, blended_color, axis=0)
                     
                     # Add hatches to the negative total sum wedge
                     if nuclide_totals[nuclide] < 0:
@@ -769,7 +773,7 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
                     wedge.set_hatch(hatch)
 
             # Get colors for reactions from the "rainbow" colormap
-            reaction_colors = plt.get_cmap('spring')(np.linspace(0, 1, num_reactions))
+            reaction_colors = plt.get_cmap('Set1')(np.linspace(0, 1, num_reactions))
 
             # Plot the outer ring for reaction-specific contributions
             outer_labels = []
@@ -780,9 +784,7 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
                 for j, (reaction, contribution) in enumerate(list(reactions.items())):
                     outer_labels.append(f"{nuclide} - {reaction}")
                     
-                    frac_rxn_color = 0.8
-                    blended_color = np.average([frac_rxn_color*reaction_colors[j], (1-frac_rxn_color)*nuclide_colors[i]], axis=0)
-                    outer_colors.append(blended_color)
+                    outer_colors.append(reaction_colors[j])
                     outer_sizes.append(np.abs(contribution.n))
                     
                     if contribution.n < 0:
