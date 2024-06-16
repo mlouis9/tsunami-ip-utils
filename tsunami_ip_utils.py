@@ -708,12 +708,56 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
 
         if plot_type == "pie":
             # Create a nested ring chart
-            nuclide_colors = plt.get_cmap('autumn')(np.linspace(0, 1, len(contributions)))
-            nuclide_labels = list(contributions.keys())
-            nuclide_totals = [sum(contribution.n for contribution in contributions[nuclide].values()) for nuclide in contributions]
+            nuclide_colors = plt.get_cmap('autumn')(np.linspace(0, 1, len(contributions.keys())))
+            nuclide_totals = { nuclide: sum(contribution.n for contribution in contributions[nuclide].values()) \
+                              for nuclide in contributions }
+            nuclide_labels = list(nuclide_totals.keys())
+
+            # Now, deal with negative values
+
+            nuclides_with_opposite_sign_contributions = []
+            for nuclide, contribution in contributions.items():
+                contribution_values = [contribution[reaction].n for reaction in contribution]
+                if not (all(v >= 0 for v in contribution_values) or all(v <= 0 for v in contribution_values)):
+                    nuclides_with_opposite_sign_contributions.append(nuclide)
+                
+            # For nuclides with opposite sign contributions, we distinguish the positive and negative contributions
+            # by coloring some of the inner ring a lighter color to indicate the negative contributions in the outer ring
+            wedge_widths = list(nuclide_totals.values())
+            if len(nuclides_with_opposite_sign_contributions) > 0:
+                for nuclide in nuclides_with_opposite_sign_contributions:
+                    print(f"Nuclide: {nuclide}")
+                    # First, determine the fraction of the contributions that are opposite (in sign) to the total
+                    total_sign = np.sign(nuclide_totals[nuclide])
+                    opposite_sign_contributions = { reaction: contribution.n for reaction, contribution in contributions[nuclide].items() \
+                                                    if np.sign(contribution.n) != total_sign }
+                    
+                    # Now, we want to pot the "lost" wedge width in white, i.e. the width lost from cancellations between the
+                    # positive and negative contributions. This will be colored a lighter color. The absolute sum of the
+                    # contributions represents the wedge width if there were no cancellations, so the total wedge width
+                    # minus the absolute sum of the contributions is "lost" wedge width.
+
+                    absolute_sum_of_contributions = sum(np.abs(contribution.n) for contribution in contributions[nuclide].values())
+                    
+                    # NOTE the sign function is needed to handle the case when the nuclide total is negative
+                    lost_wedge_width = absolute_sum_of_contributions - total_sign * nuclide_totals[nuclide]
+                    print(f"Width of opposite sign wedge: {lost_wedge_width}")
+
+                    # Now, insert the lost wedge width into the wedge widths list right after the nuclide
+                    nuclide_index = list(nuclide_totals.keys()).index(nuclide)
+                    wedge_widths.insert(nuclide_index + 1, lost_wedge_width)
+                    nuclide_labels.insert(nuclide_index + 1, f"Lost wedge width for {nuclide}")
+                    
+                    white_color = np.array([1, 1, 1, 1])
+                    nuclide_colors = np.insert(nuclide_colors, nuclide_index + 1, white_color, axis=0)
+
+            # Now make everything positive for the pie chart
+            wedge_widths = np.abs(wedge_widths)
+            contributions = { nuclide: { reaction: abs(contribution) for reaction, contribution in contributions[nuclide].items() } \
+                            for nuclide in contributions }
 
             # Plot the inner ring for nuclide totals
-            inner_ring, _ = axs.pie(nuclide_totals, radius=0.7, labels=nuclide_labels, \
+            inner_ring, _ = axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
                                     colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
                                         wedgeprops=dict(width=0.3, edgecolor='w'))
 
