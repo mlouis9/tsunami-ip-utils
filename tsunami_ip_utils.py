@@ -708,9 +708,9 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
 
         if plot_type == "pie":
             # Create a nested ring chart
-            nuclide_colors = plt.get_cmap('autumn')(np.linspace(0, 1, len(contributions.keys())))
+            nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
             nuclide_totals = { nuclide: sum(contribution.n for contribution in contributions[nuclide].values()) \
-                              for nuclide in contributions }
+                            for nuclide in contributions }
             nuclide_labels = list(nuclide_totals.keys())
 
             # Now, deal with negative values
@@ -724,15 +724,15 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
             # For nuclides with opposite sign contributions, we distinguish the positive and negative contributions
             # by coloring some of the inner ring a lighter color to indicate the negative contributions in the outer ring
             wedge_widths = list(nuclide_totals.values())
+            inner_wedge_hatches = [None] * len(wedge_widths)
+
             if len(nuclides_with_opposite_sign_contributions) > 0:
                 for nuclide in nuclides_with_opposite_sign_contributions:
                     print(f"Nuclide: {nuclide}")
                     # First, determine the fraction of the contributions that are opposite (in sign) to the total
                     total_sign = np.sign(nuclide_totals[nuclide])
-                    opposite_sign_contributions = { reaction: contribution.n for reaction, contribution in contributions[nuclide].items() \
-                                                    if np.sign(contribution.n) != total_sign }
                     
-                    # Now, we want to pot the "lost" wedge width in white, i.e. the width lost from cancellations between the
+                    # Now, we want to plot the "lost" wedge width in white, i.e. the width lost from cancellations between the
                     # positive and negative contributions. This will be colored a lighter color. The absolute sum of the
                     # contributions represents the wedge width if there were no cancellations, so the total wedge width
                     # minus the absolute sum of the contributions is "lost" wedge width.
@@ -750,16 +750,23 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
                     
                     white_color = np.array([1, 1, 1, 1])
                     nuclide_colors = np.insert(nuclide_colors, nuclide_index + 1, white_color, axis=0)
+                    
+                    # Add hatches to the negative total sum wedge
+                    if nuclide_totals[nuclide] < 0:
+                        inner_wedge_hatches[nuclide_index] = '//'
 
             # Now make everything positive for the pie chart
             wedge_widths = np.abs(wedge_widths)
-            contributions = { nuclide: { reaction: abs(contribution) for reaction, contribution in contributions[nuclide].items() } \
-                            for nuclide in contributions }
 
             # Plot the inner ring for nuclide totals
             inner_ring, _ = axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
                                     colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
                                         wedgeprops=dict(width=0.3, edgecolor='w'))
+
+            # Add hatches to the negative total sum wedges
+            for wedge, hatch in zip(inner_ring, inner_wedge_hatches):
+                if hatch:
+                    wedge.set_hatch(hatch)
 
             # Get colors for reactions from the "rainbow" colormap
             reaction_colors = plt.get_cmap('spring')(np.linspace(0, 1, num_reactions))
@@ -768,6 +775,7 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
             outer_labels = []
             outer_colors = []
             outer_sizes = []
+            outer_hatches = []
             for i, (nuclide, reactions) in enumerate(contributions.items()):
                 for j, (reaction, contribution) in enumerate(list(reactions.items())):
                     outer_labels.append(f"{nuclide} - {reaction}")
@@ -776,10 +784,20 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
                     blended_color = np.average([frac_rxn_color*reaction_colors[j], (1-frac_rxn_color)*nuclide_colors[i]], axis=0)
                     outer_colors.append(blended_color)
                     outer_sizes.append(np.abs(contribution.n))
+                    
+                    if contribution.n < 0:
+                        outer_hatches.append('//')
+                    else:
+                        outer_hatches.append(None)
 
-            axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
+            outer_ring, _ = axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
                     textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=True, \
                         wedgeprops=dict(width=0.3, edgecolor='w'))
+
+            # Add hatches to the negative contribution wedges
+            for wedge, hatch in zip(outer_ring, outer_hatches):
+                if hatch:
+                    wedge.set_hatch(hatch)
 
 
 
