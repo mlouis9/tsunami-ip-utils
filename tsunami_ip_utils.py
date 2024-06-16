@@ -712,29 +712,7 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
             nuclide_labels = list(contributions.keys())
             nuclide_totals = [sum(contribution.n for contribution in contributions[nuclide].values()) for nuclide in contributions]
 
-            # Since some contributions may be negative, we need to take the absolute sum to find how much space they need in
-            # the pie chart
-            white_spaces = []
-            nuclide_absolute_totals = [sum(np.abs(contribution.n) for contribution in contributions[nuclide].values()) for nuclide in contributions]
-            for nuclide_total, nuclide_absolute_total in zip(nuclide_totals, nuclide_absolute_totals):
-                if nuclide_total != nuclide_absolute_total:
-                    white_spaces.append(np.abs(nuclide_absolute_total - nuclide_total))
-                else:
-                    white_spaces.append(0)
-
-            # Reverse nuclides to align with outer ring
-            nuclide_labels.reverse()
-            nuclide_totals.reverse()
-
-            # Now insert a white space to pad the inner ring, set the color to white, and set the label to ''
-            for index, white_space in enumerate(white_spaces):
-                if white_space != 0:
-                    nuclide_totals.insert(index, white_space)
-                    nuclide_labels.insert(index, '')
-                    nuclide_colors = np.insert(nuclide_colors, index, [1, 1, 1, 1], axis=0)
-
             # Plot the inner ring for nuclide totals
-            nuclide_totals = [abs(nuclide_total) for nuclide_total in nuclide_totals]
             inner_ring, _ = axs.pie(nuclide_totals, radius=0.7, labels=nuclide_labels, \
                                     colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
                                         wedgeprops=dict(width=0.3, edgecolor='w'))
@@ -746,9 +724,9 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
             outer_labels = []
             outer_colors = []
             outer_sizes = []
-            for i, (_, reactions) in enumerate(contributions.items()):
+            for i, (nuclide, reactions) in enumerate(contributions.items()):
                 for j, (reaction, contribution) in enumerate(list(reactions.items())):
-                    outer_labels.append(reaction)
+                    outer_labels.append(f"{nuclide} - {reaction}")
                     
                     frac_rxn_color = 0.8
                     blended_color = np.average([frac_rxn_color*reaction_colors[j], (1-frac_rxn_color)*nuclide_colors[i]], axis=0)
@@ -756,7 +734,7 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
                     outer_sizes.append(np.abs(contribution.n))
 
             axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
-                    textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=False, \
+                    textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=True, \
                         wedgeprops=dict(width=0.3, edgecolor='w'))
 
 
