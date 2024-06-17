@@ -4,6 +4,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import re
+from plotly.subplots import make_subplots
+import plotly.express as px
+import pandas as pd
+from abc import ABC, abstractmethod
 
 ParserElement.enablePackrat()
 plt.rcParams['hatch.linewidth'] = 0.5
@@ -11,6 +15,7 @@ plt.rcParams['hatch.linewidth'] = 0.5
 # ==================
 # Reading Utilities
 # ==================
+
 
 class SdfReader:
     def __init__(self, filename):
@@ -221,9 +226,11 @@ def read_integral_indices(filename):
 
     return integral_matrices
 
+
 # ============================
 # Error Propagation Functions
 # ============================
+
 
 def unit_vector_uncertainty_propagation(vector):
     """Does error propagation for the components of a vector v that is normalized to a unit vector via 
@@ -292,9 +299,11 @@ def dot_product_uncertainty_propagation(vect1, vect2):
 
     return dot_product_uncertainty
 
+
 # ============================
 # Format Conversion Utilities
 # ============================
+
 
 def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interest):
     """Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of
@@ -483,7 +492,6 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
 
     return E_vals
 
-
 def get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions, application_norm, experiment_norm):
     """Calculate contributions to the similarity parameter E for each reaction type for a given isotope
     
@@ -625,9 +633,277 @@ def calculate_E_contributions(application_filenames: list, experiment_filenames:
 
     return E_nuclide_wise, E_nuclide_reaction_wise
 
+
 # ========================
 # Visualization Utilities
 # ========================
+
+class Plotter(ABC):
+    @abstractmethod
+    def create_plot(self, data, nested):
+        pass
+
+    @abstractmethod
+    def add_to_subplot(self, fig, position):
+        pass
+
+    @abstractmethod
+    def get_plot(self):
+        pass
+
+    @abstractmethod
+    def style(self):
+        pass
+
+
+class BarPlotter(Plotter):
+    def __init__(self, integral_index_name):
+        self.fig, self.axs = plt.subplots()
+        self.index_name = integral_index_name
+
+    def create_plot(self, contributions, nested):
+        if nested:
+            self.nested_barchart(contributions)
+        else:
+            self.barchart(contributions)
+
+    def get_plot(self):
+        return self.fig, self.axs
+        
+    def add_to_subplot(self, fig, position):
+        return fig.add_subplot(position, sharex=self.axs, sharey=self.axs)
+        
+    def barchart(self, contributions):
+        self.axs.bar(contributions.keys(), [contribution.n for contribution in contributions.values()],
+            yerr=[contribution.s for contribution in contributions.values()], capsize=5, error_kw={'elinewidth': 0.5})
+
+    def nested_barchart(self, contributions):
+        # Colors for each reaction type
+        num_reactions = len(next(iter(contributions.values())))
+        cmap = plt.get_cmap('Set1')
+        colors = cmap(np.linspace(0, 1, num_reactions))
+
+        # Variables to hold the bar positions and labels
+        indices = range(len(contributions))
+        labels = list(contributions.keys())
+
+        # Bottom offset for each stack
+        bottoms_pos = [0] * len(contributions)
+        bottoms_neg = [0] * len(contributions)
+
+        color_index = 0
+        for reaction in next(iter(contributions.values())).keys():
+            values = [contributions[nuclide][reaction].n for nuclide in contributions]
+            errs = [contributions[nuclide][reaction].s for nuclide in contributions]
+            # Stacking positive values
+            pos_values = [max(0, v) for v in values]
+            neg_values = [min(0, v) for v in values]
+            self.axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=colors[color_index % len(colors)],
+                    yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+            self.axs.bar(indices, neg_values, bottom=bottoms_neg, color=colors[color_index % len(colors)],
+                    yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+            # Update the bottom positions
+            bottoms_pos = [bottoms_pos[i] + pos_values[i] for i in range(len(bottoms_pos))]
+            bottoms_neg = [bottoms_neg[i] + neg_values[i] for i in range(len(bottoms_neg))]
+            color_index += 1
+
+        # Adding 'effective' box with dashed border
+        total_values = [sum(contributions[label][r].n for r in contributions[label]) for label in labels]
+        for idx, val in zip(indices, total_values):
+            self.axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.5)
+
+        self.axs.set_xticks(indices)
+        self.axs.set_xticklabels(labels)
+        self.axs.legend()
+
+    def style(self):
+        self.axs.set_ylabel(f"Contribution to {self.index_name}")
+        self.axs.set_xlabel("Isotope")
+        self.axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
+
+
+class PiePlotter(Plotter):
+    def __init__(self, integral_index_name):
+        self.fig, self.axs = plt.subplots()
+        self.index_name = integral_index_name
+    
+    def create_plot(self, contributions, nested):
+        if nested:
+            self.nested_pie_chart(contributions)
+        else:
+            self.pie_chart(contributions)   
+
+    def add_to_subplot(self, fig, position):
+        return fig.add_subplot(position, sharex=self.ax, sharey=self.ax)
+
+    def get_plot(self):
+        return self.fig, self.axs
+
+    def nested_pie_chart(self, contributions):
+        # Create a nested ring chart
+        num_reactions = len(next(iter(contributions.values())))
+        nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
+        nuclide_totals = { nuclide: sum(contribution.n for contribution in contributions[nuclide].values()) \
+                        for nuclide in contributions }
+        nuclide_labels = list(nuclide_totals.keys())
+
+        # Now, deal with negative values
+
+        nuclides_with_opposite_sign_contributions = []
+        for nuclide, contribution in contributions.items():
+            contribution_values = [contribution[reaction].n for reaction in contribution]
+            if not (all(v >= 0 for v in contribution_values) or all(v <= 0 for v in contribution_values)):
+                nuclides_with_opposite_sign_contributions.append(nuclide)
+            
+        # For nuclides with opposite sign contributions, we distinguish the positive and negative contributions
+        # by coloring some of the inner ring a lighter color to indicate the negative contributions in the outer ring
+        wedge_widths = list(nuclide_totals.values())
+        inner_wedge_hatches = [None] * len(wedge_widths)
+
+        def blend_colors(color1, color2, alpha):
+            return np.array( [ alpha * c1 + (1 - alpha) * c2 for c1, c2 in zip(color1, color2 ) ] )
+
+        if len(nuclides_with_opposite_sign_contributions) > 0:
+            for nuclide in nuclides_with_opposite_sign_contributions:
+                # First, determine the fraction of the contributions that are opposite (in sign) to the total
+                total_sign = np.sign(nuclide_totals[nuclide])
+                
+                # Now, we want to plot the "lost" wedge width in white, i.e. the width lost from cancellations between the
+                # positive and negative contributions. This will be colored a lighter color. The absolute sum of the
+                # contributions represents the wedge width if there were no cancellations, so the total wedge width
+                # minus the absolute sum of the contributions is "lost" wedge width.
+
+                absolute_sum_of_contributions = sum(np.abs(contribution.n) for contribution in contributions[nuclide].values())
+                
+                # NOTE the sign function is needed to handle the case when the nuclide total is negative
+                lost_wedge_width = absolute_sum_of_contributions - total_sign * nuclide_totals[nuclide]
+
+                # Now, insert the lost wedge width into the wedge widths list right after the nuclide
+                nuclide_index = list(nuclide_totals.keys()).index(nuclide)
+                wedge_widths.insert(nuclide_index + 1, lost_wedge_width)
+                nuclide_labels.insert(nuclide_index + 1, '')
+                
+                # The color of the lost wedge width will be a blend of the nuclide color and white
+                white_color = np.array([1, 1, 1, 1])
+                opacity = 0.8
+                blended_color = blend_colors(white_color, nuclide_colors[nuclide_index], opacity)
+                nuclide_colors = np.insert(nuclide_colors, nuclide_index + 1, blended_color, axis=0)
+                
+                # Add hatches to the negative total sum wedge
+                if nuclide_totals[nuclide] < 0:
+                    inner_wedge_hatches[nuclide_index] = '//'
+
+        # Now make everything positive for the pie chart
+        wedge_widths = np.abs(wedge_widths)
+
+        # Plot the inner ring for nuclide totals
+        inner_ring, _ = self.axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
+                                colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
+                                    wedgeprops=dict(width=0.3, edgecolor='w'))
+
+        # Add hatches to the negative total sum wedges
+        for wedge, hatch in zip(inner_ring, inner_wedge_hatches):
+            if hatch:
+                wedge.set_hatch(hatch)
+
+        # Get colors for reactions from the "rainbow" colormap
+        reaction_colors = plt.get_cmap('Set1')(np.linspace(0, 1, num_reactions))
+
+        # Plot the outer ring for reaction-specific contributions
+        outer_labels = []
+        outer_colors = []
+        outer_sizes = []
+        outer_hatches = []
+        for i, (nuclide, reactions) in enumerate(contributions.items()):
+            for j, (reaction, contribution) in enumerate(list(reactions.items())):
+                outer_labels.append(f"{nuclide} - {reaction}")
+                
+                outer_colors.append(reaction_colors[j])
+                outer_sizes.append(np.abs(contribution.n))
+                
+                if contribution.n < 0:
+                    outer_hatches.append('//')
+                else:
+                    outer_hatches.append(None)
+
+        outer_ring, _ = self.axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
+                textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=True, \
+                    wedgeprops=dict(width=0.3, edgecolor='w'))
+
+        # Add hatches to the negative contribution wedges
+        for wedge, hatch in zip(outer_ring, outer_hatches):
+            if hatch:
+                wedge.set_hatch(hatch)
+        
+    def pie_chart(self, contributions):
+        labels = list(contributions.keys())
+        values = [abs(contributions[key].n) for key in labels]
+
+        # Determining hatching patterns: empty string for positive, cross-hatch for negative
+        hatches = ['//' if contributions[key].n < 0 else '' for key in labels]
+
+        # Creating the pie chart
+        wedges, _ = self.axs.pie(values, labels=labels, startangle=90)
+
+        # Applying hatching patterns to the wedges
+        for wedge, hatch in zip(wedges, hatches):
+            wedge.set_hatch(hatch)
+
+    def style(self):
+        self.axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
+
+
+class InteractivePiePlotter(Plotter):
+    def __init__(self, integral_index_name):
+        self.fig = make_subplots()
+        self.index_name = integral_index_name
+
+    def create_plot(self, contributions, nested):
+        if nested:
+            self.interactive_sunburst(contributions)
+    
+    def add_to_subplot(self, fig, position):
+        for trace in self.fig.data:
+            fig.add_trace(trace, row=position[0], col=position[1])
+        return fig
+
+    def get_plot(self):
+        return self.fig
+
+    def interactive_sunburst(self, contributions):
+        # Prepare data for the sunburst chart
+        data = []
+        for nuclide, reactions in contributions.items():
+            for reaction, contribution in reactions.items():
+                sign = 'Positive' if contribution.n >= 0 else 'Negative'
+                data.append({
+                    'Nuclide': nuclide,
+                    'Reaction': reaction,
+                    'Sign': sign,
+                    'Value': abs(contribution.n),
+                    'Original Value': contribution.n
+                })
+
+        df = pd.DataFrame(data)
+
+        # Define color mapping using color maps
+        nuclide_colors = px.colors.sample_colorscale(px.colors.sequential.Rainbow, len(df['Nuclide'].unique()))
+        
+        # Create a sunburst chart
+        self.fig = px.sunburst(
+            df,
+            path=['Nuclide', 'Sign', 'Reaction'],
+            values='Value',
+            color='Nuclide',
+            color_discrete_map={k: v for k, v in zip(df['Nuclide'].unique(), nuclide_colors)},
+            custom_data=['Original Value']
+        )
+        
+        self.fig.update_traces(hovertemplate='<b>%{label}</b><br>Value: %{customdata[0]}<extra></extra>')
+
+    def style(self):
+        pass
+
 
 def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
     """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
@@ -638,8 +914,6 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
         nuclide or nuclide-reaction pair
     - plot_type: str, type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
         a pie chart"""
-    
-    fig, axs = plt.subplots()
 
     # Determine if the contributions are for nuclide-wise or nuclide-reaction-wise
     if 'reaction_type' in contributions[0]:
@@ -653,165 +927,22 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
         nested_plot = False
         contributions = { contribution['isotope']: contribution['contribution'] for contribution in contributions }
 
-    # Now plot the contributions
-    if not nested_plot:
-        if plot_type == 'bar':
-            # Plot percent contributions
-            axs.bar(contributions.keys(), [ contribution.n for contribution in contributions.values() ], \
-                    yerr=[ contribution.s for contribution in contributions.values() ], capsize=5, elinewidth=0.5)
-        elif plot_type == 'pie':
-            axs.pie([ contribution.n for contribution in contributions.values() ], labels=contributions.keys())
+    plotters = {
+        'bar': BarPlotter(integral_index_name),
+        'pie': PiePlotter(integral_index_name),
+        'interactive_pie': InteractivePiePlotter(integral_index_name)
+    }
+    
+    # Get the requested plotter
+    plotter = plotters.get(plot_type)
+    if plotter is None:
+        raise ValueError("Unsupported plot type")
 
-    else:
-        # -------------
-        # Nested plots
-        # -------------
+    # Create the plot and style it
+    plotter.create_plot(contributions, nested_plot)
+    plotter.style()
 
-        # Colors for each reaction type
-        num_reactions = len(next(iter(contributions.values())))
-        cmap = plt.get_cmap('Set1')
-        colors = cmap(np.linspace(0, 1, num_reactions))
-
-        if plot_type == 'bar':
-            # Variables to hold the bar positions and labels
-            indices = range(len(contributions))
-            labels = list(contributions.keys())
-
-            # Bottom offset for each stack
-            bottoms_pos = [0] * len(contributions)
-            bottoms_neg = [0] * len(contributions)
-
-            color_index = 0
-            for reaction in next(iter(contributions.values())).keys():
-                values = [contributions[nuclide][reaction].n for nuclide in contributions]
-                errs = [contributions[nuclide][reaction].s for nuclide in contributions]
-                # Stacking positive values
-                pos_values = [max(0, v) for v in values]
-                neg_values = [min(0, v) for v in values]
-                axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=colors[color_index % len(colors)],
-                        yerr=errs, capsize=5, error_kw={'capthick': 0.5})
-                axs.bar(indices, neg_values, bottom=bottoms_neg, color=colors[color_index % len(colors)],
-                        yerr=errs, capsize=5, error_kw={'capthick': 0.5})
-                # Update the bottom positions
-                bottoms_pos = [bottoms_pos[i] + pos_values[i] for i in range(len(bottoms_pos))]
-                bottoms_neg = [bottoms_neg[i] + neg_values[i] for i in range(len(bottoms_neg))]
-                color_index += 1
-
-            # Adding 'effective' box with dashed border
-            total_values = [sum(contributions[label][r].n for r in contributions[label]) for label in labels]
-            for idx, val in zip(indices, total_values):
-                axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.5)
-
-            axs.set_xticks(indices)
-            axs.set_xticklabels(labels)
-            axs.legend()
-
-        if plot_type == "pie":
-            # Create a nested ring chart
-            nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
-            nuclide_totals = { nuclide: sum(contribution.n for contribution in contributions[nuclide].values()) \
-                            for nuclide in contributions }
-            nuclide_labels = list(nuclide_totals.keys())
-
-            # Now, deal with negative values
-
-            nuclides_with_opposite_sign_contributions = []
-            for nuclide, contribution in contributions.items():
-                contribution_values = [contribution[reaction].n for reaction in contribution]
-                if not (all(v >= 0 for v in contribution_values) or all(v <= 0 for v in contribution_values)):
-                    nuclides_with_opposite_sign_contributions.append(nuclide)
-                
-            # For nuclides with opposite sign contributions, we distinguish the positive and negative contributions
-            # by coloring some of the inner ring a lighter color to indicate the negative contributions in the outer ring
-            wedge_widths = list(nuclide_totals.values())
-            inner_wedge_hatches = [None] * len(wedge_widths)
-
-            def blend_colors(color1, color2, alpha):
-                return np.array( [ alpha * c1 + (1 - alpha) * c2 for c1, c2 in zip(color1, color2 ) ] )
-
-            if len(nuclides_with_opposite_sign_contributions) > 0:
-                for nuclide in nuclides_with_opposite_sign_contributions:
-                    # First, determine the fraction of the contributions that are opposite (in sign) to the total
-                    total_sign = np.sign(nuclide_totals[nuclide])
-                    
-                    # Now, we want to plot the "lost" wedge width in white, i.e. the width lost from cancellations between the
-                    # positive and negative contributions. This will be colored a lighter color. The absolute sum of the
-                    # contributions represents the wedge width if there were no cancellations, so the total wedge width
-                    # minus the absolute sum of the contributions is "lost" wedge width.
-
-                    absolute_sum_of_contributions = sum(np.abs(contribution.n) for contribution in contributions[nuclide].values())
-                    
-                    # NOTE the sign function is needed to handle the case when the nuclide total is negative
-                    lost_wedge_width = absolute_sum_of_contributions - total_sign * nuclide_totals[nuclide]
-
-                    # Now, insert the lost wedge width into the wedge widths list right after the nuclide
-                    nuclide_index = list(nuclide_totals.keys()).index(nuclide)
-                    wedge_widths.insert(nuclide_index + 1, lost_wedge_width)
-                    nuclide_labels.insert(nuclide_index + 1, f"Lost wedge width for {nuclide}")
-                    
-                    # The color of the lost wedge width will be a blend of the nuclide color and white
-                    white_color = np.array([1, 1, 1, 1])
-                    opacity = 0.8
-                    blended_color = blend_colors(white_color, nuclide_colors[nuclide_index], opacity)
-                    nuclide_colors = np.insert(nuclide_colors, nuclide_index + 1, blended_color, axis=0)
-                    
-                    # Add hatches to the negative total sum wedge
-                    if nuclide_totals[nuclide] < 0:
-                        inner_wedge_hatches[nuclide_index] = '//'
-
-            # Now make everything positive for the pie chart
-            wedge_widths = np.abs(wedge_widths)
-
-            # Plot the inner ring for nuclide totals
-            inner_ring, _ = axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
-                                    colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
-                                        wedgeprops=dict(width=0.3, edgecolor='w'))
-
-            # Add hatches to the negative total sum wedges
-            for wedge, hatch in zip(inner_ring, inner_wedge_hatches):
-                if hatch:
-                    wedge.set_hatch(hatch)
-
-            # Get colors for reactions from the "rainbow" colormap
-            reaction_colors = plt.get_cmap('Set1')(np.linspace(0, 1, num_reactions))
-
-            # Plot the outer ring for reaction-specific contributions
-            outer_labels = []
-            outer_colors = []
-            outer_sizes = []
-            outer_hatches = []
-            for i, (nuclide, reactions) in enumerate(contributions.items()):
-                for j, (reaction, contribution) in enumerate(list(reactions.items())):
-                    outer_labels.append(f"{nuclide} - {reaction}")
-                    
-                    outer_colors.append(reaction_colors[j])
-                    outer_sizes.append(np.abs(contribution.n))
-                    
-                    if contribution.n < 0:
-                        outer_hatches.append('//')
-                    else:
-                        outer_hatches.append(None)
-
-            outer_ring, _ = axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
-                    textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=True, \
-                        wedgeprops=dict(width=0.3, edgecolor='w'))
-
-            # Add hatches to the negative contribution wedges
-            for wedge, hatch in zip(outer_ring, outer_hatches):
-                if hatch:
-                    wedge.set_hatch(hatch)
-
-
-
-
-    # Additional styling
-
-    if plot_type == 'bar':
-        axs.set_ylabel(f"Contribution to {integral_index_name}")
-        axs.set_xlabel("Isotope")
-    axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
-
-    return fig, axs
+    return plotter.get_plot()
 
 # =====
 # Misc
