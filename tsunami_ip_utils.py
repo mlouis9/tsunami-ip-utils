@@ -858,9 +858,32 @@ class InteractivePiePlotter(Plotter):
         self.fig = make_subplots()
         self.index_name = integral_index_name
 
-    def create_plot(self, contributions, nested):
+    def create_plot(self, contributions, nested=True):
+        # Prepare data for the sunburst chart
         if nested:
-            self.interactive_sunburst(contributions)
+            df = self._create_nested_sunburst_data(contributions)
+        else:
+            df = self._create_sunburst_data(contributions)
+            print(df)
+        
+        # Create a sunburst chart
+        self.fig = px.sunburst(
+            data_frame=df,
+            names='labels',
+            parents='parents',
+            ids='ids',
+            values='normalized_values',
+            custom_data=['values', 'uncertainties']
+        )
+
+        # Update hovertemplate with correct syntax
+        self.fig.update_traces(
+            hovertemplate=(
+                "<b>%{label}</b><br>"
+                "Value: %{customdata[0]:1.4E} +/- %{customdata[1]:1.4E}"  # Corrected format specifiers
+                "<extra></extra>"  # This hides the trace info
+            )
+        )
     
     def add_to_subplot(self, fig, position):
         for trace in self.fig.data:
@@ -871,6 +894,34 @@ class InteractivePiePlotter(Plotter):
         return self.fig
 
     def _create_sunburst_data(self, contributions):
+        data = {
+            'labels': [], 
+            'ids': [], 
+            'parents': [], 
+            'values': [], 
+            'uncertainties': [],
+            'normalized_values': [],
+            'nuclide': []
+        }
+
+        abs_sum_of_nuclide_totals = sum( abs(contribution.n) for contribution in contributions.values())
+
+        for nuclide, nuclide_total in contributions.items():
+            # Caclulate the nuclide total, and the positive and negative contributions
+            norm_nuclide_total = abs(nuclide_total) / abs_sum_of_nuclide_totals
+
+            # Add the nuclide as a parent
+            data['labels'].append(nuclide)
+            data['ids'].append(nuclide)
+            data['parents'].append('')
+            data['values'].append(nuclide_total.n)
+            data['uncertainties'].append(nuclide_total.s)
+            data['normalized_values'].append(norm_nuclide_total.n)
+            data['nuclide'].append(nuclide)
+
+        return pd.DataFrame(data)
+
+    def _create_nested_sunburst_data(self, contributions):
         data = {
             'labels': [], 
             'ids': [], 
@@ -970,32 +1021,7 @@ class InteractivePiePlotter(Plotter):
                     data['nuclide'].append(nuclide)
 
 
-        df = pd.DataFrame(data)
-        return df
-
-    def interactive_sunburst(self, contributions):
-        # Prepare data for the sunburst chart
-        df = self._create_sunburst_data(contributions)
-        df.to_pickle('sunburst_data.pkl')
-        
-        # Create a sunburst chart
-        self.fig = px.sunburst(
-            data_frame=df,
-            names='labels',
-            parents='parents',
-            ids='ids',
-            values='normalized_values',
-            custom_data=['values', 'uncertainties']
-        )
-
-        # Update hovertemplate with correct syntax
-        self.fig.update_traces(
-            hovertemplate=(
-                "<b>%{label}</b><br>"
-                "Value: %{customdata[0]:1.4E} +/- %{customdata[1]:1.4E}"  # Corrected format specifiers
-                "<extra></extra>"  # This hides the trace info
-            )
-        )
+        return pd.DataFrame(data)
 
         
     def style(self):
