@@ -870,37 +870,134 @@ class InteractivePiePlotter(Plotter):
     def get_plot(self):
         return self.fig
 
-    def interactive_sunburst(self, contributions):
-        # Prepare data for the sunburst chart
-        data = []
+    def _create_sunburst_data(self, contributions):
+        data = {
+            'labels': [], 
+            'ids': [], 
+            'parents': [], 
+            'values': [], 
+            'uncertainties': [],
+            'normalized_values': [],
+            'nuclide': []
+        }
+
+        abs_sum_of_nuclide_totals = sum(sum(abs(contribution.n) for contribution in reactions.values()) \
+                                    for reactions in contributions.values())
+
         for nuclide, reactions in contributions.items():
-            for reaction, contribution in reactions.items():
-                sign = 'Positive' if contribution.n >= 0 else 'Negative'
-                data.append({
-                    'Nuclide': nuclide,
-                    'Reaction': reaction,
-                    'Sign': sign,
-                    'Value': abs(contribution.n),
-                    'Original Value': contribution.n
-                })
+            # Caclulate the nuclide total, and the positive and negative contributions
+            nuclide_total = sum(contribution for contribution in reactions.values())
+            norm_nuclide_total = abs(nuclide_total) / abs_sum_of_nuclide_totals
+
+            positive_contributions = { reaction: contribution for reaction, contribution in reactions.items() \
+                                      if contribution.n >= 0 }
+            negative_contributions = { reaction: contribution for reaction, contribution in reactions.items() \
+                                      if contribution.n < 0 }
+            positive_total = sum(contribution for contribution in positive_contributions.values())
+            negative_total = sum(contribution for contribution in negative_contributions.values())
+
+            # Add the nuclide as a parent
+            data['labels'].append(nuclide)
+            data['ids'].append(nuclide)
+            data['parents'].append('')
+            data['values'].append(nuclide_total.n)
+            data['uncertainties'].append(nuclide_total.s)
+            data['normalized_values'].append(norm_nuclide_total.n)
+            data['nuclide'].append(nuclide)
+    
+            # --------------------------------------------------------
+            # Add the positive and negative contributions as children
+            # --------------------------------------------------------
+
+            # Normalize the contributions by the absolute value of the nuclide total 
+            absolute_sum = positive_total + abs(negative_total)
+            normalization_factor = abs(norm_nuclide_total) / absolute_sum
+
+            # Positive contributions
+            if positive_total != 0:
+                norm_positive_total = positive_total * normalization_factor
+                data['labels'].append('Positive')
+                data['ids'].append(f"{nuclide}-Positive")
+                data['parents'].append(nuclide)
+                data['values'].append(positive_total.n)
+                data['uncertainties'].append(positive_total.s)
+                data['normalized_values'].append( norm_positive_total.n )
+                data['nuclide'].append(nuclide)
+
+            # Negative contributions
+            if negative_total != 0:
+                norm_negative_total = abs(negative_total) * normalization_factor
+                data['labels'].append('Negative')
+                data['ids'].append(f"{nuclide}-Negative")
+                data['parents'].append(nuclide)
+                data['values'].append(negative_total.n)
+                data['uncertainties'].append(negative_total.s)
+                data['normalized_values'].append( norm_negative_total.n )
+                data['nuclide'].append(nuclide)
+
+            # -------------------------------
+            # Add the reaction contributions
+            # -------------------------------
+            # NOTE: Plotly express apparently has issues dealing with small numbers, so unless the contribution is
+            # multiplied by a sufficiently large scale factor, the data won't be displayed correctly
+            scale_factor = 10000
+            for reaction, contribution in positive_contributions.items():
+                # Now normalize contributions so they sum to the "normalized_positive_total"
+                normalization_factor = norm_positive_total / positive_total
+                norm_reaction_contribution = contribution.n * normalization_factor
+                
+                if contribution.n != 0:
+                    data['labels'].append(reaction)
+                    data['ids'].append(f"{nuclide}-{reaction}")
+                    data['parents'].append(f"{nuclide}-Positive")
+                    data['values'].append(contribution.n)
+                    data['uncertainties'].append(contribution.s)
+                    data['normalized_values'].append(scale_factor*norm_reaction_contribution.n)
+                    data['nuclide'].append(nuclide)
+
+            for reaction, contribution in negative_contributions.items():
+                # Now normalize contributions so they sum to the "normalized_negative_total"
+                normalization_factor = norm_negative_total / abs(negative_total)
+                norm_reaction_contribution = abs(contribution.n) * normalization_factor
+
+                if contribution.n != 0:
+                    data['labels'].append(reaction)
+                    data['ids'].append(f"{nuclide}-{reaction}")
+                    data['parents'].append(f"{nuclide}-Negative")
+                    data['values'].append(contribution.n)
+                    data['uncertainties'].append(contribution.s)
+                    data['normalized_values'].append(scale_factor*norm_reaction_contribution.n)
+                    data['nuclide'].append(nuclide)
+
 
         df = pd.DataFrame(data)
+        return df
 
-        # Define color mapping using color maps
-        nuclide_colors = px.colors.sample_colorscale(px.colors.sequential.Rainbow, len(df['Nuclide'].unique()))
+    def interactive_sunburst(self, contributions):
+        # Prepare data for the sunburst chart
+        df = self._create_sunburst_data(contributions)
+        df.to_pickle('sunburst_data.pkl')
         
         # Create a sunburst chart
         self.fig = px.sunburst(
-            df,
-            path=['Nuclide', 'Sign', 'Reaction'],
-            values='Value',
-            color='Nuclide',
-            color_discrete_map={k: v for k, v in zip(df['Nuclide'].unique(), nuclide_colors)},
-            custom_data=['Original Value']
+            data_frame=df,
+            names='labels',
+            parents='parents',
+            ids='ids',
+            values='normalized_values',
+            custom_data=['values', 'uncertainties']
         )
-        
-        self.fig.update_traces(hovertemplate='<b>%{label}</b><br>Value: %{customdata[0]}<extra></extra>')
 
+        # Update hovertemplate with correct syntax
+        self.fig.update_traces(
+            hovertemplate=(
+                "<b>%{label}</b><br>"
+                "Value: %{customdata[0]:1.4E} +/- %{customdata[1]:1.4E}"  # Corrected format specifiers
+                "<extra></extra>"  # This hides the trace info
+            )
+        )
+
+        
     def style(self):
         pass
 
