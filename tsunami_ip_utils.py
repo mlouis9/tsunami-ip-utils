@@ -8,6 +8,11 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 import pandas as pd
 from abc import ABC, abstractmethod
+from threading import Timer
+import webbrowser
+import os, sys, signal
+from flask import Flask, render_template_string
+import threading
 
 ParserElement.enablePackrat()
 plt.rcParams['hatch.linewidth'] = 0.5
@@ -657,7 +662,7 @@ class Plotter(ABC):
 
 
 class BarPlotter(Plotter):
-    def __init__(self, integral_index_name, plot_redundant=False):
+    def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
         self.fig, self.axs = plt.subplots()
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
@@ -667,6 +672,8 @@ class BarPlotter(Plotter):
             self.nested_barchart(contributions)
         else:
             self.barchart(contributions)
+
+        self.style()
 
     def get_plot(self):
         return self.fig, self.axs
@@ -729,7 +736,7 @@ class BarPlotter(Plotter):
 
 
 class PiePlotter(Plotter):
-    def __init__(self, integral_index_name, plot_redudant=False):
+    def __init__(self, integral_index_name, plot_redudant=False, **kwargs):
         self.fig, self.axs = plt.subplots()
         self.index_name = integral_index_name
         self.plot_redundant = plot_redudant
@@ -738,7 +745,9 @@ class PiePlotter(Plotter):
         if nested:
             self.nested_pie_chart(contributions)
         else:
-            self.pie_chart(contributions)   
+            self.pie_chart(contributions)
+
+        self.style()
 
     def add_to_subplot(self, fig, position):
         return fig.add_subplot(position, sharex=self.ax, sharey=self.ax)
@@ -865,9 +874,138 @@ class PiePlotter(Plotter):
         self.axs.set_title(title_text)
 
 
+class InteractiveLegend:
+    def __init__(self, fig, df):
+        """Return a flask webapp that will display an interactive legend for the sunburst chart"""
+        self.fig = fig
+
+        self.app = Flask(__name__)
+
+        @self.app.route('/shutdown', methods=['POST'])
+        def shutdown():
+            os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
+            return 'Server shutting down...'
+
+        @self.app.route('/')
+        def show_sunburst():
+            # Extract root nodes (nodes without parents)
+            root_nodes = df[df['parents'] == '']
+
+            # Generate legend HTML with a title
+            legend_html = '<div id="legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0;">Legend</h3>\n'
+            for _, row in root_nodes.iterrows():
+                legend_html += f'    <div class="legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]}</div>\n'
+            legend_html += '</div>\n'
+
+            # JavaScript for interactivity and shutdown
+            script_html = """
+            <script>
+            window.addEventListener('beforeunload', (event) => {
+                navigator.sendBeacon('/shutdown');
+            });
+            document.addEventListener('DOMContentLoaded', function () {
+                const legendItems = document.querySelectorAll('.legend-item');
+                legendItems.forEach(item => {
+                    item.addEventListener('mouseenter', function() {
+                        const target = this.getAttribute('data-target');
+                        const paths = document.querySelectorAll('path.surface');
+                        paths.forEach(path => {
+                            const labelText = path.nextElementSibling ? path.nextElementSibling.textContent : "";
+                            if (labelText.includes(target)) {
+                                path.style.opacity = 0.5; // Highlight by changing opacity
+                            }
+                        });
+                    });
+                    item.addEventListener('mouseleave', function() {
+                        const paths = document.querySelectorAll('path.surface');
+                        paths.forEach(path => {
+                            path.style.opacity = 1; // Reset opacity
+                        });
+                    });
+                    item.addEventListener('click', function() {
+                        const target = this.getAttribute('data-target');
+                        const paths = document.querySelectorAll('path.surface');
+                        paths.forEach(path => {
+                            const labelText = path.nextElementSibling ? path.nextElementSibling.textContent : "";
+                            if (labelText.includes(target)) {
+                                path.dispatchEvent(new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': true }));
+                            }
+                        });
+                    });
+                });
+            });
+            </script>
+            """
+
+            # Save the chart with interactivity and layout adjustments
+            fig_html = self.fig.to_html(full_html=False, include_plotlyjs='cdn')
+            full_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <title>Interactive Sunburst Chart</title>
+            <style>
+                body, html {{
+                    height: 100%;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                }}
+                #container {{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100%;
+                    width: 100%;
+                }}
+                #chart {{
+                    min-width: 0;    /* Prevent flex item from overflowing its container */
+                }}
+                #legend {{
+                    flex: 0 1 auto;  /* Do not grow, allow shrink */
+                    margin-left: 20px;
+                    padding: 10px;
+                    border: 2px solid black;
+                    max-height: 100%; /* Make sure it does not overflow vertically */
+                    overflow: auto;   /* Enable scrolling if content is too large */
+                }}
+            </style>
+            </head>
+            <body>
+            <div id="container">
+                <div id="chart">{fig_html}</div>
+                {legend_html}
+            </div>
+            {script_html}
+            </body>
+            </html>
+            """
+
+            return render_template_string(full_html)
+        
+    def open_browser(self):
+        # webbrowser.open_new("http://localhost:5000/")
+        pass
+
+    def show(self):
+        # Suppress Flask's startup and runtime messages by redirecting them to dev null
+        log = open(os.devnull, 'w')
+        # sys.stdout = log
+        # sys.stderr = log
+
+        threading.Timer(1, self.open_browser).start()
+        self.app.run()
+
+
 class InteractivePiePlotter(Plotter):
-    def __init__(self, integral_index_name, plot_redundant=False):
+    def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
         self.fig = make_subplots()
+
+        # Check if the user wants an interactive legend
+        if 'interactive_legend' in kwargs.keys():
+            self.interactive_legend = kwargs['interactive_legend']
+        else:
+            self.interactive_legend = True
+        
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
@@ -877,7 +1015,6 @@ class InteractivePiePlotter(Plotter):
             df = self._create_nested_sunburst_data(contributions)
         else:
             df = self._create_sunburst_data(contributions)
-            print(df)
         
         # Create a sunburst chart
         self.fig = px.sunburst(
@@ -897,11 +1034,22 @@ class InteractivePiePlotter(Plotter):
                 "<extra></extra>"  # This hides the trace info
             )
         )
+
+        # Now style the plot
+        self.style()
+
+        if self.interactive_legend:
+            self.fig = InteractiveLegend(self.fig, df)
+
+
     
     def add_to_subplot(self, fig, position):
-        for trace in self.fig.data:
-            fig.add_trace(trace, row=position[0], col=position[1])
-        return fig
+        if self.interactive_legend:
+            raise ValueError("Interactive legends are not supported when adding to a subplot")
+        else:
+            for trace in self.fig.data:
+                fig.add_trace(trace, row=position[0], col=position[1])
+            return fig
 
     def get_plot(self):
         return self.fig
@@ -1044,7 +1192,7 @@ class InteractivePiePlotter(Plotter):
         self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
 
 
-def plot_contributions(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=False):
+def plot_contributions(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=False, **kwargs):
     """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
     
     Parameters
@@ -1055,7 +1203,8 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E', 
         a pie chart
     - integral_index_name: str, name of the integral index being plotted. Default is 'E'
     - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
-        nuclide-reaction-wise contributions. Default is False"""
+        nuclide-reaction-wise contributions. Default is False
+    - kwargs: additional keyword arguments to pass to the plotting function"""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
     if 'reaction_type' in contributions[0]:
@@ -1080,9 +1229,9 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E', 
         contributions = { contribution['isotope']: contribution['contribution'] for contribution in contributions }
 
     plotters = {
-        'bar': BarPlotter(integral_index_name, plot_redundant_reactions),
-        'pie': PiePlotter(integral_index_name, plot_redundant_reactions),
-        'interactive_pie': InteractivePiePlotter(integral_index_name, plot_redundant_reactions)
+        'bar': BarPlotter(integral_index_name, plot_redundant_reactions, **kwargs),
+        'pie': PiePlotter(integral_index_name, plot_redundant_reactions, **kwargs),
+        'interactive_pie': InteractivePiePlotter(integral_index_name, plot_redundant_reactions, **kwargs)
     }
     
     # Get the requested plotter
@@ -1092,7 +1241,6 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E', 
 
     # Create the plot and style it
     plotter.create_plot(contributions, nested_plot)
-    plotter.style()
 
     return plotter.get_plot()
 
