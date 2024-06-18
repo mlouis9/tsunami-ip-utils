@@ -453,7 +453,7 @@ def create_sensitivity_vector(sdfs):
     return unumpy.uarray(senstivities, uncertainties)
 
 
-def calculate_E(application_filenames: list, experiment_filenames: list, reaction_type='all', uncertainties='automatic'):
+def calculate_E(application_filenames: list, experiment_filenames: list, reaction_type='all', uncertainties='manual'):
     """Calculates the similarity parameter, E for each application with each available experiment given the application 
     and experiment sdf files
     
@@ -657,9 +657,10 @@ class Plotter(ABC):
 
 
 class BarPlotter(Plotter):
-    def __init__(self, integral_index_name):
+    def __init__(self, integral_index_name, plot_redundant=False):
         self.fig, self.axs = plt.subplots()
         self.index_name = integral_index_name
+        self.plot_redundant = plot_redundant
 
     def create_plot(self, contributions, nested):
         if nested:
@@ -717,15 +718,21 @@ class BarPlotter(Plotter):
         self.axs.legend()
 
     def style(self):
+        if self.plot_redundant:
+            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+        else:
+            title_text = f'Contributions to {self.index_name}'
         self.axs.set_ylabel(f"Contribution to {self.index_name}")
         self.axs.set_xlabel("Isotope")
         self.axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
+        self.axs.set_title(title_text)
 
 
 class PiePlotter(Plotter):
-    def __init__(self, integral_index_name):
+    def __init__(self, integral_index_name, plot_redudant=False):
         self.fig, self.axs = plt.subplots()
         self.index_name = integral_index_name
+        self.plot_redundant = plot_redudant
     
     def create_plot(self, contributions, nested):
         if nested:
@@ -850,13 +857,19 @@ class PiePlotter(Plotter):
             wedge.set_hatch(hatch)
 
     def style(self):
+        if self.plot_redundant:
+            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+        else:
+            title_text = f'Contributions to {self.index_name}'
         self.axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
+        self.axs.set_title(title_text)
 
 
 class InteractivePiePlotter(Plotter):
-    def __init__(self, integral_index_name):
+    def __init__(self, integral_index_name, plot_redundant=False):
         self.fig = make_subplots()
         self.index_name = integral_index_name
+        self.plot_redundant = plot_redundant
 
     def create_plot(self, contributions, nested=True):
         # Prepare data for the sunburst chart
@@ -1023,12 +1036,15 @@ class InteractivePiePlotter(Plotter):
 
         return pd.DataFrame(data)
 
-        
     def style(self):
-        pass
+        if self.plot_redundant:
+            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+        else:
+            title_text = f'Contributions to {self.index_name}'
+        self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
 
 
-def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
+def plot_contributions(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=False):
     """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
     
     Parameters
@@ -1036,24 +1052,37 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E'):
     - contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter for each
         nuclide or nuclide-reaction pair
     - plot_type: str, type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
-        a pie chart"""
+        a pie chart
+    - integral_index_name: str, name of the integral index being plotted. Default is 'E'
+    - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
+        nuclide-reaction-wise contributions. Default is False"""
 
-    # Determine if the contributions are for nuclide-wise or nuclide-reaction-wise
+    # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
     if 'reaction_type' in contributions[0]:
         # Nuclide-reaction-wise contributions
         nested_plot = True # Nested plot by nuclide then by reaction type
 
         # Create a dictionary of contributions keyed by isotope then by reaction type
         contributions = isotope_reaction_list_to_nested_dict(contributions, 'contribution')
+
+        # If viewing nuclide-reaction wise contributions, it's important (at least for the visualizations in this function)
+        # that if viewing the true contributions to the nuclide total, that redundant interactions (e.g. capture and fission
+        # + (n, g)) and irrelevant interactions (e.g. chi and nubar) are not plotted.
+
+        if not plot_redundant_reactions:
+            # Remove redundant interactions
+            redundant_interactions = ['chi', 'capture', 'nubar', 'total']
+            contributions = { isotope: { reaction: contributions[isotope][reaction] for reaction in contributions[isotope] \
+                                if reaction not in redundant_interactions } for isotope in contributions }
     else:
         # Nuclide-wise contributions
         nested_plot = False
         contributions = { contribution['isotope']: contribution['contribution'] for contribution in contributions }
 
     plotters = {
-        'bar': BarPlotter(integral_index_name),
-        'pie': PiePlotter(integral_index_name),
-        'interactive_pie': InteractivePiePlotter(integral_index_name)
+        'bar': BarPlotter(integral_index_name, plot_redundant_reactions),
+        'pie': PiePlotter(integral_index_name, plot_redundant_reactions),
+        'interactive_pie': InteractivePiePlotter(integral_index_name, plot_redundant_reactions)
     }
     
     # Get the requested plotter
