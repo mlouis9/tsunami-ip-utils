@@ -894,7 +894,7 @@ class InteractiveLegend:
             # Generate legend HTML with a title
             legend_html = '<div id="legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0;">Legend</h3>\n'
             for _, row in root_nodes.iterrows():
-                legend_html += f'    <div class="legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]}</div>\n'
+                legend_html += f'    <div id="legend-item" class="legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]}</div>\n'
             legend_html += '</div>\n'
 
             # JavaScript for interactivity and shutdown
@@ -954,10 +954,11 @@ class InteractiveLegend:
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    height: 100%;
                     width: 100%;
                 }}
-                #chart {{
+                div:not(#legend, 
+                .modebar-container) {{
+                    height: 100%;
                     min-width: 0;    /* Prevent flex item from overflowing its container */
                 }}
                 #legend {{
@@ -1037,6 +1038,13 @@ class InteractivePiePlotter(Plotter):
 
         # Now style the plot
         self.style()
+
+        self.fig.update_layout(
+            autosize=True,
+            width=None,  # Removes fixed width
+            height=None,  # Removes fixed height
+            margin=dict(l=5, r=5, t=30, b=5)
+        )
 
         if self.interactive_legend:
             self.fig = InteractiveLegend(self.fig, df)
