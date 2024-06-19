@@ -138,11 +138,20 @@ class RegionIntegratedSdfReader(SdfReader):
         Returns
         -------
         - sensitivity_profiles: list of unumpy.uarrays, list of sensitivity profiles for each nuclide-reaction pair"""
-        if reaction_type == 'all':
-            return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data ]
+        if type(self.sdf_data) == list:
+            if reaction_type == 'all':
+                return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data ]
+            else:
+                return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data \
+                        if data['reaction_type'] == reaction_type ]
+        elif type(self.sdf_data) == dict:
+            if reaction_type == 'all':
+                return [ reaction['sensitivities'] for isotope in self.sdf_data.values() for reaction in isotope.values() ]
+            else:
+                return [ reaction['sensitivities'] for isotope in self.sdf_data.values() for reaction in isotope.values() \
+                         if reaction['reaction_type'] == reaction_type ]     
         else:
-            return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data \
-                    if data['reaction_type'] == reaction_type ]
+            raise ValueError("Invalid data type for sdf_data. How did that happen?")
 
 def read_covariance_matrix(filename: str):
     pass

@@ -5,6 +5,8 @@ import numpy as np
 from plotly.subplots import make_subplots
 import plotly.express as px
 import pandas as pd
+import scipy.stats as stats
+from uncertainties import umath, unumpy, ufloat
 
 # Imports for the interactive legend
 import webbrowser
@@ -667,6 +669,16 @@ def contribution_plot(contributions, plot_type='bar', integral_index_name='E', p
     return plotter.get_plot()
 
 
+def manual_pearson(x, y):
+    """Calculates the Pearson correlation coefficient between two sets of values x and y"""
+    x_mean = np.mean(x)
+    y_mean = np.mean(y)
+    x_diff = x - x_mean
+    y_diff = y - y_mean
+    numerator = np.sum(x_diff * y_diff)
+    denominator = umath.sqrt(np.sum(x_diff**2) * np.sum(y_diff**2))
+    return numerator / denominator
+
 class ScatterPlotter(Plotter):
     def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
         self.index_name = integral_index_name
@@ -680,8 +692,29 @@ class ScatterPlotter(Plotter):
         application_uncertainties = [ contribution[0].s for contribution in contribution_pairs ]
         experiment_points         = [ contribution[1].n for contribution in contribution_pairs ]
         experiment_uncertainties  = [ contribution[1].s for contribution in contribution_pairs ]
+
+        application               = unumpy.uarray(application_points, application_uncertainties)
+        experiment                = unumpy.uarray(experiment_points, experiment_uncertainties)
+        application               = np.array([ufloat(v.n, v.s) for v in application])
+        experiment                = np.array([ufloat(v.n, v.s) for v in experiment])
+
         self.fig = plt.errorbar(application_points, experiment_points, xerr=application_uncertainties, \
                                yerr=experiment_uncertainties, fmt='.', capsize=5)
+        
+        # Linear regression
+        test = manual_pearson(application, experiment)
+        print(f"Pearson correlation: {test:1.3f}")
+        regression = stats.linregress(application_points, experiment_points)
+        pearson = regression.rvalue
+        slope = regression.slope
+        intercept = regression.intercept
+
+        # Plot the regression line
+        x = np.linspace(min(application_points), max(application_points), 100)
+        y = slope * x + intercept
+        self.axs.plot(x, y, 'r', label='Linear fit')
+        self.axs.text(0.05, 0.95, f"Pearson correlation: {pearson:1.3f}", transform=self.axs.transAxes, fontsize=12,
+                verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
 
         self.style()
 

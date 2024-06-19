@@ -133,10 +133,8 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
 
     # Read the application and experiment sdf files
 
-    application_sdfs = [ RegionIntegratedSdfReader(filename).get_sensitivity_profiles(reaction_type) \
-                        for filename in application_filenames ]
-    experiment_sdfs  = [ RegionIntegratedSdfReader(filename).get_sensitivity_profiles(reaction_type) \
-                        for filename in experiment_filenames ]
+    application_sdfs = [ RegionIntegratedSdfReader(filename).convert_to_dict() for filename in application_filenames ]
+    experiment_sdfs  = [ RegionIntegratedSdfReader(filename).convert_to_dict() for filename in experiment_filenames ]
 
     # Create a matrix to store the similarity parameter E for each application with each experiment
     E_vals = unumpy.umatrix(np.zeros( ( len(experiment_sdfs), len(application_sdfs) ) ), \
@@ -145,8 +143,14 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
     # Now calculate the similarity parameter E for each application with each experiment
     for i, experiment in enumerate(experiment_sdfs):
         for j, application in enumerate(application_sdfs):
-            application_vector = create_sensitivity_vector(application)
-            experiment_vector = create_sensitivity_vector(experiment)
+            # Now add missing data to the application and experiment dictionaries
+            all_isotopes = set(application.sdf_data.keys()).union(set(experiment.sdf_data.keys()))
+            add_missing_reactions_and_nuclides(application.sdf_data, experiment.sdf_data, all_isotopes)
+            application_profiles = application.get_sensitivity_profiles()
+            experiment_profiles  = experiment.get_sensitivity_profiles()
+
+            application_vector = create_sensitivity_vector(application_profiles)
+            experiment_vector  = create_sensitivity_vector(experiment_profiles)
 
             E_vals[i, j] = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, \
                                                              application_filenames[j], experiment_filenames[i], uncertainties)
