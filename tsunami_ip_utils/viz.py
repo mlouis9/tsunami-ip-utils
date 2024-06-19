@@ -672,15 +672,21 @@ class ScatterPlotter(Plotter):
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
-    def create_plot(self, contributions, nested):
+    def create_plot(self, contribution_pairs, nested):
         self.nested = nested
         self.fig, self.axs = plt.subplots()
-        # if nested:
-        #     self.nested_barchart(contributions)
-        # else:
-        #     self.barchart(contributions)
+
+        application_points        = [ contribution[0].n for contribution in contribution_pairs ]
+        application_uncertainties = [ contribution[0].s for contribution in contribution_pairs ]
+        experiment_points         = [ contribution[1].n for contribution in contribution_pairs ]
+        experiment_uncertainties  = [ contribution[1].s for contribution in contribution_pairs ]
+        self.fig = plt.errorbar(application_points, experiment_points, xerr=application_uncertainties, \
+                               yerr=experiment_uncertainties, fmt='.', capsize=5)
 
         self.style()
+
+    def scatter_plot():
+        pass
 
     def get_plot(self):
         return self.fig, self.axs
@@ -689,7 +695,14 @@ class ScatterPlotter(Plotter):
         return fig.add_subplot(position, sharex=self.axs, sharey=self.axs)
     
     def style(self):
-        pass
+        if self.plot_redundant and self.nested:
+            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+        else:
+            title_text = f'Contributions to {self.index_name}'
+        self.axs.set_title(title_text)
+        self.axs.set_ylabel(f"Experiment {self.index_name} Contribution")
+        self.axs.set_xlabel(f"Application {self.index_name} Contribution")
+        self.axs.grid()
 
 def correlation_plot(application_contributions, experiment_contributions, plot_type='scatter', integral_index_name='E', \
                      plot_redundant_reactions=False, **kwargs):
@@ -723,20 +736,18 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
 
     # Get the list of isotopes for which contributions are available
     isotopes = list(application_contributions.keys())
-    reactions = list(application_contributions[isotopes[0]].keys())
 
     # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
     contribution_pairs = []
     if nested:
+        reactions = list(application_contributions[isotopes[0]].keys())
         for isotope in isotopes:
             for reaction in reactions:
                 contribution_pairs.append((application_contributions[isotope][reaction], \
-                                          experiment_contributions[isotope][reaction]))
+                                           experiment_contributions[isotope][reaction]))
     else:
         for isotope in isotopes:
             contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
-
-    print(contribution_pairs)
 
     plotters = {
         'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, **kwargs)
@@ -748,8 +759,6 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
         raise ValueError("Unsupported plot type")
 
     # Create the plot and style it
-    # plotter.create_plot(contribution_pairs, nested_plot)
+    plotter.create_plot(contribution_pairs, nested)
 
     return plotter.get_plot()
-
-    return 

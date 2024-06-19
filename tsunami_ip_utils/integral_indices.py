@@ -185,8 +185,8 @@ def get_reaction_wise_E_contributions(application, experiment, isotope, all_reac
 
     return E_contributions
 
-def add_missing_reactions(application, experiment, all_isotopes):
-    """Add missing reactions to the application and experiment dictionaries with an sdf profile of all zeros.
+def add_missing_reactions_and_nuclides(application, experiment, all_isotopes):
+    """Add missing reactions and nuclides to the application and experiment dictionaries with an sdf profile of all zeros.
     NOTE: Since dictionaries are passed by reference, this function does not return anything, but modifies the
     application and experiment dictionaries in place.
     
@@ -224,6 +224,18 @@ def add_missing_reactions(application, experiment, all_isotopes):
                 experiment[isotope][reaction] = {
                     "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
                 }
+
+    # Now zero out nuclides that are not in the application or experiment
+    for isotope in all_isotopes:
+        if isotope not in application.keys():
+            application[isotope] = { reaction: {
+                "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
+            } for reaction in all_reactions }
+            
+        if isotope not in experiment.keys():
+            experiment[isotope] = { reaction: {
+                "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
+            } for reaction in all_reactions }
 
     return all_reactions
 
@@ -264,21 +276,9 @@ def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedS
 
     # Since different nuclides can have different reactions, we need to consider all reactions for each nuclide (e.g. 
     # fissile isotopes will have fission reactions, while non-fissile isotopes will not)
-    all_reactions = add_missing_reactions(application, experiment, all_isotopes)
+    all_reactions = add_missing_reactions_and_nuclides(application, experiment, all_isotopes)
 
     for isotope in all_isotopes:
-        isotope_does_not_contribute = ( isotope not in application.keys() ) or ( isotope not in experiment.keys() )
-        if isotope_does_not_contribute:
-            nuclide_wise_contributions.append({
-                "isotope": isotope,
-                "contribution": ufloat(0, 0)
-            })
-            nuclide_reaction_wise_contributions += [ {
-                "isotope": isotope,
-                "reaction_type": reaction_type,
-                "contribution": ufloat(0, 0)
-            } for reaction_type in all_reactions ]
-            continue
 
         # For isotope-wise contribution, the sensitivity vector is all of the reaction sensitivities concatenated together
         application_vector = create_sensitivity_vector([ application[isotope][reaction]['sensitivities'] \
