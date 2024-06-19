@@ -35,8 +35,11 @@ def unit_vector_uncertainty_propagation(vector):
     vector_uncertainties = unumpy.std_devs(vector)
 
     # Compute the derivative matrix for uncertainty propagation
-    derivative_matrix = -unumpy.nominal_values(vector)[:, np.newaxis] * unumpy.nominal_values(vector)[np.newaxis, :] / vector_norm**3
-    np.fill_diagonal(derivative_matrix, (vector_norm**2 - unumpy.nominal_values(vector)**2) / vector_norm**3)
+    if vector_norm != 0:
+        derivative_matrix = -unumpy.nominal_values(vector)[:, np.newaxis] * unumpy.nominal_values(vector)[np.newaxis, :] / vector_norm**3
+        np.fill_diagonal(derivative_matrix, (vector_norm**2 - unumpy.nominal_values(vector)**2) / vector_norm**3)
+    else:
+        derivative_matrix = np.zeros((len(vector), len(vector)))
 
     # Calculate the uncertainties of the unit vector components
     unit_vector_uncertainties = np.sqrt(np.sum((derivative_matrix**2 * vector_uncertainties**2), axis=1))
