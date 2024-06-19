@@ -185,6 +185,47 @@ def get_reaction_wise_E_contributions(application, experiment, isotope, all_reac
 
     return E_contributions
 
+def add_missing_reactions(application, experiment, all_isotopes):
+    """Add missing reactions to the application and experiment dictionaries with an sdf profile of all zeros.
+    NOTE: Since dictionaries are passed by reference, this function does not return anything, but modifies the
+    application and experiment dictionaries in place.
+    
+    Parameters
+    ----------
+    - application: dict, dictionary of application sensitivity profiles
+    - experiment: dict, dictionary of experiment sensitivity profiles
+    - all_isotopes: list of str, list of all isotopes in the application and experiment dictionaries
+    
+    Returns
+    -------
+    - all_isotopes: set of str, set of all isotopes in the application and experiment dictionaries"""
+    application_reactions = set([ key for isotope in application.keys() for key in application[isotope].keys() ])
+    experiment_reactions = set([ key for isotope in experiment.keys() for key in experiment[isotope].keys() ])
+    all_reactions = application_reactions.union(experiment_reactions)
+
+    # Now, for any reactions that are in experiment but not application (and vice versa), they need to be added with an sdf
+    # profile of all zeros
+
+    # Get an arbitrary sdf profile to get the shape from
+    first_application_nuclide = list(application.keys())[0]
+    first_application_reaction = list(application[first_application_nuclide].keys())[0]
+    arbitrary_sdf = application[first_application_nuclide][first_application_reaction]['sensitivities']
+    for isotope in application.keys():
+        # If reaction is missing for this isotope, add it with an sdf profile of all zeros
+        for reaction in all_reactions:
+            if reaction not in application[isotope].keys():
+                application[isotope][reaction] = {
+                    "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
+                }
+    for isotope in experiment.keys():
+        # If reaction is missing for this isotope, add it with an sdf profile of all zeros
+        for reaction in all_reactions:
+            if reaction not in experiment[isotope].keys():
+                experiment[isotope][reaction] = {
+                    "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
+                }
+
+    return all_reactions
 
 def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedSdfReader, experiment: RegionIntegratedSdfReader):
     """Calculate the contributions to the similarity parameter E for each nuclide and for each reaction type for a given
@@ -221,12 +262,12 @@ def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedS
     # All isotopes in the application and experiment
     all_isotopes = set(application.keys()).union(set(experiment.keys()))
 
-    # Assuming each nuclide has the same reactions, choose an arbitrary isotope in the application to get the reactions
-    arbitrary_nuclide = list(application.keys())[0]
-    all_reactions = application[arbitrary_nuclide].keys()
+    # Since different nuclides can have different reactions, we need to consider all reactions for each nuclide (e.g. 
+    # fissile isotopes will have fission reactions, while non-fissile isotopes will not)
+    all_reactions = add_missing_reactions(application, experiment, all_isotopes)
 
     for isotope in all_isotopes:
-        isotope_does_not_contribute = isotope not in application.keys() or isotope not in experiment.keys()
+        isotope_does_not_contribute = ( isotope not in application.keys() ) or ( isotope not in experiment.keys() )
         if isotope_does_not_contribute:
             nuclide_wise_contributions.append({
                 "isotope": isotope,
