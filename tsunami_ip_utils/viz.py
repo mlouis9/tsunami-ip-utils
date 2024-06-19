@@ -492,7 +492,10 @@ class InteractivePiePlotter(Plotter):
         for nuclide, reactions in contributions.items():
             # Caclulate the nuclide total, and the positive and negative contributions
             nuclide_total = sum(contribution for contribution in reactions.values())
-            norm_nuclide_total = abs(nuclide_total) / abs_sum_of_nuclide_totals
+            if abs_sum_of_nuclide_totals != 0:
+                norm_nuclide_total = abs(nuclide_total) / abs_sum_of_nuclide_totals
+            else:
+                norm_nuclide_total = 0
 
             positive_contributions = { reaction: contribution for reaction, contribution in reactions.items() \
                                       if contribution.n >= 0 }
@@ -516,7 +519,10 @@ class InteractivePiePlotter(Plotter):
 
             # Normalize the contributions by the absolute value of the nuclide total 
             absolute_sum = positive_total + abs(negative_total)
-            normalization_factor = abs(norm_nuclide_total) / absolute_sum
+            if absolute_sum != 0:
+                normalization_factor = abs(norm_nuclide_total) / absolute_sum
+            else:
+                normalization_factor = 0
 
             # Positive contributions
             if positive_total != 0:
@@ -528,6 +534,8 @@ class InteractivePiePlotter(Plotter):
                 data['uncertainties'].append(positive_total.s)
                 data['normalized_values'].append( norm_positive_total.n )
                 data['nuclide'].append(nuclide)
+            else:
+                norm_positive_total = 0
 
             # Negative contributions
             if negative_total != 0:
@@ -539,6 +547,8 @@ class InteractivePiePlotter(Plotter):
                 data['uncertainties'].append(negative_total.s)
                 data['normalized_values'].append( norm_negative_total.n )
                 data['nuclide'].append(nuclide)
+            else:
+                norm_negative_total = 0
 
             # -------------------------------
             # Add the reaction contributions
@@ -547,8 +557,11 @@ class InteractivePiePlotter(Plotter):
             # multiplied by a sufficiently large scale factor, the data won't be displayed correctly
             scale_factor = 10000
             for reaction, contribution in positive_contributions.items():
-                # Now normalize contributions so they sum to the "normalized_positive_total"
-                normalization_factor = norm_positive_total / positive_total
+                # Now normalize contributions so they sum to the "normalized_positive_total
+                if positive_total != 0:
+                    normalization_factor = norm_positive_total / positive_total
+                else:
+                    normalization_factor = 0
                 norm_reaction_contribution = contribution.n * normalization_factor
                 
                 if contribution.n != 0:
@@ -585,23 +598,21 @@ class InteractivePiePlotter(Plotter):
         self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
 
 
-def plot_contributions(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=False, **kwargs):
-    """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
+def determine_plot_type(contributions, plot_redundant_reactions):
+    """Determines whether the contributions are nuclide-wise or nuclide-reaction-wise and whether to plot redundant
+    reactions or not
     
     Parameters
     ----------
     - contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter for each
         nuclide or nuclide-reaction pair
-    - plot_type: str, type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
-        a pie chart
-    - integral_index_name: str, name of the integral index being plotted. Default is 'E'
     - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
-        nuclide-reaction-wise contributions. Default is False
-    - kwargs: additional keyword arguments to pass to the plotting function"""
-
-    # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
-    if 'reaction_type' in contributions[0]:
-        # Nuclide-reaction-wise contributions
+        nuclide-reaction-wise contributions
+        
+    Returns
+    -------
+    - contributions: dict, contributions to the similarity parameter keyed by isotope then by reaction type"""
+    if 'reaction_type' in contributions[0]: # Nuclide-reaction-wise contributions
         nested_plot = True # Nested plot by nuclide then by reaction type
 
         # Create a dictionary of contributions keyed by isotope then by reaction type
@@ -616,10 +627,28 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E', 
             redundant_interactions = ['chi', 'capture', 'nubar', 'total']
             contributions = { isotope: { reaction: contributions[isotope][reaction] for reaction in contributions[isotope] \
                                 if reaction not in redundant_interactions } for isotope in contributions }
-    else:
-        # Nuclide-wise contributions
+    else: # Nuclide-wise contributions
         nested_plot = False
         contributions = { contribution['isotope']: contribution['contribution'] for contribution in contributions }
+
+    return contributions, nested_plot
+
+def contribution_plot(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=False, **kwargs):
+    """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
+    
+    Parameters
+    ----------
+    - contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter for each
+        nuclide or nuclide-reaction pair
+    - plot_type: str, type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
+        a pie chart
+    - integral_index_name: str, name of the integral index being plotted. Default is 'E'
+    - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
+        nuclide-reaction-wise contributions. Default is False
+    - kwargs: additional keyword arguments to pass to the plotting function"""
+
+    # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
+    contributions, nested_plot = determine_plot_type(contributions, plot_redundant_reactions)
 
     plotters = {
         'bar': BarPlotter(integral_index_name, plot_redundant_reactions, **kwargs),
@@ -636,3 +665,91 @@ def plot_contributions(contributions, plot_type='bar', integral_index_name='E', 
     plotter.create_plot(contributions, nested_plot)
 
     return plotter.get_plot()
+
+
+class ScatterPlotter(Plotter):
+    def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
+        self.index_name = integral_index_name
+        self.plot_redundant = plot_redundant
+
+    def create_plot(self, contributions, nested):
+        self.nested = nested
+        self.fig, self.axs = plt.subplots()
+        # if nested:
+        #     self.nested_barchart(contributions)
+        # else:
+        #     self.barchart(contributions)
+
+        self.style()
+
+    def get_plot(self):
+        return self.fig, self.axs
+        
+    def add_to_subplot(self, fig, position):
+        return fig.add_subplot(position, sharex=self.axs, sharey=self.axs)
+    
+    def style(self):
+        pass
+
+def correlation_plot(application_contributions, experiment_contributions, plot_type='scatter', integral_index_name='E', \
+                     plot_redundant_reactions=False, **kwargs):
+    """Creates a correlation plot for a given application-experiment pair for which the contributions to the similarity
+    parameter are given.
+    
+    Parameters
+    ----------
+    - application_contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter
+        for the application
+    - experiment_contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter
+        for the experiment
+    - plot_type: str, type of plot to create. Default is 'scatter' which creates a matplotlib scatter plot. Other options
+        are interactive_scatter, which creates a Plotly scatter plot.
+    - integral_index_name: str, name of the integral index being plotted. Default is 'E'
+    - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
+        nuclide-reaction-wise contributions. Default is False
+        
+    Returns
+    -------
+    - fig: matplotlib.figure.Figure, the figure containing the correlation plot"""
+
+    # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
+    application_contributions, application_nested = determine_plot_type(application_contributions, False)
+    experiment_contributions, experiment_nested = determine_plot_type(experiment_contributions, False)
+
+    if application_nested != experiment_nested:
+        raise ValueError("Application and experiment contributions must have the same nested structure")
+    else:
+        nested = application_nested # They are be the same, so arbitrarily choose one
+
+    # Get the list of isotopes for which contributions are available
+    isotopes = list(application_contributions.keys())
+    reactions = list(application_contributions[isotopes[0]].keys())
+
+    # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
+    contribution_pairs = []
+    if nested:
+        for isotope in isotopes:
+            for reaction in reactions:
+                contribution_pairs.append((application_contributions[isotope][reaction], \
+                                          experiment_contributions[isotope][reaction]))
+    else:
+        for isotope in isotopes:
+            contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
+
+    print(contribution_pairs)
+
+    plotters = {
+        'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, **kwargs)
+    }
+    
+    # Get the requested plotter
+    plotter = plotters.get(plot_type)
+    if plotter is None:
+        raise ValueError("Unsupported plot type")
+
+    # Create the plot and style it
+    # plotter.create_plot(contribution_pairs, nested_plot)
+
+    return plotter.get_plot()
+
+    return 
