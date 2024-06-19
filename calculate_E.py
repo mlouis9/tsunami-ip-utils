@@ -1,5 +1,5 @@
 # Script for recreating the global similarity parameter E
-from tsunami_ip_utils import comparison
+from tsunami_ip_utils.comparisons import comparison
 
 if __name__ == '__main__':
     # List of all SDF files

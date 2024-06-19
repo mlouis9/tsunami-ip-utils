@@ -41,6 +41,7 @@ class BarPlotter(Plotter):
         self.plot_redundant = plot_redundant
 
     def create_plot(self, contributions, nested):
+        self.nested = nested
         self.fig, self.axs = plt.subplots()
         if nested:
             self.nested_barchart(contributions)
@@ -99,7 +100,7 @@ class BarPlotter(Plotter):
         self.axs.legend()
 
     def style(self):
-        if self.plot_redundant:
+        if self.plot_redundant and self.nested:
             title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
         else:
             title_text = f'Contributions to {self.index_name}'
@@ -115,6 +116,7 @@ class PiePlotter(Plotter):
         self.plot_redundant = plot_redudant
     
     def create_plot(self, contributions, nested):
+        self.nested = nested
         self.fig, self.axs = plt.subplots()
         if nested:
             self.nested_pie_chart(contributions)
@@ -240,7 +242,7 @@ class PiePlotter(Plotter):
             wedge.set_hatch(hatch)
 
     def style(self):
-        if self.plot_redundant:
+        if self.plot_redundant and self.nested:
             title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
         else:
             title_text = f'Contributions to {self.index_name}'
@@ -394,6 +396,7 @@ class InteractivePiePlotter(Plotter):
 
     def create_plot(self, contributions, nested=True):
         # Prepare data for the sunburst chart
+        self.nested = nested
         if nested:
             df = self._create_nested_sunburst_data(contributions)
         else:
@@ -575,7 +578,7 @@ class InteractivePiePlotter(Plotter):
         return pd.DataFrame(data)
 
     def style(self):
-        if self.plot_redundant:
+        if self.plot_redundant and self.nested:
             title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
         else:
             title_text = f'Contributions to {self.index_name}'
