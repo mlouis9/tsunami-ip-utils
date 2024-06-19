@@ -112,6 +112,9 @@ class RegionIntegratedSdfReader(SdfReader):
     def convert_to_dict(self):
         # Transform the data into a dictionary keyed by nuclide and reaction type. Since data is region and mixture integrated
         # we can assume that there is only one entry for each nuclide-reaction pair
+        if type(self.sdf_data) == dict:
+            return self
+        
         sdf_data_dict = {}
         for match in self.sdf_data:
             nuclide = match['isotope']
