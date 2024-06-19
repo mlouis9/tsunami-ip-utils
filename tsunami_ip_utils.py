@@ -892,9 +892,9 @@ class InteractiveLegend:
             root_nodes = df[df['parents'] == '']
 
             # Generate legend HTML with a title
-            legend_html = '<div id="legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0;">Legend</h3>\n'
+            legend_html = '<div id="legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0; text-align: center;">Legend</h3>\n'
             for _, row in root_nodes.iterrows():
-                legend_html += f'    <div id="legend-item" class="legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]}</div>\n'
+                legend_html += f'    <div id="legend-item" class="legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]:1.4E}</div>\n'
             legend_html += '</div>\n'
 
             # JavaScript for interactivity and shutdown
@@ -984,17 +984,25 @@ class InteractiveLegend:
             return render_template_string(full_html)
         
     def open_browser(self):
-        # webbrowser.open_new("http://localhost:5000/")
+        print("Now running at http://localhost:5000/")
+        webbrowser.open("http://localhost:5000/")
         pass
 
     def show(self):
         # Suppress Flask's startup and runtime messages by redirecting them to dev null
         log = open(os.devnull, 'w')
         # sys.stdout = log
-        # sys.stderr = log
+        sys.stderr = log
 
         threading.Timer(1, self.open_browser).start()
         self.app.run()
+
+    def write_html(self, filename):
+        with self.app.test_client() as client:
+            response = client.get('/')
+            html_content = response.data.decode('utf-8')
+            with open(filename, 'w') as f:
+                f.write(html_content)
 
 
 class InteractivePiePlotter(Plotter):
