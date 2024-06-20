@@ -881,8 +881,8 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         self.excluded_isotopes = []  # Keep track of excluded isotopes
         self.app = dash.Dash(__name__)
         self.app.layout = html.Div([
-            dcc.Graph(id='interactive-scatter', figure=self.fig)
-        ])
+            dcc.Graph(id='interactive-scatter', figure=self.fig, style={'height': '100vh'})
+        ], style={'margin': 0})
         self.setup_callbacks()
 
     def setup_callbacks(self):
@@ -924,12 +924,11 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
                 return self.fig
 
             return dash.no_update
-        
+
         @self.app.server.route('/shutdown', methods=['POST'])
         def shutdown():
             os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
             return 'Server shutting down...'
-
 
     def show(self):
         # Function to open the browser
@@ -956,7 +955,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
                 {%favicon%}
                 {%css%}
             </head>
-            <body>
+            <body style="margin: 0;">
                 {%app_entry%}
                 <footer>
                     {%config%}
@@ -977,7 +976,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         # Timer to open the browser shortly after the server starts
         threading.Timer(1, open_browser).start()
 
-        self.app.run_server(debug=False, host='localhost',port=8050)
+        self.app.run_server(debug=False, host='localhost', port=8050)
 
     def write_html(self, filename):
         # Utilize Plotly's write_html to save the current state of the figure
