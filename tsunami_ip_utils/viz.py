@@ -17,6 +17,7 @@ import threading
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
+import logging
 
 from tsunami_ip_utils.utils import isotope_reaction_list_to_nested_dict
 
@@ -923,16 +924,60 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
                 return self.fig
 
             return dash.no_update
+        
+        @self.app.server.route('/shutdown', methods=['POST'])
+        def shutdown():
+            os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
+            return 'Server shutting down...'
 
 
     def show(self):
         # Function to open the browser
         def open_browser():
-            webbrowser.open("http://127.0.0.1:8050/")
-        
+            if not os.environ.get("WERKZEUG_RUN_MAIN"):
+                print("Now running at http://localhost:8050/")
+                webbrowser.open("http://localhost:8050/")
+
+        # Silence the Flask development server logging
+        log = open(os.devnull, 'w')
+        # sys.stdout = log
+        sys.stderr = log
+
+        # Disable Flask development server warning
+        os.environ['FLASK_ENV'] = 'development'
+
+        # JavaScript code to detect when the tab or window is closed
+        self.app.index_string = '''
+        <!DOCTYPE html>
+        <html>
+            <head>
+                {%metas%}
+                <title>{%title%}</title>
+                {%favicon%}
+                {%css%}
+            </head>
+            <body>
+                {%app_entry%}
+                <footer>
+                    {%config%}
+                    {%scripts%}
+                    <script type="text/javascript">
+                        window.addEventListener("beforeunload", function (e) {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("POST", "/shutdown", false);
+                            xhr.send();
+                        });
+                    </script>
+                    {%renderer%}
+                </footer>
+            </body>
+        </html>
+        '''
+
         # Timer to open the browser shortly after the server starts
         threading.Timer(1, open_browser).start()
-        self.app.run_server(host='localhost', port=8050)
+
+        self.app.run_server(debug=False, host='localhost',port=8050)
 
     def write_html(self, filename):
         # Utilize Plotly's write_html to save the current state of the figure
