@@ -877,6 +877,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         self.fig = interactive_scatter_plot.fig
         self.index_name = interactive_scatter_plot.index_name
         self.df = df
+        self.excluded_isotopes = []  # Keep track of excluded isotopes
         self.app = dash.Dash(__name__)
         self.app.layout = html.Div([
             dcc.Graph(id='interactive-scatter', figure=self.fig)
@@ -891,23 +892,38 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         )
         def update_figure_on_legend_click(restyleData, current_figure_state):
             if restyleData and 'visible' in restyleData[0]:
-                # Extract the visibility toggles
-                visibility_changes = restyleData[0]['visible']
                 current_fig = go.Figure(current_figure_state)
 
-                # Update DataFrame based on visibility
-                updated_df = self.df.copy()
-                for i, visible in enumerate(visibility_changes):
-                    if visible == 'legendonly':
-                        isotope = self.df['Isotope'].unique()[i]
-                        updated_df = updated_df[updated_df['Isotope'] != isotope]
+                # Get the index of the clicked trace
+                clicked_trace_index = restyleData[1][0]
 
-                # Create a new InteractiveScatterPlotter instance with the updated DataFrame
+                # Get the name of the clicked trace
+                clicked_trace_name = current_fig.data[clicked_trace_index].name
+
+                # Update excluded isotopes based on the clicked trace
+                if restyleData[0]['visible'][0] == 'legendonly' and clicked_trace_name not in self.excluded_isotopes:
+                    self.excluded_isotopes.append(clicked_trace_name)
+                elif restyleData[0]['visible'][0] == True and clicked_trace_name in self.excluded_isotopes:
+                    self.excluded_isotopes.remove(clicked_trace_name)
+
+                # Update DataFrame based on excluded isotopes
+                updated_df = self.df.copy()
+                updated_df = updated_df[~updated_df['Isotope'].isin(self.excluded_isotopes)]
+
+                # Recalculate the regression and summary statistics
                 self.add_regression_and_stats(updated_df)
+
+                # Update trace visibility based on excluded isotopes
+                for trace in self.fig.data:
+                    if trace.name in self.excluded_isotopes:
+                        trace.visible = 'legendonly'
+                    else:
+                        trace.visible = True
 
                 return self.fig
 
             return dash.no_update
+
 
     def show(self):
         # Function to open the browser
