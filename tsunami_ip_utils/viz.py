@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 import numpy as np
-import pickle
 
 from plotly.subplots import make_subplots
 import plotly.express as px
+from plotly import graph_objects as go
 import pandas as pd
 import scipy.stats as stats
 from uncertainties import umath, unumpy, ufloat
@@ -386,8 +386,6 @@ class InteractiveLegend:
 
 class InteractivePiePlotter(Plotter):
     def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
-        self.fig = make_subplots()
-
         # Check if the user wants an interactive legend
         if 'interactive_legend' in kwargs.keys():
             self.interactive_legend = kwargs['interactive_legend']
@@ -398,6 +396,8 @@ class InteractivePiePlotter(Plotter):
         self.plot_redundant = plot_redundant
 
     def create_plot(self, contributions, nested=True):
+        self.fig = make_subplots()
+
         # Prepare data for the sunburst chart
         self.nested = nested
         if nested:
@@ -680,46 +680,55 @@ def manual_pearson(x, y):
     denominator = umath.sqrt(np.sum(x_diff**2) * np.sum(y_diff**2))
     return numerator / denominator
 
-class ScatterPlotter(Plotter):
+
+class ScatterPlot(Plotter):
+    """This class exists to add some additional functionality for calculating regressions and summary statistics that's
+    common to all types of scatter plots, interactive or otherwise"""
+    def get_summary_statistics(self, x, y):
+        """Calculates the Pearson correlation coefficient, Spearman rank correlation coefficient, and linear regression
+        parameters for the given x and y datasets. The linear regression parameters are the slope and intercept of the
+        regression line. The Pearson and Spearman coefficients are also stored in the class instance as 'pearson' and
+        'spearman' respectively. The slope and intercept are stored as 'slope' and 'intercept' respectively. The linear
+        regression is stored as 'regression'"""
+        self.regression = stats.linregress(x, y)
+        self.pearson = self.regression.rvalue # The same as stats.pearsonr(x, y).statistic
+        self.spearman = stats.spearmanr(x, y).statistic
+        self.slope = self.regression.slope
+        self.intercept = self.regression.intercept
+
+        # Now create teh summary statistics text for figure annotation
+        pearson_text = f"Pearson: {self.pearson:1.6f}"
+        spearman_text = f"Spearman: {self.spearman:1.6f}"
+        self.summary_stats_text = f"{pearson_text}\n{spearman_text}"
+
+
+
+class ScatterPlotter(ScatterPlot):
     def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
-    def create_plot(self, contribution_pairs, nested):
-        self.nested = nested
+    def create_plot(self, contribution_pairs, isotopes, reactions):
         self.fig, self.axs = plt.subplots()
-        with open('contribution_pairs.pkl', 'wb') as f:
-            pickle.dump(contribution_pairs, f)
 
+        # Extract the x and y values from the contribution pairs
         application_points        = [ contribution[0].n for contribution in contribution_pairs ]
         application_uncertainties = [ contribution[0].s for contribution in contribution_pairs ]
         experiment_points         = [ contribution[1].n for contribution in contribution_pairs ]
         experiment_uncertainties  = [ contribution[1].s for contribution in contribution_pairs ]
 
-        application               = unumpy.uarray(application_points, application_uncertainties)
-        experiment                = unumpy.uarray(experiment_points, experiment_uncertainties)
-        application               = np.array([ufloat(v.n, v.s) for v in application])
-        experiment                = np.array([ufloat(v.n, v.s) for v in experiment])
-
         self.fig = plt.errorbar(application_points, experiment_points, xerr=application_uncertainties, \
                                yerr=experiment_uncertainties, fmt='.', capsize=5)
         
         # Linear regression
-        regression = stats.linregress(application_points, experiment_points)
-        pearson = regression.rvalue
-        spearman = stats.spearmanr(application_points, experiment_points).statistic
-        slope = regression.slope
-        intercept = regression.intercept
+        self.get_summary_statistics(application_points, experiment_points)
 
         # Plot the regression line
         x = np.linspace(min(application_points), max(application_points), 100)
-        y = slope * x + intercept
+        y = self.slope * x + self.intercept
         self.axs.plot(x, y, 'r', label='Linear fit')
 
-        pearson_text = f"Pearson: {pearson:1.6f}\n"
-        spearman_text = f"Spearman: {spearman:1.6f}\n"
-
-        self.axs.text(0.05, 0.95, f"{pearson_text}\n{spearman_text}", transform=self.axs.transAxes, fontsize=12,
+        self.axs.text(0.05, 0.95, self.summary_stats_text, transform=self.axs.transAxes, fontsize=12,
                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
 
         self.style()
@@ -739,6 +748,101 @@ class ScatterPlotter(Plotter):
         self.axs.set_ylabel(f"Experiment {self.index_name} Contribution")
         self.axs.set_xlabel(f"Application {self.index_name} Contribution")
         self.axs.grid()
+
+
+class InteractiveScatterPlotter(ScatterPlot):
+    def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
+        self.index_name = integral_index_name
+        self.plot_redundant = plot_redundant
+
+    def create_plot(self, contribution_pairs, isotopes, reactions):
+        self.fig = make_subplots()
+
+        # Extract isotope and reaction pairs from the given list of isotopes and reactions
+        df = self._create_scatter_data(contribution_pairs, isotopes, reactions)
+
+        hover_data_dict = {
+            'Isotope': True  # Always include Isotope
+        }
+
+        if 'Reaction' in df.columns:
+            hover_data_dict['Reaction'] = True  # Include Reaction only if it exists
+
+        # Create scatter plot with error bars using Plotly Express
+        self.fig = px.scatter(
+            df, 
+            x=f'Application {self.index_name} Contribution', 
+            y=f'Experiment {self.index_name} Contribution',
+            error_x='Application Uncertainty', 
+            error_y='Experiment Uncertainty',
+            color='Isotope',
+            labels={
+                "color": "Isotope"
+            },
+            title=f'Contributions to {self.index_name}',
+            hover_data=hover_data_dict
+        )
+
+        # Calculate the linear regression and correlation statistics
+        self.get_summary_statistics(df[f'Application {self.index_name} Contribution'], \
+                                    df[f'Experiment {self.index_name} Contribution'])
+
+        # Add linear regression to the plot
+        x_reg = np.linspace(df[f'Application {self.index_name} Contribution'].min(), df[f'Application {self.index_name} Contribution'].max(), 100)
+        y_reg = self.slope * x_reg + self.intercept
+        self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', name='Regression Line'))
+
+        # Add correlation statistics to the plot
+        self.fig.add_annotation(
+            x=0.05, xref="paper", 
+            y=0.95, yref="paper",
+            text=self.summary_stats_text,
+            showarrow=False, 
+            font=dict(size=12),
+            bgcolor="white", 
+            opacity=0.8
+        )
+
+        # Now style the plot
+        self.style()
+
+    def _create_scatter_data(self, contribution_pairs, isotopes, reactions):
+        data = {
+            f'Application {self.index_name} Contribution': [cp[0].n for cp in contribution_pairs],
+            f'Experiment {self.index_name} Contribution': [cp[1].n for cp in contribution_pairs],
+            'Application Uncertainty': [cp[0].s for cp in contribution_pairs],
+            'Experiment Uncertainty': [cp[1].s for cp in contribution_pairs],
+            'Isotope': [],
+        }
+
+        # Add nuclides and reactions (if they exist) to the data dictionary
+        if reactions == []:
+            for isotope in isotopes:
+                data['Isotope'].append(isotope)
+        else:
+            data['Reaction'] = []
+            for isotope in isotopes:
+                for reaction in reactions:
+                    data['Isotope'].append(isotope)
+                    data['Reaction'].append(reaction)
+
+        return pd.DataFrame(data)
+
+    def add_to_subplot(self, fig, position):
+        for trace in self.fig.data:
+            fig.add_trace(trace, row=position[0], col=position[1])
+        return fig
+
+    def get_plot(self):
+        return self.fig
+    
+    def style(self):
+        if self.plot_redundant and self.nested:
+                title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+        else:
+            title_text = f'Contributions to {self.index_name}'
+        self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
+
 
 def correlation_plot(application_contributions, experiment_contributions, plot_type='scatter', integral_index_name='E', \
                      plot_redundant_reactions=False, **kwargs):
@@ -782,11 +886,13 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
                 contribution_pairs.append((application_contributions[isotope][reaction], \
                                            experiment_contributions[isotope][reaction]))
     else:
+        reactions = [] # There are no reactions, having an empty list is useful for the plotting function
         for isotope in isotopes:
             contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
 
     plotters = {
-        'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, **kwargs)
+        'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, **kwargs),
+        'interactive_scatter': InteractiveScatterPlotter(integral_index_name, plot_redundant_reactions, **kwargs)
     }
     
     # Get the requested plotter
@@ -795,6 +901,6 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
         raise ValueError("Unsupported plot type")
 
     # Create the plot and style it
-    plotter.create_plot(contribution_pairs, nested)
+    plotter.create_plot(contribution_pairs, isotopes, reactions)
 
     return plotter.get_plot()
