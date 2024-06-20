@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 from plotly.subplots import make_subplots
 import plotly.express as px
@@ -687,6 +688,8 @@ class ScatterPlotter(Plotter):
     def create_plot(self, contribution_pairs, nested):
         self.nested = nested
         self.fig, self.axs = plt.subplots()
+        with open('contribution_pairs.pkl', 'wb') as f:
+            pickle.dump(contribution_pairs, f)
 
         application_points        = [ contribution[0].n for contribution in contribution_pairs ]
         application_uncertainties = [ contribution[0].s for contribution in contribution_pairs ]
@@ -702,10 +705,9 @@ class ScatterPlotter(Plotter):
                                yerr=experiment_uncertainties, fmt='.', capsize=5)
         
         # Linear regression
-        test = manual_pearson(application, experiment)
-        print(f"Pearson correlation: {test:1.3f}")
         regression = stats.linregress(application_points, experiment_points)
         pearson = regression.rvalue
+        spearman = stats.spearmanr(application_points, experiment_points).statistic
         slope = regression.slope
         intercept = regression.intercept
 
@@ -713,13 +715,14 @@ class ScatterPlotter(Plotter):
         x = np.linspace(min(application_points), max(application_points), 100)
         y = slope * x + intercept
         self.axs.plot(x, y, 'r', label='Linear fit')
-        self.axs.text(0.05, 0.95, f"Pearson correlation: {pearson:1.3f}", transform=self.axs.transAxes, fontsize=12,
+
+        pearson_text = f"Pearson: {pearson:1.6f}\n"
+        spearman_text = f"Spearman: {spearman:1.6f}\n"
+
+        self.axs.text(0.05, 0.95, f"{pearson_text}\n{spearman_text}", transform=self.axs.transAxes, fontsize=12,
                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
 
         self.style()
-
-    def scatter_plot():
-        pass
 
     def get_plot(self):
         return self.fig, self.axs
