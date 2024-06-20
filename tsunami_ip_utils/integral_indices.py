@@ -146,6 +146,15 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
             # Now add missing data to the application and experiment dictionaries
             all_isotopes = set(application.sdf_data.keys()).union(set(experiment.sdf_data.keys()))
             add_missing_reactions_and_nuclides(application.sdf_data, experiment.sdf_data, all_isotopes)
+            
+            # Sometimes the application and experiment dictionaries have different orders, which causes their sensitivity
+            # profiles and hence sensitivity vectors to be different. To fix this, we need to sort the dictionaries
+
+            # Sort the application by the experiment keys
+            application.sdf_data = { isotope: { reaction: application.sdf_data[isotope][reaction] \
+                                               for reaction in experiment.sdf_data[isotope] } \
+                                                for isotope in experiment.sdf_data.keys() }
+
             application_profiles = application.get_sensitivity_profiles()
             experiment_profiles  = experiment.get_sensitivity_profiles()
 
@@ -286,13 +295,14 @@ def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedS
 
         # For isotope-wise contribution, the sensitivity vector is all of the reaction sensitivities concatenated together
         application_vector = create_sensitivity_vector([ application[isotope][reaction]['sensitivities'] \
-                                                        for reaction in all_reactions] )
+                                                        for reaction in all_reactions ] )
         experiment_vector  = create_sensitivity_vector([ experiment[isotope][reaction]['sensitivities'] \
                                                         for reaction in all_reactions ])
 
         E_isotope_contribution = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, uncertainties='manual',
                                                                    application_norm=application_norm, \
                                                                     experiment_norm=experiment_norm)
+
         nuclide_wise_contributions.append({
             "isotope": isotope,
             "contribution": E_isotope_contribution

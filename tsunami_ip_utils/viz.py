@@ -635,7 +635,7 @@ def determine_plot_type(contributions, plot_redundant_reactions):
 
     return contributions, nested_plot
 
-def contribution_plot(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=False, **kwargs):
+def contribution_plot(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=True, **kwargs):
     """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
     
     Parameters
@@ -646,7 +646,7 @@ def contribution_plot(contributions, plot_type='bar', integral_index_name='E', p
         a pie chart
     - integral_index_name: str, name of the integral index being plotted. Default is 'E'
     - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
-        nuclide-reaction-wise contributions. Default is False
+        nuclide-reaction-wise contributions. Default is True
     - kwargs: additional keyword arguments to pass to the plotting function"""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
