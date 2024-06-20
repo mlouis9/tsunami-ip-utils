@@ -856,15 +856,11 @@ class InteractiveScatterPlotter(ScatterPlot):
                     data['Isotope'].append(isotope)
                     data['Reaction'].append(reaction)
 
-        print(f"Old data {data}")
-
         # Now filter out (0,0) points, which don't contribute to either the application or the experiment, these are
         # usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set
         # of reactions only
         data = { key: [val for val, app, exp in zip(data[key], data[f'Application {self.index_name} Contribution'], \
                     data[f'Experiment {self.index_name} Contribution']) if app != 0 or exp != 0] for key in data }
-
-        print(f"New data {data}")
 
         return pd.DataFrame(data)
 
