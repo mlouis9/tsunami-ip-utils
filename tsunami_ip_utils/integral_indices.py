@@ -2,6 +2,7 @@ from uncertainties import ufloat, umath, unumpy
 import numpy as np
 from tsunami_ip_utils.readers import RegionIntegratedSdfReader
 from tsunami_ip_utils.error import unit_vector_uncertainty_propagation, dot_product_uncertainty_propagation
+from copy import deepcopy
 
 def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, application_filename=None, \
                                       experiment_filename=None, uncertainties='automatic', experiment_norm=None, \
@@ -198,7 +199,7 @@ def get_reaction_wise_E_contributions(application, experiment, isotope, all_reac
 
     return E_contributions
 
-def add_missing_reactions_and_nuclides(application, experiment, all_isotopes):
+def add_missing_reactions_and_nuclides(application, experiment, all_isotopes, mode='sdfs'):
     """Add missing reactions and nuclides to the application and experiment dictionaries with an sdf profile of all zeros.
     NOTE: Since dictionaries are passed by reference, this function does not return anything, but modifies the
     application and experiment dictionaries in place.
@@ -208,6 +209,9 @@ def add_missing_reactions_and_nuclides(application, experiment, all_isotopes):
     - application: dict, dictionary of application sensitivity profiles
     - experiment: dict, dictionary of experiment sensitivity profiles
     - all_isotopes: list of str, list of all isotopes in the application and experiment dictionaries
+    - mode: str, the mode to use for adding missing reactions and nuclides. Default is 'sdfs' which adds sdf profiles to missing
+        reactions and nuclides. If set to 'contribution', then the contributions to the similarity parameter E are set to zero
+        for missing nuclides and reactions
     
     Returns
     -------
@@ -222,33 +226,31 @@ def add_missing_reactions_and_nuclides(application, experiment, all_isotopes):
     # Get an arbitrary sdf profile to get the shape from
     first_application_nuclide = list(application.keys())[0]
     first_application_reaction = list(application[first_application_nuclide].keys())[0]
-    arbitrary_sdf = application[first_application_nuclide][first_application_reaction]['sensitivities']
+    if mode == 'sdfs':
+        zero_data = {
+            'sensitivities': application[first_application_nuclide][first_application_reaction]['sensitivities']
+        }
+    elif mode == 'contribution':
+        zero_data = ufloat(0,0)
+
     for isotope in application.keys():
         # If reaction is missing for this isotope, add it with an sdf profile of all zeros
         for reaction in all_reactions:
             if reaction not in application[isotope].keys():
-                application[isotope][reaction] = {
-                    "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
-                }
+                application[isotope][reaction] = deepcopy(zero_data)
     for isotope in experiment.keys():
         # If reaction is missing for this isotope, add it with an sdf profile of all zeros
         for reaction in all_reactions:
             if reaction not in experiment[isotope].keys():
-                experiment[isotope][reaction] = {
-                    "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
-                }
+                experiment[isotope][reaction] = deepcopy(zero_data)
 
     # Now zero out nuclides that are not in the application or experiment
     for isotope in all_isotopes:
         if isotope not in application.keys():
-            application[isotope] = { reaction: {
-                "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
-            } for reaction in all_reactions }
+            application[isotope] = { reaction: deepcopy(zero_data) for reaction in all_reactions }
             
         if isotope not in experiment.keys():
-            experiment[isotope] = { reaction: {
-                "sensitivities": unumpy.uarray( np.zeros_like(arbitrary_sdf), np.zeros_like(arbitrary_sdf) )
-            } for reaction in all_reactions }
+            experiment[isotope] = { reaction: deepcopy(zero_data) for reaction in all_reactions }
 
     return all_reactions
 

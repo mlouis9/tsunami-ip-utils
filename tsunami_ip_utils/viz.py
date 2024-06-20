@@ -8,6 +8,8 @@ from plotly import graph_objects as go
 import pandas as pd
 import scipy.stats as stats
 from uncertainties import umath, unumpy, ufloat
+from tsunami_ip_utils.utils import isotope_reaction_list_to_nested_dict
+from tsunami_ip_utils.integral_indices import add_missing_reactions_and_nuclides
 
 # Imports for the interactive legend
 import webbrowser
@@ -19,10 +21,10 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import logging
 
-from tsunami_ip_utils.utils import isotope_reaction_list_to_nested_dict
-
 plt.rcParams['hatch.linewidth'] = 0.5
 
+
+PLOTTING_PORT = 8050
 
 class Plotter(ABC):
     @abstractmethod
@@ -367,8 +369,8 @@ class InteractivePieLegend:
             return render_template_string(full_html)
         
     def open_browser(self):
-        print("Now running at http://localhost:5000/")
-        webbrowser.open("http://localhost:5000/")
+        print(f"Now running at http://localhost:{PLOTTING_PORT}/")
+        webbrowser.open(f"http://localhost:{PLOTTING_PORT}/")
         pass
 
     def show(self):
@@ -378,7 +380,7 @@ class InteractivePieLegend:
         sys.stderr = log
 
         threading.Timer(1, self.open_browser).start()
-        self.app.run()
+        self.app.run(host='localhost', port=PLOTTING_PORT)
 
     def write_html(self, filename):
         with self.app.test_client() as client:
@@ -854,6 +856,16 @@ class InteractiveScatterPlotter(ScatterPlot):
                     data['Isotope'].append(isotope)
                     data['Reaction'].append(reaction)
 
+        print(f"Old data {data}")
+
+        # Now filter out (0,0) points, which don't contribute to either the application or the experiment, these are
+        # usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set
+        # of reactions only
+        data = { key: [val for val, app, exp in zip(data[key], data[f'Application {self.index_name} Contribution'], \
+                    data[f'Experiment {self.index_name} Contribution']) if app != 0 or exp != 0] for key in data }
+
+        print(f"New data {data}")
+
         return pd.DataFrame(data)
 
     def add_to_subplot(self, fig, position):
@@ -934,8 +946,8 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         # Function to open the browser
         def open_browser():
             if not os.environ.get("WERKZEUG_RUN_MAIN"):
-                print("Now running at http://localhost:8050/")
-                webbrowser.open("http://localhost:8050/")
+                print(f"Now running at http://localhost:{PLOTTING_PORT}/")
+                webbrowser.open(f"http://localhost:{PLOTTING_PORT}/")
 
         # Silence the Flask development server logging
         log = open(os.devnull, 'w')
@@ -976,7 +988,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         # Timer to open the browser shortly after the server starts
         threading.Timer(1, open_browser).start()
 
-        self.app.run_server(debug=False, host='localhost', port=8050)
+        self.app.run_server(debug=False, host='localhost', port=PLOTTING_PORT)
 
     def write_html(self, filename):
         # Utilize Plotly's write_html to save the current state of the figure
@@ -1014,7 +1026,10 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
         nested = application_nested # They are be the same, so arbitrarily choose one
 
     # Get the list of isotopes for which contributions are available
-    isotopes = list(application_contributions.keys())
+    isotopes = list(set(application_contributions.keys()).union(experiment_contributions.keys()))
+
+    add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
+    print(application_contributions)
 
     # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
     contribution_pairs = []
