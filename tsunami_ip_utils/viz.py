@@ -804,10 +804,23 @@ class InteractiveScatterPlotter(ScatterPlot):
         self.get_summary_statistics(df[f'Application {self.index_name} Contribution'], \
                                     df[f'Experiment {self.index_name} Contribution'])
 
-        # Add linear regression to the plot
-        x_reg = np.linspace(df[f'Application {self.index_name} Contribution'].min(), df[f'Application {self.index_name} Contribution'].max(), 100)
+        # Prepare data for the regression line
+        x_reg = np.linspace(df[f'Application {self.index_name} Contribution'].min(), 
+                            df[f'Application {self.index_name} Contribution'].max(), 100)
         y_reg = self.slope * x_reg + self.intercept
-        self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', name=f'Regression Line y={self.slope:1.4E}x + {self.intercept:1.4E}'))
+
+        # Convert self.fig.data to a list for mutability
+        current_traces = list(self.fig.data)
+
+        # Remove existing regression line if it exists
+        traces_to_keep = [trace for trace in current_traces if not trace.name.startswith('Regression Line')]
+
+        # Set the modified list of traces back to the figure
+        self.fig.data = tuple(traces_to_keep)
+
+        # Add new linear regression to the plot
+        self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', 
+                                    name=f'Regression Line y={self.slope:1.4E}x + {self.intercept:1.4E}'))
 
         # Add correlation statistics to the plot
         self.fig.add_annotation(
@@ -860,6 +873,7 @@ class InteractiveScatterPlotter(ScatterPlot):
 
 class InteractiveScatterLegend(InteractiveScatterPlotter):
     def __init__(self, interactive_scatter_plot, df):
+        self.interactive_scatter_plot = interactive_scatter_plot
         self.fig = interactive_scatter_plot.fig
         self.index_name = interactive_scatter_plot.index_name
         self.df = df
@@ -880,7 +894,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
                 # Extract the visibility toggles
                 visibility_changes = restyleData[0]['visible']
                 current_fig = go.Figure(current_figure_state)
-                
+
                 # Update DataFrame based on visibility
                 updated_df = self.df.copy()
                 for i, visible in enumerate(visibility_changes):
@@ -888,10 +902,11 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
                         isotope = self.df['Isotope'].unique()[i]
                         updated_df = updated_df[updated_df['Isotope'] != isotope]
 
-                # Recalculate the regression and stats with the updated DataFrame
-                new_fig = self.add_regression_and_stats(updated_df)
-                return new_fig
-        
+                # Create a new InteractiveScatterPlotter instance with the updated DataFrame
+                self.add_regression_and_stats(updated_df)
+
+                return self.fig
+
             return dash.no_update
 
     def show(self):
