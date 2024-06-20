@@ -14,6 +14,9 @@ import webbrowser
 import os, sys, signal
 from flask import Flask, render_template_string
 import threading
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output, State
 
 from tsunami_ip_utils.utils import isotope_reaction_list_to_nested_dict
 
@@ -253,7 +256,7 @@ class PiePlotter(Plotter):
         self.axs.set_title(title_text)
 
 
-class InteractiveLegend:
+class InteractivePieLegend:
     def __init__(self, fig, df):
         """Return a flask webapp that will display an interactive legend for the sunburst chart"""
         self.fig = fig
@@ -435,7 +438,7 @@ class InteractivePiePlotter(Plotter):
         )
 
         if self.interactive_legend:
-            self.fig = InteractiveLegend(self.fig, df)
+            self.fig = InteractivePieLegend(self.fig, df)
 
 
     
@@ -702,9 +705,9 @@ class ScatterPlot(Plotter):
         self.summary_stats_text = f"{pearson_text}\n{spearman_text}"
 
 
-
 class ScatterPlotter(ScatterPlot):
-    def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
+    def __init__(self, integral_index_name, nested, plot_redundant=False, **kwargs):
+        self.nested = nested
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
@@ -751,7 +754,12 @@ class ScatterPlotter(ScatterPlot):
 
 
 class InteractiveScatterPlotter(ScatterPlot):
-    def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
+    def __init__(self, integral_index_name, nested, plot_redundant=False, **kwargs):
+        if 'interactive_legend' in kwargs.keys():
+            self.interactive_legend = kwargs['interactive_legend']
+        else:
+            self.interactive_legend = False
+        self.nested = nested
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
@@ -783,6 +791,15 @@ class InteractiveScatterPlotter(ScatterPlot):
             hover_data=hover_data_dict
         )
 
+        self.add_regression_and_stats(df)
+
+        # Now style the plot
+        self.style()
+
+        if self.interactive_legend:
+            self.fig = InteractiveScatterLegend(self, df)
+
+    def add_regression_and_stats(self, df):
         # Calculate the linear regression and correlation statistics
         self.get_summary_statistics(df[f'Application {self.index_name} Contribution'], \
                                     df[f'Experiment {self.index_name} Contribution'])
@@ -790,7 +807,7 @@ class InteractiveScatterPlotter(ScatterPlot):
         # Add linear regression to the plot
         x_reg = np.linspace(df[f'Application {self.index_name} Contribution'].min(), df[f'Application {self.index_name} Contribution'].max(), 100)
         y_reg = self.slope * x_reg + self.intercept
-        self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', name='Regression Line'))
+        self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', name=f'Regression Line y={self.slope:1.4E}x + {self.intercept:1.4E}'))
 
         # Add correlation statistics to the plot
         self.fig.add_annotation(
@@ -802,9 +819,6 @@ class InteractiveScatterPlotter(ScatterPlot):
             bgcolor="white", 
             opacity=0.8
         )
-
-        # Now style the plot
-        self.style()
 
     def _create_scatter_data(self, contribution_pairs, isotopes, reactions):
         data = {
@@ -838,10 +852,60 @@ class InteractiveScatterPlotter(ScatterPlot):
     
     def style(self):
         if self.plot_redundant and self.nested:
-                title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
         else:
             title_text = f'Contributions to {self.index_name}'
         self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
+
+
+class InteractiveScatterLegend(InteractiveScatterPlotter):
+    def __init__(self, interactive_scatter_plot, df):
+        self.fig = interactive_scatter_plot.fig
+        self.index_name = interactive_scatter_plot.index_name
+        self.df = df
+        self.app = dash.Dash(__name__)
+        self.app.layout = html.Div([
+            dcc.Graph(id='interactive-scatter', figure=self.fig)
+        ])
+        self.setup_callbacks()
+
+    def setup_callbacks(self):
+        @self.app.callback(
+            Output('interactive-scatter', 'figure'),
+            Input('interactive-scatter', 'restyleData'),
+            State('interactive-scatter', 'figure')
+        )
+        def update_figure_on_legend_click(restyleData, current_figure_state):
+            if restyleData and 'visible' in restyleData[0]:
+                # Extract the visibility toggles
+                visibility_changes = restyleData[0]['visible']
+                current_fig = go.Figure(current_figure_state)
+                
+                # Update DataFrame based on visibility
+                updated_df = self.df.copy()
+                for i, visible in enumerate(visibility_changes):
+                    if visible == 'legendonly':
+                        isotope = self.df['Isotope'].unique()[i]
+                        updated_df = updated_df[updated_df['Isotope'] != isotope]
+
+                # Recalculate the regression and stats with the updated DataFrame
+                new_fig = self.add_regression_and_stats(updated_df)
+                return new_fig
+        
+            return dash.no_update
+
+    def show(self):
+        # Function to open the browser
+        def open_browser():
+            webbrowser.open("http://127.0.0.1:8050/")
+        
+        # Timer to open the browser shortly after the server starts
+        threading.Timer(1, open_browser).start()
+        self.app.run_server(host='localhost', port=8050)
+
+    def write_html(self, filename):
+        # Utilize Plotly's write_html to save the current state of the figure
+        self.fig.write_html(filename)
 
 
 def correlation_plot(application_contributions, experiment_contributions, plot_type='scatter', integral_index_name='E', \
@@ -866,8 +930,8 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     - fig: matplotlib.figure.Figure, the figure containing the correlation plot"""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
-    application_contributions, application_nested = determine_plot_type(application_contributions, False)
-    experiment_contributions, experiment_nested = determine_plot_type(experiment_contributions, False)
+    application_contributions, application_nested = determine_plot_type(application_contributions, plot_redundant_reactions)
+    experiment_contributions, experiment_nested = determine_plot_type(experiment_contributions, plot_redundant_reactions)
 
     if application_nested != experiment_nested:
         raise ValueError("Application and experiment contributions must have the same nested structure")
@@ -891,8 +955,8 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
             contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
 
     plotters = {
-        'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, **kwargs),
-        'interactive_scatter': InteractiveScatterPlotter(integral_index_name, plot_redundant_reactions, **kwargs)
+        'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs),
+        'interactive_scatter': InteractiveScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs)
     }
     
     # Get the requested plotter
