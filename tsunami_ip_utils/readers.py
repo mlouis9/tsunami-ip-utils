@@ -249,7 +249,8 @@ def read_integral_indices(filename):
     Returns
     -------
     - integral_matrices: dict, dictionary of integral matrices for each integral index type. The dimensions
-        of the matrices are (num_experiments x num_applications) where num_experiments is the number of experiments"""
+        of the matrices are (num_experiments x num_applications) where num_experiments is the number of experiments.
+        Keys are 'C_k', 'E_total', 'E_fission', 'E_capture', and 'E_scatter'"""
 
     with open(filename, 'r') as f:
         data = f.read()
@@ -257,7 +258,8 @@ def read_integral_indices(filename):
     # Define the Integral Values parser
     dashed_line = OneOrMore("-")
     header = Literal("Integral Values for Application") + "#" + pyparsing_common.integer + LineEnd() + dashed_line
-    table_header = Literal("Experiment") + Literal("Type") + Literal("Value") + Literal("s.d.") + Literal("c(k)") + \
+    table_header = Literal("Experiment") + Literal("Type") + Literal("Value") + Literal("s.d.") + \
+                    Optional( Literal("xsec unc %") + Literal("s.d.") ) + Literal("c(k)") + \
                     Literal("s.d.") + Literal("E") + Literal("s.d.") + Literal("E(fis)") + Literal("s.d.") + Literal("E(cap)") + \
                     Literal("s.d.") + Literal("E(sct)") + Literal("s.d.") + LineEnd() + OneOrMore(dashed_line)
     
@@ -265,6 +267,7 @@ def read_integral_indices(filename):
     non_space_printables = ''.join(c for c in printables if c != ' ')
     sci_num = pyparsing_common.sci_real
     data_line = Group(Suppress(pyparsing_common.integer + Word(non_space_printables) + Word(alphas)) + \
+                        Optional( Suppress( sci_num + sci_num ) ) + \
                         Group(sci_num + sci_num) + Group(sci_num + sci_num) + Group(sci_num + sci_num) + \
                         Group(sci_num + sci_num) + Group(sci_num + sci_num) + Group(sci_num + sci_num))
     data_block = OneOrMore(data_line)
