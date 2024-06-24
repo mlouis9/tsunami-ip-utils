@@ -5,6 +5,7 @@
 *.txt
 *.dat
 *.pkl
+*dist
 3d-sphere
 Matthew_VALID_sdfs
 __pycache__

@@ -1,3 +1,32 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "tsunami_ip_utils"
+version = "0.0.1"
+authors = [
+  { name="Matthew Louis", email="matthewlouis31@gmail.com" },
+]
+
+dependencies = [
+    "plotly~=5.22.0",  # Use version ~5.22.0 (compatible versions)
+    "matplotlib",      # Latest version of matplotlib
+    "pandas",          # Latest version of pandas
+    "uncertainties",   # Latest version of uncertainties
+    "scipy",           # Latest version of scipy
+    "flask",           # Latest version of flask
+    "dash",            # Latest version of dash
+]
+description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/mlouis9/tsunami_ip_utils"
+Issues = "https://github.com/mlouis9/tsunami_ip_utils/issues"
