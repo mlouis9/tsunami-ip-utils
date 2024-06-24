@@ -210,31 +210,31 @@ def read_uncertainty_contributions(filename: str):
     isotope_reaction = []
     for match in data_parser.parseString(data):
         isotope_reaction.append({
-            'Isotope': f'{match[0]}-{match[2]}',
-            'Reaction': f'{match[1]}-{match[3]}',
-            'Contribution': ufloat(match[4], match[5])
+            'isotope': f'{match[0]}-{match[2]}',
+            'reaction_type': f'{match[1]}-{match[3]}',
+            'contribution': ufloat(match[4], match[5])
         })
 
     # Now calculate nuclide totals by summing the contributions for each nuclide via total = sqrt((pos)^2 - (neg)^2)
     isotope_totals = {}
     for data in isotope_reaction:
         # First add up squared sums of all reaction-wise contributions
-        isotope = data['Isotope']
-        contribution = data['Contribution']
+        isotope = data['isotope']
+        contribution = data['contribution']
         if isotope not in isotope_totals.keys():
             isotope_totals[isotope] = ufloat(0,0)
 
         if contribution < 0:
-            isotope_totals[isotope] -= ( data['Contribution'] )**2
+            isotope_totals[isotope] -= ( data['contribution'] )**2
         else:
-            isotope_totals[isotope] += ( data['Contribution'] )**2
+            isotope_totals[isotope] += ( data['contribution'] )**2
         
     # Now take square root of all contributions
     for isotope, total in isotope_totals.items():
         isotope_totals[isotope] = total**0.5
 
     # Now convert into a list of dictionaries
-    isotope_totals = [ {'Isotope': isotope, 'Contribution': total} for isotope, total in isotope_totals.items() ]
+    isotope_totals = [ {'isotope': isotope, 'contribution': total} for isotope, total in isotope_totals.items() ]
 
     return isotope_totals, isotope_reaction
 

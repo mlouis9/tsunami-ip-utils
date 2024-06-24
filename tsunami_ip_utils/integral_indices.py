@@ -1,6 +1,6 @@
 from uncertainties import ufloat, umath, unumpy
 import numpy as np
-from tsunami_ip_utils.readers import RegionIntegratedSdfReader
+from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_uncertainty_contributions
 from tsunami_ip_utils.error import unit_vector_uncertainty_propagation, dot_product_uncertainty_propagation
 from copy import deepcopy
 
@@ -350,3 +350,39 @@ def calculate_E_contributions(application_filenames: list, experiment_filenames:
             E_nuclide_reaction_wise[i, j] = nuclide_reaction_wise_contributions
 
     return E_nuclide_wise, E_nuclide_reaction_wise
+
+
+def calculate_uncertainty_contributions(application_filenames: list, experiment_filenames: list):
+    """Calculates the contributions to the uncertainty in k (i.e. dk/k) for each application with each available experiment
+    on a nuclide basis and on a nuclide-reaction basis
+
+    Parameters
+    ----------
+    - application_filenames: list of str, paths to the application sdf files
+    - experiment_filenames: list of str, paths to the experiment sdf files
+
+    Returns
+    -------
+    - uncertainty_contributions_nuclide: unumpy.uarray of contributions to the uncertainty in k for each application with each
+        experiment on a nuclide basis.
+    - uncertainty_contributions_nuclide_reaction: unumpy.uarray of contributions to the uncertainty in k
+        for each application with each experiment on a nuclide-reaction basis"""
+    
+    dk_over_k_nuclide_wise = {
+        'application': np.empty( len(application_filenames), dtype=object ),
+        'experiment': np.empty( len(experiment_filenames), dtype=object )    
+    }
+    dk_over_k_nuclide_reaction_wise = {
+        'application': np.empty( len(application_filenames), dtype=object ),
+        'experiment': np.empty( len(experiment_filenames), dtype=object )    
+    }
+
+    for i, application_filename in enumerate(application_filenames):
+        dk_over_k_nuclide_wise['application'][i], dk_over_k_nuclide_reaction_wise['application'][i] = \
+            read_uncertainty_contributions(application_filename)
+
+    for i, experiment_filename in enumerate(experiment_filenames):
+        dk_over_k_nuclide_wise['experiment'][i], dk_over_k_nuclide_reaction_wise['experiment'][i] = \
+            read_uncertainty_contributions(experiment_filename)
+            
+    return dk_over_k_nuclide_wise, dk_over_k_nuclide_reaction_wise
