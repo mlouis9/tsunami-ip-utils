@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 from plotly.subplots import make_subplots
 import plotly.express as px
@@ -980,6 +981,42 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
 
         self.app.run_server(debug=False, host='localhost', port=PLOTTING_PORT)
 
+    def save_state(self, filename):
+        state = {
+            'fig': self.fig.to_dict(),
+            'df': self.df.to_dict(),
+            'excluded_isotopes': self.excluded_isotopes,
+            'index_name': self.index_name,
+            'nested': self.interactive_scatter_plot.nested
+        }
+        with open(filename, 'wb') as f:
+            pickle.dump(state, f)
+
+    @classmethod
+    def load_state(cls, filename):
+        with open(filename, 'rb') as f:
+            state = pickle.load(f)
+
+        # Recreate the InteractiveScatterPlotter instance from the saved state
+        fig = go.Figure(state['fig'])
+        index_name = state['index_name']
+        nested = state['nested']
+        interactive_scatter_plot = InteractiveScatterPlotter(index_name, nested)
+        interactive_scatter_plot.fig = fig
+
+        # Recreate the InteractiveScatterLegend instance from the saved state
+        instance = cls(interactive_scatter_plot, pd.DataFrame.from_dict(state['df']))
+        instance.excluded_isotopes = state['excluded_isotopes']
+
+        # Update trace visibility based on excluded isotopes
+        for trace in instance.fig.data:
+            if trace.name in instance.excluded_isotopes:
+                trace.visible = 'legendonly'
+            else:
+                trace.visible = True
+
+        return instance
+
     def write_html(self, filename):
         # Utilize Plotly's write_html to save the current state of the figure
         self.fig.write_html(filename)
@@ -1030,8 +1067,6 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     else:
         for isotope in isotopes:
             contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
-
-    print(f"Contribution Pairs: {contribution_pairs}")
 
     plotters = {
         'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs),
