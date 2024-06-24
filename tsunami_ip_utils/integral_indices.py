@@ -216,41 +216,64 @@ def add_missing_reactions_and_nuclides(application, experiment, all_isotopes, mo
     Returns
     -------
     - all_isotopes: set of str, set of all isotopes in the application and experiment dictionaries"""
-    application_reactions = set([ key for isotope in application.keys() for key in application[isotope].keys() ])
-    experiment_reactions = set([ key for isotope in experiment.keys() for key in experiment[isotope].keys() ])
-    all_reactions = application_reactions.union(experiment_reactions)
+    isotopes_only =  type( application[ list( application.keys() )[0] ] ) != dict
 
-    # Now, for any reactions that are in experiment but not application (and vice versa), they need to be added with an sdf
-    # profile of all zeros
+    if not isotopes_only:
+        application_reactions = set([ key for isotope in application.keys() for key in application[isotope].keys() ])
+        experiment_reactions = set([ key for isotope in experiment.keys() for key in experiment[isotope].keys() ])
+        all_reactions = application_reactions.union(experiment_reactions)
 
-    # Get an arbitrary sdf profile to get the shape from
-    first_application_nuclide = list(application.keys())[0]
-    first_application_reaction = list(application[first_application_nuclide].keys())[0]
-    if mode == 'sdfs':
-        zero_data = {
-            'sensitivities': application[first_application_nuclide][first_application_reaction]['sensitivities']
-        }
-    elif mode == 'contribution':
-        zero_data = ufloat(0,0)
+        # Now, for any reactions that are in experiment but not application (and vice versa), they need to be added with an sdf
+        # profile of all zeros
 
-    for isotope in application.keys():
-        # If reaction is missing for this isotope, add it with an sdf profile of all zeros
-        for reaction in all_reactions:
-            if reaction not in application[isotope].keys():
-                application[isotope][reaction] = deepcopy(zero_data)
-    for isotope in experiment.keys():
-        # If reaction is missing for this isotope, add it with an sdf profile of all zeros
-        for reaction in all_reactions:
-            if reaction not in experiment[isotope].keys():
-                experiment[isotope][reaction] = deepcopy(zero_data)
+        # Get an arbitrary sdf profile to get the shape from
+        first_application_nuclide = list(application.keys())[0]
+        first_application_reaction = list(application[first_application_nuclide].keys())[0]
+        if mode == 'sdfs':
+            zero_data = {
+                'sensitivities': application[first_application_nuclide][first_application_reaction]['sensitivities']
+            }
+        elif mode == 'contribution':
+            zero_data = ufloat(0,0)
+
+        # Now define a function used for updating the reactions for a given isotope
+        def update_reactions(application_or_experiment):
+            for reaction in all_reactions:
+                if reaction not in application_or_experiment[isotope].keys():
+                    application[isotope][reaction] = deepcopy(zero_data)
+    else:
+        # No reactions, only isotope totals
+        all_reactions = []
+
+        if mode == 'sdfs':
+            zero_data = {
+                'sensitivities': application[first_application_nuclide]['sensitivities']
+            }
+        elif mode == 'contribution':
+            zero_data = ufloat(0,0)
+
+    if not isotopes_only:
+        for isotope in application.keys():
+            # If reaction is missing for this isotope, add it with an sdf profile of all zeros
+            update_reactions(application)
+
+        for isotope in experiment.keys():
+            # If reaction is missing for this isotope, add it with an sdf profile of all zeros
+            update_reactions(experiment)
 
     # Now zero out nuclides that are not in the application or experiment
     for isotope in all_isotopes:
         if isotope not in application.keys():
-            application[isotope] = { reaction: deepcopy(zero_data) for reaction in all_reactions }
+            if not isotopes_only:
+                application[isotope] = { reaction: deepcopy(zero_data) for reaction in all_reactions }
+            else:
+                application[isotope] = deepcopy(zero_data)
             
         if isotope not in experiment.keys():
-            experiment[isotope] = { reaction: deepcopy(zero_data) for reaction in all_reactions }
+            if not isotopes_only:
+                experiment[isotope] = { reaction: deepcopy(zero_data) for reaction in all_reactions }
+            else:
+                experiment[isotope] = deepcopy(zero_data)
 
     return all_reactions
 

@@ -1018,20 +1018,20 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     # Get the list of isotopes for which contributions are available
     isotopes = list(set(application_contributions.keys()).union(experiment_contributions.keys()))
 
-    add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
+    all_reactions = add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
 
     # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
     contribution_pairs = []
     if nested:
-        reactions = list(application_contributions[isotopes[0]].keys())
         for isotope in isotopes:
-            for reaction in reactions:
+            for reaction in all_reactions:
                 contribution_pairs.append((application_contributions[isotope][reaction], \
                                            experiment_contributions[isotope][reaction]))
     else:
-        reactions = [] # There are no reactions, having an empty list is useful for the plotting function
         for isotope in isotopes:
             contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
+
+    print(f"Contribution Pairs: {contribution_pairs}")
 
     plotters = {
         'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs),
@@ -1044,6 +1044,6 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
         raise ValueError("Unsupported plot type")
 
     # Create the plot and style it
-    plotter.create_plot(contribution_pairs, isotopes, reactions)
+    plotter.create_plot(contribution_pairs, isotopes, all_reactions)
 
     return plotter.get_plot()

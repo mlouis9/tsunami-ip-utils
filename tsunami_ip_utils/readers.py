@@ -210,8 +210,8 @@ def read_uncertainty_contributions(filename: str):
     isotope_reaction = []
     for match in data_parser.parseString(data):
         isotope_reaction.append({
-            'isotope': f'{match[0]}-{match[2]}',
-            'reaction_type': f'{match[1]}-{match[3]}',
+            'isotope': f'{match[0]} - {match[2]}',
+            'reaction_type': f'{match[1]} - {match[3]}',
             'contribution': ufloat(match[4], match[5])
         })
 
