@@ -1,0 +1,7 @@
+plotly~=5.22.0
+matplotlib
+pandas
+uncertainties
+scipy
+flask
+dash
