@@ -363,10 +363,10 @@ def calculate_uncertainty_contributions(application_filenames: list, experiment_
 
     Returns
     -------
-    - uncertainty_contributions_nuclide: unumpy.uarray of contributions to the uncertainty in k for each application with each
-        experiment on a nuclide basis.
-    - uncertainty_contributions_nuclide_reaction: unumpy.uarray of contributions to the uncertainty in k
-        for each application with each experiment on a nuclide-reaction basis"""
+    - uncertainty_contributions_nuclide: dict of unumpy.uarray of contributions to the uncertainty in k for each application and 
+        each experiment on a nuclide basis. Keyed by 'application' and 'experiment'
+    - uncertainty_contributions_nuclide_reaction: dict of unumpy.uarray of contributions to the uncertainty in k
+        for each application and each experiment on a nuclide-reaction basis. Keyed by 'application' and 'experiment'"""
     
     dk_over_k_nuclide_wise = {
         'application': np.empty( len(application_filenames), dtype=object ),

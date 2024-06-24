@@ -746,10 +746,7 @@ class ScatterPlotter(ScatterPlot):
         return fig.add_subplot(position, sharex=self.axs, sharey=self.axs)
     
     def style(self):
-        if self.plot_redundant and self.nested:
-            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
-        else:
-            title_text = f'Contributions to {self.index_name}'
+        title_text = f'Contributions to {self.index_name}'
         self.axs.set_title(title_text)
         self.axs.set_ylabel(f"Experiment {self.index_name} Contribution")
         self.axs.set_xlabel(f"Application {self.index_name} Contribution")
@@ -873,10 +870,7 @@ class InteractiveScatterPlotter(ScatterPlot):
         return self.fig
     
     def style(self):
-        if self.plot_redundant and self.nested:
-            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
-        else:
-            title_text = f'Contributions to {self.index_name}'
+        title_text = f'Contributions to {self.index_name}'
         self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
 
 
@@ -992,7 +986,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
 
 
 def correlation_plot(application_contributions, experiment_contributions, plot_type='scatter', integral_index_name='E', \
-                     plot_redundant_reactions=False, **kwargs):
+                     plot_redundant_reactions=True, **kwargs):
     """Creates a correlation plot for a given application-experiment pair for which the contributions to the similarity
     parameter are given.
     
@@ -1006,7 +1000,7 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
         are interactive_scatter, which creates a Plotly scatter plot.
     - integral_index_name: str, name of the integral index being plotted. Default is 'E'
     - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
-        nuclide-reaction-wise contributions. Default is False
+        nuclide-reaction-wise contributions. Default is True
         
     Returns
     -------
