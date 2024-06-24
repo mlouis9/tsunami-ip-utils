@@ -216,6 +216,7 @@ def add_missing_reactions_and_nuclides(application, experiment, all_isotopes, mo
     Returns
     -------
     - all_isotopes: set of str, set of all isotopes in the application and experiment dictionaries"""
+    # Whether or not the supplied data is only isotopes or includes reactions
     isotopes_only =  type( application[ list( application.keys() )[0] ] ) != dict
 
     if not isotopes_only:
@@ -237,10 +238,10 @@ def add_missing_reactions_and_nuclides(application, experiment, all_isotopes, mo
             zero_data = ufloat(0,0)
 
         # Now define a function used for updating the reactions for a given isotope
-        def update_reactions(application_or_experiment):
+        def update_reactions(isotope):
             for reaction in all_reactions:
-                if reaction not in application_or_experiment[isotope].keys():
-                    application[isotope][reaction] = deepcopy(zero_data)
+                if reaction not in isotope.keys():
+                    isotope[reaction] = deepcopy(zero_data)
     else:
         # No reactions, only isotope totals
         all_reactions = []
@@ -252,14 +253,17 @@ def add_missing_reactions_and_nuclides(application, experiment, all_isotopes, mo
         elif mode == 'contribution':
             zero_data = ufloat(0,0)
 
+    # ---------------------------------------
+    # Now add missing reactions and nuclides
+    # ---------------------------------------
     if not isotopes_only:
         for isotope in application.keys():
             # If reaction is missing for this isotope, add it with an sdf profile of all zeros
-            update_reactions(application)
+            update_reactions(application[isotope])
 
         for isotope in experiment.keys():
             # If reaction is missing for this isotope, add it with an sdf profile of all zeros
-            update_reactions(experiment)
+            update_reactions(experiment[isotope])
 
     # Now zero out nuclides that are not in the application or experiment
     for isotope in all_isotopes:
