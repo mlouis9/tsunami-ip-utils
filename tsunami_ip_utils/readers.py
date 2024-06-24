@@ -159,6 +159,86 @@ def read_covariance_matrix(filename: str):
 def read_ck_contributions(filename: str):
     pass
 
+def read_uncertainty_contributions(filename: str):
+    """Reads the output file from TSUNAMI and returns the uncertainty contributions for each nuclide-reaction
+    covariance.
+    
+    Parameters
+    ----------
+    - filename: str, path to the TSUNAMI output file
+
+    Returns
+    -------
+    - isotope_totals: list of dict, list of dictionaries containing the nuclide-wise contributions
+    - isotope_reaction: list of dict, list of dictionaries containing the nuclide-reaction pairs and the contributions
+    """
+    with open(filename, 'r') as f:
+        data = f.read()
+
+    # ----------------------------------------------------
+    # Define the formattting that precedes the data table
+    # ----------------------------------------------------
+    table_identifier = Literal("contributions to uncertainty in k-eff (% delta-k/k) by individual energy covariance matrices:")
+    skipped_lines = SkipTo(table_identifier)
+    pre_header = Literal("covariance matrix") + LineEnd()
+    header = Word("nuclide-reaction") + Word("with") + Word("nuclide-reaction") + Word("% delta-k/k due to this matrix")
+    dash_separator = OneOrMore(OneOrMore('-'))
+
+    # ----------------------
+    # Define the data lines
+    # ----------------------
+
+    # Define the grammar for the nuclide-reaction pair
+    atomic_number = Word(nums)
+    element = Word(alphas.lower(), exact=1) 
+    isotope_name = Combine(element + '-' + atomic_number)
+    reaction_type = Word(alphanums + ',\'')
+
+    data_line = Group(isotope_name + reaction_type + isotope_name + reaction_type + \
+                pyparsing_common.sci_real + Suppress(Literal("+/-")) + pyparsing_common.sci_real + Suppress(LineEnd()))
+    data_block = OneOrMore(data_line)
+
+    # -------------------------------------------
+    # Define the total parser and parse the data
+    # -------------------------------------------
+    data_parser = Suppress(skipped_lines) + Suppress(table_identifier) + Suppress(pre_header) + Suppress(header) + \
+                    Suppress(dash_separator) + data_block
+
+    # -------------------------------------------------------------------------------
+    # Now convert the data into isotope wise and isotope-reaction wise contributions
+    # -------------------------------------------------------------------------------
+    isotope_reaction = []
+    for match in data_parser.parseString(data):
+        isotope_reaction.append({
+            'Isotope': f'{match[0]}-{match[2]}',
+            'Reaction': f'{match[1]}-{match[3]}',
+            'Contribution': ufloat(match[4], match[5])
+        })
+
+    # Now calculate nuclide totals by summing the contributions for each nuclide via total = sqrt((pos)^2 - (neg)^2)
+    isotope_totals = {}
+    for data in isotope_reaction:
+        # First add up squared sums of all reaction-wise contributions
+        isotope = data['Isotope']
+        contribution = data['Contribution']
+        if isotope not in isotope_totals.keys():
+            isotope_totals[isotope] = ufloat(0,0)
+
+        if contribution < 0:
+            isotope_totals[isotope] -= ( data['Contribution'] )**2
+        else:
+            isotope_totals[isotope] += ( data['Contribution'] )**2
+        
+    # Now take square root of all contributions
+    for isotope, total in isotope_totals.items():
+        isotope_totals[isotope] = total**0.5
+
+    # Now convert into a list of dictionaries
+    isotope_totals = [ {'Isotope': isotope, 'Contribution': total} for isotope, total in isotope_totals.items() ]
+
+    return isotope_totals, isotope_reaction
+
+
 def read_integral_indices(filename):
     """Reads the output file from TSUNAMI-IP and returns the integral values for each application
     

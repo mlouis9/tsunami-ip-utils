@@ -1025,7 +1025,6 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     isotopes = list(set(application_contributions.keys()).union(experiment_contributions.keys()))
 
     add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
-    print(application_contributions)
 
     # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
     contribution_pairs = []
