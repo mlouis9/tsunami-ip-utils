@@ -10,7 +10,7 @@ end
 end
 
 =charmin
-input=32 output=33 double to plot
+input=32 output=33 double to $plot_option
 end
 
 =shell
