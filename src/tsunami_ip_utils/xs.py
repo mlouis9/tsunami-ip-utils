@@ -121,9 +121,111 @@ def parse_reactions_from_nuclide(filename, **kwargs):
                          f"This nuclide has the available MTs: {list(all_mts)}")
     return parsed_data
 
+def parse_from_total_library(filename, **kwargs):
+    if 'nuclide_reaction_dict' not in kwargs:
+        raise ValueError("Missing required keyword argument: nuclide_reaction_dict")
+    
+    nuclide_reaction_dict = kwargs['nuclide_reaction_dict']
+    energy_boundaries = kwargs.get('energy_boundaries', False)
+
+    if energy_boundaries:
+        raise NotImplementedError("Energy boundaries are not yet supported for this function")
+
+    xs = {}
+    with open(filename, 'r') as f:
+        data = f.read()
+
+    # ===========================
+    # Define grammar for parsing
+    # ===========================
+
+    zaid = Word(nums, max=7)
+    reaction_mt = Word(nums, max=4)
+    fido_field = Word(nums + '$')
+    fido_subfield = Word(nums + '#')
+
+    # -------------------------------
+    # Define the header line by line
+    # -------------------------------
+    subfield_end = Literal('t') + LineEnd()
+    other_subfield_end = Literal('e') + Literal('t') + LineEnd()
+
+    # Define a field bundle
+    bundle_line1 = Suppress(fido_field) + zaid + Suppress(Word(nums)) + reaction_mt
+    bundle_line2 = Suppress(OneOrMore(Word(nums)))
+    bundle_line3 = Suppress(fido_subfield + Word(alphanums) + OneOrMore(pyparsing_common.fnumber) + other_subfield_end)
+    field_bundle = bundle_line1 + bundle_line2 + bundle_line3
+    
+    misc_field = fido_field + Word(nums) + Word(nums)
+
+    header = Suppress(field_bundle) + \
+             field_bundle +\
+             Suppress(Optional(field_bundle)) + \
+             Suppress(misc_field) + \
+             Suppress(fido_subfield)
+
+    # -------------------------------------------
+    # Define the cross section data line by line
+    # -------------------------------------------
+    xs_data_line = Suppress(pyparsing_common.sci_real) + pyparsing_common.sci_real + Suppress(LineEnd())
+
+    # -------------------------------------------
+    # Now define the total parser for a reaction
+    # -------------------------------------------
+    reaction_parser = header + Group(OneOrMore(xs_data_line + Suppress(xs_data_line))) + Suppress(subfield_end)
+
+    #--------------------------------
+    # Parse the data and postprocess
+    #--------------------------------
+    parsed_data = reaction_parser.searchString(data)
+
+    # First, parse the avilable nuclide reactions into a dict
+    all_nuclide_reactions = {}
+    nuclides = set( [ match[0] for match in parsed_data ] )
+    for nuclide in nuclides:
+        all_nuclide_reactions[nuclide] = [ match[1] for match in parsed_data if match[0] == nuclide ]
+    
+    # Now compare the available reactions to the requested reactions
+    nuclides_not_found = set(nuclide_reaction_dict.keys()) - set(all_nuclide_reactions.keys())
+    reactions_not_found = {}
+    for nuclide, reactions in nuclide_reaction_dict.items():
+        # Skip the nuclides that aren't found
+        if nuclide in nuclides_not_found:
+            continue
+        for reaction in reactions:
+            if reaction not in all_nuclide_reactions[nuclide]:
+                if nuclide not in reactions_not_found:
+                    reactions_not_found[nuclide] = []
+                reactions_not_found[nuclide].append(reaction)
+
+    if len(nuclides_not_found) > 0 or reactions_not_found != {}:
+        raise ValueError(f"Not all requested reactions were found in the data. Missing reactions: {reactions_not_found}. "
+                         f"And missing nuclides: {nuclides_not_found}")
+
+    # If nothing is missing, convert the parsed data into a dictionary
+    parsed_data_dict = {}
+    for nuclide in nuclides:
+        parsed_data_dict[nuclide] = { match[1]: np.array(match[2]) for match in parsed_data if match[0] == nuclide }
+
+    return parsed_data_dict
+
 def read_nuclide_reaction_from_multigroup_library(multigroup_library_path: Path, nuclide_zaid, reaction_mt, \
                                                   parsing_function=parse_nuclide_reaction, plot_option='plot', \
                                                     energy_boundaries=False, **kwargs):
+    """Uses scale to dump a binary multigroup library to a text file, and then calls the specified parsing function on the output file.
+    
+    Parameters
+    ----------
+    - multigroup_library_path: Path The path to the SCALE multigroup library file
+    - nuclide_zaid: str The ZAID of the nuclide
+    - reaction_mt: str The reaction MT to read
+    - parsing_function: function The function to call on the output file
+    - plot_option: str The plot option to use when running the MG reader
+    - energy_boundaries: bool If True, the energies at which the cross sections are defined are returned as well
+    
+    Returns
+    -------
+    - an output that is the result of the parsing function"""
     # Get the directory of the current file
     current_dir = Path(__file__).parent
 
@@ -181,3 +283,22 @@ def read_reactions_from_nuclide(multigroup_library_path: Path, nuclide_zaid, rea
                                                            parsing_function=parse_reactions_from_nuclide, \
                                                             reaction_mts=reaction_mts, plot_option='fido')
     return output
+
+def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict, method='slow'):
+    """Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.
+    
+    Parameters
+    ----------
+    - multigroup_library_path: Path The path to the SCALE multigroup library file
+    - nuclide_zaid_reaction_dict: dict A dictionary mapping nuclide ZAIDs to a list of reaction MTs to read"""
+
+    if method == 'small': # This method is slow but works for small amounts of nuclide reactions
+        output = {}
+        for nuclide_zaid, reaction_mts in nuclide_zaid_reaction_dict.items():
+            output[nuclide_zaid] = read_reactions_from_nuclide(multigroup_library_path, nuclide_zaid, reaction_mts)
+        return output
+    elif method == 'large': # This method is faster (as in there's less scale run overhead) but requires the entire library to be read
+        output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
+                                                           parsing_function=parse_from_total_library, \
+                                                            nuclide_reaction_dict=nuclide_zaid_reaction_dict, plot_option='fido')
+        return output
