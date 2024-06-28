@@ -1,0 +1,22 @@
+=shell
+  ln -sf $base_library ft89f001
+  ln -sf $perturbation_factors ft87f001
+end
+=clarolplus
+  in=89
+  out=88
+  var=87
+  isvar=10
+  bond=no
+  sam=1
+end
+=shell
+  mv ft88f001 perturbed_library
+  unlink ft87f001
+  unlink ft89f001
+  mv ft10f001 crawdadPerturbMGLib
+end
+
+=shell
+    cp perturbed_library $output
+end

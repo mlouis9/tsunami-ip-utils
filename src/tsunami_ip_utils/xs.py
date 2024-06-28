@@ -164,9 +164,9 @@ def parse_from_total_library(filename, **kwargs):
                     parsed_data_dict[nuclide] = {}
                 parsed_data_dict[nuclide][reaction] = np.array(xs_data)
 
-    # ===========================
+    # ========================================
     # Check for missing nuclides and reactions
-    # ===========================
+    # ========================================
 
     nuclides_not_found = set(nuclide_reaction_dict.keys()) - set(parsed_data_dict.keys())
     reactions_not_found = {}
@@ -269,10 +269,15 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
     - multigroup_library_path: Path The path to the SCALE multigroup library file
     - nuclide_zaid_reaction_dict: dict A dictionary mapping nuclide ZAIDs to a list of reaction MTs to read"""
 
-    if method == 'small': # This method is slow but works for small amounts of nuclide reactions
-        if num_processes is None:
-            num_processes = multiprocessing.cpu_count()
+    NUCLIDE_THRESHOLD = 50 # Number of nuclides after which the large method is more performant and hence is used
+    CORE_THRESHOLD = 2 # The large method is more performant if the number of cores is smaller than this number
 
+    if num_processes is None:
+        num_processes = multiprocessing.cpu_count()
+
+    num_nuclides = len(list(nuclide_zaid_reaction_dict.keys()))
+    use_small_method = ( num_nuclides < NUCLIDE_THRESHOLD ) and ( num_processes >= CORE_THRESHOLD )
+    if use_small_method: # This method is slow but works for small amounts of nuclide reactions or a large amount of cores
         pool = multiprocessing.Pool(processes=num_processes)
 
         # Create a partial function with the common arguments
@@ -289,7 +294,7 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
         output = dict(zip(nuclide_zaid_reaction_dict.keys(), results))
 
         return output
-    elif method == 'large': # This method is faster (as in there's less scale run overhead) but requires the entire library to be read
+    else: # This method is faster (as in there's less scale run overhead) but requires the entire library to be read and is serial
         output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
                                                            parsing_function=parse_from_total_library, \
                                                             nuclide_reaction_dict=nuclide_zaid_reaction_dict, plot_option='fido')
