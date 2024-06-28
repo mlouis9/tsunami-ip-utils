@@ -6,6 +6,7 @@ import tempfile
 import subprocess, os
 import multiprocessing
 from functools import partial
+import re
 
 """This module contains the functions necessary for processing multigroup cross sections and cross section covariance matrices."""
 
@@ -68,7 +69,6 @@ def parse_reactions_from_nuclide(filename, **kwargs):
     if energy_boundaries:
         raise NotImplementedError("Energy boundaries are not yet supported for this function")
 
-    xs = {}
     with open(filename, 'r') as f:
         data = f.read()
 
@@ -133,59 +133,43 @@ def parse_from_total_library(filename, **kwargs):
     if energy_boundaries:
         raise NotImplementedError("Energy boundaries are not yet supported for this function")
 
-    xs = {}
     with open(filename, 'r') as f:
         data = f.read()
 
     # ===========================
-    # Define grammar for parsing
+    # Define regex patterns
     # ===========================
 
-    zaid = Word(nums, max=7)
-    reaction_mt = Word(nums, max=4)
-    fido_field = Word(nums + '$')
-    fido_subfield = Word(nums + '#')
+    header_pattern = re.compile(r'2\$\$\s+(\d+)\s+\d+\s+(\d+).*?(?=\d+\#)', re.DOTALL)
+    xs_data_pattern = re.compile(r'([\d.E+-]+)\s+([\d.E+-]+)')
+    subfield_end_pattern = re.compile(r't\n')
 
-    # -------------------------------
-    # Define the header line by line
-    # -------------------------------
-    subfield_end = Literal('t') + LineEnd()
-    other_subfield_end = Literal('e') + Literal('t') + LineEnd()
+    # ===========================
+    # Parse the data
+    # ===========================
 
-    # Define a field bundle
-    bundle_line1 = Suppress(fido_field) + zaid + Suppress(Word(nums)) + reaction_mt
-    bundle_line2 = Suppress(OneOrMore(Word(nums)))
-    bundle_line3 = Suppress(fido_subfield + Word(alphanums) + OneOrMore(pyparsing_common.fnumber) + other_subfield_end)
-    field_bundle = bundle_line1 + bundle_line2 + bundle_line3
-    
-    misc_field = fido_field + Word(nums) + Word(nums)
+    parsed_data = []
+    for match in header_pattern.finditer(data):
+        nuclide = match.group(1)
+        reaction = match.group(2)
+        header_end = match.end()
 
-    header = Suppress(field_bundle) + \
-             field_bundle +\
-             Suppress(Optional(field_bundle)) + \
-             Suppress(misc_field) + \
-             Suppress(fido_subfield)
+        xs_data_start = header_end
+        xs_data_end = subfield_end_pattern.search(data, xs_data_start).start()
+        xs_data_text = data[xs_data_start:xs_data_end]
 
-    # -------------------------------------------
-    # Define the cross section data line by line
-    # -------------------------------------------
-    xs_data_line = Suppress(pyparsing_common.sci_real) + pyparsing_common.sci_real + Suppress(LineEnd())
+        xs_data = [float(xs) for _, xs in xs_data_pattern.findall(xs_data_text)]
+        parsed_data.append((nuclide, reaction, xs_data))
 
-    # -------------------------------------------
-    # Now define the total parser for a reaction
-    # -------------------------------------------
-    reaction_parser = header + Group(OneOrMore(xs_data_line + Suppress(xs_data_line))) + Suppress(subfield_end)
+    # ===========================
+    # Postprocess the parsed data
+    # ===========================
 
-    #--------------------------------
-    # Parse the data and postprocess
-    #--------------------------------
-    parsed_data = reaction_parser.searchString(data)
-
-    # First, parse the avilable nuclide reactions into a dict
+    # First, parse the available nuclide reactions into a dict
     all_nuclide_reactions = {}
-    nuclides = set( [ match[0] for match in parsed_data ] )
+    nuclides = set([match[0] for match in parsed_data])
     for nuclide in nuclides:
-        all_nuclide_reactions[nuclide] = [ match[1] for match in parsed_data if match[0] == nuclide ]
+        all_nuclide_reactions[nuclide] = [match[1] for match in parsed_data if match[0] == nuclide]
     
     # Now compare the available reactions to the requested reactions
     nuclides_not_found = set(nuclide_reaction_dict.keys()) - set(all_nuclide_reactions.keys())
@@ -207,7 +191,7 @@ def parse_from_total_library(filename, **kwargs):
     # If nothing is missing, convert the parsed data into a dictionary
     parsed_data_dict = {}
     for nuclide in nuclides:
-        parsed_data_dict[nuclide] = { match[1]: np.array(match[2]) for match in parsed_data if match[0] == nuclide }
+        parsed_data_dict[nuclide] = {match[1]: np.array(match[2]) for match in parsed_data if match[0] == nuclide}
 
     return parsed_data_dict
 
