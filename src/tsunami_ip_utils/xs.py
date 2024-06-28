@@ -140,46 +140,42 @@ def parse_from_total_library(filename, **kwargs):
     # Define regex patterns
     # ===========================
 
-    header_pattern = re.compile(r'2\$\$\s+(\d+)\s+\d+\s+(\d+).*?(?=\d+\#)', re.DOTALL)
-    xs_data_pattern = re.compile(r'([\d.E+-]+)\s+([\d.E+-]+)')
-    subfield_end_pattern = re.compile(r't\n')
+    header_pattern = re.compile(r'2\$\$\s+(\d+)\s+\d+\s+(\d+).*?(?=2##)', re.DOTALL)
+    xs_data_pattern = re.compile(r'4##\s*((?:\s*[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?\s+[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?\s*\n)+)', re.MULTILINE)
 
     # ===========================
     # Parse the data
     # ===========================
 
-    parsed_data = []
+    parsed_data_dict = {}
     for match in header_pattern.finditer(data):
         nuclide = match.group(1)
         reaction = match.group(2)
         header_end = match.end()
 
-        xs_data_start = header_end
-        xs_data_end = subfield_end_pattern.search(data, xs_data_start).start()
-        xs_data_text = data[xs_data_start:xs_data_end]
-
-        xs_data = [float(xs) for _, xs in xs_data_pattern.findall(xs_data_text)]
-        parsed_data.append((nuclide, reaction, xs_data))
+        # Check if the nuclide and reaction are in the nuclide_reaction_dict
+        if nuclide in nuclide_reaction_dict and reaction in nuclide_reaction_dict[nuclide]:
+            xs_data_match = xs_data_pattern.search(data, header_end)
+            if xs_data_match:
+                xs_data_text = xs_data_match.group(1)
+                lines = xs_data_text.strip().split('\n')
+                xs_data = [float(line.split()[1]) for line in lines[::2]]  # Extract second column and skip every other row
+                if nuclide not in parsed_data_dict:
+                    parsed_data_dict[nuclide] = {}
+                parsed_data_dict[nuclide][reaction] = np.array(xs_data)
 
     # ===========================
-    # Postprocess the parsed data
+    # Check for missing nuclides and reactions
     # ===========================
 
-    # First, parse the available nuclide reactions into a dict
-    all_nuclide_reactions = {}
-    nuclides = set([match[0] for match in parsed_data])
-    for nuclide in nuclides:
-        all_nuclide_reactions[nuclide] = [match[1] for match in parsed_data if match[0] == nuclide]
-    
-    # Now compare the available reactions to the requested reactions
-    nuclides_not_found = set(nuclide_reaction_dict.keys()) - set(all_nuclide_reactions.keys())
+    nuclides_not_found = set(nuclide_reaction_dict.keys()) - set(parsed_data_dict.keys())
     reactions_not_found = {}
     for nuclide, reactions in nuclide_reaction_dict.items():
         # Skip the nuclides that aren't found
         if nuclide in nuclides_not_found:
             continue
         for reaction in reactions:
-            if reaction not in all_nuclide_reactions[nuclide]:
+            if reaction not in parsed_data_dict[nuclide]:
                 if nuclide not in reactions_not_found:
                     reactions_not_found[nuclide] = []
                 reactions_not_found[nuclide].append(reaction)
@@ -187,11 +183,6 @@ def parse_from_total_library(filename, **kwargs):
     if len(nuclides_not_found) > 0 or reactions_not_found != {}:
         raise ValueError(f"Not all requested reactions were found in the data. Missing reactions: {reactions_not_found}. "
                          f"And missing nuclides: {nuclides_not_found}")
-
-    # If nothing is missing, convert the parsed data into a dictionary
-    parsed_data_dict = {}
-    for nuclide in nuclides:
-        parsed_data_dict[nuclide] = {match[1]: np.array(match[2]) for match in parsed_data if match[0] == nuclide}
 
     return parsed_data_dict
 
