@@ -4,6 +4,8 @@ from pathlib import Path
 from string import Template
 import tempfile
 import subprocess, os
+import multiprocessing
+from functools import partial
 
 """This module contains the functions necessary for processing multigroup cross sections and cross section covariance matrices."""
 
@@ -284,7 +286,7 @@ def read_reactions_from_nuclide(multigroup_library_path: Path, nuclide_zaid, rea
                                                             reaction_mts=reaction_mts, plot_option='fido')
     return output
 
-def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict, method='slow'):
+def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict, method='small', num_processes=None):
     """Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.
     
     Parameters
@@ -293,9 +295,24 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
     - nuclide_zaid_reaction_dict: dict A dictionary mapping nuclide ZAIDs to a list of reaction MTs to read"""
 
     if method == 'small': # This method is slow but works for small amounts of nuclide reactions
-        output = {}
-        for nuclide_zaid, reaction_mts in nuclide_zaid_reaction_dict.items():
-            output[nuclide_zaid] = read_reactions_from_nuclide(multigroup_library_path, nuclide_zaid, reaction_mts)
+        if num_processes is None:
+            num_processes = multiprocessing.cpu_count()
+
+        pool = multiprocessing.Pool(processes=num_processes)
+
+        # Create a partial function with the common arguments
+        read_reactions_partial = partial(read_reactions_from_nuclide, multigroup_library_path)
+
+        # Distribute the function calls among the processes
+        results = pool.starmap(read_reactions_partial, nuclide_zaid_reaction_dict.items())
+
+        # Close the pool and wait for the processes to finish
+        pool.close()
+        pool.join()
+
+        # Convert the results to a dictionary
+        output = dict(zip(nuclide_zaid_reaction_dict.keys(), results))
+
         return output
     elif method == 'large': # This method is faster (as in there's less scale run overhead) but requires the entire library to be read
         output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
