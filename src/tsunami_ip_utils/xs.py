@@ -63,6 +63,10 @@ def parse_reactions_from_nuclide(filename, **kwargs):
     if 'reaction_mts' not in kwargs:
         raise ValueError("Missing required keyword argument: reaction_mts")
     
+    if 'nuclide_zaid' not in kwargs:
+        raise ValueError("Missing required keyword argument: nuclide_zaid")
+
+    nuclide_zaid = kwargs['nuclide_zaid']
     reaction_mts = kwargs['reaction_mts']
     energy_boundaries = kwargs.get('energy_boundaries', False)
 
@@ -121,7 +125,7 @@ def parse_reactions_from_nuclide(filename, **kwargs):
     if parsed_data.keys() != set(reaction_mts):
         raise ValueError(f"Not all reaction MTs were found in the data. Missing MTs: {set(reaction_mts) - set(parsed_data.keys())}. "
                          f"This nuclide has the available MTs: {list(all_mts)}")
-    return parsed_data
+    return parsed_data, { nuclide_zaid: list(all_mts) }
 
 def parse_from_total_library(filename, **kwargs):
     if 'nuclide_reaction_dict' not in kwargs:
@@ -148,10 +152,16 @@ def parse_from_total_library(filename, **kwargs):
     # ===========================
 
     parsed_data_dict = {}
+    all_nuclide_reactions = {}
     for match in header_pattern.finditer(data):
         nuclide = match.group(1)
         reaction = match.group(2)
         header_end = match.end()
+
+        # Now record all available nuclide reactions
+        if nuclide not in all_nuclide_reactions:
+            all_nuclide_reactions[nuclide] = []
+        all_nuclide_reactions[nuclide].append(reaction)
 
         # Check if the nuclide and reaction are in the nuclide_reaction_dict
         if nuclide in nuclide_reaction_dict and reaction in nuclide_reaction_dict[nuclide]:
@@ -184,7 +194,7 @@ def parse_from_total_library(filename, **kwargs):
         raise ValueError(f"Not all requested reactions were found in the data. Missing reactions: {reactions_not_found}. "
                          f"And missing nuclides: {nuclides_not_found}")
 
-    return parsed_data_dict
+    return parsed_data_dict, all_nuclide_reactions
 
 def read_nuclide_reaction_from_multigroup_library(multigroup_library_path: Path, nuclide_zaid, reaction_mt, \
                                                   parsing_function=parse_nuclide_reaction, plot_option='plot', \
@@ -256,10 +266,11 @@ def read_reactions_from_nuclide(multigroup_library_path: Path, nuclide_zaid, rea
     - nuclide_zaid: str The ZAID of the nuclide
     - reaction_mts: list The list of reaction MTs to read"""
 
-    output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid, reaction_mt='0', \
-                                                           parsing_function=parse_reactions_from_nuclide, \
+    parse_reactions_from_nuclide_with_zaid = partial(parse_reactions_from_nuclide, nuclide_zaid=nuclide_zaid)
+    output, nuclide_reactions = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid, reaction_mt='0', \
+                                                           parsing_function=parse_reactions_from_nuclide_with_zaid, \
                                                             reaction_mts=reaction_mts, plot_option='fido')
-    return output
+    return output, nuclide_reactions
 
 def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict, method='small', num_processes=None):
     """Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.
@@ -291,11 +302,15 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
         pool.join()
 
         # Convert the results to a dictionary
-        output = dict(zip(nuclide_zaid_reaction_dict.keys(), results))
+        output = {}
+        all_nuclide_reactions = {}
+        for zaid, (dict1, dict2) in zip(nuclide_zaid_reaction_dict.keys(), results):
+            output.update(dict1)
+            all_nuclide_reactions.update(dict2)
 
-        return output
+        return output, all_nuclide_reactions
     else: # This method is faster (as in there's less scale run overhead) but requires the entire library to be read and is serial
-        output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
+        output, all_nuclide_reactions = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
                                                            parsing_function=parse_from_total_library, \
                                                             nuclide_reaction_dict=nuclide_zaid_reaction_dict, plot_option='fido')
-        return output
+        return output, all_nuclide_reactions
