@@ -11,6 +11,7 @@ import scipy.stats as stats
 from uncertainties import umath, unumpy, ufloat
 from tsunami_ip_utils.utils import isotope_reaction_list_to_nested_dict
 from tsunami_ip_utils.integral_indices import add_missing_reactions_and_nuclides
+from tsunami_ip_utils.utils import filter_redundant_reactions
 
 # Imports for the interactive legend
 import webbrowser
@@ -634,9 +635,7 @@ def determine_plot_type(contributions, plot_redundant_reactions):
 
         if not plot_redundant_reactions:
             # Remove redundant interactions
-            redundant_interactions = ['chi', 'capture', 'nubar', 'total']
-            contributions = { isotope: { reaction: contributions[isotope][reaction] for reaction in contributions[isotope] \
-                                if reaction not in redundant_interactions } for isotope in contributions }
+            contributions = filter_redundant_reactions(contributions)
     else: # Nuclide-wise contributions
         nested_plot = False
         contributions = { contribution['isotope']: contribution['contribution'] for contribution in contributions }

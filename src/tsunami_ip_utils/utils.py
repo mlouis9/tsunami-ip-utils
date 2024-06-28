@@ -31,3 +31,13 @@ def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interes
         isotope_reaction_dict[isotope][reaction] = value
 
     return isotope_reaction_dict
+
+def filter_redundant_reactions(data_dict, redundant_reactions=['chi', 'capture', 'nubar', 'total']):
+    """Filters out redundant reactions from a nested isotope-reaction dictionary
+    
+    Parameters
+    ----------
+    - data_dict: dict, nested dictionary containing isotope-reaction pairs
+    - redundant_reactions: list of str, list of reactions to filter out"""
+    return { isotope: { reaction: data_dict[isotope][reaction] for reaction in data_dict[isotope] \
+                        if reaction not in redundant_reactions } for isotope in data_dict }

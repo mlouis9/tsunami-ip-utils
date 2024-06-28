@@ -109,16 +109,25 @@ class RegionIntegratedSdfReader(SdfReader):
         self.filename = filename
         self.sdf_data = [ match for match in self.sdf_data if match['zone_number'] == 0 and match['zone_volume'] == 0 ]
     
-    def convert_to_dict(self):
-        # Transform the data into a dictionary keyed by nuclide and reaction type. Since data is region and mixture integrated
-        # we can assume that there is only one entry for each nuclide-reaction pair
+    def convert_to_dict(self, key='names'):
+        """Converts the sdf data into a dictionary keyed by nuclide-reaction pair or by ZAID and reaction MT
+        
+        Parameters
+        ----------
+        - key: str, the key to use for the dictionary. Default is 'names' which uses the isotope name and reaction type
+            if 'numbers' is supplied instead then the ZAID and reaction MT are used."""
+        # Since data is region and mixture integrated we can assume that there is only one entry for each nuclide-reaction pair
         if type(self.sdf_data) == dict:
             return self
         
         sdf_data_dict = {}
         for match in self.sdf_data:
-            nuclide = match['isotope']
-            reaction_type = match['reaction_type']
+            if key == 'names':
+                nuclide = match['isotope']
+                reaction_type = match['reaction_type']
+            elif key == 'numbers':
+                nuclide = match['zaid']
+                reaction_type = match['reaction_mt']
             
             if nuclide not in sdf_data_dict:
                 sdf_data_dict[nuclide] = {}
