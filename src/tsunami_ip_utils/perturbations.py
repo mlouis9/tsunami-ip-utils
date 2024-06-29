@@ -9,6 +9,8 @@ from string import Template
 import subprocess
 import time
 from tsunami_ip_utils.utils import filter_by_nuclie_reaction_dict
+import multiprocessing
+from multiprocessing import Pool
 
 """This module is used for generating cross section perturbations and combining them with the sensitivity profiles for a given application
 experiment pair to generate a similarity scatter plot"""
@@ -128,6 +130,21 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
         # Now filter out the desired nuclide reactions
         perturbed_xs = filter_by_nuclie_reaction_dict(perturbed_xs, all_nuclide_reactions)
 
+def cache_perturbed_library(args):
+    i, base_library, perturbed_library_sample, available_nuclide_reactions, perturbed_cache = args
+    perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
+    if not perturbed_xs_cache.exists():
+        start = time.time()
+        print(f"Caching perturbed library {i}... ", end='')
+        perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
+        with open(perturbed_xs_cache, 'wb') as f:
+            pickle.dump(perturbed_xs, f)
+        
+        end = time.time()
+        print(f"Done in {end - start} seconds")
+    else:
+        print(f"Perturbed library {i} already cached...")
+
 def cache_all_libraries(base_library: Path, perturbed_library: Path, reset_cache=False):
     """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths
     
@@ -179,27 +196,29 @@ def cache_all_libraries(base_library: Path, perturbed_library: Path, reset_cache
     # Make a directory to store the cached perturbed multigroup libraries if it doesn't already exist
     perturbed_cache = cache_dir / f'cached_{library_name}_perturbations'
     if not perturbed_cache.exists():
-        os.mkdir( perturbed_cache )
+        os.mkdir(perturbed_cache)
 
     # ------------------------------------------
     # Main loop for caching perturbed libraries
     # ------------------------------------------
-    NUM_SAMPLES = 1000 # Number of xs perturbation samples available in SCLAE
-    for i in range(1, NUM_SAMPLES + 1):
-        # Make path to the cross section perturbation factors for this random sample
-        perturbed_xs_sample_name = f'Sample{i}'
-        perturbed_library_sample = perturbed_library / perturbed_xs_sample_name
+    NUM_SAMPLES = 1000  # Number of xs perturbation samples available in SCLAE
 
-        # Cache the perturbed cross section libraries if not already cached
-        perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
-        if not perturbed_xs_cache.exists():
-            start = time.time()
-            print(f"Caching perturbed library {i}... ", end='')
-            perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
-            with open(perturbed_xs_cache, 'wb') as f:
-                pickle.dump(perturbed_xs, f)
-            
-            end = time.time()
-            print(f"Done in {end - start} seconds")
-        else:
-            print(f"Perturbed library {i} already cached...")
+    # Get the number of available cores
+    num_cores = multiprocessing.cpu_count()
+    
+    # Use only half of the available cores
+    num_processes = num_cores // 2
+
+    # Create a pool of worker processes
+    pool = Pool(processes=num_processes)
+
+    # Create a list of arguments for each perturbed library
+    args_list = [(i, base_library, perturbed_library / f'Sample{i}', available_nuclide_reactions, perturbed_cache)
+                 for i in range(1, NUM_SAMPLES + 1)]
+
+    # Use the pool to cache the perturbed libraries in parallel
+    pool.map(cache_perturbed_library, args_list)
+
+    # Close the pool
+    pool.close()
+    pool.join()
