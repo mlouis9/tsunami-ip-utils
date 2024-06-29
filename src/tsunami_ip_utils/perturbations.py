@@ -7,6 +7,8 @@ import os
 import tempfile
 from string import Template
 import subprocess
+import time
+from tsunami_ip_utils.utils import filter_by_nuclie_reaction_dict
 
 """This module is used for generating cross section perturbations and combining them with the sensitivity profiles for a given application
 experiment pair to generate a similarity scatter plot"""
@@ -71,8 +73,13 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
     all_nuclide_reactions = application_nuclide_reactions.copy()
     all_nuclide_reactions.update(experiment_nuclide_reactions)
 
-    # Get the base multigroup cross sections for each nuclide reaction
-    base_xs = read_multigroup_xs(base_library, all_nuclide_reactions)
+    # Get the base multigroup cross sections for each nuclide reaction and the list of all available nuclide reactions for
+    # caching the sampled perturbed cross sections
+    start1 = time.time()
+    base_xs, available_nuclide_reactions = read_multigroup_xs(base_library, all_nuclide_reactions, \
+                                                              return_available_nuclide_reactions=True)
+    end1 = time.time()
+    print(f"Time to read base xs: {end1 - start1}")
 
     # Make a directory to store the cached perturbed multigroup libraries if it doesn't already exist
     current_dir = Path(__file__).parent
@@ -91,14 +98,20 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
         perturbed_xs_sample_name = perturbed_xs_sample_names[i]
         perturbed_library_sample = perturbed_library / perturbed_xs_sample_name
         
+        start2 = time.time()
         # Cache the perturbed cross section libraries if not already cached
         perturbed_xs_cache = str(current_dir / f'cached_{library_name}_perturbations' / f'perturbed_xs_{i}.pkl')
         if not os.path.exists(perturbed_xs_cache):
-            perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, all_nuclide_reactions)
+            perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
             with open(perturbed_xs_cache, 'wb') as f:
                 pickle.dump(perturbed_xs, f)
         else:
             with open(perturbed_xs_cache, 'rb') as f:
                 perturbed_xs = pickle.load(f)
+
+        # Now filter out the desired nuclide reactions
+        perturbed_xs = filter_by_nuclie_reaction_dict(perturbed_xs, all_nuclide_reactions)
+        end2 = time.time()
+        print(f"Time to read and filter generate perturbed xs: {end2 - start2}")
 
         

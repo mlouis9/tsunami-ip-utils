@@ -63,10 +63,6 @@ def parse_reactions_from_nuclide(filename, **kwargs):
     if 'reaction_mts' not in kwargs:
         raise ValueError("Missing required keyword argument: reaction_mts")
     
-    if 'nuclide_zaid' not in kwargs:
-        raise ValueError("Missing required keyword argument: nuclide_zaid")
-
-    nuclide_zaid = kwargs['nuclide_zaid']
     reaction_mts = kwargs['reaction_mts']
     energy_boundaries = kwargs.get('energy_boundaries', False)
 
@@ -125,12 +121,17 @@ def parse_reactions_from_nuclide(filename, **kwargs):
     if parsed_data.keys() != set(reaction_mts):
         raise ValueError(f"Not all reaction MTs were found in the data. Missing MTs: {set(reaction_mts) - set(parsed_data.keys())}. "
                          f"This nuclide has the available MTs: {list(all_mts)}")
-    return parsed_data, { nuclide_zaid: list(all_mts) }
+    return parsed_data
 
 def parse_from_total_library(filename, **kwargs):
     if 'nuclide_reaction_dict' not in kwargs:
         raise ValueError("Missing required keyword argument: nuclide_reaction_dict")
     
+    if 'return_available_nuclide_reactions' in kwargs:
+        return_available_nuclide_reactions = kwargs['return_available_nuclide_reactions']
+    else:
+        return_available_nuclide_reactions = False
+
     nuclide_reaction_dict = kwargs['nuclide_reaction_dict']
     energy_boundaries = kwargs.get('energy_boundaries', False)
 
@@ -194,7 +195,11 @@ def parse_from_total_library(filename, **kwargs):
         raise ValueError(f"Not all requested reactions were found in the data. Missing reactions: {reactions_not_found}. "
                          f"And missing nuclides: {nuclides_not_found}")
 
-    return parsed_data_dict, all_nuclide_reactions
+
+    if return_available_nuclide_reactions:
+        return parsed_data_dict, all_nuclide_reactions
+    else:
+        return parsed_data_dict
 
 def read_nuclide_reaction_from_multigroup_library(multigroup_library_path: Path, nuclide_zaid, reaction_mt, \
                                                   parsing_function=parse_nuclide_reaction, plot_option='plot', \
@@ -265,14 +270,13 @@ def read_reactions_from_nuclide(multigroup_library_path: Path, nuclide_zaid, rea
     - multigroup_library_path: Path The path to the SCALE multigroup library file
     - nuclide_zaid: str The ZAID of the nuclide
     - reaction_mts: list The list of reaction MTs to read"""
-
-    parse_reactions_from_nuclide_with_zaid = partial(parse_reactions_from_nuclide, nuclide_zaid=nuclide_zaid)
-    output, nuclide_reactions = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid, reaction_mt='0', \
-                                                           parsing_function=parse_reactions_from_nuclide_with_zaid, \
+    output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid, reaction_mt='0', \
+                                                           parsing_function=parse_reactions_from_nuclide, \
                                                             reaction_mts=reaction_mts, plot_option='fido')
-    return output, nuclide_reactions
+    return output
 
-def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict, method='small', num_processes=None):
+def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict, method='small', num_processes=None, \
+                       return_available_nuclide_reactions=False):
     """Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.
     
     Parameters
@@ -288,7 +292,7 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
 
     num_nuclides = len(list(nuclide_zaid_reaction_dict.keys()))
     use_small_method = ( num_nuclides < NUCLIDE_THRESHOLD ) and ( num_processes >= CORE_THRESHOLD )
-    if use_small_method: # This method is slow but works for small amounts of nuclide reactions or a large amount of cores
+    if use_small_method and not return_available_nuclide_reactions: # This method is slow but works for small amounts of nuclide reactions or a large amount of cores
         pool = multiprocessing.Pool(processes=num_processes)
 
         # Create a partial function with the common arguments
@@ -302,15 +306,18 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
         pool.join()
 
         # Convert the results to a dictionary
-        output = {}
-        all_nuclide_reactions = {}
-        for zaid, (dict1, dict2) in zip(nuclide_zaid_reaction_dict.keys(), results):
-            output.update(dict1)
-            all_nuclide_reactions.update(dict2)
+        output = dict(zip(nuclide_zaid_reaction_dict.keys(), results))
 
-        return output, all_nuclide_reactions
+        return output
     else: # This method is faster (as in there's less scale run overhead) but requires the entire library to be read and is serial
-        output, all_nuclide_reactions = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
-                                                           parsing_function=parse_from_total_library, \
-                                                            nuclide_reaction_dict=nuclide_zaid_reaction_dict, plot_option='fido')
-        return output, all_nuclide_reactions
+        # If the user wants the available nuclide reactions, then we need to create a partial function which adds the appropriate
+        # keyword argument to the parsing function
+        if return_available_nuclide_reactions:
+            parse_function = partial(parse_from_total_library, return_available_nuclide_reactions=True)
+        else:
+            parse_function = parse_from_total_library
+        
+        output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
+                                                        parsing_function=parse_function, \
+                                                        nuclide_reaction_dict=nuclide_zaid_reaction_dict, plot_option='fido')
+        return output

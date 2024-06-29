@@ -41,3 +41,13 @@ def filter_redundant_reactions(data_dict, redundant_reactions=['chi', 'capture',
     - redundant_reactions: list of str, list of reactions to filter out"""
     return { isotope: { reaction: data_dict[isotope][reaction] for reaction in data_dict[isotope] \
                         if reaction not in redundant_reactions } for isotope in data_dict }
+
+def filter_by_nuclie_reaction_dict(data_dict, nuclide_reactions):
+    """Filters out isotopes that are not in the nuclide_reactions dictionary
+    
+    Parameters
+    ----------
+    - data_dict: dict, nested dictionary containing isotope-reaction pairs
+    - nuclide_reactions: dict, dictionary containing isotopes and their reactions"""
+    return {nuclide: {reaction: xs for reaction, xs in reactions.items() if reaction in nuclide_reactions[nuclide]} \
+                        for nuclide, reactions in data_dict.items() if nuclide in nuclide_reactions.keys()}
