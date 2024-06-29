@@ -11,6 +11,7 @@ import time
 from tsunami_ip_utils.utils import filter_by_nuclie_reaction_dict
 import multiprocessing
 from multiprocessing import Pool
+from tqdm import tqdm
 
 """This module is used for generating cross section perturbations and combining them with the sensitivity profiles for a given application
 experiment pair to generate a similarity scatter plot"""
@@ -135,15 +136,14 @@ def cache_perturbed_library(args):
     perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
     if not perturbed_xs_cache.exists():
         start = time.time()
-        print(f"Caching perturbed library {i}... ", end='')
         perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
         with open(perturbed_xs_cache, 'wb') as f:
             pickle.dump(perturbed_xs, f)
         
         end = time.time()
-        print(f"Done in {end - start} seconds")
+        return end - start
     else:
-        print(f"Perturbed library {i} already cached...")
+        return 0
 
 def cache_all_libraries(base_library: Path, perturbed_library: Path, reset_cache=False):
     """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths
@@ -216,8 +216,20 @@ def cache_all_libraries(base_library: Path, perturbed_library: Path, reset_cache
     args_list = [(i, base_library, perturbed_library / f'Sample{i}', available_nuclide_reactions, perturbed_cache)
                  for i in range(1, NUM_SAMPLES + 1)]
 
-    # Use the pool to cache the perturbed libraries in parallel
-    pool.map(cache_perturbed_library, args_list)
+    # Use the pool to cache the perturbed libraries in parallel with a progress bar
+    with tqdm(total=NUM_SAMPLES, unit='library', desc='Caching perturbed libraries') as pbar:
+        cache_times = []
+        for result in pool.imap_unordered(cache_perturbed_library, args_list):
+            cache_times.append(result)
+            pbar.update(1)
+            
+            # Calculate average cache time and estimated remaining time
+            avg_cache_time = sum(cache_times) / len(cache_times)
+            remaining_libraries = NUM_SAMPLES - pbar.n
+            estimated_remaining_time = avg_cache_time * remaining_libraries
+            
+            # Update the progress bar description with estimated remaining time
+            pbar.set_description(f'Caching perturbed libraries (Est. remaining: {estimated_remaining_time:.2f}s)')
 
     # Close the pool
     pool.close()
