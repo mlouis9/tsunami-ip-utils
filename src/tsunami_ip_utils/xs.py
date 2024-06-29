@@ -197,6 +197,8 @@ def parse_from_total_library(filename, **kwargs):
 
 
     if return_available_nuclide_reactions:
+        # Remove the nuclide '0' from the list of available nuclides if it exists
+        all_nuclide_reactions.pop('0', None)
         return parsed_data_dict, all_nuclide_reactions
     else:
         return parsed_data_dict

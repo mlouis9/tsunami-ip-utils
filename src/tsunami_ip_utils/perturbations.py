@@ -73,35 +73,51 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
     all_nuclide_reactions = application_nuclide_reactions.copy()
     all_nuclide_reactions.update(experiment_nuclide_reactions)
 
-    # Get the base multigroup cross sections for each nuclide reaction and the list of all available nuclide reactions for
-    # caching the sampled perturbed cross sections
-    start1 = time.time()
-    base_xs, available_nuclide_reactions = read_multigroup_xs(base_library, all_nuclide_reactions, \
-                                                              return_available_nuclide_reactions=True)
-    end1 = time.time()
-    print(f"Time to read base xs: {end1 - start1}")
+    # Make a directory to store all cached cross section libraries if it doesn't already exist
+    cache_dir = Path.home() / ".tsunami_ip_utils_cache"
+    if not cache_dir.exists():
+        os.mkdir(cache_dir)
 
     # Make a directory to store the cached perturbed multigroup libraries if it doesn't already exist
-    current_dir = Path(__file__).parent
     library_name = base_library.name
-    cache_directory_name = str(current_dir / f'cached_{library_name}_perturbations')
-    if not os.path.isdir(cache_directory_name):
-        os.mkdir(cache_directory_name)
+
+    # Get the base multigroup cross sections for each nuclide reaction and the list of all available nuclide reactions for
+    # caching the sampled perturbed cross sections
+
+    if not (cache_dir / f'cached_{library_name}.pkl').exists():
+        base_xs, available_nuclide_reactions = read_multigroup_xs(base_library, all_nuclide_reactions, \
+                                                                return_available_nuclide_reactions=True)
+        # Now read all cross sections and cache the base cross section library
+        base_xs = read_multigroup_xs(base_library, available_nuclide_reactions)
+        with open(cache_dir / f'cached_{library_name}.pkl', 'wb') as f:
+            pickle.dump(base_xs, f)
+    else:
+        with open(cache_dir / f'cached_{library_name}.pkl', 'rb') as f:
+            base_xs = pickle.load(f)
+
+        # Get available nuclide reactions
+        available_nuclide_reactions = { nuclide: list( reactions.keys() ) for nuclide, reactions in base_xs.items() }
+
+        # Filter out the desired nuclide reactions
+        base_xs = filter_by_nuclie_reaction_dict(base_xs, all_nuclide_reactions)
+
+
+    perturbed_cache = cache_dir / f'cached_{library_name}_perturbations'
+    if not perturbed_cache.exists():
+        os.mkdir(perturbed_cache)
 
     # --------------------------------
     # Main loop for generating points
     # --------------------------------
     points = []
-    perturbed_xs_sample_names = [f'Sample{i}' for i in range(1, num_perturbations+1)] 
-    for i in range(num_perturbations):
+    for i in range(1, num_perturbations + 1):
         # Make path to the cross section perturbation factors for this random sample
-        perturbed_xs_sample_name = perturbed_xs_sample_names[i]
+        perturbed_xs_sample_name = f"Sample{i}"
         perturbed_library_sample = perturbed_library / perturbed_xs_sample_name
         
-        start2 = time.time()
         # Cache the perturbed cross section libraries if not already cached
-        perturbed_xs_cache = str(current_dir / f'cached_{library_name}_perturbations' / f'perturbed_xs_{i}.pkl')
-        if not os.path.exists(perturbed_xs_cache):
+        perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
+        if not perturbed_xs_cache.exists():
             perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
             with open(perturbed_xs_cache, 'wb') as f:
                 pickle.dump(perturbed_xs, f)
@@ -111,7 +127,79 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
 
         # Now filter out the desired nuclide reactions
         perturbed_xs = filter_by_nuclie_reaction_dict(perturbed_xs, all_nuclide_reactions)
-        end2 = time.time()
-        print(f"Time to read and filter generate perturbed xs: {end2 - start2}")
 
+def cache_all_libraries(base_library: Path, perturbed_library: Path, reset_cache=False):
+    """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths
+    
+    Parameters
+    ----------
+    - base_library: Path, path to the base cross section library
+    - perturbed_library: Path, path to the cross section perturbation factors (used to generate the perturbed libraries)
+    - reset_cache: bool, whether to reset the cache or not (default is False)"""
+    # Read the base library, use an arbitrary nuclide reaction dict just to get the available reactions
+    all_nuclide_reactions = { '92235': ['18'] } # u-235 fission
+
+    # Make a directory to store all cached cross section libraries if it doesn't already exist
+    cache_dir = Path.home() / ".tsunami_ip_utils_cache"
+    if not cache_dir.exists():
+        os.mkdir(cache_dir)
+
+    if reset_cache:
+        # Remove all cached cross section libraries
+        for f in os.listdir(cache_dir):
+            if f.endswith('_perturbations'): # A perturbed library directory
+                for p in os.listdir(cache_dir / f):
+                    os.remove(cache_dir / f / p)
+            else:
+                os.remove(cache_dir / f)
+
+    # Cache base library if not already cached (requires reading twice)
+    library_name = base_library.name
+    base_library_cache = cache_dir / f'cached_{library_name}.pkl'
+    print("Reading base library... ")
+    if not base_library_cache.exists():
+        _, available_nuclide_reactions = read_multigroup_xs(base_library, all_nuclide_reactions, \
+                                                                return_available_nuclide_reactions=True)
+
+        start = time.time()
+        print("Caching base library... ", end='')
+        base_xs = read_multigroup_xs(base_library, available_nuclide_reactions)
+        with open( base_library_cache, 'wb') as f:
+            pickle.dump(base_xs, f)
+        end = time.time()
+        print(f"Done in {end - start} seconds")
+    else:
+        with open(cache_dir / f'cached_{library_name}.pkl', 'rb') as f:
+            base_xs = pickle.load(f)
+
+        # Get available nuclide reactions
+        available_nuclide_reactions = { nuclide: list( reactions.keys() ) for nuclide, reactions in base_xs.items() }
         
+    
+    # Make a directory to store the cached perturbed multigroup libraries if it doesn't already exist
+    perturbed_cache = cache_dir / f'cached_{library_name}_perturbations'
+    if not perturbed_cache.exists():
+        os.mkdir( perturbed_cache )
+
+    # ------------------------------------------
+    # Main loop for caching perturbed libraries
+    # ------------------------------------------
+    NUM_SAMPLES = 1000 # Number of xs perturbation samples available in SCLAE
+    for i in range(1, NUM_SAMPLES + 1):
+        # Make path to the cross section perturbation factors for this random sample
+        perturbed_xs_sample_name = f'Sample{i}'
+        perturbed_library_sample = perturbed_library / perturbed_xs_sample_name
+
+        # Cache the perturbed cross section libraries if not already cached
+        perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
+        if not perturbed_xs_cache.exists():
+            start = time.time()
+            print(f"Caching perturbed library {i}... ", end='')
+            perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
+            with open(perturbed_xs_cache, 'wb') as f:
+                pickle.dump(perturbed_xs, f)
+            
+            end = time.time()
+            print(f"Done in {end - start} seconds")
+        else:
+            print(f"Perturbed library {i} already cached...")
