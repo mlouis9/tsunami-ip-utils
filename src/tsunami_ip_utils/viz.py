@@ -1021,6 +1021,79 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         self.fig.write_html(filename)
 
 
+class InteractivePerturbationScatterPlotter(ScatterPlot):
+    def __init__(self, **kwargs):
+        pass
+
+    def create_plot(self, points):
+        self.fig = make_subplots()
+
+        # Extract isotope and reaction pairs from the given list of isotopes and reactions
+        df = pd.DataFrame({
+            'Application': [point[0].n for point in points],
+            'Experiment': [point[1].n for point in points],
+            'Application Uncertainty': [point[0].s for point in points],
+            'Experiment Uncertainty': [point[1].s for point in points]
+        })
+
+        # Create scatter plot with error bars using Plotly Express
+        self.fig = px.scatter(
+            df, 
+            x=f'Application', 
+            y=f'Experiment',
+            error_x='Application Uncertainty', 
+            error_y='Experiment Uncertainty',
+            title=f'Correlation Plot',
+        )
+
+        self.add_regression_and_stats(df)
+
+        # Now style the plot
+        self.style()
+
+    def add_regression_and_stats(self, df):
+        # Calculate the linear regression and correlation statistics
+        self.get_summary_statistics(df[f'Application'], df[f'Experiment'])
+
+        # Prepare data for the regression line
+        x_reg = np.linspace(df[f'Application'].min(), df[f'Application'].max(), 100)
+        y_reg = self.slope * x_reg + self.intercept
+
+        # Convert self.fig.data to a list for mutability
+        current_traces = list(self.fig.data)
+
+        # Remove existing regression line if it exists
+        traces_to_keep = [trace for trace in current_traces if not trace.name.startswith('Regression Line')]
+
+        # Set the modified list of traces back to the figure
+        self.fig.data = tuple(traces_to_keep)
+
+        # Add new linear regression to the plot
+        self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', 
+                                    name=f'Regression Line y={self.slope:1.4E}x + {self.intercept:1.4E}'))
+
+        # Add correlation statistics to the plot
+        self.fig.add_annotation(
+            x=0.05, xref="paper", 
+            y=0.95, yref="paper",
+            text=self.summary_stats_text,
+            showarrow=False, 
+            font=dict(size=12),
+            bgcolor="white", 
+            opacity=0.8
+        )
+
+    def add_to_subplot(self, fig, position):
+        for trace in self.fig.data:
+            fig.add_trace(trace, row=position[0], col=position[1])
+        return fig
+
+    def get_plot(self):
+        return self.fig
+    
+    def style(self):
+        pass
+
 def load_interactive_scatter_plot(filename):
     """Loads an interactive scatter plot from a saved state file. This function is purely for convenience and is a
     wrapper around the InteractiveScatterLegend.load_state method"""
@@ -1084,5 +1157,19 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
 
     # Create the plot and style it
     plotter.create_plot(contribution_pairs, isotopes, all_reactions)
+
+    return plotter.get_plot()
+
+def perturbation_plot(points):
+    """Plots the perturbation points for a given application-experiment pair for which the perturbation points have already
+    been calculated
+    
+    Parameters
+    ----------
+    - points: list of tuple of ufloat, list of tuples containing the perturbation points for the application-experiment pair"""
+    
+    # Extracting data
+    plotter = InteractivePerturbationScatterPlotter()
+    plotter.create_plot(points)
 
     return plotter.get_plot()
