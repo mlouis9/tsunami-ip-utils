@@ -12,11 +12,26 @@ from tsunami_ip_utils.utils import filter_by_nuclie_reaction_dict
 import multiprocessing
 from multiprocessing import Pool
 from tqdm import tqdm
+import numpy as np
+from tqdm.contrib.concurrent import process_map
 
 """This module is used for generating cross section perturbations and combining them with the sensitivity profiles for a given application
 experiment pair to generate a similarity scatter plot"""
 
-def generate_and_read_perturbed_library(base_library: Path, perturbation_factors: Path, all_nuclide_reactions: dict):
+def generate_and_read_perturbed_library(base_library: Path, perturbation_factors: Path, sample_number: int, \
+                                        all_nuclide_reactions: dict):
+    """Generates and reads perturbed multigroup cross section libraries.
+    
+    Parameters
+    ----------
+    - base_library: Path, path to the base cross section library
+    - perturbation_factors: Path, path to the perturbation factors directory (corresponding to the base library)
+    - sample_number: int, the sample number to use for generating the perturbed library. NOTE must be from 1-1000.
+    - all_nuclide_reactions: dict, a dictionary containing the nuclide reactions that are read from the perturbed library
+    
+    Returns
+    -------
+    - perturbed_xs: dict, a dictionary containing the perturbed cross section libraries for each nuclide reaction"""
     # Read the SCALE input template
     current_dir = Path(__file__).parent
     template_filename = current_dir / 'input_files' / 'generate_perturbed_library.inp'
@@ -30,7 +45,8 @@ def generate_and_read_perturbed_library(base_library: Path, perturbation_factors
     # Substitute the input file template values
     input_file = template.substitute(
         base_library=str(base_library),
-        perturbation_factors=str(perturbation_factors),
+        perturbation_factors=str( perturbation_factors / f'Sample{sample_number}'),
+        sample_number=sample_number,
         output=output_file_path
     )
 
@@ -56,7 +72,7 @@ def generate_and_read_perturbed_library(base_library: Path, perturbation_factors
 
     return perturbed_xs
 
-def generate_points(application_filename: str, experiment_filename: str, base_library: Path, perturbed_library: Path, \
+def generate_points(application_filename: str, experiment_filename: str, base_library: Path, perturbation_factors: Path, \
                      num_perturbations: int):
     # Read the sdfs for the application and experiment
     application = RegionIntegratedSdfReader(application_filename).convert_to_dict('numbers')
@@ -104,7 +120,6 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
         # Filter out the desired nuclide reactions
         base_xs = filter_by_nuclie_reaction_dict(base_xs, all_nuclide_reactions)
 
-
     perturbed_cache = cache_dir / f'cached_{library_name}_perturbations'
     if not perturbed_cache.exists():
         os.mkdir(perturbed_cache)
@@ -113,15 +128,12 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
     # Main loop for generating points
     # --------------------------------
     points = []
-    for i in range(1, num_perturbations + 1):
-        # Make path to the cross section perturbation factors for this random sample
-        perturbed_xs_sample_name = f"Sample{i}"
-        perturbed_library_sample = perturbed_library / perturbed_xs_sample_name
-        
+    for i in tqdm(range(1, num_perturbations + 1), desc="Generating perturbation points"):
         # Cache the perturbed cross section libraries if not already cached
         perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
         if not perturbed_xs_cache.exists():
-            perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
+            perturbed_xs = generate_and_read_perturbed_library(base_library, perturbation_factors, i, \
+                                                               available_nuclide_reactions)
             with open(perturbed_xs_cache, 'wb') as f:
                 pickle.dump(perturbed_xs, f)
         else:
@@ -131,12 +143,31 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
         # Now filter out the desired nuclide reactions
         perturbed_xs = filter_by_nuclie_reaction_dict(perturbed_xs, all_nuclide_reactions)
 
+        # ----------------------------------------------
+        # Compute S ⋅ Δσ for application and experiment
+        # ----------------------------------------------
+        running_total_application = 0
+        running_total_experiment = 0
+        for isotope, reactions in perturbed_xs.items():
+            for reaction, xs in reactions.items():
+                # First compute the cross section delta, then multiply by the sensitivity profile
+                delta_xs = xs - base_xs[isotope][reaction]
+                if isotope in application and reaction in application[isotope]:
+                    running_total_application += np.dot(application[isotope][reaction]['sensitivities'], delta_xs)
+                if isotope in experiment and reaction in experiment[isotope]:
+                    running_total_experiment  += np.dot(experiment[isotope][reaction]['sensitivities'], delta_xs)
+
+        points.append((running_total_application, running_total_experiment))
+
+    return points
+        
+
 def cache_perturbed_library(args):
-    i, base_library, perturbed_library_sample, available_nuclide_reactions, perturbed_cache = args
+    i, base_library, perturbation_factors, sample_number, available_nuclide_reactions, perturbed_cache = args
     perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
     if not perturbed_xs_cache.exists():
         start = time.time()
-        perturbed_xs = generate_and_read_perturbed_library(base_library, perturbed_library_sample, available_nuclide_reactions)
+        perturbed_xs = generate_and_read_perturbed_library(base_library, perturbation_factors, sample_number, available_nuclide_reactions)
         with open(perturbed_xs_cache, 'wb') as f:
             pickle.dump(perturbed_xs, f)
         
@@ -145,13 +176,13 @@ def cache_perturbed_library(args):
     else:
         return 0
 
-def cache_all_libraries(base_library: Path, perturbed_library: Path, reset_cache=False):
+def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_cache=False):
     """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths
     
     Parameters
     ----------
     - base_library: Path, path to the base cross section library
-    - perturbed_library: Path, path to the cross section perturbation factors (used to generate the perturbed libraries)
+    - perturbation_factors: Path, path to the cross section perturbation factors (used to generate the perturbed libraries)
     - reset_cache: bool, whether to reset the cache or not (default is False)"""
     # Read the base library, use an arbitrary nuclide reaction dict just to get the available reactions
     all_nuclide_reactions = { '92235': ['18'] } # u-235 fission
@@ -213,23 +244,11 @@ def cache_all_libraries(base_library: Path, perturbed_library: Path, reset_cache
     pool = Pool(processes=num_processes)
 
     # Create a list of arguments for each perturbed library
-    args_list = [(i, base_library, perturbed_library / f'Sample{i}', available_nuclide_reactions, perturbed_cache)
+    args_list = [(i, base_library, perturbation_factors, i, available_nuclide_reactions, perturbed_cache)
                  for i in range(1, NUM_SAMPLES + 1)]
 
     # Use the pool to cache the perturbed libraries in parallel with a progress bar
-    with tqdm(total=NUM_SAMPLES, unit='library', desc='Caching perturbed libraries') as pbar:
-        cache_times = []
-        for result in pool.imap_unordered(cache_perturbed_library, args_list):
-            cache_times.append(result)
-            pbar.update(1)
-            
-            # Calculate average cache time and estimated remaining time
-            avg_cache_time = sum(cache_times) / len(cache_times)
-            remaining_libraries = NUM_SAMPLES - pbar.n
-            estimated_remaining_time = avg_cache_time * remaining_libraries
-            
-            # Update the progress bar description with estimated remaining time
-            pbar.set_description(f'Caching perturbed libraries (Est. remaining: {estimated_remaining_time:.2f}s)')
+    process_map(cache_perturbed_library, args_list, max_workers=num_cores // 2, chunksize=1, desc='Caching perturbed libraries')
 
     # Close the pool
     pool.close()

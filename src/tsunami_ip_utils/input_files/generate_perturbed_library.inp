@@ -8,7 +8,7 @@ end
   var=87
   isvar=10
   bond=no
-  sam=1
+  sam=$sample_number
 end
 =shell
   mv ft88f001 perturbed_library
