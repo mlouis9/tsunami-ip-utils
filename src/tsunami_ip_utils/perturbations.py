@@ -79,7 +79,7 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
     experiment  = RegionIntegratedSdfReader(experiment_filename).convert_to_dict('numbers')
 
     # Filter out redundant reactions, which will introduce bias into the similarity scatter plot
-    # Absorption, or "capture" as it's referred to in SCALE, total, (n,p) and (n,α) are excluded because no data available
+    # Absorption, or "capture" as it's referred to in SCALE and total
     redundant_reactions = ['101', '1'] 
     application = filter_redundant_reactions(application.sdf_data, redundant_reactions=redundant_reactions)
     experiment  = filter_redundant_reactions(experiment.sdf_data,  redundant_reactions=redundant_reactions)

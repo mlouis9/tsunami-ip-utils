@@ -275,10 +275,14 @@ def read_integral_indices(filename):
     # Define characters allowed in a filename (all printables except space)
     non_space_printables = ''.join(c for c in printables if c != ' ')
     sci_num = pyparsing_common.sci_real
-    data_line = Group(Suppress(pyparsing_common.integer + Word(non_space_printables) + Word(alphas)) + \
-                        Optional( Suppress( sci_num + sci_num ) ) + \
-                        Group(sci_num + sci_num) + Group(sci_num + sci_num) + Group(sci_num + sci_num) + \
-                        Group(sci_num + sci_num) + Group(sci_num + sci_num) + Group(sci_num + sci_num))
+    space_as_zero = White(' ', min=8).setParseAction(lambda: 0.0)  # Parsing nine spaces as zero
+    value_or_space = MatchFirst([ space_as_zero, sci_num ])
+
+    data_line = Group(Suppress(pyparsing_common.integer + Word(non_space_printables) + Opt(Literal('-') + Word(alphas)) + \
+                               Word(alphas)) + \
+                        Opt( Suppress( sci_num + value_or_space ) ) + \
+                        Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + \
+                        Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ))
     data_block = OneOrMore(data_line)
     integral_values = Suppress(header + table_header) + data_block
     parsed_integral_values = integral_values.searchString(data)

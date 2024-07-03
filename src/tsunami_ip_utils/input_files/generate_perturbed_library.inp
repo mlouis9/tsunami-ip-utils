@@ -7,7 +7,7 @@ end
   out=88
   var=87
   isvar=10
-  bond=no
+  bond=yes
   sam=$sample_number
 end
 =shell

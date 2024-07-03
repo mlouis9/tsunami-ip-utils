@@ -697,7 +697,7 @@ class ScatterPlot(Plotter):
         'spearman' respectively. The slope and intercept are stored as 'slope' and 'intercept' respectively. The linear
         regression is stored as 'regression'"""
         self.regression = stats.linregress(x, y)
-        self.pearson = self.regression.rvalue # The same as stats.pearsonr(x, y).statistic
+        self.pearson = stats.pearsonr(x, y).statistic
         self.spearman = stats.spearmanr(x, y).statistic
         self.slope = self.regression.slope
         self.intercept = self.regression.intercept
@@ -1172,4 +1172,4 @@ def perturbation_plot(points):
     plotter = InteractivePerturbationScatterPlotter()
     plotter.create_plot(points)
 
-    return plotter.get_plot()
+    return plotter.get_plot(), plotter.pearson
