@@ -1,4 +1,4 @@
-from tsunami_ip_utils.readers import RegionIntegratedSdfReader
+from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_region_integrated_h5_sdf
 from tsunami_ip_utils.utils import filter_redundant_reactions
 from pathlib import Path
 from tsunami_ip_utils.xs import read_multigroup_xs
@@ -72,17 +72,25 @@ def generate_and_read_perturbed_library(base_library: Path, perturbation_factors
 
     return perturbed_xs
 
-def generate_points(application_filename: str, experiment_filename: str, base_library: Path, perturbation_factors: Path, \
+def generate_points(application_path: Path, experiment_path: Path, base_library: Path, perturbation_factors: Path, \
                      num_perturbations: int):
     # Read the sdfs for the application and experiment
-    application = RegionIntegratedSdfReader(application_filename).convert_to_dict('numbers')
-    experiment  = RegionIntegratedSdfReader(experiment_filename).convert_to_dict('numbers')
+    if application_path.suffix == '.sdf':
+        application = RegionIntegratedSdfReader(application_path).convert_to_dict('numbers').sdf_data
+        application = [ reaction['sensitivities'] for nuclide in application.values() for reaction in nuclide.values() ]
+    if experiment_path.suffix == '.sdf':
+        experiment  = RegionIntegratedSdfReader(experiment_path).convert_to_dict('numbers').sdf_data
+        experiment = [ reaction['sensitivities'] for nuclide in experiment.values() for reaction in nuclide.values() ]
+    if application_path.suffix == '.h5':
+        application = read_region_integrated_h5_sdf(application_path)
+    if experiment_path.suffix == '.h5':
+        experiment = read_region_integrated_h5_sdf(experiment_path)
 
     # Filter out redundant reactions, which will introduce bias into the similarity scatter plot
     # Absorption, or "capture" as it's referred to in SCALE and total
     redundant_reactions = ['101', '1'] 
-    application = filter_redundant_reactions(application.sdf_data, redundant_reactions=redundant_reactions)
-    experiment  = filter_redundant_reactions(experiment.sdf_data,  redundant_reactions=redundant_reactions)
+    application = filter_redundant_reactions(application, redundant_reactions=redundant_reactions)
+    experiment  = filter_redundant_reactions(experiment,  redundant_reactions=redundant_reactions)
 
     # Create a nuclide reaction dict for the application and experiment
     application_nuclide_reactions = {nuclide: list(reactions.keys()) for nuclide, reactions in application.items()}
@@ -148,14 +156,14 @@ def generate_points(application_filename: str, experiment_filename: str, base_li
         # ----------------------------------------------
         running_total_application = 0
         running_total_experiment = 0
-        for isotope, reactions in perturbed_xs.items():
-            for reaction, xs in reactions.items():
+        for isotope, reactions in all_nuclide_reactions.items():
+            for reaction in reactions:
                 # First compute the cross section delta, then multiply by the sensitivity profile
-                delta_xs = xs - base_xs[isotope][reaction]
+                delta_xs = perturbed_xs[isotope][reaction] - base_xs[isotope][reaction]
                 if isotope in application and reaction in application[isotope]:
-                    running_total_application += np.dot(application[isotope][reaction]['sensitivities'], delta_xs)
+                    running_total_application += np.dot(application[isotope][reaction], delta_xs)
                 if isotope in experiment and reaction in experiment[isotope]:
-                    running_total_experiment  += np.dot(experiment[isotope][reaction]['sensitivities'], delta_xs)
+                    running_total_experiment  += np.dot(experiment[isotope][reaction], delta_xs)
 
         points.append((running_total_application, running_total_experiment))
 

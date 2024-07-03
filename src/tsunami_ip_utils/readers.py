@@ -1,6 +1,8 @@
 import numpy as np
 from pyparsing import *
 from uncertainties import unumpy, ufloat
+import h5py
+from pathlib import Path
 
 ParserElement.enablePackrat()
 
@@ -70,13 +72,14 @@ class SdfReader:
         sdf_header = sdf_header_first_line + sdf_header_second_line + Suppress(sdf_header_third_line)
 
         # SDF profile data
-
         sdf_data_block = OneOrMore(data_line)
         sdf_data = sdf_header + sdf_data_first_line + sdf_data_block
         sdf_data = sdf_data.searchString(data)
 
         # Now break the data blocks into two parts: the first part is the sensitivities and the second is the uncertainties
-        sdf_data = [match[:-1] + [np.array(match[-1][:num_groups]), np.array(match[-1][num_groups:])] for match in sdf_data]
+        # NOTE: The sensitivities are read from largest to smallest energy group, so we need to reverse the order for them
+        # to correspond to the cross section values
+        sdf_data = [match[:-1] + [np.array(match[-1][:num_groups])[::-1], np.array(match[-1][num_groups:])[::-1]] for match in sdf_data]
 
         # -------------------------------------------------
         # Now parse each result into a readable dictionary
@@ -320,3 +323,20 @@ def read_integral_indices(filename):
     })
 
     return integral_matrices
+
+def read_region_integrated_h5_sdf(filename: Path):
+    """Reads all region integrated sdfs from an .h5 sdf file and returns a dictionary of the data"""
+    with h5py.File(filename, 'r') as f:
+        # Get the region integrated sdf's, i.e. where unit=0
+        region_integrated_indices = np.where(f['unit'][:] == 0)[0]
+        mts = f['mt'][region_integrated_indices]
+        zaids = f['nuclide_id'][region_integrated_indices]
+        sensitivities = f['profile_values'][region_integrated_indices, :]
+        uncertainties = f['profile_sigmas'][region_integrated_indices, :]
+
+        # Now convert the data into a dictionary
+        unique_zaids = set(zaids)
+        sdf_data = {str(zaid): {} for zaid in unique_zaids}
+        for index in region_integrated_indices:
+            sdf_data[str(zaids[index])][str(mts[index])] = unumpy.uarray(sensitivities[index][::-1], uncertainties[index][::-1])
+    return sdf_data
