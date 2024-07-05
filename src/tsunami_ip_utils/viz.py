@@ -939,6 +939,45 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
             os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
             return 'Server shutting down...'
 
+    def update_figure_on_legend_click(self, restyleData, current_figure_state):
+        if restyleData and 'visible' in restyleData[0]:
+            current_fig = go.Figure(current_figure_state)
+
+            # Get the index of the clicked trace
+            clicked_trace_index = restyleData[1][0]
+
+            # Get the name of the clicked trace
+            clicked_trace_name = current_fig.data[clicked_trace_index].name
+
+            # Update excluded isotopes based on the clicked trace
+            if restyleData[0]['visible'][0] == 'legendonly' and clicked_trace_name not in self.excluded_isotopes:
+                self.excluded_isotopes.append(clicked_trace_name)
+            elif restyleData[0]['visible'][0] == True and clicked_trace_name in self.excluded_isotopes:
+                self.excluded_isotopes.remove(clicked_trace_name)
+
+            # Update DataFrame based on excluded isotopes
+            updated_df = self.df.copy()
+            updated_df = updated_df[~updated_df['Isotope'].isin(self.excluded_isotopes)]
+
+            # Create a new InteractiveScatterPlotter instance with the updated data
+            updated_plotter = InteractiveScatterPlotter(self.index_name, self.interactive_scatter_plot.nested)
+            updated_plotter.create_plot(self.interactive_scatter_plot._create_scatter_data(updated_df), updated_df['Isotope'].unique(), updated_df['Reaction'].unique() if 'Reaction' in updated_df.columns else [])
+
+            # Update the current figure with the new traces and layout
+            current_fig.data = updated_plotter.fig.data
+            current_fig.layout = updated_plotter.fig.layout
+
+            # Update trace visibility based on excluded isotopes
+            for trace in current_fig.data:
+                if trace.name in self.excluded_isotopes:
+                    trace.visible = 'legendonly'
+                else:
+                    trace.visible = True
+
+            return current_fig
+
+        return dash.no_update
+
     def show(self):
         # Function to open the browser
         def open_browser():
@@ -1165,7 +1204,7 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     # Create the plot and style it
     plotter.create_plot(contribution_pairs, isotopes, all_reactions)
 
-    return plotter
+    return plotter.fig
 
 def perturbation_plot(points):
     """Plots the perturbation points for a given application-experiment pair for which the perturbation points have already
@@ -1193,14 +1232,66 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
         for j in range(plot_objects_array.shape[1]):
             plot_object = plot_objects_array[i, j]
             if plot_object is not None:
-                row.append(dcc.Graph(figure=plot_object.fig))
+                if isinstance(plot_object, InteractiveScatterLegend):
+                    # Handle the special case of interactive legend plots
+                    interactive_legend_app = plot_object
+                    graph_id = f"interactive-scatter-{i}-{j}"
+                    
+                    # Add the plot to the row using dcc.Graph
+                    row.append(dcc.Graph(id=graph_id, figure=interactive_legend_app.fig))
+                    
+                    # Create a closure to capture the correct interactive_legend_app instance
+                    def create_update_figure_callback(app_instance):
+                        @app.callback(
+                            Output(graph_id, 'figure'),
+                            Input(graph_id, 'restyleData'),
+                            State(graph_id, 'figure')
+                        )
+                        def update_figure_on_legend_click(restyleData, current_figure_state):
+                            if restyleData and 'visible' in restyleData[0]:
+                                current_fig = go.Figure(current_figure_state)
+
+                                # Get the index of the clicked trace
+                                clicked_trace_index = restyleData[1][0]
+
+                                # Get the name of the clicked trace
+                                clicked_trace_name = current_fig.data[clicked_trace_index].name
+
+                                # Update excluded isotopes based on the clicked trace
+                                if restyleData[0]['visible'][0] == 'legendonly' and clicked_trace_name not in app_instance.excluded_isotopes:
+                                    app_instance.excluded_isotopes.append(clicked_trace_name)
+                                elif restyleData[0]['visible'][0] == True and clicked_trace_name in app_instance.excluded_isotopes:
+                                    app_instance.excluded_isotopes.remove(clicked_trace_name)
+
+                                # Update DataFrame based on excluded isotopes
+                                updated_df = app_instance.df.copy()
+                                updated_df = updated_df[~updated_df['Isotope'].isin(app_instance.excluded_isotopes)]
+
+                                # Recalculate the regression and summary statistics
+                                app_instance.add_regression_and_stats(updated_df)
+
+                                # Update trace visibility based on excluded isotopes
+                                for trace in app_instance.fig.data:
+                                    if trace.name in app_instance.excluded_isotopes:
+                                        trace.visible = 'legendonly'
+                                    else:
+                                        trace.visible = True
+
+                                return app_instance.fig
+
+                            return dash.no_update
+                    
+                    # Create the callback using the closure
+                    create_update_figure_callback(interactive_legend_app)
+                else:
+                    row.append(dcc.Graph(figure=plot_object))
             else:
                 row.append(html.Div('Plot not available'))
-        
+
         # Append the row to the rows list
         rows.append(html.Div(row, style={'display': 'flex', 'padding': '1px'}))
 
-    # Generate the layout
+    # Generate the layout for the app
     app.layout = html.Div([
         html.H1("Matrix of Plots", style={'textAlign': 'center'}),
         html.Div(rows)
