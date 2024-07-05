@@ -21,7 +21,9 @@ import threading
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
-import logging
+import random
+import socket
+import uuid
 
 plt.rcParams['hatch.linewidth'] = 0.5
 
@@ -262,10 +264,11 @@ class PiePlotter(Plotter):
 
 
 class InteractivePieLegend:
-    def __init__(self, fig, df):
+    def __init__(self, fig, df, port):
         """Return a flask webapp that will display an interactive legend for the sunburst chart"""
         self.fig = fig
-
+        self.df = df
+        self.port = port
         self.app = Flask(__name__)
 
         @self.app.route('/shutdown', methods=['POST'])
@@ -276,51 +279,54 @@ class InteractivePieLegend:
         @self.app.route('/')
         def show_sunburst():
             # Extract root nodes (nodes without parents)
-            root_nodes = df[df['parents'] == '']
+            root_nodes = self.df[self.df['parents'] == '']
+
+            # Generate a unique ID for the container
+            container_id = f"container-{uuid.uuid4()}"
 
             # Generate legend HTML with a title
-            legend_html = '<div id="legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0; text-align: center;">Legend</h3>\n'
+            legend_html = f'<div id="{container_id}-legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0; text-align: center;">Legend</h3>\n'
             for _, row in root_nodes.iterrows():
-                legend_html += f'    <div id="legend-item" class="legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]:1.4E}</div>\n'
+                legend_html += f'    <div id="{container_id}-legend-item" class="{container_id}-legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]:1.4E}</div>\n'
             legend_html += '</div>\n'
 
             # JavaScript for interactivity and shutdown
-            script_html = """
+            script_html = f"""
             <script>
-            window.addEventListener('beforeunload', (event) => {
+            window.addEventListener('beforeunload', (event) => {{
                 navigator.sendBeacon('/shutdown');
-            });
-            document.addEventListener('DOMContentLoaded', function () {
-                const legendItems = document.querySelectorAll('.legend-item');
-                legendItems.forEach(item => {
-                    item.addEventListener('mouseenter', function() {
+            }});
+            document.addEventListener('DOMContentLoaded', function () {{
+                const legendItems = document.querySelectorAll('#{container_id}-legend-item');
+                legendItems.forEach(item => {{
+                    item.addEventListener('mouseenter', function() {{
                         const target = this.getAttribute('data-target');
                         const paths = document.querySelectorAll('path.surface');
-                        paths.forEach(path => {
+                        paths.forEach(path => {{
                             const labelText = path.nextElementSibling ? path.nextElementSibling.textContent : "";
-                            if (labelText.includes(target)) {
+                            if (labelText.includes(target)) {{
                                 path.style.opacity = 0.5; // Highlight by changing opacity
-                            }
-                        });
-                    });
-                    item.addEventListener('mouseleave', function() {
+                            }}
+                        }});
+                    }});
+                    item.addEventListener('mouseleave', function() {{
                         const paths = document.querySelectorAll('path.surface');
-                        paths.forEach(path => {
+                        paths.forEach(path => {{
                             path.style.opacity = 1; // Reset opacity
-                        });
-                    });
-                    item.addEventListener('click', function() {
+                        }});
+                    }});
+                    item.addEventListener('click', function() {{
                         const target = this.getAttribute('data-target');
                         const paths = document.querySelectorAll('path.surface');
-                        paths.forEach(path => {
+                        paths.forEach(path => {{
                             const labelText = path.nextElementSibling ? path.nextElementSibling.textContent : "";
-                            if (labelText.includes(target)) {
-                                path.dispatchEvent(new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': true }));
-                            }
-                        });
-                    });
-                });
-            });
+                            if (labelText.includes(target)) {{
+                                path.dispatchEvent(new MouseEvent('click', {{ 'view': window, 'bubbles': true, 'cancelable': true }}));
+                            }}
+                        }});
+                    }});
+                }});
+            }});
             </script>
             """
 
@@ -332,23 +338,22 @@ class InteractivePieLegend:
             <head>
             <title>Interactive Sunburst Chart</title>
             <style>
-                body, html {{
+                #{container_id} {{
                     height: 100%;
                     margin: 0;
                     font-family: Arial, sans-serif;
                 }}
-                #container {{
+                #{container_id} > div {{
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     width: 100%;
                 }}
-                div:not(#legend, 
-                .modebar-container) {{
+                #{container_id} > div > div:not(#{container_id}-legend) {{
                     height: 100%;
                     min-width: 0;    /* Prevent flex item from overflowing its container */
                 }}
-                #legend {{
+                #{container_id}-legend {{
                     flex: 0 1 auto;  /* Do not grow, allow shrink */
                     margin-left: 20px;
                     padding: 10px;
@@ -359,9 +364,11 @@ class InteractivePieLegend:
             </style>
             </head>
             <body>
-            <div id="container">
-                <div id="chart">{fig_html}</div>
-                {legend_html}
+            <div id="{container_id}">
+                <div>
+                    <div id="{container_id}-chart">{fig_html}</div>
+                    {legend_html}
+                </div>
             </div>
             {script_html}
             </body>
@@ -375,21 +382,43 @@ class InteractivePieLegend:
         webbrowser.open(f"http://localhost:{PLOTTING_PORT}/")
         pass
 
-    def show(self):
+    def show(self, open_browser=True, silent=False):
+        """Start the Flask server and open the browser to display the interactive sunburst chart
+        
+        Parameters
+        ----------
+        - open_browser: bool, whether to open the browser automatically to display the chart
+        - silent: bool, whether to suppress Flask's startup and runtime messages"""
         # Suppress Flask's startup and runtime messages by redirecting them to dev null
         log = open(os.devnull, 'w')
         # sys.stdout = log
         sys.stderr = log
 
-        threading.Timer(1, self.open_browser).start()
-        self.app.run(host='localhost', port=PLOTTING_PORT)
+        if open_browser:
+            threading.Timer(1, self.open_browser).start()
+        self.app.run(host='localhost', port=self.port)
 
-    def write_html(self, filename):
+    def serve(self):
+        """Start the Flask server to display the interactive sunburst chart"""
+        log = open(os.devnull, 'w')
+        # sys.stdout = log
+        # sys.stderr = log
+
+        # Run the Flask application in a separate thread
+        thread = threading.Thread(target=lambda: self.app.run(host='localhost', port=self.port))
+        print(f"Now running at http://localhost:{self.port}/")
+        thread.daemon = True  # This ensures thread exits when main program exits
+        thread.start()
+
+    def write_html(self, filename=None):
         with self.app.test_client() as client:
             response = client.get('/')
             html_content = response.data.decode('utf-8')
-            with open(filename, 'w') as f:
-                f.write(html_content)
+            if filename is None:
+                return html_content
+            else:
+                with open(filename, 'w') as f:
+                    f.write(html_content)
 
 
 class InteractivePiePlotter(Plotter):
@@ -400,6 +429,7 @@ class InteractivePiePlotter(Plotter):
         else:
             self.interactive_legend = True
         
+        self.port = kwargs['port']
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
@@ -443,7 +473,7 @@ class InteractivePiePlotter(Plotter):
         )
 
         if self.interactive_legend:
-            self.fig = InteractivePieLegend(self.fig, df)
+            self.fig = InteractivePieLegend(self.fig, df, port=self.port)
 
 
     
@@ -669,6 +699,11 @@ def contribution_plot(contributions, plot_type='bar', integral_index_name='E', p
     plotter = plotters.get(plot_type)
     if plotter is None:
         raise ValueError("Unsupported plot type")
+    
+    if plot_type == 'interactive_pie':
+        port = kwargs.get('port', PLOTTING_PORT)
+        kwargs.pop('port', None)
+        plotter = InteractivePiePlotter(integral_index_name, plot_redundant_reactions, port=port, **kwargs)
 
     # Create the plot and style it
     plotter.create_plot(contributions, nested_plot)
@@ -1220,6 +1255,14 @@ def perturbation_plot(points):
 
     return plotter.get_plot(), plotter.pearson
 
+def find_free_port():
+    """Finds a free port on localhost for running a Flask server."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("", 0))  # Let the OS pick an available port
+    port = s.getsockname()[1]
+    s.close()
+    return port
+
 def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
     """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects."""
     app = dash.Dash(__name__, suppress_callback_exceptions=True)
@@ -1233,6 +1276,7 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
             plot_object = plot_objects_array[i, j]
             if plot_object is not None:
                 if isinstance(plot_object, InteractiveScatterLegend):
+                    print('InteractiveScatterLegend')
                     # Handle the special case of interactive legend plots
                     interactive_legend_app = plot_object
                     graph_id = f"interactive-scatter-{i}-{j}"
@@ -1283,13 +1327,20 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
                     
                     # Create the callback using the closure
                     create_update_figure_callback(interactive_legend_app)
+                elif isinstance(plot_object, InteractivePieLegend):
+                    # Embed the Flask app using iframe with srcdoc
+                    with plot_object.app.test_client() as client:
+                        response = client.get('/')
+                        html_content = response.data.decode('utf-8')
+                        iframe_html = html.Iframe(srcDoc=html_content, style={"height": "400px", "width": "100%"})
+                    row.append(iframe_html)
                 else:
                     row.append(dcc.Graph(figure=plot_object))
             else:
                 row.append(html.Div('Plot not available'))
 
         # Append the row to the rows list
-        rows.append(html.Div(row, style={'display': 'flex', 'padding': '1px'}))
+        rows.append(html.Div(row, style={'display': 'flex', 'padding': '10px'}))
 
     # Generate the layout for the app
     app.layout = html.Div([
