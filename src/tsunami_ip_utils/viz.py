@@ -1182,25 +1182,28 @@ def perturbation_plot(points):
     return plotter.get_plot(), plotter.pearson
 
 def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
-    """Creates a matrix plot from a numpy object array of figure objects. If the type is 'interactive', the plot objects must be
-    plotly express figure objects, if not, they must be matplotlib figure objects"""
+    """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects."""
+    app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
-    if plot_type == "interactive":
-        # Determine the size of the grid
-        nrows, ncols = plot_objects_array.shape
+    # Create rows of plots
+    rows = []
+    for i in range(plot_objects_array.shape[0]):
+        # Create a row of plots
+        row = []
+        for j in range(plot_objects_array.shape[1]):
+            plot_object = plot_objects_array[i, j]
+            if plot_object is not None:
+                row.append(dcc.Graph(figure=plot_object.fig))
+            else:
+                row.append(html.Div('Plot not available'))
         
-        # Create a subplot figure with specified rows and columns
-        fig = make_subplots(rows=nrows, cols=ncols, subplot_titles=[f'Plot {i+1}' for i in range(nrows*ncols)])
+        # Append the row to the rows list
+        rows.append(html.Div(row, style={'display': 'flex', 'padding': '1px'}))
 
-        # Iterate over the array of plot objects
-        for i in range(nrows):
-            for j in range(ncols):
-                # Check if there is a plot object at the current position
-                if plot_objects_array[i, j] is not None:
-                    # Add the plot to the correct subplot
-                    plot_objects_array[i, j].add_to_subplot(fig, (i+1, j+1))
-        
-        # Update layouts if necessary
-        fig.update_layout(autosize=True, title_text="Matrix of Plots")
+    # Generate the layout
+    app.layout = html.Div([
+        html.H1("Matrix of Plots", style={'textAlign': 'center'}),
+        html.Div(rows)
+    ])
 
-        return fig
+    return app
