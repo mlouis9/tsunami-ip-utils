@@ -864,6 +864,13 @@ class InteractiveScatterPlotter(ScatterPlot):
     def add_to_subplot(self, fig, position):
         for trace in self.fig.data:
             fig.add_trace(trace, row=position[0], col=position[1])
+
+        # Transfer annotations
+        if hasattr(self.fig, 'layout') and hasattr(self.fig.layout, 'annotations'):
+            for ann in self.fig.layout.annotations:
+                # Adjust annotation references to new subplot
+                new_ann = ann.update(xref=f'x{position[1]}', yref=f'y{position[1]}')
+                fig.add_annotation(new_ann, row=position[0], col=position[1])
         return fig
 
     def get_plot(self):
@@ -1158,7 +1165,7 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     # Create the plot and style it
     plotter.create_plot(contribution_pairs, isotopes, all_reactions)
 
-    return plotter.get_plot()
+    return plotter
 
 def perturbation_plot(points):
     """Plots the perturbation points for a given application-experiment pair for which the perturbation points have already
@@ -1173,3 +1180,27 @@ def perturbation_plot(points):
     plotter.create_plot(points)
 
     return plotter.get_plot(), plotter.pearson
+
+def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
+    """Creates a matrix plot from a numpy object array of figure objects. If the type is 'interactive', the plot objects must be
+    plotly express figure objects, if not, they must be matplotlib figure objects"""
+
+    if plot_type == "interactive":
+        # Determine the size of the grid
+        nrows, ncols = plot_objects_array.shape
+        
+        # Create a subplot figure with specified rows and columns
+        fig = make_subplots(rows=nrows, cols=ncols, subplot_titles=[f'Plot {i+1}' for i in range(nrows*ncols)])
+
+        # Iterate over the array of plot objects
+        for i in range(nrows):
+            for j in range(ncols):
+                # Check if there is a plot object at the current position
+                if plot_objects_array[i, j] is not None:
+                    # Add the plot to the correct subplot
+                    plot_objects_array[i, j].add_to_subplot(fig, (i+1, j+1))
+        
+        # Update layouts if necessary
+        fig.update_layout(autosize=True, title_text="Matrix of Plots")
+
+        return fig
