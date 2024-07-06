@@ -264,11 +264,11 @@ class PiePlotter(Plotter):
 
 
 class InteractivePieLegend:
-    def __init__(self, fig, df, port):
+    def __init__(self, fig, df):
         """Return a flask webapp that will display an interactive legend for the sunburst chart"""
         self.fig = fig
         self.df = df
-        self.port = port
+        self.port = find_free_port()
         self.app = Flask(__name__)
 
         @self.app.route('/shutdown', methods=['POST'])
@@ -287,7 +287,8 @@ class InteractivePieLegend:
             # Generate legend HTML with a title
             legend_html = f'<div id="{container_id}-legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0; text-align: center;">Legend</h3>\n'
             for _, row in root_nodes.iterrows():
-                legend_html += f'    <div id="{container_id}-legend-item" class="{container_id}-legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]:1.4E}</div>\n'
+                legend_html += f'<div class="{container_id}-legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]:1.4E}</div>\n'
+            legend_height = len(root_nodes) * 30  # Calculate a dynamic height based on number of items
             legend_html += '</div>\n'
 
             # JavaScript for interactivity and shutdown
@@ -297,7 +298,7 @@ class InteractivePieLegend:
                 navigator.sendBeacon('/shutdown');
             }});
             document.addEventListener('DOMContentLoaded', function () {{
-                const legendItems = document.querySelectorAll('#{container_id}-legend-item');
+                const legendItems = document.querySelectorAll('.{container_id}-legend-item');
                 legendItems.forEach(item => {{
                     item.addEventListener('mouseenter', function() {{
                         const target = this.getAttribute('data-target');
@@ -326,6 +327,10 @@ class InteractivePieLegend:
                         }});
                     }});
                 }});
+                // Force Redraw/Reflow
+                setTimeout(() => {{
+                    window.dispatchEvent(new Event('resize'));
+                }}, 100); // Delay may be adjusted based on actual rendering time
             }});
             </script>
             """
@@ -339,27 +344,30 @@ class InteractivePieLegend:
             <title>Interactive Sunburst Chart</title>
             <style>
                 #{container_id} {{
+                    display: flex;
+                    flex-direction: row; /* Align children horizontally */
                     height: 100%;
+                    width: 100%; /* Ensure the container takes full width */
                     margin: 0;
                     font-family: Arial, sans-serif;
                 }}
                 #{container_id} > div {{
                     display: flex;
-                    justify-content: center;
-                    align-items: center;
+                    justify-content: space-between; /* Space out the chart and legend */
+                    align-items: flex-start; /* Align items at the start of the cross axis */
                     width: 100%;
+                    overflow: hidden; /* Hide overflow to prevent breaking layout */
                 }}
-                #{container_id} > div > div:not(#{container_id}-legend) {{
-                    height: 100%;
-                    min-width: 0;    /* Prevent flex item from overflowing its container */
+                #{container_id}-chart {{
+                    flex: 1 1 70%; /* Allow chart to grow and shrink but base at 70% width */
+                    padding: 10px;
                 }}
                 #{container_id}-legend {{
-                    flex: 0 1 auto;  /* Do not grow, allow shrink */
+                    flex: 0 1 30%; /* Start with 30% width but allow shrinking */
                     margin-left: 20px;
-                    padding: 10px;
-                    border: 2px solid black;
-                    max-height: 100%; /* Make sure it does not overflow vertically */
-                    overflow: auto;   /* Enable scrolling if content is too large */
+                    padding: 5px;
+                    max-height: calc(100vh - 20px); /* Limit height to viewport height minus some margin */
+                    overflow: auto; /* Scroll internally if content overflows */
                 }}
             </style>
             </head>
@@ -367,7 +375,7 @@ class InteractivePieLegend:
             <div id="{container_id}">
                 <div>
                     <div id="{container_id}-chart">{fig_html}</div>
-                    {legend_html}
+                    <div id="{container_id}-legend">{legend_html}</div>
                 </div>
             </div>
             {script_html}
@@ -429,7 +437,6 @@ class InteractivePiePlotter(Plotter):
         else:
             self.interactive_legend = True
         
-        self.port = kwargs['port']
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
@@ -473,7 +480,7 @@ class InteractivePiePlotter(Plotter):
         )
 
         if self.interactive_legend:
-            self.fig = InteractivePieLegend(self.fig, df, port=self.port)
+            self.fig = InteractivePieLegend(self.fig, df)
 
 
     
@@ -699,11 +706,6 @@ def contribution_plot(contributions, plot_type='bar', integral_index_name='E', p
     plotter = plotters.get(plot_type)
     if plotter is None:
         raise ValueError("Unsupported plot type")
-    
-    if plot_type == 'interactive_pie':
-        port = kwargs.get('port', PLOTTING_PORT)
-        kwargs.pop('port', None)
-        plotter = InteractivePiePlotter(integral_index_name, plot_redundant_reactions, port=port, **kwargs)
 
     # Create the plot and style it
     plotter.create_plot(contributions, nested_plot)
@@ -1267,22 +1269,29 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
     """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects."""
     app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
+    num_rows = plot_objects_array.shape[0]
+    num_cols = plot_objects_array.shape[1]
+
+    # Create column headers
+    column_headers = [html.Div(f'Application {i+1}', style={'flex': 1, 'text-align': 'center'}) for i in range(num_cols)]
+    header_row = html.Div([html.Div('')] + column_headers, style={'display': 'flex', 'margin-bottom': '10px'})
+
     # Create rows of plots
-    rows = []
-    for i in range(plot_objects_array.shape[0]):
+    rows = [header_row]
+    for i in range(num_rows):
         # Create a row of plots
-        row = []
-        for j in range(plot_objects_array.shape[1]):
+        row = [html.Div(f'Experiment {i+1}', style={'flex': 0, 'text-align': 'center', 'margin-right': '10px'})]
+
+        for j in range(num_cols):
             plot_object = plot_objects_array[i, j]
             if plot_object is not None:
                 if isinstance(plot_object, InteractiveScatterLegend):
-                    print('InteractiveScatterLegend')
                     # Handle the special case of interactive legend plots
                     interactive_legend_app = plot_object
                     graph_id = f"interactive-scatter-{i}-{j}"
                     
                     # Add the plot to the row using dcc.Graph
-                    row.append(dcc.Graph(id=graph_id, figure=interactive_legend_app.fig))
+                    row.append(dcc.Graph(id=graph_id, figure=interactive_legend_app.fig, style={'flex': 1}))
                     
                     # Create a closure to capture the correct interactive_legend_app instance
                     def create_update_figure_callback(app_instance):
@@ -1332,12 +1341,12 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
                     with plot_object.app.test_client() as client:
                         response = client.get('/')
                         html_content = response.data.decode('utf-8')
-                        iframe_html = html.Iframe(srcDoc=html_content, style={"height": "400px", "width": "100%"})
+                        iframe_html = html.Iframe(srcDoc=html_content, style={"height": "400px", "width": "100%", 'flex': 1})
                     row.append(iframe_html)
                 else:
-                    row.append(dcc.Graph(figure=plot_object))
+                    row.append(dcc.Graph(figure=plot_object, style={'flex': 1}))
             else:
-                row.append(html.Div('Plot not available'))
+                row.append(html.Div('Plot not available', style={'flex': 1}))
 
         # Append the row to the rows list
         rows.append(html.Div(row, style={'display': 'flex', 'padding': '10px'}))
@@ -1345,7 +1354,7 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
     # Generate the layout for the app
     app.layout = html.Div([
         html.H1("Matrix of Plots", style={'textAlign': 'center'}),
-        html.Div(rows)
+        html.Div(rows, style={'display': 'flex', 'flex-direction': 'column'})
     ])
 
     return app
