@@ -21,9 +21,9 @@ import threading
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
-import random
 import socket
 import uuid
+from pathlib import Path
 
 plt.rcParams['hatch.linewidth'] = 0.5
 
@@ -1267,31 +1267,37 @@ def find_free_port():
 
 def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
     """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects."""
-    app = dash.Dash(__name__, suppress_callback_exceptions=True)
+    current_directory = Path(__file__).parent
+    external_stylesheets = [ str( current_directory / 'css' / 'matrix_plot.css' )]  # Modify this path to your actual CSS file
+    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
     num_rows = plot_objects_array.shape[0]
     num_cols = plot_objects_array.shape[1]
 
     # Create column headers
-    column_headers = [html.Div(f'Application {i+1}', style={'flex': 1, 'text-align': 'center'}) for i in range(num_cols)]
-    header_row = html.Div([html.Div('')] + column_headers, style={'display': 'flex', 'margin-bottom': '10px'})
+    column_headers = [html.Div(f'Application {i+1}', style={'flex': '1', 'minWidth': '700px', 'textAlign': 'center'}) for i in range(num_cols)]
+    header_row = html.Div([html.Div('', style={'flex': 'none', 'width': '100px'})] + column_headers, 
+                          style={'display': 'flex', 'marginBottom': '10px'})
 
     # Create rows of plots
     rows = [header_row]
     for i in range(num_rows):
         # Create a row of plots
-        row = [html.Div(f'Experiment {i+1}', style={'flex': 0, 'text-align': 'center', 'margin-right': '10px'})]
+        row = [html.Div(f'Experiment {i+1}', style={'flex': 'none', 'width': '100px', 'textAlign': 'center', 'marginRight': '10px'})]
 
         for j in range(num_cols):
             plot_object = plot_objects_array[i, j]
             if plot_object is not None:
+                # Style parameters for plotly graphs and iframes
+                graph_style = {'flex': '1', 'minWidth': '700px', 'height': '400px'}
+
                 if isinstance(plot_object, InteractiveScatterLegend):
                     # Handle the special case of interactive legend plots
                     interactive_legend_app = plot_object
                     graph_id = f"interactive-scatter-{i}-{j}"
                     
                     # Add the plot to the row using dcc.Graph
-                    row.append(dcc.Graph(id=graph_id, figure=interactive_legend_app.fig, style={'flex': 1}))
+                    row.append(dcc.Graph(id=graph_id, figure=interactive_legend_app.fig, style=graph_style))
                     
                     # Create a closure to capture the correct interactive_legend_app instance
                     def create_update_figure_callback(app_instance):
@@ -1341,20 +1347,28 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
                     with plot_object.app.test_client() as client:
                         response = client.get('/')
                         html_content = response.data.decode('utf-8')
-                        iframe_html = html.Iframe(srcDoc=html_content, style={"height": "400px", "width": "100%", 'flex': 1})
+                        iframe_html = html.Iframe(srcDoc=html_content, style=graph_style)
                     row.append(iframe_html)
                 else:
-                    row.append(dcc.Graph(figure=plot_object, style={'flex': 1}))
+                    row.append(dcc.Graph(figure=plot_object, style=graph_style))
             else:
-                row.append(html.Div('Plot not available', style={'flex': 1}))
+                row.append(html.Div('Plot not available', style=graph_style))
 
         # Append the row to the rows list
-        rows.append(html.Div(row, style={'display': 'flex', 'padding': '10px'}))
+        rows.append(html.Div(row, style={'display': 'flex', 'marginBottom': '10px'}))
 
     # Generate the layout for the app
     app.layout = html.Div([
         html.H1("Matrix of Plots", style={'textAlign': 'center'}),
-        html.Div(rows, style={'display': 'flex', 'flex-direction': 'column'})
+        html.Div(rows, style={'display': 'flex', 'flexDirection': 'column', 'width': '100%', 'overflowX': 'auto'}),
+        html.Script("""
+        window.addEventListener('resize', function() {
+            const graphs = Array.from(document.querySelectorAll('.js-plotly-plot'));
+            graphs.forEach(graph => {
+                Plotly.Plots.resize(graph);
+            });
+        });
+        """)
     ])
 
     return app
