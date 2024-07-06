@@ -285,7 +285,7 @@ class InteractivePieLegend:
             container_id = f"container-{uuid.uuid4()}"
 
             # Generate legend HTML with a title
-            legend_html = f'<div id="{container_id}-legend" style="margin-left: 20px; border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0; text-align: center;">Legend</h3>\n'
+            legend_html = f'<div id="{container_id}-legend" style="border: 2px solid black; padding: 10px;"><h3 style="margin-top: 0; text-align: center;">Legend</h3>\n'
             for _, row in root_nodes.iterrows():
                 legend_html += f'<div class="{container_id}-legend-item" style="cursor: pointer; margin-bottom: 5px;" data-target="{row["ids"]}">{row["ids"]}: {row["values"]:1.4E}</div>\n'
             legend_height = len(root_nodes) * 30  # Calculate a dynamic height based on number of items
@@ -364,7 +364,6 @@ class InteractivePieLegend:
                 }}
                 #{container_id}-legend {{
                     flex: 0 1 30%; /* Start with 30% width but allow shrinking */
-                    margin-left: 20px;
                     padding: 5px;
                     max-height: calc(100vh - 20px); /* Limit height to viewport height minus some margin */
                     overflow: auto; /* Scroll internally if content overflows */
@@ -1275,21 +1274,55 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
     num_cols = plot_objects_array.shape[1]
 
     # Create column headers
-    column_headers = [html.Div(f'Application {i+1}', style={'flex': '1', 'minWidth': '700px', 'textAlign': 'center'}) for i in range(num_cols)]
-    header_row = html.Div([html.Div('', style={'flex': 'none', 'width': '100px'})] + column_headers, 
-                          style={'display': 'flex', 'marginBottom': '10px'})
+    column_headers = [html.Div(f'Application {i+1}', style={'flex': '1', 'minWidth': '800px', 'textAlign': 'center', 'padding': '10px', 'borderRight': '1px solid black', 'borderBottom': '1px solid black', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}) for i in range(num_cols)]
+    header_row = html.Div([html.Div('', style={'flex': 'none', 'width': '71px', 'borderBottom': '1px solid black'})] + column_headers, 
+                        style={'display': 'flex'})
 
     # Create rows of plots
     rows = [header_row]
     for i in range(num_rows):
         # Create a row of plots
-        row = [html.Div(f'Experiment {i+1}', style={'flex': 'none', 'width': '100px', 'textAlign': 'center', 'marginRight': '10px'})]
+        row = [
+            html.Div(
+                html.Span(
+                    f'Experiment {i+1}',
+                    style={
+                        'display': 'block',
+                        'overflow': 'visible',
+                        'transform': 'rotate(-90deg)',
+                        'transformOrigin': 'center',
+                        'whiteSpace': 'nowrap',
+                    }
+                ), 
+                style={
+                    'flex': 'none',
+                    'width': '50px', 
+                    'textAlign': 'center', 
+                    'marginRight': '0', 
+                    'padding': '10px', 
+                    'borderRight': '1px solid black', 
+                    'borderBottom': '1px solid black', 
+                    'display': 'flex', 
+                    'alignItems': 'center', 
+                    'justifyContent': 'center'
+                }
+            )
+        ]
 
         for j in range(num_cols):
             plot_object = plot_objects_array[i, j]
             if plot_object is not None:
                 # Style parameters for plotly graphs and iframes
-                graph_style = {'flex': '1', 'minWidth': '700px', 'height': '400px'}
+                graph_style = {
+                    'flex': '1', 
+                    'minWidth': '800px', 
+                    'height': '500px', 
+                    'padding': '10px', 
+                    'borderRight': '1px solid black', 
+                    'borderBottom': '1px solid black',
+                    'borderTop': '0px',
+                    'borderLeft': '0px'
+                }
 
                 if isinstance(plot_object, InteractiveScatterLegend):
                     # Handle the special case of interactive legend plots
@@ -1355,11 +1388,11 @@ def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
                 row.append(html.Div('Plot not available', style=graph_style))
 
         # Append the row to the rows list
-        rows.append(html.Div(row, style={'display': 'flex', 'marginBottom': '10px'}))
+        rows.append(html.Div(row, style={'display': 'flex'}))
 
     # Generate the layout for the app
     app.layout = html.Div([
-        html.H1("Matrix of Plots", style={'textAlign': 'center'}),
+        html.H1("Matrix of Plots", style={'textAlign': 'center', 'marginLeft': '121px'}),
         html.Div(rows, style={'display': 'flex', 'flexDirection': 'column', 'width': '100%', 'overflowX': 'auto'}),
         html.Script("""
         window.addEventListener('resize', function() {
