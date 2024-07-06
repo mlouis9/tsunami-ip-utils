@@ -28,8 +28,6 @@ from pathlib import Path
 plt.rcParams['hatch.linewidth'] = 0.5
 
 
-PLOTTING_PORT = 8050
-
 class Plotter(ABC):
     @abstractmethod
     def create_plot(self, data, nested):
@@ -268,7 +266,6 @@ class InteractivePieLegend:
         """Return a flask webapp that will display an interactive legend for the sunburst chart"""
         self.fig = fig
         self.df = df
-        self.port = find_free_port()
         self.app = Flask(__name__)
 
         @self.app.route('/shutdown', methods=['POST'])
@@ -384,9 +381,9 @@ class InteractivePieLegend:
 
             return render_template_string(full_html)
         
-    def open_browser(self):
-        print(f"Now running at http://localhost:{PLOTTING_PORT}/")
-        webbrowser.open(f"http://localhost:{PLOTTING_PORT}/")
+    def open_browser(self, port):
+        print(f"Now running at http://localhost:{port}/")
+        webbrowser.open(f"http://localhost:{port}/")
         pass
 
     def show(self, open_browser=True, silent=False):
@@ -401,19 +398,21 @@ class InteractivePieLegend:
         # sys.stdout = log
         sys.stderr = log
 
+        port = find_free_port()
         if open_browser:
-            threading.Timer(1, self.open_browser).start()
-        self.app.run(host='localhost', port=self.port)
+            threading.Timer(1, self.open_browser(port)).start()
+        self.app.run(host='localhost', port=port)
 
     def serve(self):
         """Start the Flask server to display the interactive sunburst chart"""
+        port = find_free_port()
         log = open(os.devnull, 'w')
         # sys.stdout = log
         # sys.stderr = log
 
         # Run the Flask application in a separate thread
-        thread = threading.Thread(target=lambda: self.app.run(host='localhost', port=self.port))
-        print(f"Now running at http://localhost:{self.port}/")
+        thread = threading.Thread(target=lambda: self.app.run(host='localhost', port=port))
+        print(f"Now running at http://localhost:{port}/")
         thread.daemon = True  # This ensures thread exits when main program exits
         thread.start()
 
@@ -1015,11 +1014,12 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         return dash.no_update
 
     def show(self):
+        port = find_free_port()
         # Function to open the browser
         def open_browser():
             if not os.environ.get("WERKZEUG_RUN_MAIN"):
-                print(f"Now running at http://localhost:{PLOTTING_PORT}/")
-                webbrowser.open(f"http://localhost:{PLOTTING_PORT}/")
+                print(f"Now running at http://localhost:{port}/")
+                webbrowser.open(f"http://localhost:{port}/")
 
         # Silence the Flask development server logging
         log = open(os.devnull, 'w')
@@ -1060,7 +1060,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
         # Timer to open the browser shortly after the server starts
         threading.Timer(1, open_browser).start()
 
-        self.app.run_server(debug=False, host='localhost', port=PLOTTING_PORT)
+        self.app.run_server(debug=False, host='localhost', port=port)
 
     def save_state(self, filename):
         state = {
