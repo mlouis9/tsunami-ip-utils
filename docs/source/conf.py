@@ -23,7 +23,7 @@ extensions = [
 
 templates_path = ['_templates']
 exclude_patterns = []
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'tsunami_ip_utils')))
+sys.path.insert(0, os.path.abspath('../../src'))
 
 
 # -- Options for HTML output -------------------------------------------------
