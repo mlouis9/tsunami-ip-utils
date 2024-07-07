@@ -6,3 +6,4 @@ scipy
 flask
 dash
 h5py
+tqdm
