@@ -1,4 +1,5 @@
 import os, sys
+sys.path.insert(0, os.path.abspath('../../src'))
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -23,7 +24,6 @@ extensions = [
 
 templates_path = ['_templates']
 exclude_patterns = []
-sys.path.insert(0, os.path.abspath('../../src'))
 
 
 # -- Options for HTML output -------------------------------------------------
