@@ -22,6 +22,5 @@ sphinx:
 # to build your documentation
 python:
    install:
-   - requirements: requirements.txt
-   - method: pip
-     path: .
+   - requirements: requirements.txt       # Requirements for the project that are needed for autodoc
+   - requirements: docs/requirements.txt  # Requirements specifically related to building the docs
