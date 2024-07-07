@@ -17,6 +17,7 @@ dependencies = [
     "scipy",           # Latest version of scipy
     "flask",           # Latest version of flask
     "dash",            # Latest version of dash
+    "h5py",            # Latest version of h5py
 ]
 description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
 readme = "README.md"
