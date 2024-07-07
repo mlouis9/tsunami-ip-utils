@@ -10,10 +10,8 @@ Welcome to tsunami_ip_utils's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: tsunami_ip_utils.perturbations
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   public_api
+   private_api
 
 Indices and tables
 ==================
