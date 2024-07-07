@@ -3,6 +3,8 @@ from tsunami_ip_utils.integral_indices import calculate_E
 import numpy as np
 from uncertainties import unumpy
 import pandas as pd
+from pathlib import Path
+from tsunami_ip_utils.perturbations import generate_points
 
 def comparison(tsunami_ip_output_filename, application_filenames: list, experiment_filenames: list):
     """Function that compares the calculated similarity parameter E with the TSUNAMI-IP output for each application with each
@@ -94,3 +96,24 @@ def comparison(tsunami_ip_output_filename, application_filenames: list, experime
                 data[E_type].loc[experiment_index + 1, (application_index + 1, 'Relative Difference in Manual Uncertainty')] = f"{E_diff_unc[E_type][experiment_index, application_index]:1.4E}"
 
     return data
+
+def ck_correlation_comparison(tsunami_ip_output: Path, application_sdfs: Path, experiment_sdfs: Path, base_library: Path, perturbation_factors: Path, \
+                     num_perturbations: int):
+    """Function that compares the calculated similarity parameter C_k (calculated using the cross section sampling method) 
+    with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs
+    must correspond with those in hte TSUNAMI-IP input file.
+    
+    Parameters
+    ----------
+    - tsunami_ip_output: Path, path to the TSUNAMI-IP output file
+    - application_sdfs: Path, path to the application sdf files
+    - experiment_sdfs: Path, path to the experiment sdf files
+    - base_library: Path, path to the base library
+    - perturbation_factors: Path, path to the perturbation factors
+    - num_perturbations: int, number of perturbations to generate
+    
+    Returns
+    -------
+    """
+    
+    pass

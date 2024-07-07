@@ -77,10 +77,14 @@ def generate_points(application_path: Path, experiment_path: Path, base_library:
     # Read the sdfs for the application and experiment
     if application_path.suffix == '.sdf':
         application = RegionIntegratedSdfReader(application_path).convert_to_dict('numbers').sdf_data
-        application = [ reaction['sensitivities'] for nuclide in application.values() for reaction in nuclide.values() ]
+        application = { nuclide_name: { reaction_name: reaction['sensitivities'] } \
+                       for nuclide_name, nuclide in application.items() \
+                       for reaction_name, reaction in nuclide.items() }
     if experiment_path.suffix == '.sdf':
         experiment  = RegionIntegratedSdfReader(experiment_path).convert_to_dict('numbers').sdf_data
-        experiment = [ reaction['sensitivities'] for nuclide in experiment.values() for reaction in nuclide.values() ]
+        experiment = { nuclide_name: { reaction_name: reaction['sensitivities'] } \
+                      for nuclide_name, nuclide in experiment.items() \
+                      for reaction_name, reaction in nuclide.items() }
     if application_path.suffix == '.h5':
         application = read_region_integrated_h5_sdf(application_path)
     if experiment_path.suffix == '.h5':
@@ -88,9 +92,9 @@ def generate_points(application_path: Path, experiment_path: Path, base_library:
 
     # Filter out redundant reactions, which will introduce bias into the similarity scatter plot
     # Absorption, or "capture" as it's referred to in SCALE and total
-    redundant_reactions = ['101', '1'] 
-    application = filter_redundant_reactions(application, redundant_reactions=redundant_reactions)
-    experiment  = filter_redundant_reactions(experiment,  redundant_reactions=redundant_reactions)
+    # redundant_reactions = ['101', '1'] 
+    # application = filter_redundant_reactions(application, redundant_reactions=redundant_reactions)
+    # experiment  = filter_redundant_reactions(experiment,  redundant_reactions=redundant_reactions)
 
     # Create a nuclide reaction dict for the application and experiment
     application_nuclide_reactions = {nuclide: list(reactions.keys()) for nuclide, reactions in application.items()}
