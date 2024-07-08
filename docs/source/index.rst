@@ -10,8 +10,8 @@ Welcome to tsunami_ip_utils's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   public_api
-   private_api
+   Public API <public_api/index>
+   Private API <private_api/index>
 
 Indices and tables
 ==================
