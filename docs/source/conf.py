@@ -76,7 +76,11 @@ def setup(app):
 def skip_member(app, what, name, obj, skip, options):
     api_type = app.config.api_type
     if api_type == 'public' and name.startswith('_'):
+        print(f"API TYPE: {api_type}")
+        print(f"SKIPPING: {name}")
         return True
     elif api_type == 'private' and not name.startswith('_'):
+        print(f"API TYPE: {api_type}")
+        print(f"SKIPPING: {name}")
         return True
     return skip

@@ -12,17 +12,17 @@ def update_rst_files(directory, label):
     for filename in os.listdir(directory):
         if filename.endswith(".rst"):
             file_path = os.path.join(directory, filename)
-            prepend_text(file_path, f".. _{label}:")
+            prepend_text(file_path, f".. api_type:: {label}")
 
 def rename_and_remove_files(file_path):
     os.rename(f"{file_path}/tsunami_ip_utils.rst", f"{file_path}/index.rst")
     os.remove(f"{file_path}/modules.rst")
 
 # Update public API files
-update_rst_files("source/public_api", "public_api")
+update_rst_files("source/public_api", "public")
 
 # Update private API files
-update_rst_files("source/private_api", "private_api")
+update_rst_files("source/private_api", "private")
 
 # Rename the tsunami_ip_utils.rst file to index.rst, and remove the modules.rst files
 rename_and_remove_files("source/public_api")

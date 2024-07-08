@@ -1,4 +1,4 @@
-.. _public_api:
+.. api_type:: public
 
 tsunami\_ip\_utils package
 ==========================
