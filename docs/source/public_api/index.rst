@@ -25,14 +25,6 @@ tsunami\_ip\_utils.comparisons module
    :undoc-members:
    :show-inheritance:
 
-tsunami\_ip\_utils.error module
--------------------------------
-
-.. automodule:: tsunami_ip_utils.error
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 tsunami\_ip\_utils.integral\_indices module
 -------------------------------------------
 

@@ -3,29 +3,53 @@ from pyparsing import *
 from uncertainties import unumpy, ufloat
 import h5py
 from pathlib import Path
+from . import config
+from typing import Tuple, List, Union, Dict
 
 ParserElement.enablePackrat()
 
 class SdfReader:
-    def __init__(self, filename):
+    """A class for reading TSUNAMI-B Sentitivity Data Files (SDFs, i.e. ``.sdf`` files produced by TSUNAMI-3D monte carlo
+    transport simulations).
+    
+    The format for TSUNAMI-B SDF files is given `here <https://scale-manual.ornl.gov/tsunami-ip-appAB.html#format-of-tsunami-b-
+    sensitivity-data-file>`_.
+
+    Notes
+    -----
+    The SDF reader currently does not support TSUNAMI-A formatted SDF files (produced by deterministic transport simulations).
+    """
+    energy_boundaries: np.ndarray
+    """Boundaries for the energy groups"""
+
+    sdf_data: List[dict]
+    """List of dictionaries containing the sensitivity profiles and other derived/descriptive data. The dictionary
+            keys are given by ``SDF_DATA_NAMES`` = :globalparam:`SDF_DATA_NAMES`."""
+    def __init__(self, filename: Union[str, Path]):
+        """Create a TSUNAMI-B SDF reader object from the given filename
+        
+        Parameters
+        ----------
+        filename
+            Path to the sdf file."""
         self.energy_boundaries, self.sdf_data = self._read_sdf(filename)
         
-    def _read_sdf(self, filename):
-        """Function that reads the sdf file and returns a dictionary of nuclide-reaction pairs and energy-dependent
+    def _read_sdf(self, filename: Union[str, Path]) -> Tuple[np.ndarray, List[dict]]:
+        """Reads the SDF file and returns a dictionary of nuclide-reaction pairs and energy-dependent
         sensitivities (with uncertainties)
         
         Parameters
         ----------
-        - Filename: str, path to the sdf file
+        Filename
+            Path to the sdf file.
         
         Returns
         -------
-        - energy_boundaries: np.ndarray, energy boundaries for the energy groups
-        - sdf_data: list of dict, list of dictionaries containing the nuclide-reaction pairs and the sensitivities
-            and uncertainties for the region-integrated sensitivity profile for each nuclide-reaction pair. The dictionary
-            keys are 'isotope', 'reaction_type', 'zaid', 'reaction_mt', 'zone_number', 'zone_volume', 
-            'energy_integrated_sensitivity', 'abs_sum_groupwise_sensitivities', 'sum_opposite_sign_groupwise_sensitivities', 
-            'sensitivities', and 'uncertainties'. The sensitivities and uncertainties are stored as unumpy.uarray objects."""
+        energy_boundaries
+            Energy boundaries for the energy groups.
+        sdf_data
+            List of dictionaries containing the sensitivity profiles and other derived/descriptive data. The dictionary
+            keys are given by ``SDF_DATA_NAMES`` = :globalparam:`SDF_DATA_NAMES`."""
         with open(filename, 'r') as f:
             data = f.read()
 
@@ -85,11 +109,9 @@ class SdfReader:
         # Now parse each result into a readable dictionary
         # -------------------------------------------------
 
-        # NOTE sum_opposite_sign_groupwise_sensitivities referrs to the groupwise sensitivities with opposite sign to the
+        # NOTE: sum_opposite_sign_groupwise_sensitivities refers to the groupwise sensitivities with opposite sign to the
         # integrated sensitivity coefficient
-        names = ["isotope", "reaction_type", "zaid", "reaction_mt", "zone_number", "zone_volume", \
-                 "energy_integrated_sensitivity", "abs_sum_groupwise_sensitivities", \
-                 "sum_opposite_sign_groupwise_sensitivities", "sensitivities", "uncertainties"]
+        names = config['SDF_DATA_NAMES']
         sdf_data = [dict(zip(names, match)) for match in sdf_data]
 
         # Convert the sensitivities and uncertainties to uncertainties.ufloat objects
@@ -104,7 +126,20 @@ class SdfReader:
         return energy_boundaries, sdf_data
         
 class RegionIntegratedSdfReader(SdfReader):
-    def __init__(self, filename):
+    """Reads region integrated TSUNAMI-B sensitivity data files produced by TSUNAMI-3D. Useful when the spatial dependence of 
+    sensitivty is not important."""
+    filename: Union[str, Path]
+    """Path to the sdf file."""
+    sdf_data: Union[List[dict], Dict[str, Dict[str, dict]]]
+    """Collection of region integrated sdf profiles. This can either be a list or a twice-nested dictionary (keyed by first by 
+    nuclide and then reaction type) of dictionaries keyed by ``SDF_DATA_NAMES`` = :globalparam:`SDF_DATA_NAMES`."""
+    def __init__(self, filename: Union[str, Path]):
+        """Create a TSUNAMI-B region integrated SDF reader object from the given filename
+        
+        Parameters
+        ----------
+        filename:
+            Path to the sdf file."""
         super().__init__(filename)
         
         # Now only return the region integrated sdf profiles
@@ -112,13 +147,14 @@ class RegionIntegratedSdfReader(SdfReader):
         self.filename = filename
         self.sdf_data = [ match for match in self.sdf_data if match['zone_number'] == 0 and match['zone_volume'] == 0 ]
     
-    def convert_to_dict(self, key='names'):
-        """Converts the sdf data into a dictionary keyed by nuclide-reaction pair or by ZAID and reaction MT
+    def convert_to_dict(self, key: str='names'):
+        """Converts the sdf data into a dictionary keyed by nuclide-reaction pair or by ZAID and reaction MT.
         
         Parameters
         ----------
-        - key: str, the key to use for the dictionary. Default is 'names' which uses the isotope name and reaction type
-            if 'numbers' is supplied instead then the ZAID and reaction MT are used."""
+        key
+            The key to use for the dictionary. Default is ``'names'`` which uses the isotope name and reaction type
+            if ``'numbers'`` is supplied instead then the ZAID and reaction MT are used."""
         # Since data is region and mixture integrated we can assume that there is only one entry for each nuclide-reaction pair
         if type(self.sdf_data) == dict:
             return self
@@ -140,16 +176,17 @@ class RegionIntegratedSdfReader(SdfReader):
         self.sdf_data = sdf_data_dict
         return self
     
-    def get_sensitivity_profiles(self, reaction_type='all'):
-        """Returns the sensitivity profiles for each nuclide-reaction pair in a list
+    def get_sensitivity_profiles(self, reaction_type: str='all') -> List[unumpy.uarray]:
+        """Returns the sensitivity profiles for each nuclide-reaction pair in a list in the order they appear in the ``sdf_data``.
         
         Parameters
         ----------
-        - reaction_type: str, the type of reaction to consider. Default is 'all' which considers all reactions
+        reaction_type
+            The type of reaction to consider. Default is 'all' which considers all reactions.
         
         Returns
         -------
-        - sensitivity_profiles: list of unumpy.uarrays, list of sensitivity profiles for each nuclide-reaction pair"""
+            List of sensitivity profiles for each nuclide-reaction pair."""
         if type(self.sdf_data) == list:
             if reaction_type == 'all':
                 return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data ]
@@ -171,18 +208,21 @@ def read_covariance_matrix(filename: str):
 def _read_ck_contributions(filename: str):
     pass
 
-def read_uncertainty_contributions(filename: str):
+def read_uncertainty_contributions(filename: Union[str, Path]) -> Tuple[List[dict], List[dict]]:
     """Reads the output file from TSUNAMI and returns the uncertainty contributions for each nuclide-reaction
     covariance.
     
     Parameters
     ----------
-    - filename: str, path to the TSUNAMI output file
+    filename
+        Path to the TSUNAMI output file.
 
     Returns
     -------
-    - isotope_totals: list of dict, list of dictionaries containing the nuclide-wise contributions
-    - isotope_reaction: list of dict, list of dictionaries containing the nuclide-reaction pairs and the contributions
+        * isotope_totals
+            List of dictionaries containing the nuclide-wise contributions.
+        * isotope_reaction
+            List of dictionaries containing the nuclide-reaction pairs and the contributions.
     """
     with open(filename, 'r') as f:
         data = f.read()
@@ -251,18 +291,32 @@ def read_uncertainty_contributions(filename: str):
     return isotope_totals, isotope_reaction
 
 
-def read_integral_indices(filename):
-    """Reads the output file from TSUNAMI-IP and returns the integral values for each application
+def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray]:
+    """Reads the output file from TSUNAMI-IP and returns the integral values for each application.
+
+    Notes
+    -----
+    Currently, this function and only reads :math:`c_k`, :math:`E_{\\text{total}}`, 
+    :math:`E_{\\text{fission}}`, :math:`E_{\\text{capture}}`, and :math:`E_{\\text{scatter}}`. If any of these are missing
+    from the output file, the function will raise an error. To ensure these are present, please include at least
     
+    ::
+
+        read parameters
+            e c
+        end parameters
+
+    in the TSUNAMI-IP input file.
+
     Parameters
     ----------
-    - filename: str, path to the TSUNAMI-IP output file
+    filename
+        Path to the TSUNAMI-IP output file.
     
     Returns
     -------
-    - integral_matrices: dict, dictionary of integral matrices for each integral index type. The dimensions
-        of the matrices are (num_experiments x num_applications) where num_experiments is the number of experiments.
-        Keys are 'C_k', 'E_total', 'E_fission', 'E_capture', and 'E_scatter'"""
+        Integral matrices for each integral index type. The shape of the matrices are ``(num_experiments, num_applications)``. 
+        Keys are ``'C_k'``, ``'E_total'``, ``'E_fission'``, ``'E_capture'``, and ``'E_scatter'``."""
 
     with open(filename, 'r') as f:
         data = f.read()
@@ -324,8 +378,20 @@ def read_integral_indices(filename):
 
     return integral_matrices
 
-def read_region_integrated_h5_sdf(filename: Path):
-    """Reads all region integrated sdfs from an .h5 sdf file and returns a dictionary of the data"""
+def read_region_integrated_h5_sdf(filename: Path) -> Dict[unumpy.uarray]:
+    """Reads all region integrated SDFs from a HDF5 (``.h5``) formatted TSUNAMI-B sdf file and returns a dictionary of 
+    the data
+    
+    Parameters
+    ----------
+    filename
+        Path to the .h5 SDF file (e.g. ``my_model.sdf.h5``)
+        
+    Returns
+    -------
+    sdf_data
+        Dictionary of the region integrated SDF data. The dictionary is twice-nested, and keyed first by nuclide, then by
+        reaction type. The values are the sensitivity profiles with uncertainties."""
     with h5py.File(filename, 'r') as f:
         # Get the region integrated sdf's, i.e. where unit=0
         region_integrated_indices = np.where(f['unit'][:] == 0)[0]

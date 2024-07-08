@@ -3,10 +3,13 @@ from tsunami_ip_utils.integral_indices import calculate_E
 import numpy as np
 from uncertainties import unumpy
 import pandas as pd
+from pandas import DataFrame as df
 from pathlib import Path
 from tsunami_ip_utils.perturbations import generate_points
+from typing import List, Dict
 
-def comparison(tsunami_ip_output_filename, application_filenames: list, experiment_filenames: list):
+def comparison(tsunami_ip_output_filename: Path, application_filenames: List[Path], 
+               experiment_filenames: List[Path]) -> Dict[str, df]:
     """Function that compares the calculated similarity parameter E with the TSUNAMI-IP output for each application with each
     experiment. The comparison is done for the nominal values and the uncertainties of the E values. In addition, the
     difference between manually calculated uncertainties and automatically calculated uncertainties (i.e. via the uncertainties
@@ -14,13 +17,16 @@ def comparison(tsunami_ip_output_filename, application_filenames: list, experime
     
     Parameters
     ----------
-    - tsunami_ip_output_filename: str, path to the TSUNAMI-IP output file
-    - application_filenames: list of str, paths to the application sdf files
-    - experiment_filenames: list of str, paths to the experiment sdf files
+    tsunami_ip_output_filename
+        Path to the TSUNAMI-IP output file.
+    application_filenames
+        Paths to the application sdf files.
+    experiment_filenames
+        Paths to the experiment sdf files.
     
     Returns
     -------
-    - data: dict, dictionary of pandas DataFrames for each type of E index. The DataFrames contain the calculated E values,
+        Dictionary of pandas DataFrames for each type of E index. The DataFrames contain the calculated E values,
         the manual uncertainties, the TSUNAMI-IP values, the relative difference in the mean, and the relative difference
         in the manual uncertainty. The DataFrames are indexed by the experiment number and the columns are a MultiIndex
         with the application number as the main index and the attributes as the subindex."""
@@ -105,12 +111,18 @@ def ck_correlation_comparison(tsunami_ip_output: Path, application_sdfs: Path, e
     
     Parameters
     ----------
-    - tsunami_ip_output: Path, path to the TSUNAMI-IP output file
-    - application_sdfs: Path, path to the application sdf files
-    - experiment_sdfs: Path, path to the experiment sdf files
-    - base_library: Path, path to the base library
-    - perturbation_factors: Path, path to the perturbation factors
-    - num_perturbations: int, number of perturbations to generate
+    tsunami_ip_output
+        Path to the TSUNAMI-IP output file.
+    application_sdfs
+        Path to the application sdf files.
+    experiment_sdfs
+        Path to the experiment sdf files.
+    base_library
+        Path to the base library
+    perturbation_factors
+        Path to the perturbation factors.
+    num_perturbations
+        Number of perturbations to generate.
     
     Returns
     -------

@@ -33,7 +33,7 @@ if "%1" == "apidoc" (
 
 REM Python script to customize .rst files
 if "%1" == "customize-rst" (
-    python prepend_api_designation_and_rename.py
+    python rename.py
     goto end
 )
 

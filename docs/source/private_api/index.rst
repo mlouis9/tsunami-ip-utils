@@ -4,8 +4,8 @@
 
 Private API Documentation
 =========================
-**NOTE**: This is the private API documentation for the `tsunami_ip_utils` package. This documentation is intended for developers who 
-are working on the Tsunami IP Utils package itself. If you are a user of the Tsunami IP Utils package, you should refer to the 
+**NOTE**: This is the private API documentation for the ``tsunami_ip_utils`` package. This documentation is intended for developers who 
+are working on the Tsunami IP Utils package itself. If you are a user of the ``tsunami_ip_utils`` package, you should refer to the 
 :ref:`public_api` instead.
 
 
@@ -20,19 +20,19 @@ Subpackages
 Submodules
 ----------
 
-tsunami\_ip\_utils.comparisons module
--------------------------------------
+tsunami\_ip\_utils.\_error module
+---------------------------------
 
-.. automodule:: tsunami_ip_utils.comparisons
+.. automodule:: tsunami_ip_utils._error
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-tsunami\_ip\_utils.error module
--------------------------------
+tsunami\_ip\_utils.comparisons module
+-------------------------------------
 
-.. automodule:: tsunami_ip_utils.error
+.. automodule:: tsunami_ip_utils.comparisons
    :members:
    :undoc-members:
    :show-inheritance:

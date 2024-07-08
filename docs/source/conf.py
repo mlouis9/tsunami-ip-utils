@@ -1,8 +1,12 @@
 import os, sys
 import logging
 from docutils.parsers.rst import Directive
+import inspect
 
-sys.path.insert(0, os.path.abspath('../../src'))
+src_path = os.path.abspath('../../src')
+ext_path = os.path.abspath('./_ext')
+sys.path.insert(0, src_path)
+sys.path.insert(0, ext_path)
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -26,10 +30,15 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinx_autodoc_typehints',
     'sphinx.ext.viewcode', # Add links to source code
-    'sphinx.ext.autosummary'
+    'sphinx.ext.mathjax',  # Render math equations using MathJax
+    'globalparam',         # Custom extension for global parameters
 ]
 
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
+autodoc_default_options = {
+    'member-order': 'bysource',
+    'special-members': '__init__'
+}
+
 templates_path = ['_templates']
 exclude_patterns = []
 show_headings = False
@@ -73,10 +82,27 @@ def setup(app):
     logger = logging.getLogger('sphinx')
     logger.addFilter(FilterDuplicateObjectWarnings())
 
+def has_private_members(obj):
+    """Check if the given object has any private members."""
+    for name, member in inspect.getmembers(obj):
+        if name.startswith('_') and not name.startswith('__'):
+            return True
+    return False
+
 def skip_member(app, what, name, obj, skip, options):
     api_type = app.config.api_type
-    if api_type == 'public' and name.startswith('_'):
-        return True
-    elif api_type == 'private' and not name.startswith('_'):
-        return True
+    if inspect.isclass(obj):
+        # Decide based on whether the class has private members
+        if api_type == 'public' and has_private_members(obj):
+            return False  # Do not skip, include in documentation for public API
+        elif api_type == 'private' and not has_private_members(obj):
+            return True  # Skip if it's meant to be private but has no private members
+    else:
+        # For non-class objects, use the existing name-based logic
+        private_method = name.startswith('_') and not name.startswith('__')
+        if api_type == 'public' and private_method:
+            return True
+        elif api_type == 'private' and not private_method:
+            return True
+
     return skip

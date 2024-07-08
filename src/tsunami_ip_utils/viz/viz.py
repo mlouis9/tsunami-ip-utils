@@ -3,7 +3,7 @@ from .pie_plot import PiePlotter, InteractivePiePlotter
 from .scatter_plot import ScatterPlotter, InteractiveScatterPlotter, InteractivePerturbationScatterPlotter, load_interactive_scatter_plot
 from .matrix_plot import interactive_matrix_plot
 from .plot_utils import determine_plot_type
-from tsunami_ip_utils.integral_indices import add_missing_reactions_and_nuclides
+from tsunami_ip_utils.integral_indices import _add_missing_reactions_and_nuclides
 import numpy as np
 from typing import List, Dict
 
@@ -80,7 +80,7 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     # Get the list of isotopes for which contributions are available
     isotopes = list(set(application_contributions.keys()).union(experiment_contributions.keys()))
 
-    all_reactions = add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
+    all_reactions = _add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
 
     # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
     contribution_pairs = []

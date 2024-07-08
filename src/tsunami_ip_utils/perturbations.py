@@ -17,10 +17,11 @@ from multiprocessing import Pool
 from tqdm import tqdm
 import numpy as np
 from tqdm.contrib.concurrent import process_map
-from typing import List, Tuple
+from typing import List, Tuple, Dict
+from . import config
 
 # Number of xs perturbation samples available in SCALE
-NUM_SAMPLES = 1000
+NUM_SAMPLES = config['NUM_SAMPLES']
 
 def _generate_and_read_perturbed_library(base_library: Path, perturbation_factors: Path, sample_number: int, 
                                          all_nuclide_reactions: dict) -> dict:
@@ -33,9 +34,9 @@ def _generate_and_read_perturbed_library(base_library: Path, perturbation_factor
     perturbation_factors
         Path to the perturbation factors directory (corresponding to the base library).
     sample_number
-        The sample number to use for generating the perturbed library. Must be from 1 - NUM_SAMPLES, where NUM_SAMPLES
-        is the number of perturbation factor samples provided in the user's current version of SCALE. 
-        (0 <= sample_number <= NUM_SAMPLES)
+        The sample number to use for generating the perturbed library. Must be from 1 - ``NUM_SAMPLES``, where 
+        ``NUM_SAMPLES`` = :globalparam:`NUM_SAMPLES` is the number of perturbation factor samples provided in 
+        the user's current version of SCALE. (``0`` :math:`\\leq` ``sample_number`` :math:`\\leq` :globalparam:`NUM_SAMPLES`)
     all_nuclide_reactions
         A dictionary containing the nuclide reactions that are read from the perturbed library.
     
@@ -203,7 +204,7 @@ def generate_points(application_path: Path, experiment_path: Path, base_library:
     return points
         
 
-def _cache_perturbed_library(args: Tuple[int, Path, Path, int, dict[List[str]], Path]) -> float:
+def _cache_perturbed_library(args: Tuple[int, Path, Path, int, Dict[str, List[str]], Path]) -> float:
     """Caches a single perturbed cross section library.
 
     Parameters
@@ -219,10 +220,10 @@ def _cache_perturbed_library(args: Tuple[int, Path, Path, int, dict[List[str]], 
         - perturbation_factors (Path):
             Path to the cross section perturbation factors (used to generate the perturbed libraries).
         - sample_number (int):
-            The sample number to use for generating the perturbed library. Must be from 1 - NUM_SAMPLES, where NUM_SAMPLES
+            The sample number to use for generating the perturbed library. Must be from 1 - ``NUM_SAMPLES``, where ``NUM_SAMPLES``
             is the number of perturbation factor samples provided in the user's current version of SCALE. 
-            (0 <= sample_number <= NUM_SAMPLES)
-        - available_nuclide_reactions (dict[List[str]]):
+            (0 :math:`\\leq` ``sample_number`` :math:`\\leq` ``NUM_SAMPLES``)
+        - available_nuclide_reactions (Dict[str, List[str]]):
             A dictionary containing the nuclide reactions that are read from the perturbed library.
 
     Returns
@@ -252,7 +253,7 @@ def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_ca
     perturbation_factors
         Path to the cross section perturbation factors (used to generate the perturbed libraries).
     reset_cache
-        Whether to reset the cache or not (default is `False`).
+        Whether to reset the cache or not (default is ``False``).
         
     Returns
     -------

@@ -28,7 +28,7 @@ apidoc-private:
 # Python script to customize .rst files
 .PHONY: customize-rst
 customize-rst:
-	python prepend_api_designation_and_rename.py
+	python rename.py
 
 # Modify the html target to depend on the new apidoc and customize-rst targets
 html: apidoc customize-rst

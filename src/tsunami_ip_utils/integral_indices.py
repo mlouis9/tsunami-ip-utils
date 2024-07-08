@@ -1,36 +1,45 @@
 from uncertainties import ufloat, umath, unumpy
 import numpy as np
 from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_uncertainty_contributions
-from tsunami_ip_utils.error import unit_vector_uncertainty_propagation, dot_product_uncertainty_propagation
+from tsunami_ip_utils._error import _unit_vector_uncertainty_propagation, _dot_product_uncertainty_propagation
 from copy import deepcopy
+from typing import List, Set, Tuple, Dict
+from pathlib import Path
+from uncertainties.core import Variable
 
-def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, application_filename=None, \
-                                      experiment_filename=None, uncertainties='automatic', experiment_norm=None, \
-                                        application_norm=None):
-    """Calculates E given the sensitivity vectors for an application and an experiment. 
-    
-    NOTE the application and experiment
-    filenames are used to break the correlation between the application and experiment vectors (that should not exist). This 
-    is because the vectors are only correlated if the application and experiment are the same.
+def _calculate_E_from_sensitivity_vecs(application_vector: unumpy.uarray, experiment_vector: unumpy.uarray, 
+                                      application_filename: Path=None, experiment_filename: Path=None, 
+                                      uncertainties: str='automatic', experiment_norm: Variable=None, 
+                                      application_norm: Variable=None) -> Variable:
+    """Calculates the integral index: E given the sensitivity vectors for an application and an experiment. **NOTE**: the 
+    application and experiment filenames are used to break the correlation between the application and experiment vectors 
+    (that should not exist). This is because the vectors are only correlated if the application and experiment are the same.
     
     Parameters
     ----------
-    - application_vector: unumpy.uarray, sensitivity vector for the application
-    - experiment_vector: unumpy.uarray, sensitivity vector for the experiment
-    - application_filename: str, filename of the application sdf file (only needed for automatic uncertianty propagation)
-    - experiment_filename: str, filename of the experiment sdf file (only needed for automatic uncertianty propagation)
-    - uncertainties: str, type of error propagation to use. Default is 'automatic' which uses the uncertainties package.
+    application_vector
+        Sensitivity vector for the application.
+    experiment_vector
+        Sensitivity vector for the experiment.
+    application_filename
+        Filename of the application sdf file (only needed for automatic uncertianty propagation).
+    experiment_filename
+        Filename of the experiment sdf file (only needed for automatic uncertianty propagation).
+    uncertainties
+        Type of error propagation to use. Default is 'automatic' which uses the uncertainties package.
         If set to 'manual', then manual error propagation is used which is generally faster
-    - experiment_norm: ufloat, norm of the experiment vector. If not provided, it is calculated. This is mainly used for
+    experiment_norm
+        Norm of the experiment vector. If not provided, it is calculated. This is mainly used for
         calculating E contributions, where the denominator is not actually the norm of the application and experiment
         vectors.
-    - application_norm: ufloat, norm of the application vector. If not provided, it is calculated. This is mainly used for
+    application_norm
+        Norm of the application vector. If not provided, it is calculated. This is mainly used for
         calculating E contributions, where the denominator is not actually the norm of the application and experiment
         vectors.
         
     Returns
     -------
-    - E: ufloat, similarity parameter between the application and the experiment"""
+        Similarity parameter between the application and the experiment"""
     
     norms_not_provided = ( experiment_norm == None ) and ( application_norm == None )
     if uncertainties == 'automatic': # Automatic error propagation with uncertainties package
@@ -85,8 +94,8 @@ def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, app
         use those to calculate the uncertainty of E."""
 
         # Calculate the uncertainties in the unit vectors
-        application_unit_vector_error = unit_vector_uncertainty_propagation(application_vector)
-        experiment_unit_vector_error = unit_vector_uncertainty_propagation(experiment_vector)
+        application_unit_vector_error = _unit_vector_uncertainty_propagation(application_vector)
+        experiment_unit_vector_error = _unit_vector_uncertainty_propagation(experiment_vector)
 
         # Construct application and experiment unit vectors as unumpy.uarray objects
         application_unit_vector = unumpy.uarray(unumpy.nominal_values(application_unit_vector), \
@@ -94,43 +103,57 @@ def calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, app
         experiment_unit_vector = unumpy.uarray(unumpy.nominal_values(experiment_unit_vector), experiment_unit_vector_error)
 
         # Now calculate error in dot product to get the uncertainty in E
-        E_uncertainty = dot_product_uncertainty_propagation(application_unit_vector, experiment_unit_vector)
+        E_uncertainty = _dot_product_uncertainty_propagation(application_unit_vector, experiment_unit_vector)
 
         return ufloat(E, E_uncertainty)
 
 
-def create_sensitivity_vector(sdfs):
+def _create_sensitivity_vector(sdfs: List[unumpy.uarray]) -> unumpy.uarray:
     """Creates a senstivity vector from all of the sensitivity profiles from a specific application or experiment
+    by concatenating them together.
+
+    Examples
+    --------
+    >>> sdfs = [ unumpy.uarray( [1, 2, 3], [0.1, 0.2, 0.3] ), unumpy.uarray( [4, 5, 6], [0.4, 0.5, 0.6] ) ]
+    >>> create_sensitivity_vector(sdfs)
+    array([1.0+/-0.1, 2.0+/-0.2, 3.0+/-0.3, 4.0+/-0.4, 5.0+/-0.5, 6.0+/-0.6],
+          dtype=object)
     
-    Parameters:
-    -----------
-    - sdfs: list of unumpy.uarrays of sensitivities for each nuclide-reaction pair in consideration
+    Parameters
+    ----------
+        List of sensitivity profiles for each nuclide-reaction pair in consideration.
     
     Returns
     -------
-    - sensitivity_vector: unumpy.uarray of sensitivities from all of the sensitivity profiles"""
+        Sensitivities from all of the sensitivity profiles combined into a single vector of length
+        ``sum( [ len(sdf_profile) for sdf_profile in sdfs ] )``"""
     uncertainties = np.concatenate([unumpy.std_devs(sdf) for sdf in sdfs])
     senstivities = np.concatenate([unumpy.nominal_values(sdf) for sdf in sdfs])
 
     return unumpy.uarray(senstivities, uncertainties)
 
 
-def calculate_E(application_filenames: list, experiment_filenames: list, reaction_type='all', uncertainties='manual'):
+def calculate_E(application_filenames: List[str], experiment_filenames: List[str], reaction_type: str='all', 
+                uncertainties: str='manual') -> np.ndarray:
     """Calculates the similarity parameter, E for each application with each available experiment given the application 
     and experiment sdf files
     
     Parameters
     ----------
-    - application_filenames: list of str, paths to the application sdf files
-    - experiment_filenames: list of str, paths to the experiment sdf files
-    - reaction_type: str, the type of reaction to consider in teh calculation of E. Default is 'all' which considers all 
-        reactions
-    - uncertainties: str, the type of uncertainty propagation to use. Default is 'automatic' which uses the uncertainties
-        package for error propagation. If set to 'manual', then manual error propagation is used
+    application_filenames
+        Paths to the application sdf files.
+    experiment_filenames
+        Paths to the experiment sdf files.
+    reaction_type 
+        The type of reaction to consider in teh calculation of E. Default is ``'all``' which considers all 
+        reactions.
+    uncertainties 
+        The type of uncertainty propagation to use. Default is ``'automatic'`` which uses the uncertainties
+        package for error propagation. If set to ``'manual'``, then manual error propagation is used.
     
     Returns
     -------
-    - E: np.ndarray, similarity parameter for each application with each experiment (experiment x application)"""
+        Similarity parameter for each application with each experiment, shape: ``(len(application_filenames), len(experiment_filenames))``"""
 
     # Read the application and experiment sdf files
 
@@ -146,7 +169,7 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
         for j, application in enumerate(application_sdfs):
             # Now add missing data to the application and experiment dictionaries
             all_isotopes = set(application.sdf_data.keys()).union(set(experiment.sdf_data.keys()))
-            add_missing_reactions_and_nuclides(application.sdf_data, experiment.sdf_data, all_isotopes)
+            _add_missing_reactions_and_nuclides(application.sdf_data, experiment.sdf_data, all_isotopes)
             
             # Sometimes the application and experiment dictionaries have different orders, which causes their sensitivity
             # profiles and hence sensitivity vectors to be different. To fix this, we need to sort the dictionaries
@@ -159,37 +182,44 @@ def calculate_E(application_filenames: list, experiment_filenames: list, reactio
             application_profiles = application.get_sensitivity_profiles()
             experiment_profiles  = experiment.get_sensitivity_profiles()
 
-            application_vector = create_sensitivity_vector(application_profiles)
-            experiment_vector  = create_sensitivity_vector(experiment_profiles)
+            application_vector = _create_sensitivity_vector(application_profiles)
+            experiment_vector  = _create_sensitivity_vector(experiment_profiles)
 
-            E_vals[i, j] = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, \
+            E_vals[i, j] = _calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, \
                                                              application_filenames[j], experiment_filenames[i], uncertainties)
 
     return E_vals
 
-def get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions, application_norm, experiment_norm):
-    """Calculate contributions to the similarity parameter E for each reaction type for a given isotope
+def _get_reaction_wise_E_contributions(application: dict, experiment: dict, isotope: str, all_reactions: List[str], 
+                                      application_norm: Variable, experiment_norm: Variable) -> List[dict]:
+    """Calculate contributions to the similarity parameter E for each reaction type for a given isotope.
     
     Parameters
     ----------
-    - application: dict, dictionary of application sensitivity profiles
-    - experiment: dict, dictionary of experiment sensitivity profiles
-    - isotope: str, isotope to consider
-    - all_reactions: list of str, list of all possible reaction types
-    - application_norm: ufloat, norm of the application sensitivity vector
-    - experiment_norm: ufloat, norm of the experiment sensitivity vector
+    application
+        Dictionary of application sensitivity profiles.
+    experiment
+        Dictionary of experiment sensitivity profiles.
+    isotope
+        Isotope to consider.
+    all_reactions
+        List of all possible reaction types.
+    application_norm
+        Norm of the application sensitivity vector.
+    experiment_norm
+        Norm of the experiment sensitivity vector.
     
     Returns
     -------
-    - E_contributions: list of dict, list of dictionaries containing the contribution to the similarity parameter E for each
-        reaction type"""
+        List of dictionaries containing the contribution to the similarity parameter E for each
+        reaction type."""
     
     E_contributions = []
     for reaction in all_reactions:
         application_vector = application[isotope][reaction]['sensitivities']
         experiment_vector = experiment[isotope][reaction]['sensitivities']
 
-        E_contribution = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, uncertainties='manual', \
+        E_contribution = _calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, uncertainties='manual', \
                                                            application_norm=application_norm, experiment_norm=experiment_norm)
         E_contributions.append({
             "isotope": isotope,
@@ -199,23 +229,29 @@ def get_reaction_wise_E_contributions(application, experiment, isotope, all_reac
 
     return E_contributions
 
-def add_missing_reactions_and_nuclides(application, experiment, all_isotopes, mode='sdfs'):
+def _add_missing_reactions_and_nuclides(application: dict, experiment: dict, all_isotopes: List[str], 
+                                       mode: str='sdfs') -> Set[str]:
     """Add missing reactions and nuclides to the application and experiment dictionaries with an sdf profile of all zeros.
-    NOTE: Since dictionaries are passed by reference, this function does not return anything, but modifies the
+    The set of all isotopes 
+    **NOTE**: since dictionaries are passed by reference, this function does not return anything, but modifies the
     application and experiment dictionaries in place.
     
     Parameters
     ----------
-    - application: dict, dictionary of application sensitivity profiles
-    - experiment: dict, dictionary of experiment sensitivity profiles
-    - all_isotopes: list of str, list of all isotopes in the application and experiment dictionaries
-    - mode: str, the mode to use for adding missing reactions and nuclides. Default is 'sdfs' which adds sdf profiles to missing
-        reactions and nuclides. If set to 'contribution', then the contributions to the similarity parameter E are set to zero
-        for missing nuclides and reactions
+    application
+        Dictionary of application sensitivity profiles.
+    experiment
+        Dictionary of experiment sensitivity profiles.
+    all_isotopes
+        List of all isotopes in the application and experiment dictionaries.
+    mode
+        The mode to use for adding missing reactions and nuclides. Default is ``'sdfs'`` which adds sdf profiles to missing
+        reactions and nuclides. If set to ``'contribution'``, then the contributions to the similarity parameter E are set to zero
+        for missing nuclides and reactions.
     
     Returns
     -------
-    - all_isotopes: set of str, set of all isotopes in the application and experiment dictionaries"""
+        Set of all isotopes in the application and experiment dictionaries."""
     # Whether or not the supplied data is only isotopes or includes reactions
     isotopes_only =  type( application[ list( application.keys() )[0] ] ) != dict
 
@@ -281,27 +317,32 @@ def add_missing_reactions_and_nuclides(application, experiment, all_isotopes, mo
 
     return all_reactions
 
-def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedSdfReader, experiment: RegionIntegratedSdfReader):
+def _get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedSdfReader, experiment: RegionIntegratedSdfReader
+                                                   ) -> Tuple[List[dict], List[dict]]:
     """Calculate the contributions to the similarity parameter E for each nuclide and for each reaction type for a given
-    application and experiment
+    application and experiment.
     
     Parameters
     ----------
-    - application: RegionIntegratedSdfReader, contains application sensitivity profile dictionaries
-    - experiment: RegionIntegratedSdfReader, contains experiment sensitivity profile dictionaries
+    application
+        Contains application sensitivity profile dictionaries.
+    experiment
+        Contains experiment sensitivity profile dictionaries.
     
     Returns
     -------
-    - nuclide_wise_contributions: list of dict, list of dictionaries containing the contribution to the similarity parameter E
-        for each nuclide
-    - nuclide_reaction_wise_contributions: list of dict, list of dictionaries containing the contribution to the similarity"""
+        * nuclide_wise_contributions
+            List of dictionaries containing the contribution to the similarity parameter E.
+            for each nuclide
+        * nuclide_reaction_wise_contributions
+            List of dictionaries containing the contribution to the similarity."""
 
     # First, extract the sensitivity vectors for the application and experiment
     
     # Calculate |S_A| and |S_E| to normalize the E contributions properly
 
-    application_vector = create_sensitivity_vector(application.get_sensitivity_profiles())
-    experiment_vector = create_sensitivity_vector(experiment.get_sensitivity_profiles())
+    application_vector = _create_sensitivity_vector(application.get_sensitivity_profiles())
+    experiment_vector = _create_sensitivity_vector(experiment.get_sensitivity_profiles())
 
     application_norm = umath.sqrt(np.sum(application_vector**2))
     experiment_norm = umath.sqrt(np.sum(experiment_vector**2))
@@ -318,17 +359,17 @@ def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedS
 
     # Since different nuclides can have different reactions, we need to consider all reactions for each nuclide (e.g. 
     # fissile isotopes will have fission reactions, while non-fissile isotopes will not)
-    all_reactions = add_missing_reactions_and_nuclides(application, experiment, all_isotopes)
+    all_reactions = _add_missing_reactions_and_nuclides(application, experiment, all_isotopes)
 
     for isotope in all_isotopes:
 
         # For isotope-wise contribution, the sensitivity vector is all of the reaction sensitivities concatenated together
-        application_vector = create_sensitivity_vector([ application[isotope][reaction]['sensitivities'] \
+        application_vector = _create_sensitivity_vector([ application[isotope][reaction]['sensitivities'] \
                                                         for reaction in all_reactions ] )
-        experiment_vector  = create_sensitivity_vector([ experiment[isotope][reaction]['sensitivities'] \
+        experiment_vector  = _create_sensitivity_vector([ experiment[isotope][reaction]['sensitivities'] \
                                                         for reaction in all_reactions ])
 
-        E_isotope_contribution = calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, uncertainties='manual',
+        E_isotope_contribution = _calculate_E_from_sensitivity_vecs(application_vector, experiment_vector, uncertainties='manual',
                                                                    application_norm=application_norm, \
                                                                     experiment_norm=experiment_norm)
 
@@ -339,27 +380,32 @@ def get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegratedS
 
         # For nuclide-reaction-wise contribution, we need to consider each reaction type
         nuclide_reaction_wise_contributions += \
-            get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions, \
+            _get_reaction_wise_E_contributions(application, experiment, isotope, all_reactions, \
                                               application_norm, experiment_norm)
         
     return nuclide_wise_contributions, nuclide_reaction_wise_contributions
 
 
-def calculate_E_contributions(application_filenames: list, experiment_filenames: list):
+def calculate_E_contributions(application_filenames: List[str], experiment_filenames: List[str]
+                              ) -> Tuple[unumpy.uarray, unumpy.uarray]:
     """Calculates the contributions to the similarity parameter E for each application with each available experiment 
-    on a nuclide basis and on a nuclide-reaction basis
+    on a nuclide basis and on a nuclide-reaction basis.
     
     Parameters
     ----------
-    - application_filenames: list of str, paths to the application sdf files
-    - experiment_filenames: list of str, paths to the experiment sdf files
+    application_filenames
+        Paths to the application sdf files.
+    experiment_filenames
+        Paths to the experiment sdf files.
     
     Returns
     -------
-    - E_contributions_nuclide: unumpy.uarray of contributions to the similarity parameter E for each application with each
-        experiment on a nuclide basis.
-    - E_contributions_nuclide_reaction: unumpy.uarray of contributions to the similarity parameter E for each application with
-        each experiment on a nuclide-reaction basis"""
+        * E_contributions_nuclide
+            Contributions to the similarity parameter E for each application with each
+            experiment on a nuclide basis.
+        * E_contributions_nuclide_reaction
+            Contributions to the similarity parameter E for each application with
+            each experiment on a nuclide-reaction basis."""
     
     application_sdfs = [ RegionIntegratedSdfReader(filename) for filename in application_filenames ]
     experiment_sdfs  = [ RegionIntegratedSdfReader(filename) for filename in experiment_filenames ]
@@ -371,7 +417,7 @@ def calculate_E_contributions(application_filenames: list, experiment_filenames:
     for i, experiment in enumerate(experiment_sdfs):
         for j, application in enumerate(application_sdfs):
             nuclide_wise_contributions, nuclide_reaction_wise_contributions = \
-                get_nuclide_and_reaction_wise_E_contributions(application, experiment)
+                _get_nuclide_and_reaction_wise_E_contributions(application, experiment)
 
             E_nuclide_wise[i, j] = nuclide_wise_contributions
             E_nuclide_reaction_wise[i, j] = nuclide_reaction_wise_contributions
@@ -379,21 +425,27 @@ def calculate_E_contributions(application_filenames: list, experiment_filenames:
     return E_nuclide_wise, E_nuclide_reaction_wise
 
 
-def calculate_uncertainty_contributions(application_filenames: list, experiment_filenames: list):
-    """Calculates the contributions to the uncertainty in k (i.e. dk/k) for each application with each available experiment
-    on a nuclide basis and on a nuclide-reaction basis
+def read_uncertainty_contributions(application_filenames: List[str], experiment_filenames: List[str]
+                                   ) -> Tuple[ Dict[ str, unumpy.uarray ], Dict[ str,  unumpy.uarray ] ]:
+    """Read the contributions to the uncertainty in :math:`k_{\\text{eff}}` (i.e. :math:`\\frac{dk}{k}`) for each 
+    application with each available experiment on a nuclide basis and on a nuclide-reaction basis from the
+    provided TSUNAMI-IP ``.out`` files.
 
     Parameters
     ----------
-    - application_filenames: list of str, paths to the application output (.out) files
-    - experiment_filenames: list of str, paths to the experiment output (.out) files
+    application_filenames
+        Paths to the application output (``.out``) files.
+    experiment_filenames
+        Paths to the experiment output (``.out``) files.
 
     Returns
     -------
-    - uncertainty_contributions_nuclide: dict of unumpy.uarray of contributions to the uncertainty in k for each application and 
-        each experiment on a nuclide basis. Keyed by 'application' and 'experiment'
-    - uncertainty_contributions_nuclide_reaction: dict of unumpy.uarray of contributions to the uncertainty in k
-        for each application and each experiment on a nuclide-reaction basis. Keyed by 'application' and 'experiment'"""
+        * uncertainty_contributions_nuclide
+            Contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and 
+            each experiment on a nuclide basis. Keyed by 'application' and 'experiment'
+        * uncertainty_contributions_nuclide_reaction
+            Contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and each experiment on a 
+            nuclide-reaction basis. Keyed by ``'application'`` and ``'experiment'``."""
     
     dk_over_k_nuclide_wise = {
         'application': np.empty( len(application_filenames), dtype=object ),

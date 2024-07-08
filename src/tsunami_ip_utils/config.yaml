@@ -1,0 +1,13 @@
+NUM_SAMPLES: 1000   # Number of cross section perturbation factors available in SCALE
+SDF_DATA_NAMES:     # Names of the data fields parsed by the SDF reader for TSUNAMI-B formatted SDF files
+  - "isotope"
+  - "reaction_type"
+  - "zaid"
+  - "reaction_mt"
+  - "zone_number"
+  - "zone_volume"
+  - "energy_integrated_sensitivity"
+  - "abs_sum_groupwise_sensitivities"
+  - "sum_opposite_sign_groupwise_sensitivities"
+  - "sensitivities"
+  - "uncertainties"
