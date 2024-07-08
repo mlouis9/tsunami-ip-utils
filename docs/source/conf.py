@@ -93,13 +93,13 @@ def skip_member(app, what, name, obj, skip, options):
     api_type = app.config.api_type
     if inspect.isclass(obj):
         # Decide based on whether the class has private members
-        if api_type == 'public' and has_private_members(obj):
+        if api_type == 'public':
             return False  # Do not skip, include in documentation for public API
         elif api_type == 'private' and not has_private_members(obj):
             return True  # Skip if it's meant to be private but has no private members
     else:
         # For non-class objects, use the existing name-based logic
-        private_method = name.startswith('_') and not name.startswith('__')
+        private_method = name.startswith('_') and ( not name.startswith('__') )
         if api_type == 'public' and private_method:
             return True
         elif api_type == 'private' and not private_method:
