@@ -13,7 +13,7 @@ build:
   jobs:
     post_checkout:
       - git fetch --unshallow || true
-    html:
+    pre_build:
       commands:
         - make html
 
