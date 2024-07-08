@@ -378,7 +378,7 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
 
     return integral_matrices
 
-def read_region_integrated_h5_sdf(filename: Path) -> Dict[unumpy.uarray]:
+def read_region_integrated_h5_sdf(filename: Path) -> Dict[str, unumpy.uarray]:
     """Reads all region integrated SDFs from a HDF5 (``.h5``) formatted TSUNAMI-B sdf file and returns a dictionary of 
     the data
     
