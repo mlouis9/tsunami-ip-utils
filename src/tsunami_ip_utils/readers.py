@@ -168,7 +168,7 @@ class RegionIntegratedSdfReader(SdfReader):
 def read_covariance_matrix(filename: str):
     pass
 
-def read_ck_contributions(filename: str):
+def _read_ck_contributions(filename: str):
     pass
 
 def read_uncertainty_contributions(filename: str):

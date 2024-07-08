@@ -3,15 +3,17 @@ import numpy as np
 
 def unit_vector_uncertainty_propagation(vector):
     """Does error propagation for the components of a vector v that is normalized to a unit vector via 
-    v^ = v / ||v||
+    v^ = v / ||v||.
     
     Parameters
     ----------
-    - vector: unumpy.uarray, vector to normalize and calculate uncertainties for
+    - vector : unumpy.uarray
+        Vector to normalize and calculate uncertainties for.
     
     Returns
     -------
-    - unit_vector_uncertainties: np.ndarray, uncertainties of the unit vector components"""
+    - unit_vector_uncertainties : np.ndarray
+        Uncertainties of the unit vector components."""
 
 
     """To calculate the uncertainty of u^ and v^, note
@@ -52,12 +54,15 @@ def dot_product_uncertainty_propagation(vect1, vect2):
     
     Parameters
     ----------
-    - vect1: unumpy.uarray, first vector in dot product
-    - vect2: unumpy.uarray, second vector in dot product
+    - vect1 : unumpy.uarray
+        first vector in dot product.
+    - vect2 : unumpy.uarray
+        second vector in dot product.
 
     Returns
     -------
-    - dot_product_uncertainty: float, uncertainty in the dot product of the two vectors"""
+    - dot_product_uncertainty : float
+        uncertainty in the dot product of the two vectors."""
 
     dot_product_uncertainty = 0
     for i in range(len(vect1)):

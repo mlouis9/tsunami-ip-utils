@@ -17,21 +17,31 @@ from multiprocessing import Pool
 from tqdm import tqdm
 import numpy as np
 from tqdm.contrib.concurrent import process_map
+from typing import List, Tuple
 
-def _generate_and_read_perturbed_library(base_library: Path, perturbation_factors: Path, sample_number: int, \
-                                        all_nuclide_reactions: dict):
+# Number of xs perturbation samples available in SCALE
+NUM_SAMPLES = 1000
+
+def _generate_and_read_perturbed_library(base_library: Path, perturbation_factors: Path, sample_number: int, 
+                                         all_nuclide_reactions: dict) -> dict:
     """Generates and reads perturbed multigroup cross section libraries.
     
     Parameters
     ----------
-    - base_library: Path, path to the base cross section library
-    - perturbation_factors: Path, path to the perturbation factors directory (corresponding to the base library)
-    - sample_number: int, the sample number to use for generating the perturbed library. NOTE must be from 1-1000.
-    - all_nuclide_reactions: dict, a dictionary containing the nuclide reactions that are read from the perturbed library
+    base_library
+        Path to the base cross section library.
+    perturbation_factors
+        Path to the perturbation factors directory (corresponding to the base library).
+    sample_number
+        The sample number to use for generating the perturbed library. Must be from 1 - NUM_SAMPLES, where NUM_SAMPLES
+        is the number of perturbation factor samples provided in the user's current version of SCALE. 
+        (0 <= sample_number <= NUM_SAMPLES)
+    all_nuclide_reactions
+        A dictionary containing the nuclide reactions that are read from the perturbed library.
     
     Returns
     -------
-    - perturbed_xs: dict, a dictionary containing the perturbed cross section libraries for each nuclide reaction"""
+        A dictionary containing the perturbed cross section libraries for each nuclide reaction."""
     # Read the SCALE input template
     current_dir = Path(__file__).parent
     template_filename = current_dir / 'input_files' / 'generate_perturbed_library.inp'
@@ -72,8 +82,27 @@ def _generate_and_read_perturbed_library(base_library: Path, perturbation_factor
 
     return perturbed_xs
 
-def generate_points(application_path: Path, experiment_path: Path, base_library: Path, perturbation_factors: Path, \
-                     num_perturbations: int):
+def generate_points(application_path: Path, experiment_path: Path, base_library: Path, perturbation_factors: Path, 
+                    num_perturbations: int) -> List[Tuple[float, float]]:
+    """Generates points for a similarity scatter plot by combining the sensitivity profiles of the application and experiment
+    with the perturbed cross section libraries.
+
+    Parameters
+    ----------
+    application_path
+        Path to the application sensitivity profile.
+    experiment_path
+        Path to the experiment sensitivity profile.
+    base_library
+        Path to the base cross section library.
+    perturbation_factors
+        Path to the perturbation factors directory.
+    num_perturbations
+        Number of perturbation points to generate.
+    
+    Returns
+    -------
+        A list of points for the similarity scatter plot."""
     # Read the sdfs for the application and experiment
     if application_path.suffix == '.sdf':
         application = RegionIntegratedSdfReader(application_path).convert_to_dict('numbers').sdf_data
@@ -174,7 +203,32 @@ def generate_points(application_path: Path, experiment_path: Path, base_library:
     return points
         
 
-def _cache_perturbed_library(args):
+def _cache_perturbed_library(args: Tuple[int, Path, Path, int, dict[List[str]], Path]) -> float:
+    """Caches a single perturbed cross section library.
+
+    Parameters
+    ----------
+    args
+        A tuple containing all necessary components to perform the caching of a 
+        perturbed library.
+        
+        - i (int):
+            The sample number to use for generating the perturbed library.
+        - base_library (Path):
+            Path to the base cross section library.
+        - perturbation_factors (Path):
+            Path to the cross section perturbation factors (used to generate the perturbed libraries).
+        - sample_number (int):
+            The sample number to use for generating the perturbed library. Must be from 1 - NUM_SAMPLES, where NUM_SAMPLES
+            is the number of perturbation factor samples provided in the user's current version of SCALE. 
+            (0 <= sample_number <= NUM_SAMPLES)
+        - available_nuclide_reactions (dict[List[str]]):
+            A dictionary containing the nuclide reactions that are read from the perturbed library.
+
+    Returns
+    -------
+        The time taken to cache the perturbed library.
+    """    
     i, base_library, perturbation_factors, sample_number, available_nuclide_reactions, perturbed_cache = args
     perturbed_xs_cache = perturbed_cache / f'perturbed_xs_{i}.pkl'
     if not perturbed_xs_cache.exists():
@@ -188,21 +242,20 @@ def _cache_perturbed_library(args):
     else:
         return 0
 
-def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_cache=False):
+def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_cache: bool=False) -> None:
     """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths
 
     Parameters
     ----------
-    base_library : Path
+    base_library
         Path to the base cross section library.
-    perturbation_factors : Path
+    perturbation_factors
         Path to the cross section perturbation factors (used to generate the perturbed libraries).
-    reset_cache : bool
-        Whether to reset the cache or not (default is False).
+    reset_cache
+        Whether to reset the cache or not (default is `False`).
         
     Returns
     -------
-    None
         This function does not return a value and has no return type."""
     # Read the base library, use an arbitrary nuclide reaction dict just to get the available reactions
     all_nuclide_reactions = { '92235': ['18'] } # u-235 fission
@@ -252,8 +305,6 @@ def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_ca
     # ------------------------------------------
     # Main loop for caching perturbed libraries
     # ------------------------------------------
-    NUM_SAMPLES = 1000  # Number of xs perturbation samples available in SCLAE
-
     # Get the number of available cores
     num_cores = multiprocessing.cpu_count()
     

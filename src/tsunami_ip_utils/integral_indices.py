@@ -385,8 +385,8 @@ def calculate_uncertainty_contributions(application_filenames: list, experiment_
 
     Parameters
     ----------
-    - application_filenames: list of str, paths to the application sdf files
-    - experiment_filenames: list of str, paths to the experiment sdf files
+    - application_filenames: list of str, paths to the application output (.out) files
+    - experiment_filenames: list of str, paths to the experiment output (.out) files
 
     Returns
     -------

@@ -5,20 +5,27 @@ from .matrix_plot import interactive_matrix_plot
 from .plot_utils import determine_plot_type
 from tsunami_ip_utils.integral_indices import add_missing_reactions_and_nuclides
 import numpy as np
+from typing import List, Dict
 
-def contribution_plot(contributions, plot_type='bar', integral_index_name='E', plot_redundant_reactions=True, **kwargs):
+def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_index_name: str='E', 
+                      plot_redundant_reactions: bool=True, **kwargs: dict):
     """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
     
     Parameters
     ----------
-    - contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter for each
+    contributions
+        list of dictionaries containing the contributions to the similarity parameter for each
         nuclide or nuclide-reaction pair
-    - plot_type: str, type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
+    plot_type
+        type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
         a pie chart
-    - integral_index_name: str, name of the integral index being plotted. Default is 'E'
-    - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
+    integral_index_name
+        name of the integral index being plotted. Default is `'E'`
+    plot_redundant_reactions
+        whether to plot redundant reactions (or irrelevant reactions) when considering
         nuclide-reaction-wise contributions. Default is True
-    - kwargs: additional keyword arguments to pass to the plotting function"""
+    kwargs
+        additional keyword arguments to pass to the plotting function"""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
     contributions, nested_plot = determine_plot_type(contributions, plot_redundant_reactions)
