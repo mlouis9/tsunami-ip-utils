@@ -1,7 +1,13 @@
-.. api_type:: private
 
-tsunami\_ip\_utils package
-==========================
+.. api_type:: private
+.. _private_api:
+
+Private API Documentation
+=========================
+**NOTE**: This is the private API documentation for the `tsunami_ip_utils` package. This documentation is intended for developers who 
+are working on the Tsunami IP Utils package itself. If you are a user of the Tsunami IP Utils package, you should refer to the 
+:ref:`public_api` instead.
+
 
 Subpackages
 -----------

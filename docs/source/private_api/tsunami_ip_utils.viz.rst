@@ -1,5 +1,3 @@
-.. api_type:: private_api
-
 tsunami\_ip\_utils.viz package
 ==============================
 

@@ -26,8 +26,8 @@ if errorlevel 9009 (
 
 REM Custom target for generating API docs
 if "%1" == "apidoc" (
-    sphinx-apidoc -o "%SOURCEDIR%/public_api" "%PACKAGE_DIR%"
-    sphinx-apidoc --private -o "%SOURCEDIR%/private_api" "%PACKAGE_DIR%"
+    sphinx-apidoc --templatedir="source/_templates/public" -f -o "%SOURCEDIR%/public_api" "%PACKAGE_DIR%"
+    sphinx-apidoc --private --templatedir="source/_templates/private" -f -o "%SOURCEDIR%/private_api" "%PACKAGE_DIR%"
     goto end
 )
 

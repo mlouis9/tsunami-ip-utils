@@ -20,11 +20,10 @@ help:
 apidoc: apidoc-public apidoc-private
 
 apidoc-public:
-	sphinx-apidoc -o "$(SOURCEDIR)/public_api" "$(PACKAGE_DIR)"
+	sphinx-apidoc --templatedir=source/_templates/public -f -o "$(SOURCEDIR)/public_api" "$(PACKAGE_DIR)"
 
 apidoc-private:
-	sphinx-apidoc --private -o "$(SOURCEDIR)/private_api" "$(PACKAGE_DIR)"
-
+	sphinx-apidoc --private --templatedir=source/_templates/private -f -o "$(SOURCEDIR)/private_api/" "$(PACKAGE_DIR)"
 
 # Python script to customize .rst files
 .PHONY: customize-rst

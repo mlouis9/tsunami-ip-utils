@@ -1,7 +1,10 @@
-.. api_type:: public
 
-tsunami\_ip\_utils package
-==========================
+.. api_type:: public
+.. _public_api:
+
+Public API Documentation
+========================
+
 
 Subpackages
 -----------

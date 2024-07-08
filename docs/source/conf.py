@@ -32,7 +32,7 @@ extensions = [
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 templates_path = ['_templates']
 exclude_patterns = []
-
+show_headings = False
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -76,11 +76,7 @@ def setup(app):
 def skip_member(app, what, name, obj, skip, options):
     api_type = app.config.api_type
     if api_type == 'public' and name.startswith('_'):
-        print(f"API TYPE: {api_type}")
-        print(f"SKIPPING: {name}")
         return True
     elif api_type == 'private' and not name.startswith('_'):
-        print(f"API TYPE: {api_type}")
-        print(f"SKIPPING: {name}")
         return True
     return skip
