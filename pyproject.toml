@@ -19,7 +19,6 @@ dependencies = [
     "dash",            # Latest version of dash
     "h5py",            # Latest version of h5py
     "tqdm",            # Latest version of tqdm
-    "doctest",         # Latest version of doctest
     "pyyaml",          # Latest version of pyyaml
 ]
 description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
