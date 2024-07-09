@@ -17,8 +17,9 @@ from multiprocessing import Pool
 from tqdm import tqdm
 import numpy as np
 from tqdm.contrib.concurrent import process_map
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Union
 from . import config
+from numpy.typing import ArrayLike
 
 # Number of xs perturbation samples available in SCALE
 NUM_SAMPLES = config['NUM_SAMPLES']
@@ -83,17 +84,29 @@ def _generate_and_read_perturbed_library(base_library: Path, perturbation_factor
 
     return perturbed_xs
 
-def generate_points(application_path: Path, experiment_path: Path, base_library: Path, perturbation_factors: Path, 
-                    num_perturbations: int) -> List[Tuple[float, float]]:
+def generate_points(application_path: Union[Path, List[Path]], experiment_path: Union[Path, List[Path]], base_library: Path, 
+                    perturbation_factors: Path, num_perturbations: int
+                    ) -> Union[ List[ Tuple[ float, float ] ], 
+                               np.ndarray[ List[ Tuple[ float, float ] ] ]]:
     """Generates points for a similarity scatter plot by combining the sensitivity profiles of the application and experiment
     with the perturbed cross section libraries.
+
+    Notes
+    -----
+    * This function will cache the base cross section library and the perturbed cross section libraries in the user's home 
+    directory under the ``.tsunami_ip_utils_cache`` directory. If the user wishes to reset the cache, they can do so by
+    setting the ``reset_cache`` parameter to ``True`` in the :func:`cache_all_libraries` function. The user can also cache
+    the base and perturbed cross section libraries manually by calling the :func:`cache_all_libraries` function.
+
+    * This function can also generate a matrix of points for a given set of experiment and applications for making a matrix plot
+    this can be done by passing a list of paths for the application and experiment sensitivity profiles.
 
     Parameters
     ----------
     application_path
-        Path to the application sensitivity profile.
+        Path(s) to the application sensitivity profile.
     experiment_path
-        Path to the experiment sensitivity profile.
+        Path(s) to the experiment sensitivity profile.
     base_library
         Path to the base cross section library.
     perturbation_factors
@@ -104,21 +117,43 @@ def generate_points(application_path: Path, experiment_path: Path, base_library:
     Returns
     -------
         A list of points for the similarity scatter plot."""
+    
+    if isinstance(application_path, list) and isinstance(experiment_path, list):
+        points_array = np.empty( ( len(application_path), len(experiment_path) ), dtype=object )
+        for i, application in enumerate(application_path):
+            for j, experiment in enumerate(experiment_path):
+                points_array[i, j] = generate_points(
+                    application, 
+                    experiment, 
+                    base_library, 
+                    perturbation_factors, 
+                    num_perturbations
+                )
+        return points_array
+    elif isinstance(application_path, list) or isinstance(experiment_path, list):
+        raise ValueError("Both application and experiment paths must be lists or neither.")
+
     # Read the sdfs for the application and experiment
     if application_path.suffix == '.sdf':
         application = RegionIntegratedSdfReader(application_path).convert_to_dict('numbers').sdf_data
         application = { nuclide_name: { reaction_name: reaction['sensitivities'] } \
                        for nuclide_name, nuclide in application.items() \
                        for reaction_name, reaction in nuclide.items() }
+    elif application_path.suffix == '.h5':
+        application = read_region_integrated_h5_sdf(application_path)
+    else:
+        raise ValueError("The application path must be either an sdf or h5 file.")
+    
     if experiment_path.suffix == '.sdf':
         experiment  = RegionIntegratedSdfReader(experiment_path).convert_to_dict('numbers').sdf_data
         experiment = { nuclide_name: { reaction_name: reaction['sensitivities'] } \
                       for nuclide_name, nuclide in experiment.items() \
                       for reaction_name, reaction in nuclide.items() }
-    if application_path.suffix == '.h5':
-        application = read_region_integrated_h5_sdf(application_path)
-    if experiment_path.suffix == '.h5':
+    elif experiment_path.suffix == '.h5':
         experiment = read_region_integrated_h5_sdf(experiment_path)
+    else:
+        raise ValueError("The experiment path must be either an sdf or h5 file.")
+    
 
     # Filter out redundant reactions, which will introduce bias into the similarity scatter plot
     # Absorption, or "capture" as it's referred to in SCALE and total

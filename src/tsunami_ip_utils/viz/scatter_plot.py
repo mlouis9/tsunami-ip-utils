@@ -21,7 +21,27 @@ import sys, os, signal
 import threading
 import webbrowser
 import sys
+from plotly.graph_objs import Figure
 
+
+class EnhancedPlotlyFigure(Figure):
+    """This class wraps a plotly express figure object (intended for a scatter plot) and adds additional metadata for the
+    summary statistics and linear regression data. This class is intended to be used with the ``InteractiveScatterPlotter``
+    class."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Directly set the attributes using object's __setattr__ to bypass Plotly's checks
+        object.__setattr__(self, 'statistics', None)
+        object.__setattr__(self, 'regression', None)
+
+    def __setattr__(self, name, value):
+        if name in ['statistics', 'regression']:
+            # Handle custom attributes internally
+            object.__setattr__(self, name, value)
+        else:
+            # Use the super class's __setattr__ for all other attributes
+            super().__setattr__(name, value)
 
 class ScatterPlot(Plotter):
     """This class exists to add some additional functionality for calculating regressions and summary statistics that's
@@ -33,15 +53,28 @@ class ScatterPlot(Plotter):
         'spearman' respectively. The slope and intercept are stored as 'slope' and 'intercept' respectively. The linear
         regression is stored as 'regression'"""
         self.regression = stats.linregress(x, y)
-        self.pearson = stats.pearsonr(x, y).statistic
-        self.spearman = stats.spearmanr(x, y).statistic
-        self.slope = self.regression.slope
-        self.intercept = self.regression.intercept
+        self.pearson    = stats.pearsonr(x, y).statistic
+        self.spearman   = stats.spearmanr(x, y).statistic
+        self.slope      = self.regression.slope
+        self.intercept  = self.regression.intercept
+
+        # If the figure has been plotted (and is an enhanced plot which supports adding this metadata), add the regression 
+        # and correlation statistics to the figure
+        is_metadata_plot = isinstance(getattr(self, 'fig', None), EnhancedPlotlyFigure)
+        if hasattr(self, 'fig') and is_metadata_plot:
+            self.fig.statistics = {
+                'pearson': self.pearson,
+                'spearman': self.spearman
+            }
+            self.fig.regression = {
+                'slope': self.slope,
+                'intercept': self.intercept,
+            }
 
         # Now create teh summary statistics text for figure annotation
-        pearson_text = f"Pearson: {self.pearson:1.6f}"
-        spearman_text = f"Spearman: {self.spearman:1.6f}"
-        self.summary_stats_text = f"{pearson_text}\n{spearman_text}"
+        pearson_text = f"Pearson: <b>{self.pearson:1.6f}</b>"
+        spearman_text = f"Spearman: <b>{self.spearman:1.6f}</b>"
+        self.summary_stats_text = f"{pearson_text} {spearman_text}"
 
 
 class ScatterPlotter(ScatterPlot):
@@ -133,6 +166,9 @@ class InteractiveScatterPlotter(ScatterPlot):
             hover_data=hover_data_dict
         )
 
+        # Wrap the plotly express figure in a MetadataPlotly object
+        self.fig = EnhancedPlotlyFigure(self.fig.to_dict())
+
         self.add_regression_and_stats(df)
 
         # Now style the plot
@@ -160,6 +196,10 @@ class InteractiveScatterPlotter(ScatterPlot):
         # Set the modified list of traces back to the figure
         self.fig.data = tuple(traces_to_keep)
 
+        # Remove existing annotation if it exists
+        if hasattr(self.fig, 'layout') and hasattr(self.fig.layout, 'annotations'):
+            self.fig.layout.annotations = [ann for ann in self.fig.layout.annotations if not ann.text.startswith('Pearson')]
+
         # Add new linear regression to the plot
         self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', 
                                     name=f'Regression Line y={self.slope:1.4E}x + {self.intercept:1.4E}'))
@@ -171,6 +211,7 @@ class InteractiveScatterPlotter(ScatterPlot):
             text=self.summary_stats_text,
             showarrow=False, 
             font=dict(size=12),
+            align='left',
             bgcolor="white", 
             opacity=0.8
         )
@@ -248,6 +289,9 @@ class InteractivePerturbationScatterPlotter(ScatterPlot):
             title=f'Correlation Plot',
         )
 
+        # Wrap the plotly express figure in a MetadataPlotly object
+        self.fig = EnhancedPlotlyFigure(self.fig.to_dict())
+
         self.add_regression_and_stats(df)
 
         # Now style the plot
@@ -279,7 +323,8 @@ class InteractivePerturbationScatterPlotter(ScatterPlot):
             x=0.05, xref="paper", 
             y=0.95, yref="paper",
             text=self.summary_stats_text,
-            showarrow=False, 
+            showarrow=False,
+            align='left',
             font=dict(size=12),
             bgcolor="white", 
             opacity=0.8

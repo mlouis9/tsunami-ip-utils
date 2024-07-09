@@ -411,22 +411,30 @@ def calculate_E_contributions(application_filenames: List[str], experiment_filen
     experiment_sdfs  = [ RegionIntegratedSdfReader(filename) for filename in experiment_filenames ]
     
     # Initialize np object arrays to store the E contributions
-    E_nuclide_wise          = np.empty( ( len(experiment_sdfs), len(application_sdfs) ), dtype=object )
-    E_nuclide_reaction_wise = np.empty( ( len(experiment_sdfs), len(application_sdfs) ), dtype=object )
+    E_nuclide_wise          = {'application': [], 'experiment': []}
+    E_nuclide_reaction_wise = {'application': [], 'experiment': []}
 
-    for i, experiment in enumerate(experiment_sdfs):
-        for j, application in enumerate(application_sdfs):
-            nuclide_wise_contributions, nuclide_reaction_wise_contributions = \
-                _get_nuclide_and_reaction_wise_E_contributions(application, experiment)
+    # Calculate contributions to E for each application
+    for application in application_sdfs:
+        nuclide_wise_contributions, nuclide_reaction_wise_contributions = \
+            _get_nuclide_and_reaction_wise_E_contributions(application, application)
 
-            E_nuclide_wise[i, j] = nuclide_wise_contributions
-            E_nuclide_reaction_wise[i, j] = nuclide_reaction_wise_contributions
+        E_nuclide_wise['application'].append(nuclide_wise_contributions)
+        E_nuclide_reaction_wise['application'] = nuclide_reaction_wise_contributions
+
+    # Calculate contributions to E for each experiment
+    for experiment in experiment_sdfs:
+        nuclide_wise_contributions, nuclide_reaction_wise_contributions = \
+            _get_nuclide_and_reaction_wise_E_contributions(experiment, experiment)
+
+        E_nuclide_wise['experiment'].append(nuclide_wise_contributions)
+        E_nuclide_reaction_wise['experiment'] = nuclide_reaction_wise_contributions
 
     return E_nuclide_wise, E_nuclide_reaction_wise
 
 
-def read_uncertainty_contributions(application_filenames: List[str], experiment_filenames: List[str]
-                                   ) -> Tuple[ Dict[ str, unumpy.uarray ], Dict[ str,  unumpy.uarray ] ]:
+def get_uncertainty_contributions(application_filenames: List[str], experiment_filenames: List[str]
+                                   ) -> Tuple[ Dict[ str, List[unumpy.uarray] ], Dict[ str,  List[unumpy.uarray] ] ]:
     """Read the contributions to the uncertainty in :math:`k_{\\text{eff}}` (i.e. :math:`\\frac{dk}{k}`) for each 
     application with each available experiment on a nuclide basis and on a nuclide-reaction basis from the
     provided TSUNAMI-IP ``.out`` files.
@@ -441,11 +449,11 @@ def read_uncertainty_contributions(application_filenames: List[str], experiment_
     Returns
     -------
         * uncertainty_contributions_nuclide
-            Contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and 
-            each experiment on a nuclide basis. Keyed by 'application' and 'experiment'
+            List of contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and 
+            each experiment on a nuclide basis. Keyed by ``'application'`` and ``'experiment'``.
         * uncertainty_contributions_nuclide_reaction
-            Contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and each experiment on a 
-            nuclide-reaction basis. Keyed by ``'application'`` and ``'experiment'``."""
+            List of contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and each experiment 
+            on a nuclide-reaction basis. Keyed by ``'application'`` and ``'experiment'``."""
     
     dk_over_k_nuclide_wise = {
         'application': np.empty( len(application_filenames), dtype=object ),

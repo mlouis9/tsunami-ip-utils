@@ -121,10 +121,10 @@ def perturbation_plot(points):
     plotter = InteractivePerturbationScatterPlotter()
     plotter.create_plot(points)
 
-    return plotter.get_plot(), plotter.pearson
+    return plotter.get_plot()
 
 
-def matrix_plot(plot_type: str, plot_objects_array: np.ndarray):
+def matrix_plot(plot_objects_array: np.ndarray, plot_type: str):
     """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects."""
     if plot_type == 'interactive':
         return interactive_matrix_plot(plot_objects_array)

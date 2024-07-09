@@ -315,7 +315,7 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
     
     Returns
     -------
-        Integral matrices for each integral index type. The shape of the matrices are ``(num_experiments, num_applications)``. 
+        Integral matrices for each integral index type. The shape of the matrices are ``(num_applications, num_experiments)``. 
         Keys are ``'C_k'``, ``'E_total'``, ``'E_fission'``, ``'E_capture'``, and ``'E_scatter'``."""
 
     with open(filename, 'r') as f:
@@ -369,11 +369,11 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
             E_scatter[row_index, match_index] = ufloat(row[5][0], row[5][1])
 
     integral_matrices.update({
-        "C_k": C_k,
-        "E_total": E_total,
-        "E_fission": E_fission,
-        "E_capture": E_capture,
-        "E_scatter": E_scatter
+        "C_k":       C_k.transpose(),
+        "E_total":   E_total.transpose(),
+        "E_fission": E_fission.transpose(),
+        "E_capture": E_capture.transpose(),
+        "E_scatter": E_scatter.transpose()
     })
 
     return integral_matrices
