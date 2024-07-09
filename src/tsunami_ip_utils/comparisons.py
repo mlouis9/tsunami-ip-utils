@@ -119,7 +119,7 @@ def _update_annotation(fig: EnhancedPlotlyFigure, integral_index: float, index_n
         The plotly figure object.
     integral_index
         The TSUNAMI-IP integral_index value.
-    index_name_latex
+    index_name
         The name of the integral index.
         
     Returns

@@ -6,6 +6,11 @@ from pathlib import Path
 import plotly.graph_objects as go
 from .scatter_plot import InteractiveScatterLegend
 from .pie_plot import InteractivePieLegend
+import webbrowser
+import os
+import sys
+import threading
+from .plot_utils import find_free_port
 
 # Style constants
 GRAPH_STYLE = {
@@ -130,6 +135,42 @@ def generate_layout(app, rows):
         """)
     ])
 
+class InteractiveMatrixPlot:
+    def __init__(self, app):
+        self.app = app
+    
+    def open_browser(self, port):
+        print(f"Now running at http://localhost:{port}/")
+        webbrowser.open(f"http://localhost:{port}/")
+        pass
+
+    def show(self, open_browser=True, silent=False):
+        """Start the Flask server and open the browser to display the interactive sunburst chart
+        
+        Parameters
+        ----------
+        - open_browser: bool, whether to open the browser automatically to display the chart
+        - silent: bool, whether to suppress Flask's startup and runtime messages"""
+        # Suppress Flask's startup and runtime messages by redirecting them to dev null
+        log = open(os.devnull, 'w')
+        # sys.stdout = log
+        sys.stderr = log
+
+        port = find_free_port()
+        if open_browser:
+            threading.Timer(1, self.open_browser(port)).start()
+        self.app.run(host='localhost', port=port)
+
+    def write_html(self, filename=None):
+        with self.app.test_client() as client:
+            response = client.get('/')
+            html_content = response.data.decode('utf-8')
+            if filename is None:
+                return html_content
+            else:
+                with open(filename, 'w') as f:
+                    f.write(html_content)
+
 def interactive_matrix_plot(plot_objects_array: np.ndarray):
     current_directory = Path(__file__).parent
     external_stylesheets = [str(current_directory / 'css' / 'matrix_plot.css')]
@@ -153,4 +194,4 @@ def interactive_matrix_plot(plot_objects_array: np.ndarray):
         rows.append(html.Div(row, style={'display': 'flex'}))
 
     generate_layout(app, rows)
-    return app
+    return InteractiveMatrixPlot(app)
