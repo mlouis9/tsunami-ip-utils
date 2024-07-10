@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tsunami_ip_utils"
-version = "0.0.1"
+version = "0.0.3"
 authors = [
   { name="Matthew Louis", email="matthewlouis31@gmail.com" },
 ]
@@ -20,6 +20,7 @@ dependencies = [
     "h5py",            # Latest version of h5py
     "tqdm",            # Latest version of tqdm
     "pyyaml",          # Latest version of pyyaml
+    "IPython",         # Latest version of IPython
 ]
 description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
 readme = "README.md"

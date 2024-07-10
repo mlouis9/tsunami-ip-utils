@@ -8,3 +8,4 @@ dash
 h5py
 tqdm
 pyyaml
+IPython

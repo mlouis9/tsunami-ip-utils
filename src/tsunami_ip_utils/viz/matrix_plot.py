@@ -196,9 +196,9 @@ class InteractiveMatrixPlot:
             for i, row in enumerate(plot_objects_array):
                 for j, plot_object in enumerate(row):
                     if plot_types[i,j] == "InteractiveScatterLegend":
-                        plot_objects_array[i,j] = InteractiveScatterLegend.load_state(plot_object)
+                        plot_objects_array[i,j] = InteractiveScatterLegend.load_state(data_dict=plot_object)
                     elif plot_types[i,j] == "InteractivePieLegend":
-                        plot_objects_array[i,j] = InteractivePieLegend.load_state(plot_object)
+                        plot_objects_array[i,j] = InteractivePieLegend.load_state(data_dict=plot_object)
 
         return interactive_matrix_plot(plot_objects_array)
     
