@@ -1,3 +1,3 @@
-from .viz import correlation_plot, contribution_plot, perturbation_plot, matrix_plot
-from .matrix_plot import load_interactive_matrix_plot
-from .scatter_plot import load_interactive_scatter_plot
+from tsunami_ip_utils.viz.viz import correlation_plot, contribution_plot, perturbation_plot, matrix_plot
+from tsunami_ip_utils.viz.matrix_plot import load_interactive_matrix_plot
+from tsunami_ip_utils.viz.scatter_plot import load_interactive_scatter_plot

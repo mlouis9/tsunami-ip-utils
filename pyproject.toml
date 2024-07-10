@@ -20,7 +20,6 @@ dependencies = [
     "h5py",            # Latest version of h5py
     "tqdm",            # Latest version of tqdm
     "pyyaml",          # Latest version of pyyaml
-    "IPython",         # Latest version of IPython
 ]
 description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
 readme = "README.md"
