@@ -11,6 +11,7 @@ import os
 import sys
 import threading
 from .plot_utils import find_free_port
+import pickle
 
 # Style constants
 GRAPH_STYLE = {
@@ -136,8 +137,9 @@ def generate_layout(app, rows):
     ])
 
 class InteractiveMatrixPlot:
-    def __init__(self, app):
+    def __init__(self, app, plot_objects_array):
         self.app = app
+        self.plot_objects_array = plot_objects_array
     
     def open_browser(self, port):
         print(f"Now running at http://localhost:{port}/")
@@ -170,6 +172,42 @@ class InteractiveMatrixPlot:
             else:
                 with open(filename, 'w') as f:
                     f.write(html_content)
+    
+    def save_state(self, filename):
+        # Serialize interactive plots in the plot objects array
+        self.plot_types = np.empty_like(self.plot_objects_array, dtype=object)
+        for i, row in enumerate(self.plot_objects_array):
+            for j, plot_object in enumerate(row):
+                if isinstance(plot_object, InteractiveScatterLegend):
+                    self.plot_objects_array[i,j] = plot_object.save_state()
+                    self.plot_types[i,j] = "InteractiveScatterLegend"
+                elif isinstance(plot_object, InteractivePieLegend):
+                    self.plot_objects_array[i,j] = plot_object.save_state()
+                    self.plot_types[i,j] = "InteractivePieLegend"
+
+        with open(filename, 'wb') as f:
+            pickle.dump( ( self.plot_objects_array, self.plot_types ) , f)
+
+    @classmethod
+    def load_state(self, filename):
+        with open(filename, 'rb') as f:
+            plot_objects_array, plot_types = pickle.load(f)
+            # Reserialize interactive scatter legends
+            for i, row in enumerate(plot_objects_array):
+                for j, plot_object in enumerate(row):
+                    if plot_types[i,j] == "InteractiveScatterLegend":
+                        plot_objects_array[i,j] = InteractiveScatterLegend.load_state(plot_object)
+                    elif plot_types[i,j] == "InteractivePieLegend":
+                        plot_objects_array[i,j] = InteractivePieLegend.load_state(plot_object)
+
+        return interactive_matrix_plot(plot_objects_array)
+    
+
+def load_interactive_matrix_plot(filename):
+    """Loads an interactive matrix plot from a saved state pickle file. This function is purely for convenience and is a
+    wrapper of the InteractiveScatterLegend.load_state method"""
+    return InteractiveMatrixPlot.load_state(filename)
+
 
 def interactive_matrix_plot(plot_objects_array: np.ndarray):
     current_directory = Path(__file__).parent
@@ -194,4 +232,4 @@ def interactive_matrix_plot(plot_objects_array: np.ndarray):
         rows.append(html.Div(row, style={'display': 'flex'}))
 
     generate_layout(app, rows)
-    return InteractiveMatrixPlot(app)
+    return InteractiveMatrixPlot(app, plot_objects_array)

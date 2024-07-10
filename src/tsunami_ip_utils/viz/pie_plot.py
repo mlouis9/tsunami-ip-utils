@@ -10,6 +10,7 @@ import webbrowser
 from flask import Flask, render_template_string
 import uuid
 from .plot_utils import find_free_port
+import pickle
 
 
 class PiePlotter(Plotter):
@@ -532,3 +533,28 @@ class InteractivePieLegend:
             else:
                 with open(filename, 'w') as f:
                     f.write(html_content)
+
+    def save_state(self, filename=None):
+        state = {
+            'fig': self.fig,
+            'df': self.df,
+        }
+        if filename is None:
+            return state
+        else:
+            with open(filename, 'wb') as f:
+                pickle.dump(state, f)
+
+    @classmethod
+    def load_state(cls, filename=None, data_dict=None):
+        if filename is None and data_dict is None:
+            raise ValueError("Either a filename or a data dictionary must be provided")
+        if filename is not None:
+            with open(filename, 'rb') as f:
+                state = pickle.load(f)
+        else:
+            state = data_dict
+        fig = state['fig']
+        df = state['df']
+        instance = cls(fig, df)
+        return instance

@@ -1,6 +1,6 @@
 from .bar_plot import BarPlotter
 from .pie_plot import PiePlotter, InteractivePiePlotter
-from .scatter_plot import ScatterPlotter, InteractiveScatterPlotter, InteractivePerturbationScatterPlotter, load_interactive_scatter_plot
+from .scatter_plot import ScatterPlotter, InteractiveScatterPlotter, InteractivePerturbationScatterPlotter
 from .matrix_plot import interactive_matrix_plot
 from .plot_utils import determine_plot_type
 from tsunami_ip_utils.integral_indices import _add_missing_reactions_and_nuclides

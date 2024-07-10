@@ -124,7 +124,7 @@ class ScatterPlotter(ScatterPlot):
 
 def load_interactive_scatter_plot(filename):
     """Loads an interactive scatter plot from a saved state file. This function is purely for convenience and is a
-    wrapper around the InteractiveScatterLegend.load_state method"""
+    wrapper of the InteractiveScatterLegend.load_state method"""
     return InteractiveScatterLegend.load_state(filename)
 
 
@@ -488,7 +488,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
 
         self.app.run_server(debug=False, host='localhost', port=port)
 
-    def save_state(self, filename):
+    def save_state(self, filename=None):
         state = {
             'fig': self.fig.to_dict(),
             'df': self.df.to_dict(),
@@ -496,13 +496,21 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
             'index_name': self.index_name,
             'nested': self.interactive_scatter_plot.nested
         }
-        with open(filename, 'wb') as f:
-            pickle.dump(state, f)
+        if filename is None:
+            return state
+        else:
+            with open(filename, 'wb') as f:
+                pickle.dump(state, f)
 
     @classmethod
-    def load_state(cls, filename):
-        with open(filename, 'rb') as f:
-            state = pickle.load(f)
+    def load_state(cls, filename=None, data_dict=None):
+        if filename is None and data_dict is None:
+            raise ValueError("Either a filename or a data dictionary must be provided")
+        if filename is not None:
+            with open(filename, 'rb') as f:
+                state = pickle.load(f)
+        else:
+            state = data_dict
 
         # Recreate the _InteractiveScatterPlotter instance from the saved state
         fig = go.Figure(state['fig'])
