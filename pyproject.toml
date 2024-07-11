@@ -1,35 +1,33 @@
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "tsunami_ip_utils"
-version = "0.0.3"
-authors = [
-  { name="Matthew Louis", email="matthewlouis31@gmail.com" },
-]
-
-dependencies = [
-    "plotly~=5.22.0",  # Use version ~5.22.0 (compatible versions)
-    "matplotlib",      # Latest version of matplotlib
-    "pandas",          # Latest version of pandas
-    "uncertainties",   # Latest version of uncertainties
-    "scipy",           # Latest version of scipy
-    "flask",           # Latest version of flask
-    "dash",            # Latest version of dash
-    "h5py",            # Latest version of h5py
-    "tqdm",            # Latest version of tqdm
-    "pyyaml",          # Latest version of pyyaml
-]
+version = "0.0.4"
 description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
-readme = "README.md"
-requires-python = ">=3.8"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+authors = [
+    "Matthew Louis <matthewlouis31@gmail.com>"
 ]
+license = "MIT"
+readme = "README.md"
+documentation = "https://tsunami-ip-utils.readthedocs.io"
+include = ["src/tsunami_ip_utils/config.yaml"]
 
-[project.urls]
-Homepage = "https://github.com/mlouis9/tsunami_ip_utils"
-Issues = "https://github.com/mlouis9/tsunami_ip_utils/issues"
+# Dependencies section: specify your package dependencies here
+[tool.poetry.dependencies]
+python = "^3.8"
+plotly = "~5.22.0"
+matplotlib = "*"
+pandas = "*"
+uncertainties = "*"
+scipy = "*"
+flask = "*"
+dash = "*"
+h5py = "*"
+tqdm = "*"
+pyyaml = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+# Additional metadata and URLs for the project
+[tool.poetry.urls]
+"Homepage" = "https://github.com/mlouis9/tsunami_ip_utils"
+"Issues" = "https://github.com/mlouis9/tsunami_ip_utils/issues"
