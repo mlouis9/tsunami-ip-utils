@@ -11,7 +11,8 @@ from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure
 from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_perturbations, generate_plot_objects_from_array_contributions
 from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, calculate_E_contributions
 from tsunami_ip_utils.viz import matrix_plot
-import inspect
+from memory_profiler import profile
+import multiprocessing
 
 def comparison(tsunami_ip_output_filename: Path, application_filenames: List[Path], 
                experiment_filenames: List[Path]) -> Dict[str, df]:
@@ -136,13 +137,30 @@ def _update_annotation(fig: EnhancedPlotlyFigure, integral_index: float, index_n
     percent_difference = (integral_index - calculated_value)/integral_index * 100
     summary_stats_annotation.text += f"<br>TSUNAMI-IP {index_name}: <b>{integral_index}</b><br>Percent Difference: <b>{percent_difference}</b>%"
     
-    if percent_difference > 5:
+    if abs(percent_difference) > 5:
         summary_stats_annotation.update(bordercolor='red')
     return fig,  calculated_value, percent_difference
 
+def _process_pair(args):
+    application_file, experiment_file, base_library, perturbation_factors, num_perturbations, integral_value = args
+    points_array = generate_points(
+        application_file, 
+        experiment_file, 
+        base_library=base_library, 
+        perturbation_factors=perturbation_factors, 
+        num_perturbations=num_perturbations
+    )
+    x_points = unumpy.nominal_values(points_array[:, 0])
+    y_points = unumpy.nominal_values(points_array[:, 1])
+
+    # Calculate the Pearson correlation coefficient
+    calculated_value = np.corrcoef(x_points, y_points)[0, 1]
+    percent_difference = (integral_value - calculated_value) / integral_value * 100
+    return calculated_value, percent_difference
+
 def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_name: str, application_files: List[Path], 
                            experiment_files: List[Path], method: str, base_library: Path=None, perturbation_factors: Path=None, 
-                           num_perturbations: int=None) -> Tuple[pd.DataFrame, Any]:
+                           num_perturbations: int=None, make_plot=True) -> Tuple[pd.DataFrame, Any]:
     """Function that compares the calculated similarity parameter C_k (calculated using the cross section sampling method) 
     with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs
     must correspond with those in hte TSUNAMI-IP input file.
@@ -174,6 +192,11 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
         Path to the perturbation factors.
     num_perturbations
         Number of perturbations to generate.
+    make_plot
+        Whether to generate the matrix plot. Default is ``True``.
+    num_cores
+        If ``make_plot`` is ``False``, the number of cores to use for multiprocessing. Default is two less than the number
+        of available cores.  
     
     Returns
     -------
@@ -215,27 +238,57 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
     # ===================================
     match method:
         case 'perturbation':
-            points_array = generate_points(application_files, experiment_files, base_library, perturbation_factors, 
-                                           num_perturbations)
-            plot_objects_array = generate_plot_objects_array_from_perturbations(points_array)
+            # This is the most memory intensive method, so instead of storing the entire points array, if make_plot is False,
+            # we will just calculate the Pearson correlation coefficient from the points themselves, and only store the
+            # results array.
+            if make_plot:
+                points_array = generate_points(application_files, experiment_files, base_library, perturbation_factors, 
+                                               num_perturbations)
+                plot_objects_array = generate_plot_objects_array_from_perturbations(points_array)
+            else:
+                # Get the number of available cores
+                num_cores = multiprocessing.cpu_count()
+                
+                # Use only half of the available cores
+                num_processes = num_cores - 2 # Leave 2 cores for other processes
+
+                num_applications = len(application_files)
+                num_experiments = len(experiment_files)
+                
+                # Prepare arguments for multiprocessing
+                tasks = [(application_files[i], experiment_files[j], base_library, perturbation_factors, num_perturbations, integral_index_matrix[i, j])
+                        for i in range(num_applications) for j in range(num_experiments)]
+                
+                # Use multiprocessing to process data
+                with multiprocessing.Pool(processes=num_processes) as pool:
+                    results = pool.map(_process_pair, tasks)
+                
+                # Reshape the results into matrices
+                calculated_values = np.array([result[0] for result in results]).reshape(num_applications, num_experiments)
+                percent_differences = np.array([result[1] for result in results]).reshape(num_applications, num_experiments)
+                
 
         case 'uncertainty_contributions_nuclide':
             contributions_nuclide, _ = get_uncertainty_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide, '%Δk/k')
+            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide, '%Δk/k') \
+                                    if make_plot else None
 
         case 'uncertainty_contributions_nuclide_reaction':
             _, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide_reaction, '%Δk/k')
+            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide_reaction, '%Δk/k') \
+                                    if make_plot else None
 
         case 'E_contributions_nuclide':
             contributions_nuclide, _ =  calculate_E_contributions(application_files, experiment_files)
             plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide, 
-                                                                                integral_index_name)
+                                                                                integral_index_name) \
+                                    if make_plot else None
 
         case 'E_contributions_nuclide_reaction':
             _, contributions_nuclide_reaction =  calculate_E_contributions(application_files, experiment_files)
             plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide_reaction, 
-                                                                                integral_index_name)
+                                                                                integral_index_name) \
+                                    if make_plot else None
 
         case 'c_k_contributions':
             raise NotImplementedError("The method 'c_k_contributions' is not yet implemented.")
@@ -244,15 +297,26 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
     # ==============================
     # Update plots with annotations
     # ==============================
-    percent_differences = np.empty_like(integral_index_matrix)
-    calculated_values = np.empty_like(integral_index_matrix)
-    for i, row in enumerate(plot_objects_array):
-        for j, plot_object in enumerate(row):
-            updated_plot_object, calculated_value, percent_difference = \
-                _update_annotation(plot_object, integral_index_matrix[i, j], integral_index_name)
-            calculated_values[i, j] = calculated_value
-            percent_differences[i, j] = percent_difference
-            plot_objects_array[i, j] = updated_plot_object
+    if make_plot:
+        percent_differences = np.empty_like(integral_index_matrix)
+        calculated_values = np.empty_like(integral_index_matrix)
+        for i, row in enumerate(plot_objects_array):
+            for j, plot_object in enumerate(row):
+                updated_plot_object, calculated_value, percent_difference = \
+                    _update_annotation(plot_object, integral_index_matrix[i, j], integral_index_name)
+                calculated_values[i, j] = calculated_value
+                percent_differences[i, j] = percent_difference
+                plot_objects_array[i, j] = updated_plot_object
+    elif method != 'perturbation':
+        percent_differences = np.empty_like(integral_index_matrix)
+        calculated_values = np.empty_like(integral_index_matrix)
+        # Just calculate pearson correlation coefficient from the points themselves
+        for i in range(num_experiments):
+            for j in range(num_applications):
+                x_points = unumpy.nominal_values(points_array[i, j, :, 0])
+                y_points = unumpy.nominal_values(points_array[i, j, :, 1])
+                calculated_values[i, j] = np.corrcoef(x_points, y_points)[0, 1]
+                percent_differences[i, j] = (integral_index_matrix[i, j] - calculated_values[i, j])/integral_index_matrix[i, j] * 100
 
     # ===================================
     # Create dataframes with comparisons
@@ -278,6 +342,9 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
     # ===================
     # Create matrix plot
     # ===================
-    fig = matrix_plot(plot_objects_array, 'interactive')
+    if make_plot:
+        fig = matrix_plot(plot_objects_array, 'interactive')
 
-    return comparisons, fig
+        return comparisons, fig
+    else:
+        return comparisons

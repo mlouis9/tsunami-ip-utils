@@ -119,16 +119,25 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
         A list of points for the similarity scatter plot."""
     
     if isinstance(application_path, list) and isinstance(experiment_path, list):
-        points_array = np.empty( ( len(application_path), len(experiment_path) ), dtype=object )
+        points_array = np.empty( ( len(application_path), len(experiment_path), num_perturbations, 2), dtype=object )
         for i, application in enumerate(application_path):
             for j, experiment in enumerate(experiment_path):
-                points_array[i, j] = generate_points(
+                if i < j: # Skip upper right triangle of the matrix (since it's symmetric)
+                    continue
+
+                points_array[i, j, :, :] = generate_points(
                     application, 
                     experiment, 
                     base_library, 
                     perturbation_factors, 
                     num_perturbations
                 )
+        # Now popupate the upper right triangle of the matrix with the transpose of the lower left triangle
+        for i, application in enumerate(application_path):
+            for j, experiment in enumerate(experiment_path):
+                if i < j:
+                    points_array[i, j, :, :] = points_array[j, i, :, :]
+
         return points_array
     elif isinstance(application_path, list) or isinstance(experiment_path, list):
         raise ValueError("Both application and experiment paths must be lists or neither.")
@@ -236,7 +245,7 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
 
         points.append((running_total_application, running_total_experiment))
 
-    return points
+    return np.array(points)
         
 
 def _cache_perturbed_library(args: Tuple[int, Path, Path, int, Dict[str, List[str]], Path]) -> float:

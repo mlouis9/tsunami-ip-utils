@@ -162,16 +162,6 @@ class InteractiveMatrixPlot:
         if open_browser:
             threading.Timer(1, self.open_browser(port)).start()
         self.app.run(host='localhost', port=port)
-
-    def write_html(self, filename=None):
-        with self.app.test_client() as client:
-            response = client.get('/')
-            html_content = response.data.decode('utf-8')
-            if filename is None:
-                return html_content
-            else:
-                with open(filename, 'w') as f:
-                    f.write(html_content)
     
     def save_state(self, filename):
         # Serialize interactive plots in the plot objects array
