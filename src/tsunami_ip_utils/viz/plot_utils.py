@@ -123,11 +123,13 @@ def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> 
     from tsunami_ip_utils.viz import perturbation_plot # Import here to avoid circular import
     
     # Construct plot matrix
-    plot_objects_array = np.empty_like(points_array, dtype=object)
+    num_applications, num_experiments, _, _ = np.shape(points_array)
+    plot_objects_array = np.empty( ( num_applications, num_experiments ), dtype=object)
 
     for i, row in enumerate(points_array):
         for j, _ in enumerate(row):
-            plot_objects_array[i, j] = perturbation_plot(points_array[i, j])
+            fig = perturbation_plot(points_array[i, j])
+            plot_objects_array[i, j] = fig
 
     return plot_objects_array
     
