@@ -5,7 +5,8 @@ from .matrix_plot import interactive_matrix_plot
 from .plot_utils import determine_plot_type
 from tsunami_ip_utils.integral_indices import _add_missing_reactions_and_nuclides
 import numpy as np
-from typing import List, Dict
+from uncertainties import ufloat, unumpy
+from typing import List, Dict, Tuple, Union
 
 def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_index_name: str='E', 
                       plot_redundant_reactions: bool=True, **kwargs: dict):
@@ -109,7 +110,7 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     return plotter.fig
 
 
-def perturbation_plot(points):
+def perturbation_plot(points: List[Tuple[ufloat, ufloat]]):
     """Plots the perturbation points for a given application-experiment pair for which the perturbation points have already
     been calculated
     

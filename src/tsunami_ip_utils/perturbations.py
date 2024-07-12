@@ -125,7 +125,7 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
                 if i < j: # Skip upper right triangle of the matrix (since it's symmetric)
                     continue
 
-                points_array[i, j, :, :] = generate_points(
+                points_array[i, j] = generate_points(
                     application, 
                     experiment, 
                     base_library, 
@@ -136,7 +136,7 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
         for i, application in enumerate(application_path):
             for j, experiment in enumerate(experiment_path):
                 if i < j:
-                    points_array[i, j, :, :] = points_array[j, i, :, :]
+                    points_array[i, j] = points_array[j, i]
 
         return points_array
     elif isinstance(application_path, list) or isinstance(experiment_path, list):
@@ -245,7 +245,7 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
 
         points.append((running_total_application, running_total_experiment))
 
-    return np.array(points)
+    return points
         
 
 def _cache_perturbed_library(args: Tuple[int, Path, Path, int, Dict[str, List[str]], Path]) -> float:
