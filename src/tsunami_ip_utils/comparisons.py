@@ -356,7 +356,7 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
             comparisons.loc[experiment_index + 1, (application_index + 1, 'TSUNAMI-IP')] = \
                 f"{integral_index_matrix[experiment_index, application_index].n:1.3E}+/-{integral_index_matrix[experiment_index, application_index].s:1.2E}"
             comparisons.loc[experiment_index + 1, (application_index + 1, 'Percent Difference')] = \
-                f"{percent_differences[experiment_index, application_index].n:2.2f}+/-{percent_differences[experiment_index, application_index].n:1.2E}"
+                f"{percent_differences[experiment_index, application_index].n:2.2f}+/-{percent_differences[experiment_index, application_index].s:1.2E}"
     
     # ===================
     # Create matrix plot
