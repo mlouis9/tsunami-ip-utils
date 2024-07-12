@@ -7,7 +7,7 @@ from pandas import DataFrame as df
 from pathlib import Path
 from tsunami_ip_utils.perturbations import generate_points
 from typing import List, Dict, Tuple, Any
-from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure
+from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure, InteractiveScatterLegend
 from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_perturbations, generate_plot_objects_from_array_contributions
 from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, calculate_E_contributions
 from tsunami_ip_utils.viz import matrix_plot
@@ -132,6 +132,18 @@ def _update_annotation(fig: EnhancedPlotlyFigure, integral_index: float, index_n
         * percent_difference
             The percent difference between the TSUNAMI-IP integral_index value and the Pearson correlation coefficient.
     """
+
+    fig_has_annotations = isinstance(fig, EnhancedPlotlyFigure)  or isinstance(fig, InteractiveScatterLegend)
+    if  not fig_has_annotations:
+        # On the diagonal are usually the contributions in a pie plot, and the calculated c_k is 1.0
+        calculated_value = 1.0
+        percent_difference = (integral_index - calculated_value) / integral_index * 100
+        return fig, calculated_value, percent_difference
+    
+    if isinstance(fig, InteractiveScatterLegend):
+        # The figure is actually stored under the 'fig' attribute
+        fig = fig.fig
+
     summary_stats_annotation = fig.layout.annotations[0]
     calculated_value = fig.statistics['pearson']
     percent_difference = (integral_index - calculated_value)/integral_index * 100
