@@ -142,16 +142,23 @@ def _update_annotation(fig: EnhancedPlotlyFigure, integral_index: float, index_n
     
     if isinstance(fig, InteractiveScatterLegend):
         # The figure is actually stored under the 'fig' attribute
-        fig = fig.fig
-
-    summary_stats_annotation = fig.layout.annotations[0]
-    calculated_value = fig.statistics['pearson']
-    percent_difference = (integral_index - calculated_value)/integral_index * 100
-    summary_stats_annotation.text += f"<br>TSUNAMI-IP {index_name}: <b>{integral_index}</b><br>Percent Difference: <b>{percent_difference}</b>%"
-    
-    if abs(percent_difference) > 5:
-        summary_stats_annotation.update(bordercolor='red')
-    return fig,  calculated_value, percent_difference
+        summary_stats_annotation = fig.fig.layout.annotations[0]
+        calculated_value = fig.fig.statistics['pearson']
+        percent_difference = (integral_index - calculated_value)/integral_index * 100
+        summary_stats_annotation.text += f"<br>TSUNAMI-IP {index_name}: <b>{integral_index}</b><br>Percent Difference: <b>{percent_difference}</b>%"
+        
+        if abs(percent_difference) > 5:
+            summary_stats_annotation.update(bordercolor='red')
+        return fig,  calculated_value, percent_difference
+    else:
+        summary_stats_annotation = fig.layout.annotations[0]
+        calculated_value = fig.statistics['pearson']
+        percent_difference = (integral_index - calculated_value)/integral_index * 100
+        summary_stats_annotation.text += f"<br>TSUNAMI-IP {index_name}: <b>{integral_index}</b><br>Percent Difference: <b>{percent_difference}</b>%"
+        
+        if abs(percent_difference) > 5:
+            summary_stats_annotation.update(bordercolor='red')
+        return fig,  calculated_value, percent_difference
 
 def _process_pair(args):
     application_file, experiment_file, base_library, perturbation_factors, num_perturbations, integral_value = args

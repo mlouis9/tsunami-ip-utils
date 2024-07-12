@@ -100,7 +100,7 @@ def generate_plot_objects_from_array_contributions(contributions: Dict[ str, Lis
                 correlation_plot(
                     contributions['application'][application_index], 
                     contributions['experiment'][experiment_index], 
-                    plot_type=diagonal_type,
+                    plot_type='interactive_scatter',
                     integral_index_name=integral_index_name, 
                     plot_redundant_reactions=True, 
                     interactive_legend=interactive_correlation_legend

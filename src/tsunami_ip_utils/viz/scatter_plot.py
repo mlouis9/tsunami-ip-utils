@@ -22,7 +22,53 @@ import threading
 import webbrowser
 import sys
 from plotly.graph_objs import Figure
+from pyparsing import *
+import re
+from uncertainties import ufloat
 
+def replace_spearman_and_pearson(text, new_pearson, new_spearman):
+    """Replaces the Spearman and Pearson values in the given text with the new values provided using regex."""
+    
+    new_pearson = f"{new_pearson:1.6f}"
+    new_spearman = f"{new_spearman:1.6f}"
+
+    # Replace Pearson value using regex
+    pearson_pattern = r"(Pearson: <b>)[0-9.]+(</b>)"
+    text = re.sub(pearson_pattern, r"\g<1>" + new_pearson + r"\2", text)
+
+    # Replace Spearman value using regex
+    spearman_pattern = r"(Spearman: <b>)[0-9.]+(</b>)"
+    text = re.sub(spearman_pattern, r"\g<1>" + new_spearman + r"\2", text)
+    
+    return text
+
+
+def update_percent_difference(text, reference_value):
+    # Regex to find the TSUNAMI-IP c_k value
+    ck_pattern = r"TSUNAMI-IP c_k: <b>([\d\.]+)\+/-([\d\.]+)</b>"
+    # Find the TSUNAMI-IP c_k value in the text
+    match = re.search(ck_pattern, text)
+    if not match:
+        raise ValueError("TSUNAMI-IP c_k value not found in the text")
+    
+    # Parse the nominal value and the uncertainty
+    nominal_value, uncertainty = match.groups()
+    tsunami_ck = ufloat(float(nominal_value), float(uncertainty))
+    
+    # Calculate the percent difference
+    if reference_value == 0 or np.isnan(reference_value):
+        percent_difference = ufloat(0, 0)
+    else:
+        percent_difference = (tsunami_ck - reference_value) / reference_value * 100
+    
+    # Format the new percent difference with uncertainty
+    new_percent_diff_text = f"<b>{percent_difference.nominal_value:.2f}+/-{percent_difference.std_dev:.2f}</b>%"
+    
+    # Regex to replace the Percent Difference in the text
+    # Escaping special characters used in the regex pattern
+    updated_text = re.sub(r"Percent Difference: <b>[\d\.\+\-/]+</b>+%", f"Percent Difference: {new_percent_diff_text}", text)
+    
+    return updated_text, percent_difference
 
 class EnhancedPlotlyFigure(Figure):
     """This class wraps a plotly express figure object (intended for a scatter plot) and adds additional metadata for the
@@ -196,19 +242,39 @@ class InteractiveScatterPlotter(ScatterPlot):
         # Set the modified list of traces back to the figure
         self.fig.data = tuple(traces_to_keep)
 
-        # Remove existing annotation if it exists
-        if hasattr(self.fig, 'layout') and hasattr(self.fig.layout, 'annotations'):
-            self.fig.layout.annotations = [ann for ann in self.fig.layout.annotations if not ann.text.startswith('Pearson')]
-
         # Add new linear regression to the plot
         self.fig.add_trace(go.Scatter(x=x_reg, y=y_reg, mode='lines', 
                                     name=f'Regression Line y={self.slope:1.4E}x + {self.intercept:1.4E}'))
+
+        # Remove existing annotation if it exists
+        if hasattr(self.fig, 'layout') and hasattr(self.fig.layout, 'annotations'):
+            if len(self.fig.layout.annotations) != 0:
+                # Get the text of the old annotation
+                old_annotation_text = \
+                    [ann for ann in self.fig.layout.annotations if ann.text.startswith('Pearson')][0].text
+                annotation_text = replace_spearman_and_pearson(old_annotation_text, self.pearson, self.spearman)
+
+                self.fig.layout.annotations = [ann for ann in self.fig.layout.annotations if not ann.text.startswith('Pearson')]
+                if "TSUNAMI-IP" in annotation_text:
+                    try:
+                        annotation_text, percent_difference = update_percent_difference(annotation_text, self.pearson)
+                    except Exception as e:
+                        print(f"Error updating percent difference: {e}")
+                    if abs(percent_difference.nominal_value) > 5:
+                        bordercolor = 'red'
+            else:
+                bordercolor = 'black'
+                annotation_text = self.summary_stats_text
+        else:
+            bordercolor = 'black'
+            annotation_text = self.summary_stats_text
 
         # Add correlation statistics to the plot
         self.fig.add_annotation(
             x=0.05, xref="paper", 
             y=0.95, yref="paper",
-            text=self.summary_stats_text,
+            text=annotation_text,
+            bordercolor=bordercolor,
             showarrow=False, 
             font=dict(size=12),
             align='left',

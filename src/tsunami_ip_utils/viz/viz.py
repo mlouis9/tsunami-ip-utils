@@ -102,7 +102,7 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     # Get the requested plotter
     plotter = plotters.get(plot_type)
     if plotter is None:
-        raise ValueError("Unsupported plot type")
+        raise ValueError(f"Unsupported plot type: {plot_type}")
 
     # Create the plot and style it
     plotter.create_plot(contribution_pairs, isotopes, all_reactions)
