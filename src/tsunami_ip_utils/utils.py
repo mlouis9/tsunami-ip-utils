@@ -16,7 +16,9 @@ def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interes
     isotope_reaction_dict = {}
 
     def get_atomic_number(isotope):
-        return int(re.findall(r'\d+', isotope)[0])
+        matches = re.findall(r'\d+', isotope)
+        return int(matches[0] if matches else -1) # Return -1 if no atomic number is found, these isotopes will be sorted last
+                                                  # Should only be applicable to carbon in ENDF 7.1
     
     # Sort isotopes by atomic number so plots will have similar colors across different calls
     all_isotopes = list(set([isotope_reaction['isotope'] for isotope_reaction in isotope_reaction_list]))
