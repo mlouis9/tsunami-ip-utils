@@ -243,7 +243,7 @@ def read_uncertainty_contributions(filename: Union[str, Path]) -> Tuple[List[dic
     # Define the grammar for the nuclide-reaction pair
     atomic_number = Word(nums)
     element = Word(alphas.lower(), exact=1) 
-    isotope_name = Combine(element + '-' + atomic_number)
+    isotope_name = Combine(element + Optional('-' + atomic_number)) # To handle the case of carbon in ENDF-7.1 libraries
     reaction_type = Word(alphanums + ',\'')
 
     data_line = Group(isotope_name + reaction_type + isotope_name + reaction_type + \
