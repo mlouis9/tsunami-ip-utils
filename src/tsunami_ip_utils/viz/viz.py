@@ -13,8 +13,6 @@ import matplotlib.pyplot as plt
 from tsunami_ip_utils.utils import parse_ufloats
 from tsunami_ip_utils import config
 from matplotlib.figure import Figure
-import time
-import threading
 
 def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_index_name: str='E', 
                       plot_redundant_reactions: bool=True, **kwargs: dict):

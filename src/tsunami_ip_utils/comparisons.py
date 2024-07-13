@@ -169,8 +169,8 @@ def _process_pair(args):
         perturbation_factors=perturbation_factors, 
         num_perturbations=num_perturbations
     )
-    x_points = unumpy.nominal_values(points_array[:, 0])
-    y_points = unumpy.nominal_values(points_array[:, 1])
+    x_points = unumpy.nominal_values([ pair[0] for pair in points_array ])
+    y_points = unumpy.nominal_values([ pair[1] for pair in points_array ])
 
     # Calculate the Pearson correlation coefficient
     calculated_value = np.corrcoef(x_points, y_points)[0, 1]
