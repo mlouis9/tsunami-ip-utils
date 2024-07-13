@@ -132,4 +132,3 @@ def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> 
             plot_objects_array[i, j] = fig
 
     return plot_objects_array
-    

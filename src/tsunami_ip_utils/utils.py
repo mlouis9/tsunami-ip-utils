@@ -1,4 +1,6 @@
 import re
+import numpy as np
+from uncertainties import ufloat
 
 def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interest):
     """Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of
@@ -53,3 +55,20 @@ def filter_by_nuclie_reaction_dict(data_dict, nuclide_reactions):
     - nuclide_reactions: dict, dictionary containing isotopes and their reactions"""
     return {nuclide: {reaction: xs for reaction, xs in reactions.items() if reaction in nuclide_reactions[nuclide]} \
                         for nuclide, reactions in data_dict.items() if nuclide in nuclide_reactions.keys()}
+
+
+def parse_ufloats(array_of_strings):
+    """ Parses a 2D array of strings into a 2D array of ufloats, assuming zero uncertainty if '+/-' is not found. """
+    def to_ufloat(s):
+        if isinstance(s, float):
+            return ufloat(s, s)
+        
+        parts = s.split('+/-')
+        if len(parts) == 2:
+            value, error = parts
+        else:
+            value = s
+            error = 0
+        return ufloat(float(value), float(error))
+    
+    return np.vectorize(to_ufloat)(array_of_strings)

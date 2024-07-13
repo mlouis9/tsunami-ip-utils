@@ -7,6 +7,14 @@ from tsunami_ip_utils.integral_indices import _add_missing_reactions_and_nuclide
 import numpy as np
 from uncertainties import ufloat, unumpy
 from typing import List, Dict, Tuple, Union
+from pathlib import Path
+import pandas as pd
+import matplotlib.pyplot as plt
+from tsunami_ip_utils.utils import parse_ufloats
+from tsunami_ip_utils import config
+from matplotlib.figure import Figure
+import time
+import threading
 
 def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_index_name: str='E', 
                       plot_redundant_reactions: bool=True, **kwargs: dict):
@@ -131,3 +139,62 @@ def matrix_plot(plot_objects_array: np.ndarray, plot_type: str):
         return interactive_matrix_plot(plot_objects_array)
     elif plot_type == 'static':
         raise NotImplementedError("Static matrix plots are not yet supported")
+
+
+class BlockingFigureWrapper:
+    def __init__(self, figure):
+        if not isinstance(figure, Figure):
+            raise ValueError("Expected a matplotlib.figure.Figure instance")
+        self._figure = figure
+
+    def show(self):
+        # Show the figure
+        self._figure.show()
+
+        input("Press Enter to continue...")
+
+    def __getattr__(self, name):
+        return getattr(self._figure, name)
+
+
+def generate_heatmap_from_comparison(comparison_excel_path: Union[str, Path]) -> Dict[str, Tuple[plt.Figure, plt.Axes]]:
+    """Generates a heatmap from a comparison excel file"""
+    
+    comparison = pd.read_excel(comparison_excel_path, header=[0,1], index_col=0)
+    
+    # Get unique secondary headers from level 1 of the MultiIndex
+    unique_headers = comparison.columns.get_level_values(1).unique()
+
+    plot_dict = {}
+    # Assuming `config` is a predefined dictionary that includes 'COMPARISON_HEATMAP_LABELS'
+    heatmap_labels = config['COMPARISON_HEATMAP_LABELS']
+
+    # Extract a separate 2D numpy array for each unique header in level 1
+    for index, header in enumerate(unique_headers):
+        # Filter the DataFrame for the current header
+        filtered_df = comparison.xs(header, level=1, axis=1)
+        # Convert the filtered DataFrame to a numpy array
+        array = parse_ufloats(filtered_df.to_numpy())
+        
+        # Now plot the array
+        data = unumpy.nominal_values(array)
+        plt.figure(index)
+        cax = plt.matshow(data, cmap='viridis')
+        cbar = plt.colorbar(cax)
+        cbar.set_label(heatmap_labels[header])
+
+        # Annotate cells with values
+        font_size = min(10, 200 / max(data.shape))
+        for (i, j), val in np.ndenumerate(data):
+            plt.text(j, i, f"{val:.2f}", ha='center', va='center', color='white', fontsize=font_size)
+
+        # Set axis labels and ticks
+        plt.xlabel('Application')
+        plt.ylabel('Experiment')
+        plt.xticks(range(data.shape[1]))
+        plt.yticks(range(data.shape[0]))
+        plt.tick_params(axis="x", bottom=True, labelbottom=True, top=False, labeltop=False)
+
+        plot_dict[header] = (BlockingFigureWrapper(plt.gcf()), plt.gca())
+
+    return plot_dict

@@ -11,3 +11,8 @@ SDF_DATA_NAMES:     # Names of the data fields parsed by the SDF reader for TSUN
   - "sum_opposite_sign_groupwise_sensitivities"
   - "sensitivities"
   - "uncertainties"
+
+COMPARISON_HEATMAP_LABELS:
+  Calculated: 'Calculated Integral Index'
+  TSUNAMI-IP: 'TSUNAMI-IP Integral Index'
+  Percent Difference: 'Percent Difference (%)'
