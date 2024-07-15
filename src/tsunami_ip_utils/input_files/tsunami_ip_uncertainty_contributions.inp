@@ -1,0 +1,17 @@
+=tsunami-ip
+Uncertainty Contributions
+
+read parameters
+    uncert
+    uncert_long
+end parameters
+
+read applications
+    $filenames
+end applications
+
+read experiments
+    $first_file
+end experiments
+
+end

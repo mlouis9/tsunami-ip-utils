@@ -5,6 +5,10 @@ import h5py
 from pathlib import Path
 from . import config
 from typing import Tuple, List, Union, Dict
+from string import Template
+from tempfile import NamedTemporaryFile
+import subprocess
+import os
 
 ParserElement.enablePackrat()
 
@@ -208,7 +212,7 @@ def read_covariance_matrix(filename: str):
 def _read_ck_contributions(filename: str):
     pass
 
-def read_uncertainty_contributions(filename: Union[str, Path]) -> Tuple[List[dict], List[dict]]:
+def read_uncertainty_contributions_out(filename: Union[str, Path]) -> Tuple[List[dict], List[dict]]:
     """Reads the output file from TSUNAMI and returns the uncertainty contributions for each nuclide-reaction
     covariance.
     
@@ -290,6 +294,120 @@ def read_uncertainty_contributions(filename: Union[str, Path]) -> Tuple[List[dic
 
     return isotope_totals, isotope_reaction
 
+def read_uncertainty_contributions_sdf(filenames: List[Path]):
+    """Reads the uncertainty contributions from a list of TSUNAMI-B SDF files and returns the contributions for each nuclide-
+    reaction covariance by first running a TSUNAMI-IP calculation to generate the extended uncertainty edit.
+    
+    Parameters
+    ----------
+    filenames
+        List of paths to the SDF files.
+        
+    Returns
+    -------"""
+
+    # ===============================
+    # Generate the Uncertainty Edits
+    # ===============================
+
+    # First generate the extended uncertainty edits
+    current_dir = Path(__file__).parent
+    with open(current_dir / "input_files" / "tsunami_ip_uncertainty_contributions.inp", 'r') as f:
+        tsunami_ip_template = Template(f.read())
+
+    # Generate a string containing a list of all filenames
+    filenames = [ str(filename.absolute()) for filename in filenames ]
+
+    # Now template the input file
+    tsunami_ip_input = tsunami_ip_template.substitute(
+        filenames='\n'.join(filenames),
+        first_file=filenames[0]
+    )
+
+    # Now write the template file to a temporary file and run it
+    with NamedTemporaryFile('w', delete=False) as f:
+        f.write(tsunami_ip_input)
+        input_filename = f.name
+
+    # Run the TSUNAMI-IP calculation
+    process = subprocess.Popen( ['scalerte', input_filename], cwd=str( Path( input_filename ).parent ) )
+    process.wait()
+
+    # ========================
+    # Process the Output File
+    # ========================
+    with open(f"{input_filename}.out", 'r') as f:
+        data = f.read()
+    
+    # ----------------------------------------------------
+    # Define the formattting that precedes the data table
+    # ----------------------------------------------------
+    table_identifier = Literal("contributions to uncertainty in keff ( % dk/k ) by individual energy covariance matrices:")
+    pre_header = Literal("covariance matrix") + LineEnd()
+    header = Word("nuclide-reaction") + Word("with") + Word("nuclide-reaction") + Word("% delta-k/k due to this matrix")
+    dash_separator = OneOrMore(OneOrMore('-'))
+
+    # ----------------------
+    # Define the data lines
+    # ----------------------
+
+    # Define the grammar for the nuclide-reaction pair
+    atomic_number = Word(nums)
+    element = Word(alphas.lower(), max=2) 
+    isotope_name = Combine(element + Optional('-' + atomic_number)) # To handle the case of carbon in ENDF-7.1 libraries
+    reaction_type = Word(alphanums + ',\'')
+
+    data_line = Group(isotope_name + reaction_type + isotope_name + reaction_type + \
+                pyparsing_common.sci_real + Suppress(Literal("+/-")) + pyparsing_common.sci_real + Suppress(LineEnd()))
+    data_block = OneOrMore(data_line)
+
+    # -------------------------------------------
+    # Define the total parser and parse the data
+    # -------------------------------------------
+    data_parser = Suppress(table_identifier) + Suppress(pre_header) + Suppress(header) + \
+                    Suppress(dash_separator) + data_block
+
+    # -------------------------------------------------------------------------------
+    # Now convert the data into isotope wise and isotope-reaction wise contributions
+    # -------------------------------------------------------------------------------
+    parsed_data = data_parser.searchString(data)
+    num_sdfs = len(parsed_data)
+    isotope_reaction = [ [] for _ in range(num_sdfs) ]
+    for i, match in enumerate(parsed_data):
+        for data_element in match:
+            isotope_reaction[i].append({
+                'isotope': f'{data_element[0]} - {data_element[2]}',
+                'reaction_type': f'{data_element[1]} - {data_element[3]}',
+                'contribution': ufloat(data_element[4], data_element[5])
+            })
+
+    # Now calculate nuclide totals by summing the contributions for each nuclide via total = sqrt((pos)^2 - (neg)^2)
+    isotope_totals = [ {} for _ in range(num_sdfs) ]
+    for i, application in enumerate(isotope_reaction):
+        for data in application:
+            # First add up squared sums of all reaction-wise contributions
+            isotope = data['isotope']
+            contribution = data['contribution']
+            if isotope not in isotope_totals[i].keys():
+                isotope_totals[i][isotope] = ufloat(0,0)
+
+            if contribution < 0:
+                isotope_totals[i][isotope] -= ( data['contribution'] )**2
+            else:
+                isotope_totals[i][isotope] += ( data['contribution'] )**2
+        
+        # Now take square root of all contributions
+        for isotope, total in isotope_totals[i].items():
+            isotope_totals[i][isotope] = total**0.5
+
+        # Now convert into a list of dictionaries
+        isotope_totals[i] = [ {'isotope': isotope, 'contribution': total} for isotope, total in isotope_totals[i].items() ]
+
+    # Remove the temporary input and output files
+    os.remove(input_filename)
+    os.remove(f"{input_filename}.out")
+
+    return isotope_totals, isotope_reaction
 
 def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray]:
     """Reads the output file from TSUNAMI-IP and returns the integral values for each application.

@@ -179,7 +179,7 @@ def _process_pair(args):
 
 def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_name: str, application_files: List[Path], 
                            experiment_files: List[Path], method: str, base_library: Path=None, perturbation_factors: Path=None, 
-                           num_perturbations: int=None, make_plot=True) -> Tuple[pd.DataFrame, Any]:
+                           num_perturbations: int=None, make_plot=True, num_cores=None) -> Tuple[pd.DataFrame, Any]:
     """Function that compares the calculated similarity parameter C_k (calculated using the cross section sampling method) 
     with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs
     must correspond with those in hte TSUNAMI-IP input file.
@@ -266,10 +266,10 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
                 plot_objects_array = generate_plot_objects_array_from_perturbations(points_array)
             else:
                 # Get the number of available cores
-                num_cores = multiprocessing.cpu_count()
+                if num_cores is None:
+                    num_cores = multiprocessing.cpu_count() - 2
                 
                 # Use only half of the available cores
-                num_processes = num_cores - 2 # Leave 2 cores for other processes
 
                 num_applications = len(application_files)
                 num_experiments = len(experiment_files)
@@ -279,7 +279,7 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
                         for i in range(num_applications) for j in range(num_experiments)]
                 
                 # Use multiprocessing to process data
-                with multiprocessing.Pool(processes=num_processes) as pool:
+                with multiprocessing.Pool(processes=num_cores) as pool:
                     results = pool.map(_process_pair, tasks)
                 
                 # Reshape the results into matrices

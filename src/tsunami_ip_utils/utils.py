@@ -1,6 +1,9 @@
 import re
 import numpy as np
 from uncertainties import ufloat
+from pathlib import Path
+from typing import Callable
+import functools
 
 def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interest):
     """Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of
@@ -72,3 +75,26 @@ def parse_ufloats(array_of_strings):
         return ufloat(float(value), float(error))
     
     return np.vectorize(to_ufloat)(array_of_strings)
+
+def convert_paths(func: Callable) -> Callable:
+    """
+    Decorator to ensure that any list argument passed to the decorated function,
+    which contains strings, has those strings converted to pathlib.Path objects.
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        new_args = []
+        for arg in args:
+            if isinstance(arg, list):
+                # Convert all string items in the list to Path objects
+                new_arg = [Path(item) if isinstance(item, str) else item for item in arg]
+                new_args.append(new_arg)
+            else:
+                new_args.append(arg)
+        
+        new_kwargs = {k: [Path(item) if isinstance(item, str) else item for item in v] if isinstance(v, list) else v
+                      for k, v in kwargs.items()}
+        
+        return func(*new_args, **new_kwargs)
+    
+    return wrapper

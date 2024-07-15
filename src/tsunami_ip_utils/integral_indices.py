@@ -1,11 +1,12 @@
 from uncertainties import ufloat, umath, unumpy
 import numpy as np
-from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_uncertainty_contributions
+from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_uncertainty_contributions_out, read_uncertainty_contributions_sdf
 from tsunami_ip_utils._error import _unit_vector_uncertainty_propagation, _dot_product_uncertainty_propagation
 from copy import deepcopy
 from typing import List, Set, Tuple, Dict
 from pathlib import Path
 from uncertainties.core import Variable
+from tsunami_ip_utils.utils import convert_paths
 
 def _calculate_E_from_sensitivity_vecs(application_vector: unumpy.uarray, experiment_vector: unumpy.uarray, 
                                       application_filename: Path=None, experiment_filename: Path=None, 
@@ -433,18 +434,19 @@ def calculate_E_contributions(application_filenames: List[str], experiment_filen
     return E_nuclide_wise, E_nuclide_reaction_wise
 
 
+@convert_paths
 def get_uncertainty_contributions(application_filenames: List[str], experiment_filenames: List[str]
                                    ) -> Tuple[ Dict[ str, List[unumpy.uarray] ], Dict[ str,  List[unumpy.uarray] ] ]:
     """Read the contributions to the uncertainty in :math:`k_{\\text{eff}}` (i.e. :math:`\\frac{dk}{k}`) for each 
     application with each available experiment on a nuclide basis and on a nuclide-reaction basis from the
-    provided TSUNAMI-IP ``.out`` files.
+    provided TSUNAMI-IP ``.out`` or ``.sdf`` files.
 
     Parameters
     ----------
     application_filenames
-        Paths to the application output (``.out``) files.
+        Paths to the application output (``.out``) ``.sdf`` files.
     experiment_filenames
-        Paths to the experiment output (``.out``) files.
+        Paths to the experiment output (``.out``) or ``.sdf`` files.
 
     Returns
     -------
@@ -464,12 +466,24 @@ def get_uncertainty_contributions(application_filenames: List[str], experiment_f
         'experiment': np.empty( len(experiment_filenames), dtype=object )    
     }
 
-    for i, application_filename in enumerate(application_filenames):
-        dk_over_k_nuclide_wise['application'][i], dk_over_k_nuclide_reaction_wise['application'][i] = \
-            read_uncertainty_contributions(application_filename)
+    at_least_one_not_out = any([ filename.suffix != '.out' for filename in application_filenames + experiment_filenames ])
+    all_sdf = all([ filename.suffix == '.sdf' for filename in application_filenames + experiment_filenames ])
+    if at_least_one_not_out and not all_sdf:
+        raise ValueError("All files must be either .out or .sdf files")
+    
+    if all_sdf:
+        dk_over_k_nuclide_wise['application'], dk_over_k_nuclide_reaction_wise['application'] = \
+            read_uncertainty_contributions_sdf(application_filenames)
 
-    for i, experiment_filename in enumerate(experiment_filenames):
-        dk_over_k_nuclide_wise['experiment'][i], dk_over_k_nuclide_reaction_wise['experiment'][i] = \
-            read_uncertainty_contributions(experiment_filename)
+        dk_over_k_nuclide_wise['experiment'], dk_over_k_nuclide_reaction_wise['experiment'] = \
+            read_uncertainty_contributions_sdf(experiment_filenames)
+    else:
+        for i, application_filename in enumerate(application_filenames):
+            dk_over_k_nuclide_wise['application'][i], dk_over_k_nuclide_reaction_wise['application'][i] = \
+                read_uncertainty_contributions_out(application_filename)
+
+        for i, experiment_filename in enumerate(experiment_filenames):
+            dk_over_k_nuclide_wise['experiment'][i], dk_over_k_nuclide_reaction_wise['experiment'][i] = \
+                read_uncertainty_contributions_out(experiment_filename)
             
     return dk_over_k_nuclide_wise, dk_over_k_nuclide_reaction_wise
