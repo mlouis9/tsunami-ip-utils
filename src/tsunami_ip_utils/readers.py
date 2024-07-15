@@ -398,7 +398,7 @@ def read_uncertainty_contributions_sdf(filenames: List[Path]):
         
         # Now take square root of all contributions
         for isotope, total in isotope_totals[i].items():
-            isotope_totals[i][isotope] = total**0.5
+            isotope_totals[i][isotope] = total**0.5 if total > 0 else -(-total)**0.5 # Allow for negative isotope totals
 
         # Now convert into a list of dictionaries
         isotope_totals[i] = [ {'isotope': isotope, 'contribution': total} for isotope, total in isotope_totals[i].items() ]
