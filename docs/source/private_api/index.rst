@@ -29,6 +29,15 @@ tsunami\_ip\_utils.\_error module
    :show-inheritance:
    :private-members:
 
+tsunami\_ip\_utils.\_utils module
+---------------------------------
+
+.. automodule:: tsunami_ip_utils._utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
 tsunami\_ip\_utils.comparisons module
 -------------------------------------
 
@@ -60,15 +69,6 @@ tsunami\_ip\_utils.readers module
 ---------------------------------
 
 .. automodule:: tsunami_ip_utils.readers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
-
-tsunami\_ip\_utils.utils module
--------------------------------
-
-.. automodule:: tsunami_ip_utils.utils
    :members:
    :undoc-members:
    :show-inheritance:

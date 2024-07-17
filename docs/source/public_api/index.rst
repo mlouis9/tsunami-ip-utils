@@ -49,14 +49,6 @@ tsunami\_ip\_utils.readers module
    :undoc-members:
    :show-inheritance:
 
-tsunami\_ip\_utils.utils module
--------------------------------
-
-.. automodule:: tsunami_ip_utils.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 tsunami\_ip\_utils.xs module
 ----------------------------
 
