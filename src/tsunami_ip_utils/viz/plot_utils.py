@@ -1,5 +1,5 @@
 import socket
-from tsunami_ip_utils.utils import filter_redundant_reactions, isotope_reaction_list_to_nested_dict
+from tsunami_ip_utils._utils import _filter_redundant_reactions, _isotope_reaction_list_to_nested_dict
 import numpy as np
 from typing import Dict, List
 from uncertainties import unumpy
@@ -31,7 +31,7 @@ def determine_plot_type(contributions, plot_redundant_reactions):
         nested_plot = True # Nested plot by nuclide then by reaction type
 
         # Create a dictionary of contributions keyed by isotope then by reaction type
-        contributions = isotope_reaction_list_to_nested_dict(contributions, 'contribution')
+        contributions = _isotope_reaction_list_to_nested_dict(contributions, 'contribution')
 
         # If viewing nuclide-reaction wise contributions, it's important (at least for the visualizations in this function)
         # that if viewing the true contributions to the nuclide total, that redundant interactions (e.g. capture and fission
@@ -39,7 +39,7 @@ def determine_plot_type(contributions, plot_redundant_reactions):
 
         if not plot_redundant_reactions:
             # Remove redundant interactions
-            contributions = filter_redundant_reactions(contributions)
+            contributions = _filter_redundant_reactions(contributions)
     else: # Nuclide-wise contributions
         nested_plot = False
         contributions = { contribution['isotope']: contribution['contribution'] for contribution in contributions }

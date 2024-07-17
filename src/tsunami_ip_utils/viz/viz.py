@@ -10,7 +10,7 @@ from typing import List, Dict, Tuple, Union
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
-from tsunami_ip_utils.utils import parse_ufloats
+from tsunami_ip_utils._utils import _parse_ufloats
 from tsunami_ip_utils import config
 from matplotlib.figure import Figure
 
@@ -155,7 +155,8 @@ class BlockingFigureWrapper:
         return getattr(self._figure, name)
 
 
-def generate_heatmap_from_comparison(comparison_excel_path: Union[str, Path]) -> Dict[str, Tuple[plt.Figure, plt.Axes]]:
+def generate_heatmap_from_comparison(comparison_excel_path: Union[str, Path], base_fontsize: int=6
+                                     ) -> Dict[str, Tuple[plt.Figure, plt.Axes]]:
     """Generates a heatmap from a comparison excel file"""
     
     comparison = pd.read_excel(comparison_excel_path, header=[0,1], index_col=0)
@@ -172,7 +173,7 @@ def generate_heatmap_from_comparison(comparison_excel_path: Union[str, Path]) ->
         # Filter the DataFrame for the current header
         filtered_df = comparison.xs(header, level=1, axis=1)
         # Convert the filtered DataFrame to a numpy array
-        array = parse_ufloats(filtered_df.to_numpy())
+        array = _parse_ufloats(filtered_df.to_numpy())
         
         # Now plot the array
         data = unumpy.nominal_values(array)
@@ -182,7 +183,7 @@ def generate_heatmap_from_comparison(comparison_excel_path: Union[str, Path]) ->
         cbar.set_label(heatmap_labels[header])
 
         # Annotate cells with values
-        font_size = min(10, 200 / max(data.shape))
+        font_size = min(base_fontsize, 200 / max(data.shape))
         for (i, j), val in np.ndenumerate(data):
             plt.text(j, i, f"{val:.2f}", ha='center', va='center', color='white', fontsize=font_size)
 

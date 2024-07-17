@@ -253,6 +253,7 @@ class InteractiveScatterPlotter(ScatterPlot):
                 old_annotation_text = \
                     [ann for ann in self.fig.layout.annotations if ann.text.startswith('Pearson')][0].text
                 annotation_text = replace_spearman_and_pearson(old_annotation_text, self.pearson, self.spearman)
+                bordercolor = '#444'
 
                 self.fig.layout.annotations = [ann for ann in self.fig.layout.annotations if not ann.text.startswith('Pearson')]
                 if "TSUNAMI-IP" in annotation_text:
@@ -263,10 +264,10 @@ class InteractiveScatterPlotter(ScatterPlot):
                     if abs(percent_difference.nominal_value) > 5:
                         bordercolor = 'red'
             else:
-                bordercolor = 'black'
+                bordercolor = '#444'
                 annotation_text = self.summary_stats_text
         else:
-            bordercolor = 'black'
+            bordercolor = '#444'
             annotation_text = self.summary_stats_text
 
         # Add correlation statistics to the plot

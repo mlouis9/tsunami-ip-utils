@@ -2,7 +2,7 @@
 experiment pair to generate a similarity scatter plot"""
 
 from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_region_integrated_h5_sdf
-from tsunami_ip_utils.utils import filter_redundant_reactions
+from tsunami_ip_utils._utils import _filter_redundant_reactions
 from pathlib import Path
 from tsunami_ip_utils.xs import read_multigroup_xs
 import pickle
@@ -11,7 +11,7 @@ import tempfile
 from string import Template
 import subprocess
 import time
-from tsunami_ip_utils.utils import filter_by_nuclie_reaction_dict
+from tsunami_ip_utils._utils import _filter_by_nuclie_reaction_dict
 import multiprocessing
 from multiprocessing import Pool
 from tqdm import tqdm
@@ -204,7 +204,7 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
         available_nuclide_reactions = { nuclide: list( reactions.keys() ) for nuclide, reactions in base_xs.items() }
 
         # Filter out the desired nuclide reactions
-        base_xs = filter_by_nuclie_reaction_dict(base_xs, all_nuclide_reactions)
+        base_xs = _filter_by_nuclie_reaction_dict(base_xs, all_nuclide_reactions)
 
     perturbed_cache = cache_dir / f'cached_{library_name}_perturbations'
     if not perturbed_cache.exists():
@@ -227,7 +227,7 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
                 perturbed_xs = pickle.load(f)
 
         # Now filter out the desired nuclide reactions
-        perturbed_xs = filter_by_nuclie_reaction_dict(perturbed_xs, all_nuclide_reactions)
+        perturbed_xs = _filter_by_nuclie_reaction_dict(perturbed_xs, all_nuclide_reactions)
 
         # ----------------------------------------------
         # Compute S ⋅ Δσ for application and experiment

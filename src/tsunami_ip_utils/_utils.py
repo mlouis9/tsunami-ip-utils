@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Callable
 import functools
 
-def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interest):
+def _isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interest):
     """Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of
     interest, e.g. an sdf profile or a contribution) to a nested dictionary
     
@@ -39,7 +39,7 @@ def isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interes
 
     return isotope_reaction_dict
 
-def filter_redundant_reactions(data_dict, redundant_reactions=['chi', 'capture', 'nubar', 'total']):
+def _filter_redundant_reactions(data_dict, redundant_reactions=['chi', 'capture', 'nubar', 'total']):
     """Filters out redundant reactions from a nested isotope-reaction dictionary
     
     Parameters
@@ -49,7 +49,7 @@ def filter_redundant_reactions(data_dict, redundant_reactions=['chi', 'capture',
     return { isotope: { reaction: data_dict[isotope][reaction] for reaction in data_dict[isotope] \
                         if reaction not in redundant_reactions } for isotope in data_dict }
 
-def filter_by_nuclie_reaction_dict(data_dict, nuclide_reactions):
+def _filter_by_nuclie_reaction_dict(data_dict, nuclide_reactions):
     """Filters out isotopes that are not in the nuclide_reactions dictionary
     
     Parameters
@@ -60,11 +60,11 @@ def filter_by_nuclie_reaction_dict(data_dict, nuclide_reactions):
                         for nuclide, reactions in data_dict.items() if nuclide in nuclide_reactions.keys()}
 
 
-def parse_ufloats(array_of_strings):
-    """ Parses a 2D array of strings into a 2D array of ufloats, assuming zero uncertainty if '+/-' is not found. """
+def _parse_ufloats(array_of_strings):
+    """Parses a 2D array of strings into a 2D array of ufloats, assuming zero uncertainty if '+/-' is not found. """
     def to_ufloat(s):
         if isinstance(s, float):
-            return ufloat(s, s)
+            return ufloat(s, 0)
         
         parts = s.split('+/-')
         if len(parts) == 2:
@@ -76,7 +76,7 @@ def parse_ufloats(array_of_strings):
     
     return np.vectorize(to_ufloat)(array_of_strings)
 
-def convert_paths(func: Callable) -> Callable:
+def _convert_paths(func: Callable) -> Callable:
     """
     Decorator to ensure that any list argument passed to the decorated function,
     which contains strings, has those strings converted to pathlib.Path objects.

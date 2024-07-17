@@ -6,7 +6,7 @@ from copy import deepcopy
 from typing import List, Set, Tuple, Dict
 from pathlib import Path
 from uncertainties.core import Variable
-from tsunami_ip_utils.utils import convert_paths
+from tsunami_ip_utils._utils import _convert_paths
 
 def _calculate_E_from_sensitivity_vecs(application_vector: unumpy.uarray, experiment_vector: unumpy.uarray, 
                                       application_filename: Path=None, experiment_filename: Path=None, 
@@ -434,7 +434,7 @@ def calculate_E_contributions(application_filenames: List[str], experiment_filen
     return E_nuclide_wise, E_nuclide_reaction_wise
 
 
-@convert_paths
+@_convert_paths
 def get_uncertainty_contributions(application_filenames: List[str], experiment_filenames: List[str]
                                    ) -> Tuple[ Dict[ str, List[unumpy.uarray] ], Dict[ str,  List[unumpy.uarray] ] ]:
     """Read the contributions to the uncertainty in :math:`k_{\\text{eff}}` (i.e. :math:`\\frac{dk}{k}`) for each 
