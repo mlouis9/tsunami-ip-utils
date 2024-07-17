@@ -30,13 +30,13 @@ def _unit_vector_uncertainty_propagation(vector: unumpy.uarray) -> np.ndarray:
 
     Examples
     --------
-    >>> unit_vector_uncertainty_propagation(unumpy.uarray([1, 2, 3], [0.1, 0.2, 0.3]))
+    >>> _unit_vector_uncertainty_propagation(unumpy.uarray([1, 2, 3], [0.1, 0.2, 0.3]))
     array([0.03113499, 0.05150788, 0.03711537])
 
-    >>> unit_vector_uncertainty_propagation(unumpy.uarray([0, 0, 0], [0.1, 0.2, 0.3]))
+    >>> _unit_vector_uncertainty_propagation(unumpy.uarray([0, 0, 0], [0.1, 0.2, 0.3]))
     array([0., 0., 0.])
 
-    >>> unit_vector_uncertainty_propagation(unumpy.uarray([0, 0, 0], [0.0, 0.0, 0.0]))
+    >>> _unit_vector_uncertainty_propagation(unumpy.uarray([0, 0, 0], [0.0, 0.0, 0.0]))
     array([0., 0., 0.])
     
     Parameters

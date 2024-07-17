@@ -94,12 +94,12 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
     Notes
     -----
     * This function will cache the base cross section library and the perturbed cross section libraries in the user's home 
-    directory under the ``.tsunami_ip_utils_cache`` directory. If the user wishes to reset the cache, they can do so by
-    setting the ``reset_cache`` parameter to ``True`` in the :func:`cache_all_libraries` function. The user can also cache
-    the base and perturbed cross section libraries manually by calling the :func:`cache_all_libraries` function.
-    
+      directory under the ``.tsunami_ip_utils_cache`` directory. If the user wishes to reset the cache, they can do so by
+      setting the ``reset_cache`` parameter to ``True`` in the :func:`cache_all_libraries` function. The user can also cache
+      the base and perturbed cross section libraries manually by calling the :func:`cache_all_libraries` function.
+
     * This function can also generate a matrix of points for a given set of experiment and applications for making a matrix plot
-    this can be done by passing a list of paths for the application and experiment sensitivity profiles.
+      done by passing a list of paths for the application and experiment sensitivity profiles.
 
     Parameters
     ----------

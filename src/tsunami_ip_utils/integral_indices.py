@@ -116,7 +116,7 @@ def _create_sensitivity_vector(sdfs: List[unumpy.uarray]) -> unumpy.uarray:
     Examples
     --------
     >>> sdfs = [ unumpy.uarray( [1, 2, 3], [0.1, 0.2, 0.3] ), unumpy.uarray( [4, 5, 6], [0.4, 0.5, 0.6] ) ]
-    >>> create_sensitivity_vector(sdfs)
+    >>> _create_sensitivity_vector(sdfs)
     array([1.0+/-0.1, 2.0+/-0.2, 3.0+/-0.3, 4.0+/-0.4, 5.0+/-0.5, 6.0+/-0.6],
           dtype=object)
     
