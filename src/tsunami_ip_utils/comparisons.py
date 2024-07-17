@@ -11,7 +11,6 @@ from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure, InteractiveS
 from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_perturbations, generate_plot_objects_from_array_contributions
 from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, calculate_E_contributions
 from tsunami_ip_utils.viz import matrix_plot
-from memory_profiler import profile
 import multiprocessing
 
 def comparison(tsunami_ip_output_filename: Path, application_filenames: List[Path], 
