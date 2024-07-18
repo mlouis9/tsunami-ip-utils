@@ -2,6 +2,7 @@ import os, sys
 import logging
 from docutils.parsers.rst import Directive
 import inspect
+from sphinx_gallery.scrapers import figure_rst
 
 src_path = os.path.abspath('../../src')
 ext_path = os.path.abspath('./_ext')
@@ -21,6 +22,27 @@ copyright = '2024, Matthew Louis'
 author = 'Matthew Louis'
 release = '0.0.1'
 
+# -- Plotly Image Scraper -----------------------------------------------------
+def plotly_scraper(block, block_vars, gallery_conf):
+    from IPython.display import HTML
+
+    # Check if 'fig' is in the example_globals and if it can generate HTML
+    fig = block_vars['example_globals'].get('fig', None)
+    if fig and hasattr(fig, 'to_html'):
+        html_output = fig.to_html(include_plotlyjs='cdn', full_html=False)
+        # Wrap the HTML output in necessary RST for Sphinx to handle it correctly
+        html_rst = f"""
+.. raw:: html
+
+    {html_output}
+
+        """
+        return html_rst
+    else:
+        # Handle cases where 'fig' is not available or does not have 'to_html'
+        print("No 'fig' found or 'fig' lacks 'to_html' method")
+        return ''
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -29,10 +51,22 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_rtd_theme',
     'sphinx_autodoc_typehints',
-    'sphinx.ext.viewcode', # Add links to source code
-    'sphinx.ext.mathjax',  # Render math equations using MathJax
-    'globalparam',         # Custom extension for global parameters
+    'sphinx.ext.viewcode',         # Add links to source code
+    'sphinx.ext.mathjax',          # Render math equations using MathJax
+    'globalparam',                 # Custom extension for global parameters
+    'sphinx_gallery.gen_gallery',  # Generate gallery of examples
 ]
+
+sphinx_gallery_conf = {
+    'examples_dirs': '../../examples',  # Path to example scripts
+    'gallery_dirs': 'auto_examples',  # Path to save gallery generated output
+    'filename_pattern': r'plot_.*\.py$',  # Adjusted regex to ensure it captures all intended files
+    'example_extensions': ['.py'],
+    'image_scrapers': ('matplotlib', plotly_scraper),  # If using matplotlib for plots
+    'doc_module': ('tsunami_ip_utils',),
+    'download_all_examples': True,  # Ensures download links are generated
+    'notebook_images': True,  # If you want to generate Jupyter notebooks
+}
 
 autodoc_default_options = {
     'member-order': 'bysource',

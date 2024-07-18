@@ -23,6 +23,8 @@ dash = "*"
 h5py = "*"
 tqdm = "*"
 pyyaml = "*"
+pytest-mpl = "*"
+pytest = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

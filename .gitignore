@@ -3,6 +3,7 @@
 *.html
 *.dat
 *dist
+results
 src/*.egg*
 3d-sphere
 1d-sphere

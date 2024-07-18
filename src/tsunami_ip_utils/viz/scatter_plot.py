@@ -75,6 +75,7 @@ class EnhancedPlotlyFigure(Figure):
     summary statistics and linear regression data. This class is intended to be used with the ``InteractiveScatterPlotter``
     class."""
     def __init__(self, *args, **kwargs):
+        """Hey new init method"""
         super().__init__(*args, **kwargs)
 
         # Directly set the attributes using object's __setattr__ to bypass Plotly's checks

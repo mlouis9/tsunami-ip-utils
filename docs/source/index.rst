@@ -12,6 +12,7 @@ Welcome to tsunami_ip_utils's documentation!
 
    Public API <public_api/index>
    Private API <private_api/index>
+   Examples <auto_examples/index>
 
 Indices and tables
 ==================

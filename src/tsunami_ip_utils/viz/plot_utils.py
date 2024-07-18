@@ -59,6 +59,7 @@ def generate_plot_objects_from_array_contributions(contributions: Dict[ str, Lis
         Name of the integral index being plotted.
     kwargs
         Additional keyword arguments. The following are supported:
+        
         * diagonal_type : str
             Type of plot to create on the diagonal. Default is ``'interactive_pie'`` which creates an interactive
             pie chart.
