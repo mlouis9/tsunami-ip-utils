@@ -70,6 +70,7 @@ autodoc_default_options = {
     'member-order': 'bysource',
     'special-members': '__init__',
     'inherited-members': True,
+    'exclude-members': '__class__'
 }
 
 templates_path = ['_templates']
@@ -136,10 +137,16 @@ def skip_by_api_type(api_type, name, obj):
             return True
         elif api_type == 'private' and not private_method:
             return True
+        
+def skip_unwanted_inherited_members(name):
+    unwanted_inherited_members = ['__class__'] # Not sure why this is being inherited
+    if name in unwanted_inherited_members:
+        return True
+    return None
 
 def skip_member(app, what, name, obj, skip, options):
     api_type = app.config.api_type
-    skip = skip_by_api_type(api_type, name, obj)
+    skip = skip_by_api_type(api_type, name, obj) or skip_unwanted_inherited_members(name)
 
     # Exclude inherited members for specific classes
     classes_to_exclude_inherited_members = ['EnhancedPlotlyFigure']
