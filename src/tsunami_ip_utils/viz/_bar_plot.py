@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 from ._base_plotter import _Plotter
 import numpy as np
 from typing import Dict, Union, Tuple
@@ -9,11 +10,11 @@ from uncertainties import ufloat
 
 class _BarPlotter(_Plotter):
     """Class for creating bar plots of contributions to integral indices on a nuclide-wise and nuclide-reaction-wise basis."""
-    fig: Figure
+    _fig: Figure
     """The figure object for the plot."""
-    axs: plt.Axes
+    _axs: plt.Axes
     """The axes object for the plot."""
-    index_name: str
+    _index_name: str
     """The name of the integral index being plotted."""
     def __init__(self, integral_index_name: str, plot_redundant: bool=False):
         """Initializes a bar plot of the contributions to the given integral index.
@@ -36,7 +37,7 @@ class _BarPlotter(_Plotter):
           the contributions to add up nicely, then the redundant reactions should be excluded, and if only cross sections are
           being considered, then the irrelevant reactions should be excluded.
         """
-        self.index_name = integral_index_name
+        self._index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
     def _create_plot(self, contributions: Union[Dict[str, ufloat], Dict[str, Dict[str, ufloat]]], nested: bool):
@@ -53,7 +54,7 @@ class _BarPlotter(_Plotter):
         nested
             Wether the contributions are on a reaction-wise basis or not."""
         self.nested = nested
-        self.fig, self.axs = plt.subplots()
+        self._fig, self._axs = plt.subplots()
         if nested:
             self._nested_barchart(contributions)
         else:
@@ -61,11 +62,11 @@ class _BarPlotter(_Plotter):
 
         self._style()
 
-    def _get_plot(self) -> Tuple[Figure, plt.Axes]:
-        return self.fig, self.axs
+    def _get_plot(self) -> Tuple[Figure, Axes]:
+        return self._fig, self._axs
         
     def _add_to_subplot(self, fig, position) -> Figure:
-        return fig.add_subplot(position, sharex=self.axs, sharey=self.axs)
+        return fig.add_subplot(position, sharex=self._axs, sharey=self._axs)
         
     def _barchart(self, contributions: Dict[str, ufloat]):
         """Create a bar chart of the contributions to the integral index on a nuclide-wise basis.
@@ -75,7 +76,7 @@ class _BarPlotter(_Plotter):
         contributions
             A dictionary of the form ``{nuclide: contribution}``, where contribution is a ``ufloat`` object representing the
             contribution of the nuclide to the integral index."""
-        self.axs.bar(contributions.keys(), [contribution.n for contribution in contributions.values()],
+        self._axs.bar(contributions.keys(), [contribution.n for contribution in contributions.values()],
             yerr=[contribution.s for contribution in contributions.values()], capsize=5, error_kw={'elinewidth': 0.5})
 
     def _nested_barchart(self, contributions):
@@ -107,9 +108,9 @@ class _BarPlotter(_Plotter):
             # Stacking positive values
             pos_values = [max(0, v) for v in values]
             neg_values = [min(0, v) for v in values]
-            self.axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=colors[color_index % len(colors)],
+            self._axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=colors[color_index % len(colors)],
                     yerr=errs, capsize=5, error_kw={'capthick': 0.5})
-            self.axs.bar(indices, neg_values, bottom=bottoms_neg, color=colors[color_index % len(colors)],
+            self._axs.bar(indices, neg_values, bottom=bottoms_neg, color=colors[color_index % len(colors)],
                     yerr=errs, capsize=5, error_kw={'capthick': 0.5})
             # Update the bottom positions
             bottoms_pos = [bottoms_pos[i] + pos_values[i] for i in range(len(bottoms_pos))]
@@ -119,18 +120,18 @@ class _BarPlotter(_Plotter):
         # Adding 'effective' box with dashed border
         total_values = [sum(contributions[label][r].n for r in contributions[label]) for label in labels]
         for idx, val in zip(indices, total_values):
-            self.axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.5)
+            self._axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.5)
 
-        self.axs.set_xticks(indices)
-        self.axs.set_xticklabels(labels)
-        self.axs.legend()
+        self._axs.set_xticks(indices)
+        self._axs.set_xticklabels(labels)
+        self._axs.legend()
 
     def _style(self):
         if self.plot_redundant and self.nested:
-            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+            title_text = f'Contributions to {self._index_name} (including redundant/irrelvant reactions)'
         else:
-            title_text = f'Contributions to {self.index_name}'
-        self.axs.set_ylabel(f"Contribution to {self.index_name}")
-        self.axs.set_xlabel("Isotope")
-        self.axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
-        self.axs.set_title(title_text)
+            title_text = f'Contributions to {self._index_name}'
+        self._axs.set_ylabel(f"Contribution to {self._index_name}")
+        self._axs.set_xlabel("Isotope")
+        self._axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
+        self._axs.set_title(title_text)

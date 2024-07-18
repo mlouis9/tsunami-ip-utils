@@ -75,7 +75,7 @@ def create_plot_element(i, j, plot_object):
         graph_id = f"interactive-scatter-{i}-{j}"
         return dcc.Graph(id=graph_id, figure=plot_object.fig, style=GRAPH_STYLE)
     elif isinstance(plot_object, InteractivePieLegend):
-        with plot_object.app.test_client() as client:
+        with plot_object._app.test_client() as client:
             response = client.get('/')
             html_content = response.data.decode('utf-8')
             return html.Iframe(srcDoc=html_content, style=GRAPH_STYLE)

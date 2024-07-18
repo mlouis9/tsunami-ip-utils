@@ -1,3 +1,6 @@
+"""Tools for creating pie charts of contributions to integral indices."""
+
+from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -11,30 +14,79 @@ from flask import Flask, render_template_string
 import uuid
 from .plot_utils import find_free_port
 import pickle
+from typing import Tuple, Dict, Union, Optional
+from uncertainties import ufloat
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+import plotly
+from pathlib import Path
 
-
-class PiePlotter(_Plotter):
+class _PiePlotter(_Plotter):
+    """A class for creating static pie charts of contributions to integral indices."""
+    _index_name: str
+    """The name of the integral index whose contributions are being plotted (e.g. ``'E'`` or ``'c_k'``)."""
+    _plot_redundant: bool
+    """Whether to plot redundant/irrelevant reactions in the pie chart."""
     def __init__(self, integral_index_name, plot_redudant=False, **kwargs):
-        self.index_name = integral_index_name
-        self.plot_redundant = plot_redudant
+        """Initializes a pie chart of the contributions to the given integral index.
+        
+        Parameters
+        ----------
+        integral_index_name
+            The name of the integral index whose contributions are to be plotted.
+        plot_redundant
+            Wether to include redundant/irrelevant reactions in the plot. NOTE: this only applies to nested plots, and
+            only affects the plot title; it is expected that the provided data is consistent with the flag.
+            
+        Notes
+        -----
+        * Redundant reactions are defined as those which are derived from other reactions, e.g. 'total' and 'capture' reactions
+          in SCALE.
+        * Irrelevant reactions are defined as those which are not directly cross sections (but rather other nuclear data 
+          parameters), e.g. 'chi' in SCALE.
+        * A flag for including/excluding redundant/irrelevant reactions was provided since, if the user is expecting the
+          the contributions to add up nicely, then the redundant reactions should be excluded, and if only cross sections are
+          being considered, then the irrelevant reactions should be excluded.
+        """
+        self._index_name = integral_index_name
+        self._plot_redundant = plot_redudant
     
-    def _create_plot(self, contributions, nested):
+    def _create_plot(self, contributions: Union[Dict[str, ufloat], Dict[str, Dict[str, ufloat]]], nested: bool):
+        """Creates a pie chart of the given contributions to the integral index.
+        
+        Parameters
+        ----------
+        contributions
+            * If ``nested`` is ``False``, then this should be a dictionary of the form ``{nuclide: contribution}``, where 
+              contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index.
+            * If ``nested`` is ``True``, then this should be a dictionary of the form ``{nuclide: {reaction: contribution}}``,
+              where contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index 
+              through the given reaction.
+        nested
+            Wether the contributions are on a reaction-wise basis or not."""
         self.nested = nested
         self.fig, self.axs = plt.subplots()
         if nested:
-            self.nested_pie_chart(contributions)
+            self._nested_pie_chart(contributions)
         else:
-            self.pie_chart(contributions)
+            self._pie_chart(contributions)
 
         self._style()
 
     def _add_to_subplot(self, fig, position):
         return fig.add_subplot(position, sharex=self.ax, sharey=self.ax)
 
-    def _get_plot(self):
+    def _get_plot(self) -> Tuple[Figure, Axes]:
         return self.fig, self.axs
 
-    def nested_pie_chart(self, contributions):
+    def _nested_pie_chart(self, contributions: Dict[str, Dict[str, ufloat]]):
+        """Create a pie chart of the contributions to the integral index on a nuclide-reaction-wise basis.
+
+        Parameters
+        ----------
+        contributions
+            A dictionary of the form ``{nuclide: {reaction: contribution}}``, where contribution is a ``ufloat`` object
+            representing the contribution of the nuclide to the integral index through the given reaction."""
         # Create a nested ring chart
         num_reactions = len(next(iter(contributions.values())))
         nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
@@ -130,7 +182,14 @@ class PiePlotter(_Plotter):
             if hatch:
                 wedge.set_hatch(hatch)
         
-    def pie_chart(self, contributions):
+    def _pie_chart(self, contributions: Dict[str, ufloat]):
+        """Create a pie chart of the contributions to the integral index on a nuclide-wise basis.
+        
+        Parameters
+        ----------
+        contributions
+            A dictionary of the form ``{nuclide: contribution}``, where contribution is a ``ufloat`` object representing the
+            contribution of the nuclide to the integral index."""
         labels = list(contributions.keys())
         values = [abs(contributions[key].n) for key in labels]
 
@@ -145,26 +204,67 @@ class PiePlotter(_Plotter):
             wedge.set_hatch(hatch)
 
     def _style(self):
-        if self.plot_redundant and self.nested:
-            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+        if self._plot_redundant and self.nested:
+            title_text = f'Contributions to {self._index_name} (including redundant/irrelvant reactions)'
         else:
-            title_text = f'Contributions to {self.index_name}'
+            title_text = f'Contributions to {self._index_name}'
         self.axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
         self.axs.set_title(title_text)
 
 
-class InteractivePiePlotter(_Plotter):
-    def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
+class _InteractivePiePlotter(_Plotter):
+    """A class for creating interactive pie charts of contributions to integral indices."""
+    _index_name: str
+    """The name of the integral index whose contributions are being plotted (e.g. ``'E'`` or ``'c_k'``)."""
+    _plot_redundant: bool
+    """Whether to plot redundant/irrelevant reactions in the pie chart."""
+    def __init__(self, integral_index_name: str, plot_redundant: bool=False, **kwargs: dict):
+        """Initializes a pie chart of the contributions to the given integral index.
+        
+        Parameters
+        ----------
+        integral_index_name
+            The name of the integral index whose contributions are to be plotted.
+        plot_redundant
+            Wether to include redundant/irrelevant reactions in the plot. NOTE: this only applies to nested plots, and
+            only affects the plot title; it is expected that the provided data is consistent with the flag.
+        kwargs
+            Additional keyword arguments to control the behavior of the interactive legend.
+
+            - interactive_legend (bool)
+                Wether to include an interactive legend in the plot. Default is ``True``.
+        Notes
+        -----
+        * Redundant reactions are defined as those which are derived from other reactions, e.g. 'total' and 'capture' reactions
+          in SCALE.
+        * Irrelevant reactions are defined as those which are not directly cross sections (but rather other nuclear data 
+          parameters), e.g. 'chi' in SCALE.
+        * A flag for including/excluding redundant/irrelevant reactions was provided since, if the user is expecting the
+          the contributions to add up nicely, then the redundant reactions should be excluded, and if only cross sections are
+          being considered, then the irrelevant reactions should be excluded.
+        """
         # Check if the user wants an interactive legend
         if 'interactive_legend' in kwargs.keys():
             self.interactive_legend = kwargs['interactive_legend']
         else:
             self.interactive_legend = True
         
-        self.index_name = integral_index_name
-        self.plot_redundant = plot_redundant
+        self._index_name = integral_index_name
+        self._plot_redundant = plot_redundant
 
-    def _create_plot(self, contributions, nested=True):
+    def _create_plot(self, contributions: Union[Dict[str, ufloat], Dict[str, Dict[str, ufloat]]], nested: bool):
+        """Creates an interactive pie chart of the given contributions to the integral index.
+        
+        Parameters
+        ----------
+        contributions
+            * If ``nested`` is ``False``, then this should be a dictionary of the form ``{nuclide: contribution}``, where 
+              contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index.
+            * If ``nested`` is ``True``, then this should be a dictionary of the form ``{nuclide: {reaction: contribution}}``,
+              where contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index 
+              through the given reaction.
+        nested
+            Wether the contributions are on a reaction-wise basis or not."""
         self.fig = make_subplots()
 
         # Prepare data for the sunburst chart
@@ -216,10 +316,21 @@ class InteractivePiePlotter(_Plotter):
                 fig.add_trace(trace, row=position[0], col=position[1])
             return fig
 
-    def _get_plot(self):
+    def _get_plot(self) -> Union[plotly.graph_objs.Figure, InteractivePieLegend]:
         return self.fig
 
-    def _create_sunburst_data(self, contributions):
+    def _create_sunburst_data(self, contributions: Dict[str, ufloat]) -> pd.DataFrame:
+        """Create a pandas dataframe for a (not nested) sunburst chart of contributions.
+        
+        Parameters
+        ----------
+        contributions
+            A dictionary of the form ``{nuclide: contribution}``, where contribution is a ``ufloat`` object representing the
+            contribution of the nuclide to the integral index.
+        
+        Returns
+        -------
+            The dataframe for creating the sunburst chart."""
         data = {
             'labels': [], 
             'ids': [], 
@@ -247,7 +358,18 @@ class InteractivePiePlotter(_Plotter):
 
         return pd.DataFrame(data)
 
-    def _create_nested_sunburst_data(self, contributions):
+    def _create_nested_sunburst_data(self, contributions: Dict[str, Dict[str, ufloat]]) -> pd.DataFrame:
+        """Create a pandas dataframe for a nested sunburst chart of contributions.
+        
+        Parameters
+        ----------
+        contributions
+            A dictionary of the form ``{nuclide: {reaction: contribution}}``, where contribution is a ``ufloat`` object
+            representing the contribution of the nuclide to the integral index through the given reaction.
+        
+        Returns
+        -------
+            The dataframe for creating the sunburst chart."""
         data = {
             'labels': [], 
             'ids': [], 
@@ -363,27 +485,47 @@ class InteractivePiePlotter(_Plotter):
         return pd.DataFrame(data)
 
     def _style(self):
-        if self.plot_redundant and self.nested:
-            title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
+        if self._plot_redundant and self.nested:
+            title_text = f'Contributions to {self._index_name} (including redundant/irrelvant reactions)'
         else:
-            title_text = f'Contributions to {self.index_name}'
+            title_text = f'Contributions to {self._index_name}'
         self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
 
 
 class InteractivePieLegend:
-    def __init__(self, fig, df):
-        """Return a flask webapp that will display an interactive legend for the sunburst chart"""
+    """A class for creating an interactive legend for a sunburst chart."""
+    fig: plotly.graph_objs.Figure
+    """The sunburst chart for which the interactive legend is being created."""
+    df: pd.DataFrame
+    """The dataframe used to create the sunburst chart."""
+    _app: Flask
+    """The Flask webapp that will display the interactive legend."""
+    def __init__(self, fig: plotly.graph_objs.Figure, df: pd.DataFrame):
+        """Create a flask webapp that will display an interactive legend for the sunburst chart.
+        
+        Parameters
+        ----------
+        fig
+            The sunburst chart for which the interactive legend is being created.
+        df
+            The dataframe used to create the sunburst chart."""
         self.fig = fig
         self.df = df
-        self.app = Flask(__name__)
+        self._app = Flask(__name__)
 
-        @self.app.route('/shutdown', methods=['POST'])
+        @self._app.route('/shutdown', methods=['POST'])
         def shutdown():
+            """Function to shutdown the server"""
             os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
             return 'Server shutting down...'
 
-        @self.app.route('/')
-        def show_sunburst():
+        @self._app.route('/')
+        def show_sunburst() -> str:
+            """Function to display the sunburst chart with an interactive legend
+            
+            Returns
+            -------
+                The HTML content for the sunburst chart with the interactive legend."""
             # Extract root nodes (nodes without parents)
             root_nodes = self.df[self.df['parents'] == '']
 
@@ -489,43 +631,62 @@ class InteractivePieLegend:
 
             return render_template_string(full_html)
         
-    def open_browser(self, port):
+    def _open_browser(self, port: int):
+        """Open the browser to display the interactive sunburst chart
+
+        Parameters
+        ----------
+        port
+            The port at which the Flask server is running.
+        """
         print(f"Now running at http://localhost:{port}/")
         webbrowser.open(f"http://localhost:{port}/")
-        pass
 
-    def show(self, open_browser=True, silent=False):
+    def show(self, open_browser: bool=True, silent: bool=False):
         """Start the Flask server and open the browser to display the interactive sunburst chart
         
         Parameters
         ----------
-        - open_browser: bool, whether to open the browser automatically to display the chart
-        - silent: bool, whether to suppress Flask's startup and runtime messages"""
+        open_browser
+            Whether to open the browser automatically to display the chart.
+        silent
+            Whether to suppress Flask's startup and runtime messages."""
         # Suppress Flask's startup and runtime messages by redirecting them to dev null
         log = open(os.devnull, 'w')
-        # sys.stdout = log
+        if silent:
+            sys.stdout = log
         sys.stderr = log
 
         port = find_free_port()
         if open_browser:
-            threading.Timer(1, self.open_browser(port)).start()
-        self.app.run(host='localhost', port=port)
+            threading.Timer(1, self._open_browser(port)).start()
+        self._app.run(host='localhost', port=port)
 
     def serve(self):
-        """Start the Flask server to display the interactive sunburst chart"""
+        """Start the Flask server to display the interactive sunburst chart without a browser tab."""
         port = find_free_port()
         log = open(os.devnull, 'w')
         # sys.stdout = log
         # sys.stderr = log
 
         # Run the Flask application in a separate thread
-        thread = threading.Thread(target=lambda: self.app.run(host='localhost', port=port))
+        thread = threading.Thread(target=lambda: self._app.run(host='localhost', port=port))
         print(f"Now running at http://localhost:{port}/")
         thread.daemon = True  # This ensures thread exits when main program exits
         thread.start()
 
-    def write_html(self, filename=None):
-        with self.app.test_client() as client:
+    def write_html(self, filename: Union[str, Path]=None) -> Union[None, str]:
+        """Write the HTML content of the interactive sunburst chart to a file.
+        
+        Parameters
+        ----------
+        filename
+            The path of the file to which the HTML content will be written. If not provided, the content will be returned.
+            
+        Returns
+        -------
+            If ``filename`` is not provided, the HTML content of the interactive sunburst chart."""
+        with self._app.test_client() as client:
             response = client.get('/')
             html_content = response.data.decode('utf-8')
             if filename is None:
@@ -534,7 +695,24 @@ class InteractivePieLegend:
                 with open(filename, 'w') as f:
                     f.write(html_content)
 
-    def save_state(self, filename=None):
+    def save_state(self, filename: Optional[Union[str, Path]]=None
+                   ) -> Union[None, Dict[str, Union[plotly.graph_objs.Figure, pd.DataFrame]]]:
+        """Save the figure (with interactive legend) as a pickle that can be deserialized for plotting later with full
+        interactivity.
+        
+        Parameters
+        ----------
+        filename
+            Path to the file to store the pickle of the plot object (should have a ``.pkl`` extension).
+
+        Returns
+        -------
+            If ``filename`` is not provided, a dictionary containing the figure and dataframe used to create the plot. This
+            data can be used to researialize the plot later.
+            
+        Notes
+        -----
+        This data can be loaded later using the :meth:`load_state` method."""
         state = {
             'fig': self.fig,
             'df': self.df,
@@ -546,7 +724,22 @@ class InteractivePieLegend:
                 pickle.dump(state, f)
 
     @classmethod
-    def load_state(cls, filename=None, data_dict=None):
+    def load_state(cls, filename: Optional[Union[str, Path]]=None, data_dict: Optional[dict]=None) -> InteractivePieLegend:
+        """Researilize an :class:`InteractivePieLegend` plot from a pickle file or a data dictionary (produced by 
+        :meth:`save_state`).
+        
+        Parameters
+        ----------
+        filename
+            Path to the file containing the pickle of the plot object.
+        data_dict
+            A dictionary containing the figure and dataframe used to create the plot.
+        
+        Returns
+        -------
+            A new instance of the :class:`InteractivePieLegend` class with the same state as the original instance whose data
+            was provided.
+        """
         if filename is None and data_dict is None:
             raise ValueError("Either a filename or a data dictionary must be provided")
         if filename is not None:

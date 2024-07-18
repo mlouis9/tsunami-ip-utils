@@ -1,5 +1,5 @@
 from ._bar_plot import _BarPlotter
-from .pie_plot import PiePlotter, InteractivePiePlotter
+from .pie_plot import _PiePlotter, _InteractivePiePlotter
 from .scatter_plot import ScatterPlotter, InteractiveScatterPlotter, InteractivePerturbationScatterPlotter
 from .matrix_plot import interactive_matrix_plot
 from .plot_utils import determine_plot_type
@@ -58,8 +58,8 @@ def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_
 
     plotters = {
         'bar': _BarPlotter(integral_index_name, plot_redundant_reactions, **kwargs),
-        'pie': PiePlotter(integral_index_name, plot_redundant_reactions, **kwargs),
-        'interactive_pie': InteractivePiePlotter(integral_index_name, plot_redundant_reactions, **kwargs)
+        'pie': _PiePlotter(integral_index_name, plot_redundant_reactions, **kwargs),
+        'interactive_pie': _InteractivePiePlotter(integral_index_name, plot_redundant_reactions, **kwargs)
     }
     
     # Get the requested plotter
