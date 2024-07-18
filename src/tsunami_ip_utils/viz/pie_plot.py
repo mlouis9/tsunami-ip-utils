@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from .base_plotter import Plotter
+from ._base_plotter import _Plotter
 from plotly.subplots import make_subplots
 import os, sys, signal
 import threading
@@ -13,12 +13,12 @@ from .plot_utils import find_free_port
 import pickle
 
 
-class PiePlotter(Plotter):
+class PiePlotter(_Plotter):
     def __init__(self, integral_index_name, plot_redudant=False, **kwargs):
         self.index_name = integral_index_name
         self.plot_redundant = plot_redudant
     
-    def create_plot(self, contributions, nested):
+    def _create_plot(self, contributions, nested):
         self.nested = nested
         self.fig, self.axs = plt.subplots()
         if nested:
@@ -26,12 +26,12 @@ class PiePlotter(Plotter):
         else:
             self.pie_chart(contributions)
 
-        self.style()
+        self._style()
 
-    def add_to_subplot(self, fig, position):
+    def _add_to_subplot(self, fig, position):
         return fig.add_subplot(position, sharex=self.ax, sharey=self.ax)
 
-    def get_plot(self):
+    def _get_plot(self):
         return self.fig, self.axs
 
     def nested_pie_chart(self, contributions):
@@ -144,7 +144,7 @@ class PiePlotter(Plotter):
         for wedge, hatch in zip(wedges, hatches):
             wedge.set_hatch(hatch)
 
-    def style(self):
+    def _style(self):
         if self.plot_redundant and self.nested:
             title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
         else:
@@ -153,7 +153,7 @@ class PiePlotter(Plotter):
         self.axs.set_title(title_text)
 
 
-class InteractivePiePlotter(Plotter):
+class InteractivePiePlotter(_Plotter):
     def __init__(self, integral_index_name, plot_redundant=False, **kwargs):
         # Check if the user wants an interactive legend
         if 'interactive_legend' in kwargs.keys():
@@ -164,7 +164,7 @@ class InteractivePiePlotter(Plotter):
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
-    def create_plot(self, contributions, nested=True):
+    def _create_plot(self, contributions, nested=True):
         self.fig = make_subplots()
 
         # Prepare data for the sunburst chart
@@ -194,7 +194,7 @@ class InteractivePiePlotter(Plotter):
         )
 
         # Now style the plot
-        self.style()
+        self._style()
 
         self.fig.update_layout(
             autosize=True,
@@ -208,7 +208,7 @@ class InteractivePiePlotter(Plotter):
 
 
     
-    def add_to_subplot(self, fig, position):
+    def _add_to_subplot(self, fig, position):
         if self.interactive_legend:
             raise ValueError("Interactive legends are not supported when adding to a subplot")
         else:
@@ -216,7 +216,7 @@ class InteractivePiePlotter(Plotter):
                 fig.add_trace(trace, row=position[0], col=position[1])
             return fig
 
-    def get_plot(self):
+    def _get_plot(self):
         return self.fig
 
     def _create_sunburst_data(self, contributions):
@@ -362,7 +362,7 @@ class InteractivePiePlotter(Plotter):
 
         return pd.DataFrame(data)
 
-    def style(self):
+    def _style(self):
         if self.plot_redundant and self.nested:
             title_text = f'Contributions to {self.index_name} (including redundant/irrelvant reactions)'
         else:

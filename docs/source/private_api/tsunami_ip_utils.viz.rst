@@ -4,19 +4,19 @@ tsunami\_ip\_utils.viz package
 Submodules
 ----------
 
-tsunami\_ip\_utils.viz.bar\_plot module
----------------------------------------
+tsunami\_ip\_utils.viz.\_bar\_plot module
+-----------------------------------------
 
-.. automodule:: tsunami_ip_utils.viz.bar_plot
+.. automodule:: tsunami_ip_utils.viz._bar_plot
    :members:
    :undoc-members:
    :show-inheritance:
    :private-members:
 
-tsunami\_ip\_utils.viz.base\_plotter module
--------------------------------------------
+tsunami\_ip\_utils.viz.\_base\_plotter module
+---------------------------------------------
 
-.. automodule:: tsunami_ip_utils.viz.base_plotter
+.. automodule:: tsunami_ip_utils.viz._base_plotter
    :members:
    :undoc-members:
    :show-inheritance:

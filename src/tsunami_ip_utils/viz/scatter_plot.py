@@ -1,7 +1,7 @@
 import scipy.stats as stats
 import numpy as np
 import matplotlib.pyplot as plt
-from .base_plotter import Plotter
+from ._base_plotter import _Plotter
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -90,7 +90,7 @@ class EnhancedPlotlyFigure(Figure):
             # Use the super class's __setattr__ for all other attributes
             super().__setattr__(name, value)
 
-class ScatterPlot(Plotter):
+class ScatterPlot(_Plotter):
     """This class exists to add some additional functionality for calculating regressions and summary statistics that's
     common to all types of scatter plots, interactive or otherwise"""
     def get_summary_statistics(self, x, y):
@@ -130,7 +130,7 @@ class ScatterPlotter(ScatterPlot):
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
-    def create_plot(self, contribution_pairs, isotopes, reactions):
+    def _create_plot(self, contribution_pairs, isotopes, reactions):
         self.fig, self.axs = plt.subplots()
 
         # Extract the x and y values from the contribution pairs
@@ -153,15 +153,15 @@ class ScatterPlotter(ScatterPlot):
         self.axs.text(0.05, 0.95, self.summary_stats_text, transform=self.axs.transAxes, fontsize=12,
                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
 
-        self.style()
+        self._style()
 
-    def get_plot(self):
+    def _get_plot(self):
         return self.fig, self.axs
         
-    def add_to_subplot(self, fig, position):
+    def _add_to_subplot(self, fig, position):
         return fig.add_subplot(position, sharex=self.axs, sharey=self.axs)
     
-    def style(self):
+    def _style(self):
         title_text = f'Contributions to {self.index_name}'
         self.axs.set_title(title_text)
         self.axs.set_ylabel(f"Experiment {self.index_name} Contribution")
@@ -185,7 +185,7 @@ class InteractiveScatterPlotter(ScatterPlot):
         self.index_name = integral_index_name
         self.plot_redundant = plot_redundant
 
-    def create_plot(self, contribution_pairs, isotopes, reactions):
+    def _create_plot(self, contribution_pairs, isotopes, reactions):
         self.fig = make_subplots()
 
         # Extract isotope and reaction pairs from the given list of isotopes and reactions
@@ -219,7 +219,7 @@ class InteractiveScatterPlotter(ScatterPlot):
         self.add_regression_and_stats(df)
 
         # Now style the plot
-        self.style()
+        self._style()
 
         if self.interactive_legend:
             self.fig = InteractiveScatterLegend(self, df)
@@ -312,7 +312,7 @@ class InteractiveScatterPlotter(ScatterPlot):
 
         return pd.DataFrame(data)
 
-    def add_to_subplot(self, fig, position):
+    def _add_to_subplot(self, fig, position):
         for trace in self.fig.data:
             fig.add_trace(trace, row=position[0], col=position[1])
 
@@ -324,10 +324,10 @@ class InteractiveScatterPlotter(ScatterPlot):
                 fig.add_annotation(new_ann, row=position[0], col=position[1])
         return fig
 
-    def get_plot(self):
+    def _get_plot(self):
         return self.fig
     
-    def style(self):
+    def _style(self):
         title_text = f'Contributions to {self.index_name}'
         self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
 
@@ -336,7 +336,7 @@ class InteractivePerturbationScatterPlotter(ScatterPlot):
     def __init__(self, **kwargs):
         pass
 
-    def create_plot(self, points):
+    def _create_plot(self, points):
         self.fig = make_subplots()
 
         # Extract isotope and reaction pairs from the given list of isotopes and reactions
@@ -363,7 +363,7 @@ class InteractivePerturbationScatterPlotter(ScatterPlot):
         self.add_regression_and_stats(df)
 
         # Now style the plot
-        self.style()
+        self._style()
 
     def add_regression_and_stats(self, df):
         # Calculate the linear regression and correlation statistics
@@ -398,15 +398,15 @@ class InteractivePerturbationScatterPlotter(ScatterPlot):
             opacity=0.8
         )
 
-    def add_to_subplot(self, fig, position):
+    def _add_to_subplot(self, fig, position):
         for trace in self.fig.data:
             fig.add_trace(trace, row=position[0], col=position[1])
         return fig
 
-    def get_plot(self):
+    def _get_plot(self):
         return self.fig
     
-    def style(self):
+    def _style(self):
         pass
 
 
@@ -490,7 +490,7 @@ class InteractiveScatterLegend(InteractiveScatterPlotter):
 
             # Create a new _InteractiveScatterPlotter instance with the updated data
             updated_plotter = InteractiveScatterPlotter(self.index_name, self.interactive_scatter_plot.nested)
-            updated_plotter.create_plot(self.interactive_scatter_plot._create_scatter_data(updated_df), updated_df['Isotope'].unique(), updated_df['Reaction'].unique() if 'Reaction' in updated_df.columns else [])
+            updated_plotter._create_plot(self.interactive_scatter_plot._create_scatter_data(updated_df), updated_df['Isotope'].unique(), updated_df['Reaction'].unique() if 'Reaction' in updated_df.columns else [])
 
             # Update the current figure with the new traces and layout
             current_fig.data = updated_plotter.fig.data
