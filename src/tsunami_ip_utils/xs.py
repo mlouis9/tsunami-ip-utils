@@ -1,3 +1,6 @@
+"""This module contains the functions necessary for processing the binary SCALE multigroup cross section libraries
+(using the AMPX tools: charmin and tabasco) into python friendly dictionaries of numpy arrays."""
+
 from pyparsing import *
 import numpy as np
 from pathlib import Path
@@ -7,20 +10,23 @@ import subprocess, os
 import multiprocessing
 from functools import partial
 import re
+from typing import Union, Tuple, Dict, Any, Callable, List
 
-"""This module contains the functions necessary for processing multigroup cross sections and cross section covariance matrices."""
-
-def parse_nuclide_reaction(filename, energy_boundaries=False):
-    """Reads a multigroup cross section file produced by the extractor function and returns the energy-dependent cross sections 
-    as a numpy array.
+def _parse_nuclide_reaction(filename: Union[str, Path], energy_boundaries: bool=False) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    """Reads a multigroup cross section ``.txt`` file produced by the extractor function and returns the energy-dependent 
+    cross sections as a numpy array.
     
     Parameters
     ----------
-    - filename: str The filename of the cross section file
-    - energy_boundaries: bool If True, the energies at which the cross sections are defined are returned as well
+    filename
+        The filename of the cross section file
+    energy_boundaries
+        If True, the energies at which the cross sections are defined are returned as well
     
     Returns
-    -------"""
+    -------
+        * If ``energy_boundaries`` is ``False``, a numpy array of cross sections
+        * If ``energy_boundaries`` is ``True``, a numpy array of cross sections and a numpy array of energy boundaries"""
     xs = {}
     with open(filename, 'r') as f:
         data = f.read()
@@ -31,8 +37,8 @@ def parse_nuclide_reaction(filename, energy_boundaries=False):
 
     xs_data_line = Suppress(pyparsing_common.sci_real) + pyparsing_common.sci_real + Suppress(LineEnd())
 
-    # Note that the output is formatted such that the same cross section value is printed for both energy boundaries of the group
-    # to avoid duplicating the cross section data, skip every other data line
+    # Note that the output is formatted such that the same cross section value is printed for both energy boundaries of the 
+    # group to avoid duplicating the cross section data, skip every other data line
     xs_parser = OneOrMore(xs_data_line + Suppress(xs_data_line))
 
     xs = np.array(xs_parser.parseString(data).asList())
@@ -46,19 +52,25 @@ def parse_nuclide_reaction(filename, energy_boundaries=False):
     else:
         return xs
 
-def parse_reactions_from_nuclide(filename, **kwargs):
+def _parse_reactions_from_nuclide(filename: Union[str, Path], **kwargs: dict) -> Dict[str, np.ndarray]:
     """Reads a set of reactions (given by the list of reaction mt's) from a dump of all reactions for a single nuclide from
     a SCALE library. Note this function requires that the dump included headers
     
     Parameters
     ----------
-    - filename: str The filename of the dump file
-    - reaction_mts: list of str The list of reaction MTs to read (required kwarg)
-    - energy_boundaries: bool If True, the energies at which the cross sections are defined are returned as well (optional kwarg)
+    filename
+        The filename of the dump file.
+    **kwargs
+        Additional keyword arguments:
+
+        - reaction_mts (List[str])
+            The list of reaction MTs to read (**required** kwarg).
+        - energy_boundaries (bool)
+            If ``True``, the energies at which the cross sections are defined are returned as well (optional kwarg).
     
     Returns
     -------
-    - dict A dictionary containing the cross sections for each reaction MT"""
+        A dictionary containing the cross sections for each reaction MT"""
 
     if 'reaction_mts' not in kwargs:
         raise ValueError("Missing required keyword argument: reaction_mts")
@@ -123,7 +135,31 @@ def parse_reactions_from_nuclide(filename, **kwargs):
                          f"This nuclide has the available MTs: {list(all_mts)}")
     return parsed_data
 
-def parse_from_total_library(filename, **kwargs):
+def _parse_from_total_library(filename: Union[str, Path], **kwargs: dict
+                              ) -> Union[Dict[str, np.ndarray], Tuple[Dict[str, np.ndarray], Dict[str, list]]]:
+    """Parse selected nuclide-reactions from an entire cross section library dump.
+    
+    Parameters
+    ----------
+    filename
+        Path to the file containing the library dump.
+    **kwargs
+        Additional keyword arguments:
+        
+        - nuclide_reaction_dict (dict)
+            A dictionary mapping nuclides to a list of reaction MTs to read (**required** kwarg).
+        - return_available_nuclide_reactions (bool)
+            If ``True``, the available nuclide reactions (i.e. all of the nuclide reactions for which data exists in the
+            given multigroup librari) are returned as well (optional kwarg).
+        - energy_boundaries (bool)
+            If ``True``, the energies at which the cross sections are defined are returned as well (optional kwarg).
+            
+    Returns
+    -------
+        * If ``return_available_nuclide_reactions`` is ``False``, a doubly nested dictionary containing the cross sections for each
+          nuclide-reaction pair. Keyed first by nuclide, then by reaction.
+        * If ``return_available_nuclide_reactions`` is ``True``, a tuple containing the above dictionary and a dictionary containing
+          all available nuclide reactions."""
     if 'nuclide_reaction_dict' not in kwargs:
         raise ValueError("Missing required keyword argument: nuclide_reaction_dict")
     
@@ -203,23 +239,32 @@ def parse_from_total_library(filename, **kwargs):
     else:
         return parsed_data_dict
 
-def read_nuclide_reaction_from_multigroup_library(multigroup_library_path: Path, nuclide_zaid, reaction_mt, \
-                                                  parsing_function=parse_nuclide_reaction, plot_option='plot', \
-                                                    energy_boundaries=False, **kwargs):
-    """Uses scale to dump a binary multigroup library to a text file, and then calls the specified parsing function on the output file.
+def _read_nuclide_reaction_from_multigroup_library(multigroup_library_path: Path, nuclide_zaid: str, reaction_mt: str, 
+                                                   parsing_function: Callable[[Union[str, Path], bool, dict], Any]=_parse_nuclide_reaction, 
+                                                   plot_option: str='plot', energy_boundaries: bool=False, **kwargs: dict) -> Any:
+    """Uses SCALE to dump a binary multigroup library to a text file, and then calls the specified parsing function on the 
+    output file.
     
     Parameters
     ----------
-    - multigroup_library_path: Path The path to the SCALE multigroup library file
-    - nuclide_zaid: str The ZAID of the nuclide
-    - reaction_mt: str The reaction MT to read
-    - parsing_function: function The function to call on the output file
-    - plot_option: str The plot option to use when running the MG reader
-    - energy_boundaries: bool If True, the energies at which the cross sections are defined are returned as well
+    multigroup_library_path
+        The path to the SCALE multigroup library file.
+    nuclide_zaid
+        The ZAID of the nuclide.
+    reaction_mt
+        The reaction MT to read.
+    parsing_function
+        The function to call on the output file. This function takes the filename of the output file as its first argument, and
+        whether or not energy boundaries should be returned as its second argument. Additional keyword arguments can be passed
+        to the parsing function using the kwargs argument.
+    plot_option
+        The plot option to use when running the MG reader.
+    energy_boundaries
+        If True, the energies at which the cross sections are defined are returned as well.
     
     Returns
     -------
-    - an output that is the result of the parsing function"""
+        An output that is the result of the parsing function"""
     # Get the directory of the current file
     current_dir = Path(__file__).parent
 
@@ -264,33 +309,54 @@ def read_nuclide_reaction_from_multigroup_library(multigroup_library_path: Path,
     os.remove(output_file_path)
     return output
 
-def read_reactions_from_nuclide(multigroup_library_path: Path, nuclide_zaid, reaction_mts):
+def _read_reactions_from_nuclide(multigroup_library_path: Path, nuclide_zaid: str, reaction_mts: List[str]
+                                 ) -> Dict[str, np.ndarray]:
     """Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.
     
     Parameters
     ----------
-    - multigroup_library_path: Path The path to the SCALE multigroup library file
-    - nuclide_zaid: str The ZAID of the nuclide
-    - reaction_mts: list The list of reaction MTs to read"""
-    output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid, reaction_mt='0', \
-                                                           parsing_function=parse_reactions_from_nuclide, \
+    multigroup_library_path
+        The path to the SCALE multigroup library file.
+    nuclide_zaid
+        The ZAID of the nuclide.
+    reaction_mts
+        The list of reaction MTs to read.
+    
+    Returns
+    -------
+        A dictionary containing the cross sections for each reaction MT"""
+    output = _read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid, reaction_mt='0', \
+                                                           parsing_function=_parse_reactions_from_nuclide, \
                                                             reaction_mts=reaction_mts, plot_option='fido')
     return output
 
-def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict, method='small', num_processes=None, \
-                       return_available_nuclide_reactions=False):
+def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict: Dict[str, Dict[str, str]], 
+                       num_processes: int=multiprocessing.cpu_count(), return_available_nuclide_reactions: bool=False
+                       ) -> Union[Dict[str, Dict[str, np.ndarray]], Tuple[Dict[str, Dict[str, np.ndarray]], Dict[str, list]]]:
     """Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.
     
     Parameters
     ----------
-    - multigroup_library_path: Path The path to the SCALE multigroup library file
-    - nuclide_zaid_reaction_dict: dict A dictionary mapping nuclide ZAIDs to a list of reaction MTs to read"""
+    multigroup_library_path
+        The path to the SCALE multigroup library file.
+    nuclide_zaid_reaction_dict
+        A dictionary mapping nuclide ZAIDs to a list of reaction MTs to read.
+    num_processes
+        The number of processes to use for reading the library. If None, the number of processes is set to the number of cores.
+    return_available_nuclide_reactions
+        If True, the available nuclide reactions (i.e. all of the nuclide reactions for which data exists in the given 
+        multigroup library) are returned as well.
+
+    Returns
+    -------
+        * If ``return_available_nuclide_reactions`` is ``False``, a dictionary containing the cross sections (as numpy arrays) 
+          for each nuclide-reaction pair. Keyed first by nuclide, then by reaction.
+        * If ``return_available_nuclide_reactions`` is ``True``, a tuple containing the above dictionary and a 
+          dictionary containing all available nuclide reactions is returned.
+    """
 
     NUCLIDE_THRESHOLD = 50 # Number of nuclides after which the large method is more performant and hence is used
     CORE_THRESHOLD = 2 # The large method is more performant if the number of cores is smaller than this number
-
-    if num_processes is None:
-        num_processes = multiprocessing.cpu_count()
 
     num_nuclides = len(list(nuclide_zaid_reaction_dict.keys()))
     use_small_method = ( num_nuclides < NUCLIDE_THRESHOLD ) and ( num_processes >= CORE_THRESHOLD )
@@ -298,7 +364,7 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
         pool = multiprocessing.Pool(processes=num_processes)
 
         # Create a partial function with the common arguments
-        read_reactions_partial = partial(read_reactions_from_nuclide, multigroup_library_path)
+        read_reactions_partial = partial(_read_reactions_from_nuclide, multigroup_library_path)
 
         # Distribute the function calls among the processes
         results = pool.starmap(read_reactions_partial, nuclide_zaid_reaction_dict.items())
@@ -315,11 +381,11 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
         # If the user wants the available nuclide reactions, then we need to create a partial function which adds the appropriate
         # keyword argument to the parsing function
         if return_available_nuclide_reactions:
-            parse_function = partial(parse_from_total_library, return_available_nuclide_reactions=True)
+            parse_function = partial(_parse_from_total_library, return_available_nuclide_reactions=True)
         else:
-            parse_function = parse_from_total_library
+            parse_function = _parse_from_total_library
         
-        output = read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
+        output = _read_nuclide_reaction_from_multigroup_library(multigroup_library_path, nuclide_zaid='0', reaction_mt='0', \
                                                         parsing_function=parse_function, \
                                                         nuclide_reaction_dict=nuclide_zaid_reaction_dict, plot_option='fido')
         return output

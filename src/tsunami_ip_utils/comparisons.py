@@ -13,7 +13,7 @@ from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, cal
 from tsunami_ip_utils.viz import matrix_plot
 import multiprocessing
 
-def comparison(tsunami_ip_output_filename: Path, application_filenames: List[Path], 
+def E_calculation_comparison(tsunami_ip_output_filename: Path, application_filenames: List[Path], 
                experiment_filenames: List[Path]) -> Dict[str, df]:
     """Function that compares the calculated similarity parameter E with the TSUNAMI-IP output for each application with each
     experiment. The comparison is done for the nominal values and the uncertainties of the E values. In addition, the
@@ -34,7 +34,11 @@ def comparison(tsunami_ip_output_filename: Path, application_filenames: List[Pat
         Dictionary of pandas DataFrames for each type of E index. The DataFrames contain the calculated E values,
         the manual uncertainties, the TSUNAMI-IP values, the relative difference in the mean, and the relative difference
         in the manual uncertainty. The DataFrames are indexed by the experiment number and the columns are a MultiIndex
-        with the application number as the main index and the attributes as the subindex."""
+        with the application number as the main index and the attributes as the subindex.
+        
+    Notes
+    -----
+    Each of the results dataframes in the dictionary can easily be written to excel using the pandas ``to_excel`` method."""
     
     # First perform the manual calculations for each type of E index
     E_types = ['total', 'fission', 'capture', 'scatter']

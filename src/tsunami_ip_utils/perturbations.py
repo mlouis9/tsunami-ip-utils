@@ -88,18 +88,7 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
                     perturbation_factors: Path, num_perturbations: int
                     ) -> Union[ List[ Tuple[ float, float ] ], 
                                np.ndarray[ List[ Tuple[ float, float ] ] ]]:
-    """Generates points for a similarity scatter plot by combining the sensitivity profiles of the application and experiment
-    with the perturbed cross section libraries.
-
-    Notes
-    -----
-    * This function will cache the base cross section library and the perturbed cross section libraries in the user's home 
-      directory under the ``.tsunami_ip_utils_cache`` directory. If the user wishes to reset the cache, they can do so by
-      setting the ``reset_cache`` parameter to ``True`` in the :func:`cache_all_libraries` function. The user can also cache
-      the base and perturbed cross section libraries manually by calling the :func:`cache_all_libraries` function.
-
-    * This function can also generate a matrix of points for a given set of experiment and applications for making a matrix plot
-      done by passing a list of paths for the application and experiment sensitivity profiles.
+    """Generates points for a similarity scatter plot using the nuclear data sampling method.
 
     Parameters
     ----------
@@ -116,7 +105,32 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
     
     Returns
     -------
-        A list of points for the similarity scatter plot."""
+        A list of points for the similarity scatter plot.
+
+    Notes
+    -----    
+    * This function will automatically cache the base cross section library and the perturbed cross section libraries in the 
+      user's home directory under the ``.tsunami_ip_utils_cache`` directory if not already cached. Caching is recommended if
+      perturbation points are to be generated multiple times, because the I/O overhead of dumping and reading the base and
+      perturbed cross section libraries can be significant.
+
+    * This function can also generate a matrix of points for a given set of experiment and applications for making a matrix plot
+      done by passing a list of paths for the application and experiment sensitivity profiles.
+        
+    Theory
+    ======
+    The nuclear data sampling method
+    involves randomly sampling cross section libraries using the AMPX tool ``clarolplus`` to calculate a perturbed cross section
+    library :math:`\\Delta \\boldsymbol{\\sigma}_n = \\overline{\\boldsymbol{\\sigma}} - \\boldsymbol{\\sigma}_n`, where
+    :math:`\\boldsymbol{\\sigma}_n` is the :math:`n` th randomly sampled cross section library, and 
+    :math:`\\overline{\\boldsymbol{\\sigma}}` is the base cross section library, consisting of the mean values of all of the 
+    cross sections (e.g. the SCALE 252-group ENDF-V7.1 library). This perturbed cross section library (a vector consisting 
+    of the nuclide-reaction-group-wise perturbations to the cross sections) is dotted with the sensitivity vector for the 
+    application: :math:`x_n = \\boldsymbol{S}_A \\cdot \\Delta \\boldsymbol{\\sigma}`, and the experiment
+    :math:`y_n = \\boldsymbol{S}_A \\cdot \\Delta \\boldsymbol{\\sigma}`, and the resulting points :math:`(x_n, y_n)` are
+    plotted on a scatter plot whose Pearson correlation coefficient is meant to correspond to the :math:`c_k` value computed
+    by TSUNAMI-IP.
+    """
     
     if isinstance(application_path, list) and isinstance(experiment_path, list):
         points_array = np.empty( ( len(application_path), len(experiment_path), num_perturbations, 2), dtype=object )
@@ -288,7 +302,7 @@ def _cache_perturbed_library(args: Tuple[int, Path, Path, int, Dict[str, List[st
         return 0
 
 def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_cache: bool=False) -> None:
-    """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths
+    """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths.
 
     Parameters
     ----------
@@ -301,7 +315,19 @@ def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_ca
         
     Returns
     -------
-        This function does not return a value and has no return type."""
+        This function does not return a value and has no return type.
+        
+    Notes
+    -----
+    * This function will cache the base cross section library and the perturbed cross section libraries in the user's home
+      directory under the ``.tsunami_ip_utils_cache`` directory. If the user wishes to reset the cache, they can do so by
+      setting the ``reset_cache`` parameter to ``True`` in the :func:`cache_all_libraries` function.
+    * The caches can be `very` large, so make sure that sufficient space is available. For example, caching SCALE's 252-group
+      ENDF-v7.1 library and all of the perturbed libraries currently available in SCALE (1000 samples) requires 48 GB of space,
+      and for ENDF-v8.0, it requires 76 GB of space.
+    * The time taken to cache the libraries can be significant (~5 hours, but this is hardware dependent), but when caching the
+      libraries a progress bar will be displayed with a time estimate.
+    """
     # Read the base library, use an arbitrary nuclide reaction dict just to get the available reactions
     all_nuclide_reactions = { '92235': ['18'] } # u-235 fission
 
