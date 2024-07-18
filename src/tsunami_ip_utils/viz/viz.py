@@ -13,26 +13,45 @@ import matplotlib.pyplot as plt
 from tsunami_ip_utils._utils import _parse_ufloats
 from tsunami_ip_utils import config
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from tsunami_ip_utils.viz.pie_plot import InteractivePieLegend
+import plotly
+from tsunami_ip_utils.viz.scatter_plot import InteractiveScatterLegend
+from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure
+from tsunami_ip_utils.viz.matrix_plot import InteractiveMatrixPlot
 
 def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_index_name: str='E', 
-                      plot_redundant_reactions: bool=True, **kwargs: dict):
+                      plot_redundant_reactions: bool=True, **kwargs: dict
+                      ) -> Union[Tuple[Figure, Axes], plotly.graph_objs.Figure, InteractivePieLegend]:
     """Plots the contributions to an arbitrary similarity parameter for a single experiment application pair
     
     Parameters
     ----------
     contributions
-        list of dictionaries containing the contributions to the similarity parameter for each
-        nuclide or nuclide-reaction pair
+        List of dictionaries containing the contributions to the similarity parameter for each
+        nuclide or nuclide-reaction pair.
     plot_type
-        type of plot to create. Default is 'bar' which creates a bar plot. Other option is 'pie' which creates
-        a pie chart
+        Type of plot to create. Default is ``'bar'`` which creates a matplotlib bar plot. Other options are:
+        
+        - ``'pie'``
+            Creates a ``matplotlib`` pie chart.
+        - ``'interactive_pie'``
+            Creates an interactive Plotly sunburst chart.
     integral_index_name
-        name of the integral index being plotted. Default is `'E'`
+        Name of the integral index being plotted. Default is ``'E'``.
     plot_redundant_reactions
-        whether to plot redundant reactions (or irrelevant reactions) when considering
-        nuclide-reaction-wise contributions. Default is True
+        Whether to plot redundant reactions (or irrelevant reactions) when considering
+        nuclide-reaction-wise contributions. Default is ``True``.
     kwargs
-        additional keyword arguments to pass to the plotting function"""
+        Additional keyword arguments to pass to the plotting function.
+        
+    Returns
+    -------
+        * If ``plot_type`` is ``'bar'``, returns a tuple containing the matplotlib figure and axes objects. These
+          can be used to further style the plot or save it to a file. Can be plotted by calling ``plt.show()``.
+        * If ``plot_type`` is ``'pie'``, returns a Plotly figure object which can be displayed by calling ``fig.show()``
+        * If ``plot_type`` is ``'interactive_pie'``, returns a :class:`.InteractivePieLegend` object which can be displayed by
+          calling ``fig.show()``"""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
     contributions, nested_plot = determine_plot_type(contributions, plot_redundant_reactions)
@@ -54,26 +73,49 @@ def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_
     return plotter.get_plot()
 
 
-def correlation_plot(application_contributions, experiment_contributions, plot_type='scatter', integral_index_name='E', \
-                     plot_redundant_reactions=True, **kwargs):
+def correlation_plot(application_contributions: List[dict], experiment_contributions: List[dict], plot_type: str='scatter', 
+                     integral_index_name: str='E', plot_redundant_reactions: bool=True, **kwargs: dict
+                     ) -> Union[Tuple[Figure, Axes], EnhancedPlotlyFigure, InteractiveScatterLegend]:
     """Creates a correlation plot for a given application-experiment pair for which the contributions to the similarity
     parameter are given.
     
     Parameters
     ----------
-    - application_contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter
-        for the application
-    - experiment_contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter
-        for the experiment
-    - plot_type: str, type of plot to create. Default is 'scatter' which creates a matplotlib scatter plot. Other options
-        are interactive_scatter, which creates a Plotly scatter plot.
-    - integral_index_name: str, name of the integral index being plotted. Default is 'E'
-    - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
-        nuclide-reaction-wise contributions. Default is True
+    application_contributions
+        List of dictionaries containing the contributions to the similarity parameter
+        for the application.
+    experiment_contributions
+        List of dictionaries containing the contributions to the similarity parameter
+        for the experiment.
+    plot_type
+        Type of plot to create. Default is ``'scatter'`` which creates a matplotlib scatter plot. Other options
+        are ``'interactive_scatter'``, which creates a Plotly scatter plot.
+    integral_index_name
+        Name of the integral index being plotted. Default is ``'E'``
+    plot_redundant_reactions
+        Whether to plot redundant reactions (or irrelevant reactions) when considering
+        nuclide-reaction-wise contributions. Default is ``True``.
+    kwargs
+        Additional keyword arguments to pass to the plotting function.
+
+        - ``interactive_legend``: bool
+            Whether to include an interactive legend in the plot. Default is ``False``. Only applicable if
+            ``plot_type`` is ``'interactive_scatter'``.
         
     Returns
     -------
-    - fig: matplotlib.figure.Figure, the figure containing the correlation plot"""
+        * If ``plot_type`` is ``'scatter'``, returns a tuple containing the matplotlib figure and axes objects. These
+          can be used to further style the plot or save it to a file. Can be plotted by calling ``plt.show()``.
+        * If ``plot_type`` is ``'interactive_scatter'`` and ``interactive_legend`` is ``False``, returns a Plotly figure 
+          object which can be displayed by calling ``fig.show()``
+        * If ``plot_type`` is ``'interactive_scatter'`` and ``interactive_legend`` is ``True``, returns a 
+          :class:`.InteractiveScatterLegend` object which can be displayed by calling ``fig.show()``
+          
+    Notes
+    -----
+    Technically, if ``plot_type`` is ``interactive_scatter`` and ``interactive_legend`` is ``False``, the function will
+    return a :class:`.EnhancedPlotlyFigure` object, which is a wrapper of Plotly's ``Figure`` class, which has additional
+    attributes related to the statistics of the scatter plot."""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
     application_contributions, application_nested = determine_plot_type(application_contributions, plot_redundant_reactions)
@@ -116,13 +158,18 @@ def correlation_plot(application_contributions, experiment_contributions, plot_t
     return plotter.fig
 
 
-def perturbation_plot(points: List[Tuple[ufloat, ufloat]]):
+def perturbation_plot(points: List[Tuple[ufloat, ufloat]]) -> EnhancedPlotlyFigure:
     """Plots the perturbation points for a given application-experiment pair for which the perturbation points have already
-    been calculated
+    been calculated.
     
     Parameters
     ----------
-    - points: list of tuple of ufloat, list of tuples containing the perturbation points for the application-experiment pair"""
+    points: 
+        List of tuples containing the perturbation points for the application-experiment pair.
+        
+    Returns
+    -------
+        A (enhanced) Plotly figure object which can be displayed by calling ``fig.show()``."""
     
     # Extracting data
     plotter = InteractivePerturbationScatterPlotter()
@@ -131,8 +178,22 @@ def perturbation_plot(points: List[Tuple[ufloat, ufloat]]):
     return plotter.get_plot()
 
 
-def matrix_plot(plot_objects_array: np.ndarray, plot_type: str):
-    """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects."""
+def matrix_plot(plot_objects_array: np.ndarray, plot_type: str) -> InteractiveMatrixPlot:
+    """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects.
+    
+    Parameters
+    ----------
+    plot_objects_array
+        A 2D numpy array of figure objects.
+    plot_type
+        Type of plot to create. Default is ``'interactive'`` which creates an interactive matrix plot (served by a Dash app). 
+        Other options are ``'static'``, which creates a static matplotlib matrix plot.
+        
+    Returns
+    -------
+        * If ``plot_type`` is ``'interactive'``, returns a :class:`.InteractiveMatrixPlot` object which can be run by 
+          calling ``app.show()``.
+        * If ``plot_type`` is ``'static'``, raises a ``NotImplementedError``."""
     if plot_type == 'interactive':
         return interactive_matrix_plot(plot_objects_array)
     elif plot_type == 'static':
@@ -140,18 +201,27 @@ def matrix_plot(plot_objects_array: np.ndarray, plot_type: str):
 
 
 class BlockingFigureWrapper:
-    def __init__(self, figure):
+    """This class wraps a ``matplotlib.figure.Figure`` instance and blocks the execution of the program until the figure
+    is closed. This is useful for displaying figures in a Jupyter notebook or other interactive environments where the
+    program would otherwise continue executing and close the figure immediately, i.e. ``figure.show()`` is non-blocking. 
+    This is nice for creating multiple plots programmatically via a plotting function, then returning the relevant figure 
+    and axs objects, after which the user can make changes and plot or save the figures individually. This functionality
+    is not allowed with ``plt.show()``, because it shows all plots created in a given session (and so will show multiple plots
+    instead of just a selected one)."""
+    def __init__(self, figure: Figure):
         if not isinstance(figure, Figure):
             raise ValueError("Expected a matplotlib.figure.Figure instance")
         self._figure = figure
 
     def show(self):
+        """Display the figure and block the program until the user presses Enter."""
         # Show the figure
         self._figure.show()
 
         input("Press Enter to continue...")
 
     def __getattr__(self, name):
+        """Delegate all other attribute access to the wrapped matplotlib figure instance."""
         return getattr(self._figure, name)
 
 

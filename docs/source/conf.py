@@ -68,7 +68,7 @@ autodoc_default_options = {
     'member-order': 'bysource',
     'special-members': '__init__',
     'inherited-members': True,
-    'exclude-members': '__class__'
+    'exclude-members': '__class__',
 }
 
 templates_path = ['_templates']
@@ -79,6 +79,9 @@ show_headings = False
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
+html_theme_options = {
+    'navigation_depth': 6,
+}
 html_static_path = ['_static']
 
 # -- Custom Class for Filtering Duplicate Object Warnings --------------------

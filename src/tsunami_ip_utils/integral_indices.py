@@ -450,10 +450,10 @@ def get_uncertainty_contributions(application_filenames: List[str], experiment_f
 
     Returns
     -------
-        * uncertainty_contributions_nuclide
+        - uncertainty_contributions_nuclide
             List of contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and 
             each experiment on a nuclide basis. Keyed by ``'application'`` and ``'experiment'``.
-        * uncertainty_contributions_nuclide_reaction
+        - uncertainty_contributions_nuclide_reaction
             List of contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and each experiment 
             on a nuclide-reaction basis. Keyed by ``'application'`` and ``'experiment'``."""
     

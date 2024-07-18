@@ -301,7 +301,8 @@ def _cache_perturbed_library(args: Tuple[int, Path, Path, int, Dict[str, List[st
     else:
         return 0
 
-def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_cache: bool=False) -> None:
+def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_cache: bool=False,
+                        num_cores: int=multiprocessing.cpu_count()//2) -> None:
     """Caches the base and perturbed cross section libraries for a given base library and perturbed library paths.
 
     Parameters
@@ -312,6 +313,9 @@ def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_ca
         Path to the cross section perturbation factors (used to generate the perturbed libraries).
     reset_cache
         Whether to reset the cache or not (default is ``False``).
+    num_cores
+        The number of cores to use for caching the perturbed libraries in parallel (default is half the number of cores 
+        available).
         
     Returns
     -------
@@ -325,8 +329,10 @@ def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_ca
     * The caches can be `very` large, so make sure that sufficient space is available. For example, caching SCALE's 252-group
       ENDF-v7.1 library and all of the perturbed libraries currently available in SCALE (1000 samples) requires 48 GB of space,
       and for ENDF-v8.0, it requires 76 GB of space.
-    * The time taken to cache the libraries can be significant (~5 hours, but this is hardware dependent), but when caching the
-      libraries a progress bar will be displayed with a time estimate.
+    * The time taken to cache the libraries can be significant (~5 hours on 6 cores, but this is hardware dependent), but when 
+      caching the libraries a progress bar will be displayed with a time estimate.
+    * Note, if using ``num_cores`` greater than half the number of cores available on your system, you may experience excessive
+      memory usage, so proceed with caution.
     """
     # Read the base library, use an arbitrary nuclide reaction dict just to get the available reactions
     all_nuclide_reactions = { '92235': ['18'] } # u-235 fission
@@ -376,14 +382,9 @@ def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_ca
     # ------------------------------------------
     # Main loop for caching perturbed libraries
     # ------------------------------------------
-    # Get the number of available cores
-    num_cores = multiprocessing.cpu_count()
-    
-    # Use only half of the available cores
-    num_processes = num_cores // 2
 
     # Create a pool of worker processes
-    pool = Pool(processes=num_processes)
+    pool = Pool(processes=num_cores)
 
     # Create a list of arguments for each perturbed library
     args_list = [(i, base_library, perturbation_factors, i, available_nuclide_reactions, perturbed_cache)

@@ -1,3 +1,6 @@
+"""Tools for generating comparisons between TSUNAMI-IP calculated integral parameters (e.g. :math:`c_k`, :math:`E`) and calculated
+values using correlation methods with either cross section sampling or uncertainty contributions."""
+
 from tsunami_ip_utils.readers import read_integral_indices
 from tsunami_ip_utils.integral_indices import calculate_E
 import numpy as np
@@ -182,15 +185,17 @@ def _process_pair(args):
 
 def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_name: str, application_files: List[Path], 
                            experiment_files: List[Path], method: str, base_library: Path=None, perturbation_factors: Path=None, 
-                           num_perturbations: int=None, make_plot=True, num_cores=None) -> Tuple[pd.DataFrame, Any]:
+                           num_perturbations: int=None, make_plot=True, num_cores: int=multiprocessing.cpu_count() - 2
+                           ) -> Tuple[pd.DataFrame, Any]:
     """Function that compares the calculated similarity parameter C_k (calculated using the cross section sampling method) 
     with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs
     must correspond with those in hte TSUNAMI-IP input file.
 
     Notes
     -----
-    If the chosen method is uncertainty_contributions_nuclide or uncertainty_contributions_nuclide_reaction, the required input
-    files are TSUNAMI ``.out`` files. Otherwise, the required input files are TSUNAMI ``.sdf`` files.
+    * If the chosen method is 'perturbation', the matrix plot can become extremely memory intensive, so it is recommended
+      to set ``make_plot=False`` (if only the matrix of comparisons is desired) and/or to use ``num_cores=1`` or a small
+      number of perturbations to avoid memory issues.
     
     Parameters
     ----------
@@ -268,12 +273,6 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
                                                num_perturbations)
                 plot_objects_array = generate_plot_objects_array_from_perturbations(points_array)
             else:
-                # Get the number of available cores
-                if num_cores is None:
-                    num_cores = multiprocessing.cpu_count() - 2
-                
-                # Use only half of the available cores
-
                 num_applications = len(application_files)
                 num_experiments = len(experiment_files)
                 

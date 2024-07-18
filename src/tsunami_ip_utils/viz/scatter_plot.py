@@ -71,8 +71,8 @@ def update_percent_difference(text, reference_value):
     return updated_text, percent_difference
 
 class EnhancedPlotlyFigure(Figure):
-    """This class wraps a plotly express figure object (intended for a scatter plot) and adds additional metadata for the
-    summary statistics and linear regression data. This class is intended to be used with the ``InteractiveScatterPlotter``
+    """This class wraps a plotly express figure object (intended for a scatter plot) and adds additional attributes for the
+    summary statistics and linear regression data. This class is intended to be used with the :class:`.InteractiveScatterPlotter`
     class."""
     def __init__(self, *args, **kwargs):
         """Hey new init method"""
