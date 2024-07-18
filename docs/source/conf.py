@@ -24,8 +24,6 @@ release = '0.0.1'
 
 # -- Plotly Image Scraper -----------------------------------------------------
 def plotly_scraper(block, block_vars, gallery_conf):
-    from IPython.display import HTML
-
     # Check if 'fig' is in the example_globals and if it can generate HTML
     fig = block_vars['example_globals'].get('fig', None)
     if fig and hasattr(fig, 'to_html'):

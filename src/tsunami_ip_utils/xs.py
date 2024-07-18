@@ -258,7 +258,7 @@ def _read_nuclide_reaction_from_multigroup_library(multigroup_library_path: Path
         whether or not energy boundaries should be returned as its second argument. Additional keyword arguments can be passed
         to the parsing function using the kwargs argument.
     plot_option
-        The plot option to use when running the MG reader.
+        The plot option to use when running the MG reader. For example ``'plot'`` or ``'fido'``.
     energy_boundaries
         If True, the energies at which the cross sections are defined are returned as well.
     
