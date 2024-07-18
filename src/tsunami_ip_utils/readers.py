@@ -288,6 +288,7 @@ class RegionIntegratedSdfReader(SdfReader):
             
         Examples
         --------
+        >>> reader = RegionIntegratedSdfReader('tests/example_files/sphere_model_1.sdf')
         >>> reader.convert_to_dict()
         <tsunami_ip_utils.readers.RegionIntegratedSdfReader object from tests/example_files/sphere_model_1.sdf>
         >>> reader.sdf_data.keys()
@@ -395,7 +396,46 @@ class RegionIntegratedSdfReader(SdfReader):
         
         Returns
         -------
-            List of sensitivity profiles for each nuclide-reaction pair."""
+            List of sensitivity profiles for each nuclide-reaction pair.
+
+        Notes
+        -----
+        This method is useful for generating sensitivity profiles for each nuclide-reaction pair for a given system for e.g. computing
+        :math:`E` or :math:`C_k` via :math:`C_k = \\boldsymbol{S}_A^T \\boldsymbol{C}_{\\alpha, \\alpha} \\boldsymbol{S}_B`.
+        However, it is important to note that the sensitivity vectors obtained this way are ordered according to the order
+        in which the nuclide-reaction pairs appear in the sdf file.
+            
+        Examples
+        --------
+        >>> reader = RegionIntegratedSdfReader('tests/example_files/sphere_model_1.sdf')
+        >>> first_sensitivity_profile = reader.get_sensitivity_profiles()[0]
+        >>> first_sensitivity_profile[200:]
+        array([-2.504294e-05+/-1.322211e-05, 2.988232e-06+/-9.999848e-06,
+               9.248787e-06+/-2.051111e-05, 8.657588e-06+/-2.534945e-05,
+               -9.951473e-06+/-9.817888e-06, 3.696361e-06+/-2.029254e-05,
+               8.702776e-06+/-1.343905e-05, 1.237458e-05+/-3.052268e-05,
+               9.421495e-05+/-4.640119e-05, -3.918389e-05+/-3.697521e-05,
+               0.0001051884+/-6.277818e-05, 0.0001998479+/-6.489579e-05,
+               0.0001497279+/-5.563772e-05, 0.0001947749+/-5.449071e-05,
+               7.17222e-05+/-2.914425e-05, 0.000134732+/-2.9629e-05,
+               0.0001109158+/-3.34169e-05, 0.0001089335+/-2.818967e-05,
+               0.0003405998+/-4.422492e-05, 0.0001581347+/-2.790862e-05,
+               0.0001519637+/-2.893234e-05, 0.0002925294+/-4.266703e-05,
+               3.390917e-05+/-1.328072e-05, 0.0003311925+/-4.068107e-05,
+               0.0003964351+/-3.973347e-05, 0.0002032989+/-2.820316e-05,
+               4.749484e-05+/-1.391542e-05, 7.308714e-05+/-1.919152e-05,
+               8.477883e-05+/-1.880586e-05, 0.0003783144+/-3.910496e-05,
+               0.0002999691+/-3.663134e-05, 0.0002810895+/-3.531906e-05,
+               0.0001691159+/-2.466477e-05, 0.0001964518+/-2.750338e-05,
+               0.0001036065+/-1.975991e-05, 7.118574e-05+/-1.79444e-05,
+               0.0003142769+/-3.554042e-05, 0.0006935364+/-5.715178e-05,
+               0.0008185451+/-5.864059e-05, 0.0001756991+/-2.74122e-05,
+               0.0005926753+/-4.821636e-05, 0.001032059+/-6.463625e-05,
+               0.0001732703+/-2.667443e-05, 0.0003230355+/-3.82033e-05,
+               0.0001058208+/-2.194266e-05, 4.386201e-05+/-1.377494e-05,
+               2.231817e-05+/-7.640867e-06, 3.150126e-06+/-3.827818e-06,
+               9.240951e-08+/-1.080839e-07, 0.0+/-0, 0.0+/-0, 0.0+/-0],
+              dtype=object)"""
         if type(self.sdf_data) == list:
             if reaction_type == 'all':
                 return [ data['sensitivities'] for data in RegionIntegratedSdfReader(self.filename).sdf_data ]
@@ -418,21 +458,20 @@ def _read_ck_contributions(filename: str):
     pass
 
 def read_uncertainty_contributions_out(filename: Union[str, Path]) -> Tuple[List[dict], List[dict]]:
-    """Reads the output file from TSUNAMI and returns the uncertainty contributions for each nuclide-reaction
+    """Reads the output file from TSUNAMI-3D and returns the uncertainty contributions for each nuclide-reaction
     covariance.
     
     Parameters
     ----------
     filename
-        Path to the TSUNAMI output file.
+        Path to the TSUNAMI-3D output file.
 
     Returns
     -------
         * isotope_totals
-            List of dictionaries containing the nuclide-wise contributions.
+            List of dictionaries with keys: ``'isotope'`` and ``'contribution'``.
         * isotope_reaction
-            List of dictionaries containing the nuclide-reaction pairs and the contributions.
-    """
+            List of dictionaries with keys: ``'isotope'``, ``'reaction_type'`` and ``'contribution'``."""
     with open(filename, 'r') as f:
         data = f.read()
 
@@ -499,7 +538,7 @@ def read_uncertainty_contributions_out(filename: Union[str, Path]) -> Tuple[List
 
     return isotope_totals, isotope_reaction
 
-def read_uncertainty_contributions_sdf(filenames: List[Path]):
+def read_uncertainty_contributions_sdf(filenames: List[Path]) -> Tuple[List[List[dict]], List[List[dict]]]:
     """Reads the uncertainty contributions from a list of TSUNAMI-B SDF files and returns the contributions for each nuclide-
     reaction covariance by first running a TSUNAMI-IP calculation to generate the extended uncertainty edit.
     
@@ -509,7 +548,23 @@ def read_uncertainty_contributions_sdf(filenames: List[Path]):
         List of paths to the SDF files.
         
     Returns
-    -------"""
+    -------
+        * isotope_totals
+            List of nuclide-wise contributions. The outer list corresponds to the different SDF files, and has length: ``len(filenames)``.
+            The inner list contains dictionaries with keys: ``'isotope'`` and ``'contribution'``.
+        * isotope_reaction
+            List of nuclide-reaction-wise contributions. The outer list corresponds to the different SDF files, and has length: 
+            ``len(filenames)``. The inner list contains dictionaries with keys: ``'isotope'``, ``'reaction_type'`` and ``'contribution'``.
+
+    Examples
+    --------
+    >>> filenames = [Path('tests/example_files/sphere_model_1.sdf'), Path('tests/example_files/sphere_model_2.sdf')]
+    >>> isotope_totals, isotope_reaction = read_uncertainty_contributions_sdf(filenames)
+    >>> isotope_totals[0][0]
+    {'isotope': 'u-235 - u-235', 'contribution': 1.1547475051845695+/-0.000896155210593727}
+    >>> isotope_reaction[0][0]
+    {'isotope': 'u-235 - u-235', 'reaction_type': 'n,gamma - n,gamma', 'contribution': 1.0304+/-0.00094372}
+    """
 
     # ===============================
     # Generate the Uncertainty Edits
@@ -617,6 +672,16 @@ def read_uncertainty_contributions_sdf(filenames: List[Path]):
 def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray]:
     """Reads the output file from TSUNAMI-IP and returns the integral values for each application.
 
+    Parameters
+    ----------
+    filename
+        Path to the TSUNAMI-IP output file.
+    
+    Returns
+    -------
+        Integral matrices for each integral index type. The shape of the matrices are ``(num_applications, num_experiments)``. 
+        Keys are ``'c_k'``, ``'E_total'``, ``'E_fission'``, ``'E_capture'``, and ``'E_scatter'``.
+        
     Notes
     -----
     Currently, this function and only reads :math:`c_k`, :math:`E_{\\text{total}}`, 
@@ -630,16 +695,63 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
         end parameters
 
     in the TSUNAMI-IP input file.
-
-    Parameters
-    ----------
-    filename
-        Path to the TSUNAMI-IP output file.
     
-    Returns
-    -------
-        Integral matrices for each integral index type. The shape of the matrices are ``(num_applications, num_experiments)``. 
-        Keys are ``'C_k'``, ``'E_total'``, ``'E_fission'``, ``'E_capture'``, and ``'E_scatter'``."""
+    Examples
+    --------
+    >>> filename = Path('tests/example_files/tsunami_ip.out')
+    >>> integral_indices = read_integral_indices(filename)
+    >>> integral_indices['c_k']
+    array([[1.0+/-0.0024, 0.9986+/-0.0024, 0.9941+/-0.0025, 0.9892+/-0.0025,
+            0.9729+/-0.0026, 0.9701+/-0.0026, 0.9582+/-0.0026,
+            0.9032+/-0.0009, 0.896+/-0.0008, 0.8902+/-0.0008,
+            0.8883+/-0.0007, 0.8353+/-0.0008],
+           [0.9986+/-0.0024, 1.0+/-0.0025, 0.9976+/-0.0025, 0.9939+/-0.0026,
+            0.9798+/-0.0026, 0.9772+/-0.0026, 0.9663+/-0.0026,
+            0.9036+/-0.0009, 0.898+/-0.0008, 0.8939+/-0.0008,
+            0.8924+/-0.0007, 0.8347+/-0.0008],
+           [0.9941+/-0.0025, 0.9976+/-0.0025, 1.0+/-0.0026, 0.9991+/-0.0026,
+            0.9909+/-0.0025, 0.9891+/-0.0026, 0.9811+/-0.0026,
+            0.9192+/-0.0008, 0.9145+/-0.0008, 0.9115+/-0.0008,
+            0.9102+/-0.0007, 0.8491+/-0.0008],
+           [0.9892+/-0.0025, 0.9939+/-0.0026, 0.9991+/-0.0026, 1.0+/-0.0025,
+            0.9956+/-0.0025, 0.9943+/-0.0025, 0.9882+/-0.0025,
+            0.927+/-0.0008, 0.9229+/-0.0008, 0.9204+/-0.0007,
+            0.9192+/-0.0007, 0.8564+/-0.0008],
+           [0.9729+/-0.0026, 0.9798+/-0.0026, 0.9909+/-0.0025,
+            0.9956+/-0.0025, 1.0+/-0.0024, 0.9998+/-0.0024, 0.9981+/-0.0024,
+            0.9428+/-0.0008, 0.9397+/-0.0008, 0.9386+/-0.0007,
+            0.9374+/-0.0007, 0.871+/-0.0008],
+           [0.9701+/-0.0026, 0.9772+/-0.0026, 0.9891+/-0.0026,
+            0.9943+/-0.0025, 0.9998+/-0.0024, 1.0+/-0.0024, 0.9988+/-0.0024,
+            0.9437+/-0.0008, 0.9406+/-0.0008, 0.9396+/-0.0007,
+            0.9385+/-0.0007, 0.8717+/-0.0008],
+           [0.9582+/-0.0026, 0.9663+/-0.0026, 0.9811+/-0.0026,
+            0.9882+/-0.0025, 0.9981+/-0.0024, 0.9988+/-0.0024, 1.0+/-0.0024,
+            0.9482+/-0.0008, 0.9455+/-0.0008, 0.945+/-0.0007,
+            0.9439+/-0.0007, 0.8761+/-0.0008],
+           [0.9032+/-0.001, 0.9036+/-0.001, 0.9192+/-0.001, 0.927+/-0.001,
+            0.9428+/-0.0009, 0.9437+/-0.0009, 0.9482+/-0.0009, 1.0+/-0.001,
+            0.9988+/-0.0009, 0.996+/-0.0009, 0.9945+/-0.0009,
+            0.9226+/-0.0008],
+           [0.896+/-0.001, 0.898+/-0.001, 0.9145+/-0.0009, 0.9229+/-0.0009,
+            0.9397+/-0.0009, 0.9406+/-0.0009, 0.9455+/-0.0009,
+            0.9988+/-0.0009, 1.0+/-0.0009, 0.999+/-0.0009, 0.9982+/-0.0008,
+            0.92+/-0.0008],
+           [0.8902+/-0.0009, 0.8939+/-0.0009, 0.9115+/-0.0009,
+            0.9204+/-0.0009, 0.9386+/-0.0008, 0.9396+/-0.0008,
+            0.945+/-0.0008, 0.996+/-0.0009, 0.999+/-0.0009, 1.0+/-0.0008,
+            0.9998+/-0.0008, 0.9169+/-0.0008],
+           [0.8883+/-0.0009, 0.8924+/-0.0009, 0.9102+/-0.0009,
+            0.9192+/-0.0009, 0.9374+/-0.0008, 0.9385+/-0.0008,
+            0.9439+/-0.0008, 0.9945+/-0.0009, 0.9982+/-0.0008,
+            0.9998+/-0.0008, 1.0+/-0.0008, 0.9157+/-0.0008],
+           [0.8353+/-0.001, 0.8347+/-0.001, 0.8491+/-0.001, 0.8564+/-0.0009,
+            0.871+/-0.0009, 0.8717+/-0.0009, 0.8761+/-0.0009,
+            0.9226+/-0.0008, 0.92+/-0.0007, 0.9169+/-0.0007, 0.9157+/-0.0007,
+            1.0+/-0.0011]], dtype=object)
+    >>> application_1_with_experiment_2_ck = integral_indices['c_k'][0, 1]
+    >>> application_1_with_experiment_2_ck
+    0.9986+/-0.0024"""
 
     with open(filename, 'r') as f:
         data = f.read()
@@ -692,7 +804,7 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
             E_scatter[row_index, match_index] = ufloat(row[5][0], row[5][1])
 
     integral_matrices.update({
-        "C_k":       C_k.transpose(),
+        "c_k":       C_k.transpose(),
         "E_total":   E_total.transpose(),
         "E_fission": E_fission.transpose(),
         "E_capture": E_capture.transpose(),
@@ -701,7 +813,7 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
 
     return integral_matrices
 
-def read_region_integrated_h5_sdf(filename: Path) -> Dict[str, unumpy.uarray]:
+def read_region_integrated_h5_sdf(filename: Union[str, Path]) -> Dict[str, unumpy.uarray]:
     """Reads all region integrated SDFs from a HDF5 (``.h5``) formatted TSUNAMI-B sdf file and returns a dictionary of 
     the data
     
@@ -712,9 +824,25 @@ def read_region_integrated_h5_sdf(filename: Path) -> Dict[str, unumpy.uarray]:
         
     Returns
     -------
-    sdf_data
         Dictionary of the region integrated SDF data. The dictionary is twice-nested, and keyed first by nuclide, then by
-        reaction type. The values are the sensitivity profiles with uncertainties."""
+        reaction type. The values are the sensitivity profiles with uncertainties.
+        
+    Notes
+    -----
+    ``.h5`` formatted SDF files can be generated using the SCALE utility 
+    `tao <https://scale-manual.ornl.gov/tsunami-ip-appAB.html#format-of-hdf5-based-sensitivity-data-file>`_. Tao can convert a
+    single ``.sdf`` file to a ``.h5`` file using the command:
+    
+    ::
+    
+        tao convert filename.sdf
+        
+    or convert all ``.sdf`` files in a directory using:
+    
+    ::
+    
+        tao convert *.sdf
+    """
     with h5py.File(filename, 'r') as f:
         # Get the region integrated sdf's, i.e. where unit=0
         region_integrated_indices = np.where(f['unit'][:] == 0)[0]
