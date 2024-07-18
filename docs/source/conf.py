@@ -63,14 +63,13 @@ sphinx_gallery_conf = {
     'filename_pattern': r'plot_.*\.py$',  # Adjusted regex to ensure it captures all intended files
     'example_extensions': ['.py'],
     'image_scrapers': ('matplotlib', plotly_scraper),  # If using matplotlib for plots
-    'doc_module': ('tsunami_ip_utils',),
-    'download_all_examples': True,  # Ensures download links are generated
-    'notebook_images': True,  # If you want to generate Jupyter notebooks
+    'doc_module': ('tsunami_ip_utils',)
 }
 
 autodoc_default_options = {
     'member-order': 'bysource',
-    'special-members': '__init__'
+    'special-members': '__init__',
+    'inherited-members': True,
 }
 
 templates_path = ['_templates']
@@ -123,8 +122,7 @@ def has_private_members(obj):
             return True
     return False
 
-def skip_member(app, what, name, obj, skip, options):
-    api_type = app.config.api_type
+def skip_by_api_type(api_type, name, obj):
     if inspect.isclass(obj):
         # Decide based on whether the class has private members
         if api_type == 'public':
@@ -138,5 +136,14 @@ def skip_member(app, what, name, obj, skip, options):
             return True
         elif api_type == 'private' and not private_method:
             return True
+
+def skip_member(app, what, name, obj, skip, options):
+    api_type = app.config.api_type
+    skip = skip_by_api_type(api_type, name, obj)
+
+    # Exclude inherited members for specific classes
+    classes_to_exclude_inherited_members = ['EnhancedPlotlyFigure']
+    if isinstance(obj, type) and obj.__name__ in classes_to_exclude_inherited_members:
+        options['inherited-members'] = {}
 
     return skip
