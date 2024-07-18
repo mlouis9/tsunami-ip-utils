@@ -12,4 +12,4 @@ isotope_totals, isotope_reaction = read_uncertainty_contributions_out('../3d-sph
 print(isotope_reaction)
 
 isotope_totals, isotope_reaction = read_uncertainty_contributions_sdf([Path('../3d-sphere/sphere_model_9.sdf')])
-print(isotope_reaction[0])
+print(isotope_totals[0][0])
