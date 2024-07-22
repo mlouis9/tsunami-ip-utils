@@ -57,7 +57,7 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    'myproject': ('https://tsunami-ip-utils.readthedocs.io', None),
+    'tsunami_ip_utils': ('https://tsunami-ip-utils.readthedocs.io/en/latest', None),
 }
 
 sphinx_gallery_conf = {
