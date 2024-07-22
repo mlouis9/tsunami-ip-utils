@@ -12,7 +12,7 @@ import threading
 import webbrowser
 from flask import Flask, render_template_string
 import uuid
-from .plot_utils import find_free_port
+from .plot_utils import _find_free_port
 import pickle
 from typing import Tuple, Dict, Union, Optional
 from uncertainties import ufloat
@@ -657,14 +657,14 @@ class InteractivePieLegend:
             sys.stdout = log
         sys.stderr = log
 
-        port = find_free_port()
+        port = _find_free_port()
         if open_browser:
             threading.Timer(1, self._open_browser(port)).start()
         self._app.run(host='localhost', port=port)
 
     def serve(self):
         """Start the Flask server to display the interactive sunburst chart without a browser tab."""
-        port = find_free_port()
+        port = _find_free_port()
         log = open(os.devnull, 'w')
         # sys.stdout = log
         # sys.stderr = log

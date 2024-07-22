@@ -10,7 +10,7 @@ import webbrowser
 import os
 import sys
 import threading
-from .plot_utils import find_free_port
+from .plot_utils import _find_free_port
 import pickle
 
 # Style constants
@@ -158,7 +158,7 @@ class InteractiveMatrixPlot:
         # sys.stdout = log
         sys.stderr = log
 
-        port = find_free_port()
+        port = _find_free_port()
         if open_browser:
             threading.Timer(1, self.open_browser(port)).start()
         self.app.run(host='localhost', port=port)

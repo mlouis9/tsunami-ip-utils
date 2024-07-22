@@ -3,7 +3,7 @@ from typing import Any
 
 class _Plotter(ABC):
     @abstractmethod
-    def _create_plot(self, data, nested):
+    def _create_plot(self, data, nested) -> None:
         pass
 
     @abstractmethod
@@ -32,6 +32,6 @@ class _Plotter(ABC):
         pass
 
     @abstractmethod
-    def _style(self):
+    def _style(self) -> None:
         """Style the plot."""
         pass

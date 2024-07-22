@@ -11,7 +11,7 @@ from pathlib import Path
 from tsunami_ip_utils.perturbations import generate_points
 from typing import List, Dict, Tuple, Any
 from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure, InteractiveScatterLegend
-from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_perturbations, generate_plot_objects_from_array_contributions
+from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_perturbations, generate_plot_objects_array_from_contributions
 from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, calculate_E_contributions
 from tsunami_ip_utils.viz import matrix_plot
 import multiprocessing
@@ -291,23 +291,23 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
 
         case 'uncertainty_contributions_nuclide':
             contributions_nuclide, _ = get_uncertainty_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide, '%Δk/k') \
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide, '%Δk/k') \
                                     if make_plot else None
 
         case 'uncertainty_contributions_nuclide_reaction':
             _, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide_reaction, '%Δk/k') \
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '%Δk/k') \
                                     if make_plot else None
 
         case 'E_contributions_nuclide':
             contributions_nuclide, _ =  calculate_E_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide, 
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide, 
                                                                                 integral_index_name) \
                                     if make_plot else None
 
         case 'E_contributions_nuclide_reaction':
             _, contributions_nuclide_reaction =  calculate_E_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_from_array_contributions(contributions_nuclide_reaction, 
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, 
                                                                                 integral_index_name) \
                                     if make_plot else None
 

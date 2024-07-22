@@ -1,32 +1,48 @@
+"""Various utility functions for creating interactive plots, including functions for generating plot objects from
+contributions and perturbations. These functions are used in the interactive plotting functions in the ``viz`` module."""
+
 import socket
 from tsunami_ip_utils._utils import _filter_redundant_reactions, _isotope_reaction_list_to_nested_dict
 import numpy as np
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from uncertainties import unumpy
 from pathlib import Path
+from uncertainties import ufloat
+import tsunami_ip_utils
 
-def find_free_port():
-    """Finds a free port on localhost for running a Flask server."""
+def _find_free_port() -> int:
+    """Finds a free port on localhost for running a Flask/Dash server. This is done by creating a socket and binding it
+    to an available port. The socket is then closed and the port number is returned.
+    
+    Returns
+    -------
+        A free port number."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("", 0))  # Let the OS pick an available port
     port = s.getsockname()[1]
     s.close()
     return port
 
-def determine_plot_type(contributions, plot_redundant_reactions):
+def _determine_plot_type(contributions: List[ dict ], plot_redundant_reactions: bool) -> Tuple[dict, bool]:
     """Determines whether the contributions are nuclide-wise or nuclide-reaction-wise and whether to plot redundant
-    reactions or not
+    reactions or not. Then converts the contributions (list of dictionaries) to a dictionary of contributions keyed by
+    isotope then by reaction type if necessary.
     
     Parameters
     ----------
-    - contributions: list of dict, list of dictionaries containing the contributions to the similarity parameter for each
-        nuclide or nuclide-reaction pair
-    - plot_redundant_reactions: bool, whether to plot redundant reactions (or irrelevant reactions) when considering
-        nuclide-reaction-wise contributions
+    contributions
+        List of dictionaries containing the contributions to the similarity parameter for each
+        nuclide or nuclide-reaction pair.
+    plot_redundant_reactions
+        Whether to plot redundant reactions (or irrelevant reactions) when considering
+        nuclide-reaction-wise contributions.
         
     Returns
     -------
-    - contributions: dict, contributions to the similarity parameter keyed by isotope then by reaction type"""
+        - contributions
+            Contributions to the similarity parameter keyed by isotope then by reaction type (if necessary).
+        - nested_plot
+            Whether the plot is nested by nuclide then by reaction type."""
     if 'reaction_type' in contributions[0]: # Nuclide-reaction-wise contributions
         nested_plot = True # Nested plot by nuclide then by reaction type
 
@@ -46,10 +62,10 @@ def determine_plot_type(contributions, plot_redundant_reactions):
 
     return contributions, nested_plot
 
-def generate_plot_objects_from_array_contributions(contributions: Dict[ str, List[ unumpy.uarray ] ], integral_index_name: str, 
+def generate_plot_objects_array_from_contributions(contributions: Dict[ str, List[ unumpy.uarray ] ], integral_index_name: str, 
                                                    **kwargs: dict) -> np.ndarray:
     """Generate a matrix of plot objects (for creating a matrix plot) for the given contributions to an arbitrary integral index.
-    This is valid for plots of %Δk/k, E contributions, c_k contributions, etc..
+    This is valid for plots of :math:`\\Delta k/k` contributions, :math:`E` contributions, :math:`c_k` contributions, etc..
     
     Parameters
     ----------
@@ -60,17 +76,17 @@ def generate_plot_objects_from_array_contributions(contributions: Dict[ str, Lis
     kwargs
         Additional keyword arguments. The following are supported:
         
-        * diagonal_type : str
+        - diagonal_type (str)
             Type of plot to create on the diagonal. Default is ``'interactive_pie'`` which creates an interactive
             pie chart.
-        * interactive_contribution_legend : bool
+        - interactive_contribution_legend (bool)
             Whether to make the legend interactive for the contribution plots. Default is ``True``.
-        * interactive_correlation_legend : bool
+        - interactive_correlation_legend (bool)
             Whether to make the legend interactive for the correlation plots. Default is ``True``.
             
     Returns
     -------
-        2D numpy array of plot objects to be plotted with the matrix plot function."""
+        2D numpy array of plot objects to be plotted with the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function."""
     from tsunami_ip_utils.viz import contribution_plot, correlation_plot # Import here to avoid circular import
     
     # Get options for legend interactivity and the diagonal plot type if supplied
@@ -110,17 +126,17 @@ def generate_plot_objects_from_array_contributions(contributions: Dict[ str, Lis
     return plot_objects_array
 
 def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> np.ndarray:
-    """Generate a matrix of plot objects (for creating a matrix plot) for the given contributions to an arbitrary integral index.
-    This is valid for plots of %Δk/k, E contributions, c_k contributions, etc..
+    """Generate a matrix of plot objects (for creating a matrix plot) from a numpy array of perturbation points. This is
+    used for a matrix of perturbation plots only.
     
     Parameters
     ----------
     points_array
-        Array of points generated from the perturbation test.
+        2D numpy array of points generated from the perturbation test. Shape ``(num_applications, num_experiments)``.
             
     Returns
     -------
-        2D numpy array of plot objects to be plotted with the matrix plot function."""
+        2D numpy array of plot objects to be plotted with the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function."""
     from tsunami_ip_utils.viz import perturbation_plot # Import here to avoid circular import
     
     # Construct plot matrix

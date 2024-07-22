@@ -1,8 +1,8 @@
 from ._bar_plot import _BarPlotter
 from .pie_plot import _PiePlotter, _InteractivePiePlotter
-from .scatter_plot import ScatterPlotter, InteractiveScatterPlotter, InteractivePerturbationScatterPlotter
+from .scatter_plot import _ScatterPlotter, _InteractiveScatterPlotter, _InteractivePerturbationScatterPlotter
 from .matrix_plot import interactive_matrix_plot
-from .plot_utils import determine_plot_type
+from .plot_utils import _determine_plot_type
 from tsunami_ip_utils.integral_indices import _add_missing_reactions_and_nuclides
 import numpy as np
 from uncertainties import ufloat, unumpy
@@ -54,7 +54,7 @@ def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_
           calling ``fig.show()``"""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
-    contributions, nested_plot = determine_plot_type(contributions, plot_redundant_reactions)
+    contributions, nested_plot = _determine_plot_type(contributions, plot_redundant_reactions)
 
     plotters = {
         'bar': _BarPlotter(integral_index_name, plot_redundant_reactions, **kwargs),
@@ -118,8 +118,8 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
     attributes related to the statistics of the scatter plot."""
 
     # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
-    application_contributions, application_nested = determine_plot_type(application_contributions, plot_redundant_reactions)
-    experiment_contributions, experiment_nested = determine_plot_type(experiment_contributions, plot_redundant_reactions)
+    application_contributions, application_nested = _determine_plot_type(application_contributions, plot_redundant_reactions)
+    experiment_contributions, experiment_nested = _determine_plot_type(experiment_contributions, plot_redundant_reactions)
 
     if application_nested != experiment_nested:
         raise ValueError("Application and experiment contributions must have the same nested structure")
@@ -143,8 +143,8 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
             contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
 
     plotters = {
-        'scatter': ScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs),
-        'interactive_scatter': InteractiveScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs)
+        'scatter': _ScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs),
+        'interactive_scatter': _InteractiveScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs)
     }
     
     # Get the requested plotter
@@ -172,7 +172,7 @@ def perturbation_plot(points: List[Tuple[ufloat, ufloat]]) -> EnhancedPlotlyFigu
         A (enhanced) Plotly figure object which can be displayed by calling ``fig.show()``."""
     
     # Extracting data
-    plotter = InteractivePerturbationScatterPlotter()
+    plotter = _InteractivePerturbationScatterPlotter()
     plotter._create_plot(points)
 
     return plotter._get_plot()
