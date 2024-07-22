@@ -394,13 +394,13 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
     
 def perturb_multigroup_xs_dump(filename: Union[str, Path],  max_perturb_factor: float, overwrite: bool=False,
                                output_file: typing.Optional[Union[str, Path]]=None) -> typing.Optional[List[str]]:
-    """Perturb the cross section data in a SCALE multigroup cross section library text dump file. This is useful for generating
+    """Perturb the cross section data in a SCALE multigroup cross section library fido text dump file. This is useful for generating
     examples for testing the SCALE reader functions which do not violate export control.
     
     Parameters
     ----------
     filename
-        The filename of the text dump file.
+        The filename of the fido text dump file.
     max_perturb_factor
         The maximum percentage by which to perturb the cross sections. Cross sections are perturbed by a random factor between
         ``1 - max_perturb_factor`` and ``1 + max_perturb_factor``.
@@ -413,7 +413,12 @@ def perturb_multigroup_xs_dump(filename: Union[str, Path],  max_perturb_factor: 
     -------
         * If ``True``, the file is overwritten with the perturbed data and nothing is returned.
         * If ``False``, the perturbed data is returned as a list of strings, which can be written to a file via
-          ``with open('filename.txt', 'w') as f: f.writelines(perturbed_data)``."""
+          ``with open('filename.txt', 'w') as f: f.writelines(perturbed_data)``.
+          
+    Notes
+    -----
+    - This only applies to `fido` dumps of SCALE multigroup cross section libraries.
+    - Fido dumps of SCALE multigroup cross section libraries can be generated using """
     # First read the multigroup xs library text dump
     with open(filename, 'r') as f:
         input_file = f.readlines()

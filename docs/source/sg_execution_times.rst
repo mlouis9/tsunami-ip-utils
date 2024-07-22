@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:00.730** total execution time for 17 files **from all galleries**:
+**00:00.573** total execution time for 18 files **from all galleries**:
 
 .. container::
 
@@ -33,10 +33,7 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_plot_example_plotly.py` (``../../examples/plot_example_plotly.py``)
-     - 00:00.730
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_calculate_Ck.py` (``../../examples/calculate_Ck.py``)
-     - 00:00.000
+     - 00:00.573
      - 0.0
    * - :ref:`sphx_glr_auto_examples_calculate_E.py` (``../../examples/calculate_E.py``)
      - 00:00.000
@@ -69,6 +66,12 @@ Computation times
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_perturbation_test.py` (``../../examples/perturbation_test.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_sdf_readers.py` (``../../examples/sdf_readers.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_test_mg_xs_perturbation.py` (``../../examples/test_mg_xs_perturbation.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_test_sdf_uncertainty_contributions.py` (``../../examples/test_sdf_uncertainty_contributions.py``)
