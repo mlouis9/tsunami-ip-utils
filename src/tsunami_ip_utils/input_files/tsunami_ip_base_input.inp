@@ -1,0 +1,17 @@
+=tsunami-ip
+Run TSUNAMI-IP
+
+read parameters
+    e c 
+    prtparts
+    values
+    coverx=$coverx_library
+end parameters
+
+read applications
+    $application_filenames
+end applications
+
+read experiments
+    $experiment_filenames
+end experiments

@@ -58,10 +58,14 @@ tsunami\_ip\_utils.xs module
    :show-inheritance:
 
 
+.. _scale-template-input-files:
+
 SCALE Template Input Files
 --------------------------
 These are the SCALE input files that are used to interface with SCALE via ``scalerte``. Each of the input file is meant to 
 be read as a python `Template string <https://docs.python.org/3/library/string.html#template-strings>`_.
+
+.. _mg_reader.inp:
 
 Multigroup SCALE XS Library Reader
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -86,6 +90,8 @@ Further details on valid options can be found in `the AMPX manual <https://www.o
    :caption: :download:`Download this input file <../../../src/tsunami_ip_utils/input_files/MG_reader.inp>`.
    :linenos:
 
+.. _tsunami_ip_uncertainty_contributions.inp:
+
 Uncertainty Edit Generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 This input file is used to generate the uncertainty edits (i.e. covariance-wise :math:`\Delta k/k` contributions) 
@@ -103,6 +109,8 @@ all of the files supplied).
    :language: text
    :caption: :download:`Download this input file <../../../src/tsunami_ip_utils/input_files/tsunami_ip_uncertainty_contributions.inp>`.
    :linenos:
+
+.. _generate_perturbed_library.inp:
 
 Perturbed Library Generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

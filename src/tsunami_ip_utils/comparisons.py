@@ -9,15 +9,17 @@ import pandas as pd
 from pandas import DataFrame as df
 from pathlib import Path
 from tsunami_ip_utils.perturbations import generate_points
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Tuple, Any, Optional, Union
 from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure, InteractiveScatterLegend
 from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_perturbations, generate_plot_objects_array_from_contributions
 from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, calculate_E_contributions
 from tsunami_ip_utils.viz import matrix_plot
 import multiprocessing
+from tsunami_ip_utils._utils import _run_and_read_TSUNAMI_IP
 
-def E_calculation_comparison(tsunami_ip_output_filename: Path, application_filenames: List[Path], 
-               experiment_filenames: List[Path]) -> Dict[str, df]:
+def E_calculation_comparison(application_filenames: List[Path], experiment_filenames: List[Path], 
+                             coverx_library: str="252groupcov7.1", 
+                             tsunami_ip_output_filename: Optional[Union[str, Path]]=None) -> Dict[str, df]:
     """Function that compares the calculated similarity parameter E with the TSUNAMI-IP output for each application with each
     experiment. The comparison is done for the nominal values and the uncertainties of the E values. In addition, the
     difference between manually calculated uncertainties and automatically calculated uncertainties (i.e. via the uncertainties
@@ -25,12 +27,15 @@ def E_calculation_comparison(tsunami_ip_output_filename: Path, application_filen
     
     Parameters
     ----------
-    tsunami_ip_output_filename
-        Path to the TSUNAMI-IP output file.
     application_filenames
         Paths to the application sdf files.
     experiment_filenames
         Paths to the experiment sdf files.
+    coverx
+        The coverx library to use for TSUNAMI-IP. Default is ``'252groupcov7.1'``.
+    tsunami_ip_output_filename
+        Optional path to the TSUNAMI-IP output file, if not specified, the function will run TSUNAMI-IP to calculate the
+        E values using the template file :ref:`MG_reader.inp`.
     
     Returns
     -------
@@ -64,8 +69,11 @@ def E_calculation_comparison(tsunami_ip_output_filename: Path, application_filen
 
     print("Done with calculations")
 
-    # Now read the tsunami_ip output
-    tsunami_ip_output = read_integral_indices(tsunami_ip_output_filename)
+    # Now read the tsunami_ip output if given, and calculate it if not
+    if tsunami_ip_output_filename is not None:
+        tsunami_ip_output = read_integral_indices(tsunami_ip_output_filename)
+    else:
+        tsunami_ip_output = _run_and_read_TSUNAMI_IP(application_filenames, experiment_filenames, coverx_library)
 
     # Compare the nominal values
     E_diff = {}
@@ -187,7 +195,7 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
                            experiment_files: List[Path], method: str, base_library: Path=None, perturbation_factors: Path=None, 
                            num_perturbations: int=None, make_plot=True, num_cores: int=multiprocessing.cpu_count() - 2
                            ) -> Tuple[pd.DataFrame, Any]:
-    """Function that compares the calculated similarity parameter C_k (calculated using the cross section sampling method) 
+    """Function that compares the calculated similarity parameter :math:`c_k` (calculated using the cross section sampling method) 
     with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs
     must correspond with those in hte TSUNAMI-IP input file.
 

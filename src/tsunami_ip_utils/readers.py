@@ -691,7 +691,9 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
     ::
 
         read parameters
-            e c
+            e c 
+            prtparts
+            values
         end parameters
 
     in the TSUNAMI-IP input file.
@@ -756,11 +758,13 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
     with open(filename, 'r') as f:
         data = f.read()
 
+    print(data)
+
     # Define the Integral Values parser
     dashed_line = OneOrMore("-")
     header = Literal("Integral Values for Application") + "#" + pyparsing_common.integer + LineEnd() + dashed_line
     table_header = Literal("Experiment") + Literal("Type") + Literal("Value") + Literal("s.d.") + \
-                    Optional( Literal("xsec unc %") + Literal("s.d.") ) + Literal("c(k)") + \
+                    Opt( Literal("xsec unc %") + Literal("s.d.") ) + Literal("c(k)") + \
                     Literal("s.d.") + Literal("E") + Literal("s.d.") + Literal("E(fis)") + Literal("s.d.") + Literal("E(cap)") + \
                     Literal("s.d.") + Literal("E(sct)") + Literal("s.d.") + LineEnd() + OneOrMore(dashed_line)
     
@@ -770,11 +774,16 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
     space_as_zero = White(' ', min=8).setParseAction(lambda: 0.0)  # Parsing nine spaces as zero
     value_or_space = MatchFirst([ space_as_zero, sci_num ])
 
+    numbers_without_keff_uncertainty = Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + \
+                                       Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space )
+    numbers_with_keff_uncertainty = Suppress( sci_num + value_or_space ) + \
+                                    Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + \
+                                    Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space )
+
     data_line = Group(Suppress(pyparsing_common.integer + Word(non_space_printables) + Opt(Literal('-') + Word(alphas)) + \
                                Word(alphas)) + \
-                        Opt( Suppress( sci_num + value_or_space ) ) + \
-                        Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + \
-                        Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ) + Group( sci_num + value_or_space ))
+                        MatchFirst([numbers_with_keff_uncertainty, numbers_without_keff_uncertainty]))
+    
     data_block = OneOrMore(data_line)
     integral_values = Suppress(header + table_header) + data_block
     parsed_integral_values = integral_values.searchString(data)

@@ -4,6 +4,12 @@ from uncertainties import ufloat
 from pathlib import Path
 from typing import Callable
 import functools
+from typing import List, Union
+import tempfile
+from string import Template
+import subprocess
+from tsunami_ip_utils.readers import read_integral_indices
+import os
 
 def _isotope_reaction_list_to_nested_dict(isotope_reaction_list, field_of_interest):
     """Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of
@@ -98,3 +104,56 @@ def _convert_paths(func: Callable) -> Callable:
         return func(*new_args, **new_kwargs)
     
     return wrapper
+
+@_convert_paths
+def _run_and_read_TSUNAMI_IP(application_filenames: Union[List[str], List[Path]], 
+                            experiment_filenames: Union[List[str], List[Path]], coverx_library: str):
+    """Runs TSUNAMI-IP and reads the output file using the :func:`tsunami_ip_utils.readers.read_integral_indices` function.
+    
+    Parameters
+    ----------
+    application_filenames
+        List of paths to the application SDF files.
+    experiment_filenames
+        List of paths to the experiment SDF files.
+    coverx
+        The coverx library to use for TSUNAMI-IP.
+        
+    Returns
+    -------
+        Integral matrices for each integral index type. The shape of the matrices are ``(num_applications, num_experiments)``. 
+        Keys are ``'c_k'``, ``'E_total'``, ``'E_fission'``, ``'E_capture'``, and ``'E_scatter'``."""
+    
+    current_dir = Path(__file__).parent
+    template_filename = current_dir / 'input_files' / 'tsunami_ip_base_input.inp'
+    with open(template_filename, 'r') as f:
+        template = Template(f.read())
+
+    # Convert filenames to strings
+    application_filenames = [str(filename.absolute()) for filename in application_filenames]
+    experiment_filenames  = [str(filename.absolute()) for filename in experiment_filenames]
+    
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+        # Create the input file
+        input_file = template.substitute(
+            application_filenames='\n'.join(application_filenames),
+            experiment_filenames='\n'.join(experiment_filenames),
+            coverx_library=coverx_library
+        )
+        f.write(input_file)
+        input_filename = f.name
+
+    # Run the TSUNAMI-IP calculation
+    process = subprocess.Popen( ['scalerte', input_filename], cwd=str( Path( input_filename ).parent ) )
+    process.wait()
+
+    # Read the output file
+    output_filename = f"{input_filename}.out"
+    tsunami_ip_output = read_integral_indices(output_filename)
+
+    # Clean up the temporary files
+    os.remove(input_filename)
+    os.remove(output_filename)
+
+    return tsunami_ip_output
+
