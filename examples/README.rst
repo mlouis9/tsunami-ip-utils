@@ -1,7 +1,7 @@
 Examples
 ========
 
-tada examples
+This directory contains examples of how to use the ``tsunami_ip_utils`` package.
 
 .. only:: html
 

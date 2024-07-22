@@ -11,6 +11,8 @@ import multiprocessing
 from functools import partial
 import re
 from typing import Union, Tuple, Dict, Any, Callable, List
+import typing
+import random
 
 def _parse_nuclide_reaction(filename: Union[str, Path], energy_boundaries: bool=False) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """Reads a multigroup cross section ``.txt`` file produced by the extractor function and returns the energy-dependent 
@@ -389,3 +391,70 @@ def read_multigroup_xs(multigroup_library_path: Path, nuclide_zaid_reaction_dict
                                                         parsing_function=parse_function, \
                                                         nuclide_reaction_dict=nuclide_zaid_reaction_dict, plot_option='fido')
         return output
+    
+def perturb_multigroup_xs_dump(filename: Union[str, Path],  max_perturb_factor: float, overwrite: bool=False,
+                               output_file: typing.Optional[Union[str, Path]]=None) -> typing.Optional[List[str]]:
+    """Perturb the cross section data in a SCALE multigroup cross section library text dump file. This is useful for generating
+    examples for testing the SCALE reader functions which do not violate export control.
+    
+    Parameters
+    ----------
+    filename
+        The filename of the text dump file.
+    max_perturb_factor
+        The maximum percentage by which to perturb the cross sections. Cross sections are perturbed by a random factor between
+        ``1 - max_perturb_factor`` and ``1 + max_perturb_factor``.
+    overwrite
+        Whether or not to overwrite the file with the perturbed data.
+    output_file
+        An output file to write the perturbed data to.
+        
+    Returns
+    -------
+        * If ``True``, the file is overwritten with the perturbed data and nothing is returned.
+        * If ``False``, the perturbed data is returned as a list of strings, which can be written to a file via
+          ``with open('filename.txt', 'w') as f: f.writelines(perturbed_data)``."""
+    # First read the multigroup xs library text dump
+    with open(filename, 'r') as f:
+        input_file = f.readlines()
+
+    # Perturb the data
+    reading_data = False
+    perturbed_data = []
+    for line in input_file:
+        # Identify the start of the data with the correct fido delimiters
+        if line.startswith(' 4## '):
+            reading_data = True
+            last_energy = None
+            newline = line
+            perturbed_data.append(newline)
+            continue
+
+        if reading_data and line.startswith(' t'):
+            reading_data = False
+
+        # Now perturb the data
+        if reading_data:
+            energy, xs = line.strip().split()
+            if energy == last_energy:
+                # If the energy is the same as the last energy, keep the (perturbed) xs the same
+                newline = f'        {energy} {last_xs}\n'
+                last_xs = last_xs
+            else:
+                perturbation_factor = 1.0 + random.uniform(-max_perturb_factor, max_perturb_factor)
+                newline = f'        {energy} {float(xs) * perturbation_factor}\n'
+                last_xs = float(xs) * perturbation_factor
+            last_energy = energy
+        else:
+            newline = line
+
+        perturbed_data.append(newline)
+    
+    if overwrite:
+        with open(filename, 'w') as f:
+            f.writelines(perturbed_data)
+    elif output_file is not None:
+        with open(output_file, 'w') as f:
+            f.writelines(perturbed_data)
+    else:
+        return perturbed_data
