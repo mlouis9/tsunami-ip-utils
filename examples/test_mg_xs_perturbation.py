@@ -1,3 +1,10 @@
+"""
+Placeholder
+===========
+
+This is a placeholder description
+"""
+
 from tsunami_ip_utils.xs import perturb_multigroup_xs_dump
 from pathlib import Path
 script_dir = Path(__file__).parent.absolute()
