@@ -1,7 +1,7 @@
 from ._bar_plot import _BarPlotter
 from .pie_plot import _PiePlotter, _InteractivePiePlotter
 from .scatter_plot import _ScatterPlotter, _InteractiveScatterPlotter, _InteractivePerturbationScatterPlotter
-from .matrix_plot import interactive_matrix_plot
+from .matrix_plot import _interactive_matrix_plot
 from .plot_utils import _determine_plot_type
 from tsunami_ip_utils.integral_indices import _add_missing_reactions_and_nuclides
 import numpy as np
@@ -195,7 +195,7 @@ def matrix_plot(plot_objects_array: np.ndarray, plot_type: str) -> InteractiveMa
           calling ``app.show()``.
         * If ``plot_type`` is ``'static'``, raises a ``NotImplementedError``."""
     if plot_type == 'interactive':
-        return interactive_matrix_plot(plot_objects_array)
+        return _interactive_matrix_plot(plot_objects_array)
     elif plot_type == 'static':
         raise NotImplementedError("Static matrix plots are not yet supported")
 
