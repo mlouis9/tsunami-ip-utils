@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:00.573** total execution time for 18 files **from all galleries**:
+**00:00.390** total execution time for 18 files **from all galleries**:
 
 .. container::
 
@@ -33,7 +33,7 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_plot_example_plotly.py` (``../../examples/plot_example_plotly.py``)
-     - 00:00.573
+     - 00:00.390
      - 0.0
    * - :ref:`sphx_glr_auto_examples_calculate_E.py` (``../../examples/calculate_E.py``)
      - 00:00.000

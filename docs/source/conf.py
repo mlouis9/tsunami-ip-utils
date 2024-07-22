@@ -53,7 +53,12 @@ extensions = [
     'sphinx.ext.mathjax',          # Render math equations using MathJax
     'globalparam',                 # Custom extension for global parameters
     'sphinx_gallery.gen_gallery',  # Generate gallery of examples
+    'sphinx.ext.intersphinx',      # Link to other projects' documentation
 ]
+
+intersphinx_mapping = {
+    'myproject': ('https://tsunami-ip-utils.readthedocs.io', None),
+}
 
 sphinx_gallery_conf = {
     'examples_dirs': '../../examples',  # Path to example scripts
