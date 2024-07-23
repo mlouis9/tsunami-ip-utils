@@ -68,9 +68,9 @@ def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_
         raise ValueError("Unsupported plot type")
 
     # Create the plot and style it
-    plotter.create_plot(contributions, nested_plot)
+    plotter._create_plot(contributions, nested_plot)
 
-    return plotter.get_plot()
+    return plotter._get_plot()
 
 
 def correlation_plot(application_contributions: List[dict], experiment_contributions: List[dict], plot_type: str='scatter', 

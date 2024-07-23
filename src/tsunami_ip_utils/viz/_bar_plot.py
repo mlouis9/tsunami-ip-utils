@@ -135,3 +135,5 @@ class _BarPlotter(_Plotter):
         self._axs.set_xlabel("Isotope")
         self._axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
         self._axs.set_title(title_text)
+        ticklabels = self._axs.get_xticklabels()
+        self._axs.set_xticklabels(ticklabels, rotation=45, rotation_mode='anchor', ha='right', va='top') 
