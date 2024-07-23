@@ -136,4 +136,5 @@ class _BarPlotter(_Plotter):
         self._axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
         self._axs.set_title(title_text)
         ticklabels = self._axs.get_xticklabels()
+        self._axs.set_xticks(range(len(ticklabels))) # Have to reset these otherwise the next line gives a warning
         self._axs.set_xticklabels(ticklabels, rotation=45, rotation_mode='anchor', ha='right', va='top') 
