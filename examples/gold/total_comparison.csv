@@ -1,0 +1,6 @@
+Application Number,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3
+Attribute,Calculated,Manual Uncertainty,TSUNAMI-IP,Relative Difference in Mean,Relative Difference in Manual Uncertainty,Calculated,Manual Uncertainty,TSUNAMI-IP,Relative Difference in Mean,Relative Difference in Manual Uncertainty,Calculated,Manual Uncertainty,TSUNAMI-IP,Relative Difference in Mean,Relative Difference in Manual Uncertainty
+Experiment Number,,,,,,,,,,,,,,,
+1,1.000E+00+/-1.71E-03,1.71E-03,1.000E+00+/-2.40E-03,3.3307E-15,2.8798E-01,9.983E-01+/-1.72E-03,1.72E-03,9.986E-01+/-2.40E-03,2.8934E-04,2.8323E-01,9.962E-01+/-1.72E-03,1.72E-03,9.965E-01+/-2.40E-03,2.7262E-04,2.8255E-01
+2,9.983E-01+/-1.72E-03,1.72E-03,9.986E-01+/-2.40E-03,2.8934E-04,2.8323E-01,1.000E+00+/-1.74E-03,1.74E-03,1.000E+00+/-2.40E-03,2.7756E-15,2.7650E-01,9.993E-01+/-1.74E-03,1.74E-03,9.992E-01+/-2.40E-03,6.6851E-05,2.7439E-01
+3,9.962E-01+/-1.72E-03,1.72E-03,9.965E-01+/-2.40E-03,2.7262E-04,2.8255E-01,9.993E-01+/-1.74E-03,1.74E-03,9.992E-01+/-2.40E-03,6.6851E-05,2.7439E-01,1.000E+00+/-1.75E-03,1.75E-03,1.000E+00+/-2.40E-03,3.2196E-15,2.7163E-01

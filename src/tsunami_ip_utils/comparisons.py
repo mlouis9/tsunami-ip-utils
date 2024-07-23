@@ -15,10 +15,10 @@ from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_per
 from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, calculate_E_contributions
 from tsunami_ip_utils.viz import matrix_plot
 import multiprocessing
-from tsunami_ip_utils._utils import _run_and_read_TSUNAMI_IP
+from tsunami_ip_utils._utils import _run_and_read_TSUNAMI_IP, _convert_paths
 
-def E_calculation_comparison(application_filenames: List[Path], experiment_filenames: List[Path], 
-                             coverx_library: str="252groupcov7.1", 
+def E_calculation_comparison(application_filenames: Union[List[str], List[Path]], 
+                             experiment_filenames: Union[List[str], List[Path]], coverx_library: str="252groupcov7.1", 
                              tsunami_ip_output_filename: Optional[Union[str, Path]]=None) -> Dict[str, df]:
     """Function that compares the calculated similarity parameter E with the TSUNAMI-IP output for each application with each
     experiment. The comparison is done for the nominal values and the uncertainties of the E values. In addition, the
@@ -39,10 +39,11 @@ def E_calculation_comparison(application_filenames: List[Path], experiment_filen
     
     Returns
     -------
-        Dictionary of pandas DataFrames for each type of E index. The DataFrames contain the calculated E values,
-        the manual uncertainties, the TSUNAMI-IP values, the relative difference in the mean, and the relative difference
-        in the manual uncertainty. The DataFrames are indexed by the experiment number and the columns are a MultiIndex
-        with the application number as the main index and the attributes as the subindex.
+        Dictionary of pandas DataFrames for each type of E index. The keys are ``'total'``, ``'fission'``, ``'capture'``, 
+        and ``'scatter'``. The DataFrames contain the calculated E values, the manual uncertainties, the TSUNAMI-IP values, 
+        the relative difference in the mean, and the relative difference in the manually computed uncertainty. The DataFrames 
+        are indexed by the experiment number and the columns are a MultiIndex with the application number as the main index 
+        and the attributes as the subindex.
         
     Notes
     -----
@@ -191,9 +192,14 @@ def _process_pair(args):
     percent_difference = (integral_value - calculated_value) / integral_value * 100
     return calculated_value, percent_difference
 
-def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_name: str, application_files: List[Path], 
-                           experiment_files: List[Path], method: str, base_library: Path=None, perturbation_factors: Path=None, 
-                           num_perturbations: int=None, make_plot=True, num_cores: int=multiprocessing.cpu_count() - 2
+@_convert_paths
+def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_name: str, 
+                           application_files: Union[List[str], List[Path]], 
+                           experiment_files: Union[List[str], List[Path]], method: str, 
+                           base_library: Optional[Union[str, Path]]=None, 
+                           perturbation_factors: Optional[Union[str, Path]]=None, 
+                           num_perturbations: Optional[int]=None, make_plot: bool=True, 
+                           num_cores: int=multiprocessing.cpu_count() - 2
                            ) -> Tuple[pd.DataFrame, Any]:
     """Function that compares the calculated similarity parameter :math:`c_k` (calculated using the cross section sampling method) 
     with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs

@@ -25,6 +25,7 @@ tqdm = "*"
 pyyaml = "*"
 pytest-mpl = "*"
 pytest = "*"
+pyprojroot = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -34,6 +34,13 @@ customize-rst:
 html: apidoc customize-rst
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+clean:
+	@echo "Cleaning up build directories..."
+	rm -r "$(BUILDDIR)"
+	rm -r "$(SOURCEDIR)/auto_examples"
+	@echo "Clean-up done."
+
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile

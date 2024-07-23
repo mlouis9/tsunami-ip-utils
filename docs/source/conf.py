@@ -6,8 +6,10 @@ from sphinx_gallery.scrapers import figure_rst
 
 src_path = os.path.abspath('../../src')
 ext_path = os.path.abspath('./_ext')
+project_path = os.path.abspath('../..')
 sys.path.insert(0, src_path)
 sys.path.insert(0, ext_path)
+sys.path.insert(0, project_path)
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -63,10 +65,10 @@ intersphinx_mapping = {
 sphinx_gallery_conf = {
     'examples_dirs': '../../examples',  # Path to example scripts
     'gallery_dirs': 'auto_examples',  # Path to save gallery generated output
-    'filename_pattern': r'plot_.*\.py$',  # Adjusted regex to ensure it captures all intended files
+    'filename_pattern': r'.*\.py$',  # Adjusted regex to ensure it captures all intended files
     'example_extensions': ['.py'],
     'image_scrapers': ('matplotlib', plotly_scraper),  # If using matplotlib for plots
-    'doc_module': ('tsunami_ip_utils',)
+    'doc_module': ('tsunami_ip_utils',),
 }
 
 autodoc_default_options = {

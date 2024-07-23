@@ -3,7 +3,7 @@ import numpy as np
 from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_uncertainty_contributions_out, read_uncertainty_contributions_sdf
 from tsunami_ip_utils._error import _unit_vector_uncertainty_propagation, _dot_product_uncertainty_propagation
 from copy import deepcopy
-from typing import List, Set, Tuple, Dict
+from typing import List, Set, Tuple, Dict, Union
 from pathlib import Path
 from uncertainties.core import Variable
 from tsunami_ip_utils._utils import _convert_paths
@@ -134,8 +134,8 @@ def _create_sensitivity_vector(sdfs: List[unumpy.uarray]) -> unumpy.uarray:
     return unumpy.uarray(senstivities, uncertainties)
 
 
-def calculate_E(application_filenames: List[str], experiment_filenames: List[str], reaction_type: str='all', 
-                uncertainties: str='manual') -> np.ndarray:
+def calculate_E(application_filenames: Union[List[str], List[Path]], experiment_filenames: Union[List[str], List[Path]], 
+                reaction_type: str='all', uncertainties: str='manual') -> np.ndarray:
     """Calculates the similarity parameter, E for each application with each available experiment given the application 
     and experiment sdf files
     
@@ -146,7 +146,7 @@ def calculate_E(application_filenames: List[str], experiment_filenames: List[str
     experiment_filenames
         Paths to the experiment sdf files.
     reaction_type 
-        The type of reaction to consider in teh calculation of E. Default is ``'all``' which considers all 
+        The type of reaction to consider in the calculation of E. Default is ``'all``' which considers all 
         reactions.
     uncertainties 
         The type of uncertainty propagation to use. Default is ``'automatic'`` which uses the uncertainties

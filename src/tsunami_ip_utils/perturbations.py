@@ -2,7 +2,7 @@
 experiment pair to generate a similarity scatter plot"""
 
 from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_region_integrated_h5_sdf
-from tsunami_ip_utils._utils import _filter_redundant_reactions
+from tsunami_ip_utils._utils import _convert_paths
 from pathlib import Path
 from tsunami_ip_utils.xs import read_multigroup_xs
 import pickle
@@ -24,7 +24,7 @@ from numpy.typing import ArrayLike
 # Number of xs perturbation samples available in SCALE
 NUM_SAMPLES = config['NUM_SAMPLES']
 
-def _generate_and_read_perturbed_library(base_library: Path, perturbation_factors: Path, sample_number: int, 
+def _generate_and_read_perturbed_library(base_library: Union[str, Path], perturbation_factors: Union[str, Path], sample_number: int, 
                                          all_nuclide_reactions: dict) -> dict:
     """Generates and reads perturbed multigroup cross section libraries.
     
@@ -54,7 +54,15 @@ def _generate_and_read_perturbed_library(base_library: Path, perturbation_factor
     with tempfile.NamedTemporaryFile(mode='w', delete=False) as output_file:
         output_file_path = output_file.name
 
+    # -----------------------------------------
     # Substitute the input file template values
+    # -----------------------------------------
+    # Convert the paths to strings if not already strings
+    if isinstance(perturbation_factors, str):
+        perturbation_factors = Path(perturbation_factors)
+    if isinstance(base_library, str):
+        base_library = Path(base_library)
+    
     input_file = template.substitute(
         base_library=str(base_library),
         perturbation_factors=str( perturbation_factors / f'Sample{sample_number}'),
@@ -67,7 +75,7 @@ def _generate_and_read_perturbed_library(base_library: Path, perturbation_factor
         input_temp_file.write(input_file)
         input_temp_file_path = input_temp_file.name
 
-    # Run the executable
+    # Run the input file with scalerte
     command = ['scalerte', input_temp_file_path]
 
     proc = subprocess.Popen(command)
@@ -84,8 +92,9 @@ def _generate_and_read_perturbed_library(base_library: Path, perturbation_factor
 
     return perturbed_xs
 
-def generate_points(application_path: Union[Path, List[Path]], experiment_path: Union[Path, List[Path]], base_library: Path, 
-                    perturbation_factors: Path, num_perturbations: int
+@_convert_paths
+def generate_points(application_path: Union[Path, List[Path]], experiment_path: Union[Path, List[Path]], 
+                    base_library: Union[str, Path], perturbation_factors: Union[str, Path], num_perturbations: int
                     ) -> Union[ List[ Tuple[ float, float ] ], 
                                np.ndarray[ List[ Tuple[ float, float ] ] ]]:
     """Generates points for a similarity scatter plot using the nuclear data sampling method.
@@ -131,7 +140,17 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
     plotted on a scatter plot whose Pearson correlation coefficient is meant to correspond to the :math:`c_k` value computed
     by TSUNAMI-IP.
     """
+    # Convert the paths to strings if not already strings
+    if isinstance(application_path, str):
+        application_path = Path(application_path)
+    if isinstance(experiment_path, str):
+        experiment_path = Path(experiment_path)
+    if isinstance(base_library, str):
+        base_library = Path(base_library)
+    if isinstance(perturbation_factors, str):
+        perturbation_factors = Path(perturbation_factors)
     
+    # Check if the application and experiment paths are lists (vectorization)
     if isinstance(application_path, list) and isinstance(experiment_path, list):
         points_array = np.empty( ( len(application_path), len(experiment_path), num_perturbations, 2), dtype=object )
         for i, application in enumerate(application_path):
@@ -273,9 +292,9 @@ def _cache_perturbed_library(args: Tuple[int, Path, Path, int, Dict[str, List[st
         
         - i (int):
             The sample number to use for generating the perturbed library.
-        - base_library (Path):
+        - base_library (str | Path):
             Path to the base cross section library.
-        - perturbation_factors (Path):
+        - perturbation_factors (str | Path):
             Path to the cross section perturbation factors (used to generate the perturbed libraries).
         - sample_number (int):
             The sample number to use for generating the perturbed library. Must be from 1 - ``NUM_SAMPLES``, where ``NUM_SAMPLES``

@@ -8,3 +8,6 @@ def rename_and_remove_files(file_path):
 rename_and_remove_files("source/public_api")
 rename_and_remove_files("source/private_api")
 
+# Now move paths module to the root directory and rename it to paths.rst
+os.rename("source/public_api/paths.rst", "source/paths.rst")
+os.remove("source/private_api/paths.rst") 

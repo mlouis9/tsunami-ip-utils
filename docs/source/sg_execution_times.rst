@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:00.390** total execution time for 18 files **from all galleries**:
+**00:55.758** total execution time for 3 files **from all galleries**:
 
 .. container::
 
@@ -32,57 +32,12 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_compare_E.py` (``../../examples/compare_E.py``)
+     - 00:55.758
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_E_contributions.py` (``../../examples/E_contributions.py``)
+     - 00:00.000
+     - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_example_plotly.py` (``../../examples/plot_example_plotly.py``)
-     - 00:00.390
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_calculate_E.py` (``../../examples/calculate_E.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_compare_HMF_perturbation.py` (``../../examples/compare_HMF_perturbation.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_compare_perturbation.py` (``../../examples/compare_perturbation.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_compare_uncertainty_contributions.py` (``../../examples/compare_uncertainty_contributions.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_comparison_heatmap.py` (``../../examples/comparison_heatmap.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_correlation_plot.py` (``../../examples/correlation_plot.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_examples.py` (``../../examples/examples.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_generate_heatmaps.py` (``../../examples/generate_heatmaps.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_matrix_plot.py` (``../../examples/matrix_plot.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_mg_xs_reader.py` (``../../examples/mg_xs_reader.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_perturbation_test.py` (``../../examples/perturbation_test.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_sdf_readers.py` (``../../examples/sdf_readers.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_test_mg_xs_perturbation.py` (``../../examples/test_mg_xs_perturbation.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_test_sdf_uncertainty_contributions.py` (``../../examples/test_sdf_uncertainty_contributions.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_test_uncertainty_contribution_reader.py` (``../../examples/test_uncertainty_contribution_reader.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_uncertainty_correlation.py` (``../../examples/uncertainty_correlation.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_view_plots.py` (``../../examples/view_plots.py``)
      - 00:00.000
      - 0.0

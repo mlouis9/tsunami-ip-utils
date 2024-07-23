@@ -758,8 +758,6 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
     with open(filename, 'r') as f:
         data = f.read()
 
-    print(data)
-
     # Define the Integral Values parser
     dashed_line = OneOrMore("-")
     header = Literal("Integral Values for Application") + "#" + pyparsing_common.integer + LineEnd() + dashed_line
