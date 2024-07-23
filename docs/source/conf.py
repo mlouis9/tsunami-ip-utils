@@ -60,6 +60,7 @@ extensions = [
 
 intersphinx_mapping = {
     'tsunami_ip_utils': ('https://tsunami-ip-utils.readthedocs.io/en/latest', None),
+    'uncertainties': ('https://uncertainties.readthedocs.io/en/latest/', None),
 }
 
 sphinx_gallery_conf = {

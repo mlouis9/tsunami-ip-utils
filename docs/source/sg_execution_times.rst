@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:55.758** total execution time for 3 files **from all galleries**:
+**01:06.066** total execution time for 4 files **from all galleries**:
 
 .. container::
 
@@ -33,11 +33,14 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_compare_E.py` (``../../examples/compare_E.py``)
-     - 00:55.758
+     - 00:55.262
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_E_contributions.py` (``../../examples/E_contributions.py``)
-     - 00:00.000
+   * - :ref:`sphx_glr_auto_examples_uncertainty_contributions.py` (``../../examples/uncertainty_contributions.py``)
+     - 00:05.817
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_visualizing_contributions.py` (``../../examples/visualizing_contributions.py``)
+     - 00:04.486
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_example_plotly.py` (``../../examples/plot_example_plotly.py``)
-     - 00:00.000
+     - 00:00.501
      - 0.0
