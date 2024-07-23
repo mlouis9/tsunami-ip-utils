@@ -64,8 +64,9 @@ class _PiePlotter(_Plotter):
               through the given reaction.
         nested
             Wether the contributions are on a reaction-wise basis or not."""
-        self.nested = nested
-        self.fig, self.axs = plt.subplots()
+        self._nested = nested
+        self._fig, self._axs = plt.subplots()
+        self._textprops = dict(va="center", rotation_mode = 'anchor', fontsize=8)
         if nested:
             self._nested_pie_chart(contributions)
         else:
@@ -77,7 +78,7 @@ class _PiePlotter(_Plotter):
         return fig.add_subplot(position, sharex=self.ax, sharey=self.ax)
 
     def _get_plot(self) -> Tuple[Figure, Axes]:
-        return self.fig, self.axs
+        return self._fig, self._axs
 
     def _nested_pie_chart(self, contributions: Dict[str, Dict[str, ufloat]]):
         """Create a pie chart of the contributions to the integral index on a nuclide-reaction-wise basis.
@@ -144,7 +145,7 @@ class _PiePlotter(_Plotter):
         wedge_widths = np.abs(wedge_widths)
 
         # Plot the inner ring for nuclide totals
-        inner_ring, _ = self.axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
+        inner_ring, _ = self._axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
                                 colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
                                     wedgeprops=dict(width=0.3, edgecolor='w'))
 
@@ -173,9 +174,9 @@ class _PiePlotter(_Plotter):
                 else:
                     outer_hatches.append(None)
 
-        outer_ring, _ = self.axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
-                textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=True, \
-                    wedgeprops=dict(width=0.3, edgecolor='w'))
+        outer_ring, _ = self._axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
+                textprops=self._textprops, startangle=inner_ring[0].theta1, counterclock=True, \
+                    rotatelabels =True, wedgeprops=dict(width=0.3, edgecolor='w'))
 
         # Add hatches to the negative contribution wedges
         for wedge, hatch in zip(outer_ring, outer_hatches):
@@ -197,19 +198,19 @@ class _PiePlotter(_Plotter):
         hatches = ['//' if contributions[key].n < 0 else '' for key in labels]
 
         # Creating the pie chart
-        wedges, _ = self.axs.pie(values, labels=labels, startangle=90)
+        wedges, _ = self._axs.pie(values, labels=labels, startangle=90, rotatelabels =True, textprops=self._textprops)
 
         # Applying hatching patterns to the wedges
         for wedge, hatch in zip(wedges, hatches):
             wedge.set_hatch(hatch)
 
     def _style(self):
-        if self._plot_redundant and self.nested:
+        if self._plot_redundant and self._nested:
             title_text = f'Contributions to {self._index_name} (including redundant/irrelvant reactions)'
         else:
             title_text = f'Contributions to {self._index_name}'
-        self.axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
-        self.axs.set_title(title_text)
+        self._axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
+        self._axs.set_title(title_text, pad=50) # Pad set to avoid overlap with labels
 
 
 class _InteractivePiePlotter(_Plotter):
