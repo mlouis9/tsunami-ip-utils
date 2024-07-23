@@ -3,7 +3,7 @@ import numpy as np
 from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_uncertainty_contributions_out, read_uncertainty_contributions_sdf
 from tsunami_ip_utils._error import _unit_vector_uncertainty_propagation, _dot_product_uncertainty_propagation
 from copy import deepcopy
-from typing import List, Set, Tuple, Dict, Union
+from typing import List, Set, Tuple, Dict, Union, Optional
 from pathlib import Path
 from uncertainties.core import Variable
 from tsunami_ip_utils._utils import _convert_paths
@@ -435,18 +435,19 @@ def calculate_E_contributions(application_filenames: List[str], experiment_filen
 
 
 @_convert_paths
-def get_uncertainty_contributions(application_filenames: List[str], experiment_filenames: List[str]
+def get_uncertainty_contributions(application_filenames: Optional[Union[ List[str], List[Path] ]]=None, 
+                                  experiment_filenames: Optional[Union[ List[str], List[Path] ]]=None,
                                    ) -> Tuple[ Dict[ str, List[unumpy.uarray] ], Dict[ str,  List[unumpy.uarray] ] ]:
     """Read the contributions to the uncertainty in :math:`k_{\\text{eff}}` (i.e. :math:`\\frac{dk}{k}`) for each 
-    application with each available experiment on a nuclide basis and on a nuclide-reaction basis from the
-    provided TSUNAMI-IP ``.out`` or ``.sdf`` files.
+    application and each available experiment on a nuclide basis and on a nuclide-reaction basis from the
+    provided TSUNAMI-IP ``.out`` or ``.sdf`` files. =
 
     Parameters
     ----------
     application_filenames
-        Paths to the application output (``.out``) ``.sdf`` files.
+        (Optional) Paths to the application output (``.out``) or ``.sdf`` files.
     experiment_filenames
-        Paths to the experiment output (``.out``) or ``.sdf`` files.
+        (Optional) Paths to the experiment output (``.out``) or ``.sdf`` files.
 
     Returns
     -------
@@ -455,28 +456,60 @@ def get_uncertainty_contributions(application_filenames: List[str], experiment_f
             each experiment on a nuclide basis. Keyed by ``'application'`` and ``'experiment'``.
         - uncertainty_contributions_nuclide_reaction
             List of contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and each experiment 
-            on a nuclide-reaction basis. Keyed by ``'application'`` and ``'experiment'``."""
+            on a nuclide-reaction basis. Keyed by ``'application'`` and ``'experiment'``.
+            
+    Notes
+    -----
+    If either the application or experiment filenames are not provided, then the corresponding output will be an empty list.
+
+    
+    Theory
+    ======
+    The nuclear-data induced varaince in :math:`k_{\\text{eff}}` (defined in 
+    `Equation 6.3.34 <https://scale-manual.ornl.gov/sams.html#equation-eq6-3-34>`_ ) can be decomposed into contributions 
+    from each nulicde-reaction covariance via `Equation 6.3.35 <https://scale-manual.ornl.gov/sams.html#equation-eq6-3-35>`_
+    in the SALE manual. The `total` uncertainty in :math:`k_{\\text{eff}}` (as well as the contributions on a nuclide-reaction
+    wise basis) can be calculated from these two definitions by simply taking the square root. For nuclide-reaction covariances
+    that are not principle submatrices, the contribution to the variance may be negative (as they are not guaranteed to be
+    positive definite), and so the uncertainty contribution may be (formally) imaginary. However, these contributions physically
+    represent anticorrelations in the nuclear data, and so TSUNAMI reports them as negative values, but with a note that there
+    is a special rule for handling these values (see the footer of the ``Uncertainty Information`` section in
+    `Example 6.6.3 <https://scale-manual.ornl.gov/sams.html#list6-3-3>`_ )."""
     
     dk_over_k_nuclide_wise = {
-        'application': np.empty( len(application_filenames), dtype=object ),
-        'experiment': np.empty( len(experiment_filenames), dtype=object )    
+        'application': [],
+        'experiment': []    
     }
     dk_over_k_nuclide_reaction_wise = {
-        'application': np.empty( len(application_filenames), dtype=object ),
-        'experiment': np.empty( len(experiment_filenames), dtype=object )    
+        'application': [],
+        'experiment': []    
     }
 
-    at_least_one_not_out = any([ filename.suffix != '.out' for filename in application_filenames + experiment_filenames ])
+    application_filenames = application_filenames if application_filenames is not None else []
+    experiment_filenames = experiment_filenames if experiment_filenames is not None else []
+    all_filenames = application_filenames + experiment_filenames
+
+    at_least_one_not_out = any([ filename.suffix != '.out' for filename in all_filenames ])
     all_sdf = all([ filename.suffix == '.sdf' for filename in application_filenames + experiment_filenames ])
     if at_least_one_not_out and not all_sdf:
         raise ValueError("All files must be either .out or .sdf files")
     
     if all_sdf:
-        dk_over_k_nuclide_wise['application'], dk_over_k_nuclide_reaction_wise['application'] = \
-            read_uncertainty_contributions_sdf(application_filenames)
+        # Application
+        if application_filenames != []:
+            dk_over_k_nuclide_wise['application'], dk_over_k_nuclide_reaction_wise['application'] = \
+                read_uncertainty_contributions_sdf(application_filenames)
+        else:
+            dk_over_k_nuclide_wise['application'] = []
+            dk_over_k_nuclide_reaction_wise['application'] = []
 
-        dk_over_k_nuclide_wise['experiment'], dk_over_k_nuclide_reaction_wise['experiment'] = \
-            read_uncertainty_contributions_sdf(experiment_filenames)
+        # Experiment
+        if experiment_filenames != []:
+            dk_over_k_nuclide_wise['experiment'], dk_over_k_nuclide_reaction_wise['experiment'] = \
+                read_uncertainty_contributions_sdf(experiment_filenames)
+        else:
+            dk_over_k_nuclide_wise['experiment'] = []
+            dk_over_k_nuclide_reaction_wise['experiment'] = []
     else:
         for i, application_filename in enumerate(application_filenames):
             dk_over_k_nuclide_wise['application'][i], dk_over_k_nuclide_reaction_wise['application'][i] = \
