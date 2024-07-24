@@ -3,7 +3,7 @@ from pyparsing import *
 from uncertainties import unumpy, ufloat
 import h5py
 from pathlib import Path
-from . import config
+from tsunami_ip_utils import config
 from typing import Tuple, List, Union, Dict
 from string import Template
 from tempfile import NamedTemporaryFile
@@ -115,7 +115,7 @@ class SdfReader:
 
         # NOTE: sum_opposite_sign_groupwise_sensitivities refers to the groupwise sensitivities with opposite sign to the
         # integrated sensitivity coefficient
-        names = config['SDF_DATA_NAMES']
+        names = config.SDF_DATA_NAMES
         sdf_data = [dict(zip(names, match)) for match in sdf_data]
 
         # Convert the sensitivities and uncertainties to uncertainties.ufloat objects

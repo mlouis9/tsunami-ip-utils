@@ -18,11 +18,11 @@ from tqdm import tqdm
 import numpy as np
 from tqdm.contrib.concurrent import process_map
 from typing import List, Tuple, Dict, Union
-from . import config
+from tsunami_ip_utils import config
 from numpy.typing import ArrayLike
 
 # Number of xs perturbation samples available in SCALE
-NUM_SAMPLES = config['NUM_SAMPLES']
+NUM_SAMPLES = config.NUM_SAMPLES
 
 def _generate_and_read_perturbed_library(base_library: Union[str, Path], perturbation_factors: Union[str, Path], sample_number: int, 
                                          all_nuclide_reactions: dict) -> dict:

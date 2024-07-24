@@ -20,6 +20,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import plotly
 from pathlib import Path
+from tsunami_ip_utils import config
 
 plt.rcParams['hatch.linewidth'] = 0.6
 
@@ -68,8 +69,8 @@ class _PiePlotter(_Plotter):
             Wether the contributions are on a reaction-wise basis or not."""
         
         self._nested = nested
-        self._fig, self._axs = plt.subplots()
-        self._textprops = dict(va="center", rotation_mode = 'anchor', fontsize=6)
+        self._fig, self._axs = plt.subplots(figsize=(10, 10))
+        self._textprops = dict(va="center", rotation_mode = 'anchor', fontsize=12)
         if nested:
             self._nested_pie_chart(contributions)
         else:
@@ -91,11 +92,19 @@ class _PiePlotter(_Plotter):
         contributions
             A dictionary of the form ``{nuclide: {reaction: contribution}}``, where contribution is a ``ufloat`` object
             representing the contribution of the nuclide to the integral index through the given reaction."""
+        
+        def blend_colors(color1, color2, alpha):
+            return np.array( [ alpha * c1 + (1 - alpha) * c2 for c1, c2 in zip(color1, color2 ) ] )
+        
         # Create a nested ring chart
         nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
+        nuclide_colors = [ blend_colors(color, [1, 1, 1, 1], 0.8) for color in nuclide_colors ]
+
         nuclide_totals = { nuclide: sum(contribution.n for contribution in contributions[nuclide].values()) \
                         for nuclide in contributions }
-        nuclide_labels = list(nuclide_totals.keys())
+        
+        # Sort nuclides by absolute magnitude of their total contributions
+        nuclide_labels, nuclide_totals_sorted = zip(*sorted(nuclide_totals.items(), key=lambda x: abs(x[1]), reverse=True))
 
         # Now, deal with negative values
 
@@ -107,11 +116,8 @@ class _PiePlotter(_Plotter):
             
         # For nuclides with opposite sign contributions, we distinguish the positive and negative contributions
         # by coloring some of the inner ring a lighter color to indicate the negative contributions in the outer ring
-        wedge_widths = list(nuclide_totals.values())
+        wedge_widths = list(nuclide_totals_sorted)
         inner_wedge_hatches = [None] * len(wedge_widths)
-
-        def blend_colors(color1, color2, alpha):
-            return np.array( [ alpha * c1 + (1 - alpha) * c2 for c1, c2 in zip(color1, color2 ) ] )
 
         if len(nuclides_with_opposite_sign_contributions) > 0:
             for nuclide in nuclides_with_opposite_sign_contributions:
@@ -129,13 +135,14 @@ class _PiePlotter(_Plotter):
                 lost_wedge_width = absolute_sum_of_contributions - total_sign * nuclide_totals[nuclide]
 
                 # Now, insert the lost wedge width into the wedge widths list right after the nuclide
-                nuclide_index = list(nuclide_totals.keys()).index(nuclide)
+                nuclide_index = list(nuclide_labels).index(nuclide)
                 wedge_widths.insert(nuclide_index + 1, lost_wedge_width)
+                nuclide_labels = list(nuclide_labels)
                 nuclide_labels.insert(nuclide_index + 1, '')
                 
                 # The color of the lost wedge width will be a blend of the nuclide color and white
                 white_color = np.array([1, 1, 1, 1])
-                opacity = 0.8
+                opacity = 1.0
                 blended_color = blend_colors(white_color, nuclide_colors[nuclide_index], opacity)
                 nuclide_colors = np.insert(nuclide_colors, nuclide_index + 1, blended_color, axis=0)
                 
@@ -148,7 +155,7 @@ class _PiePlotter(_Plotter):
 
         # Plot the inner ring for nuclide totals
         inner_ring, _ = self._axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
-                                colors=nuclide_colors, labeldistance=0.3, textprops={'fontsize': 6}, \
+                                colors=nuclide_colors, labeldistance=0.4, textprops={'fontsize': 8}, \
                                     rotatelabels=True, wedgeprops=dict(width=0.4, edgecolor='w'))
 
         # Add hatches to the negative total sum wedges
@@ -162,9 +169,15 @@ class _PiePlotter(_Plotter):
         outer_sizes = []
         outer_hatches = []
         nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
-        for i, (nuclide, reactions) in enumerate(contributions.items()):
+        nuclide_colors = [ blend_colors(color, [1, 1, 1, 1], 0.8) for color in nuclide_colors ]
+        for i, nuclide in enumerate( [ nuclide_label for nuclide_label in nuclide_labels if nuclide_label != '' ] ):
             blended_color = blend_colors(nuclide_colors[i], [1, 1, 1, 1], 0.8)
-            for j, (reaction, contribution) in enumerate(list(reactions.items())):
+            
+            # Sort reactions by absolute magnitude of their contributions
+            reactions = contributions[nuclide]
+            sorted_reactions = sorted(reactions.items(), key=lambda x: abs(x[1].n), reverse=True)
+            
+            for j, (reaction, contribution) in enumerate(sorted_reactions):
                 outer_labels.append(reaction)
                 
                 outer_colors.append(blended_color)
@@ -176,7 +189,7 @@ class _PiePlotter(_Plotter):
                     outer_hatches.append(None)
 
         outer_ring, _ = self._axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.7, colors=outer_colors, \
-                textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=True, \
+                textprops={'fontsize': 8}, startangle=inner_ring[0].theta1, counterclock=True, \
                     rotatelabels=True, wedgeprops=dict(width=0.4, edgecolor='w'))
 
         # Add hatches to the negative contribution wedges
@@ -192,14 +205,14 @@ class _PiePlotter(_Plotter):
         contributions
             A dictionary of the form ``{nuclide: contribution}``, where contribution is a ``ufloat`` object representing the
             contribution of the nuclide to the integral index."""
-        labels = list(contributions.keys())
-        values = [abs(contributions[key].n) for key in labels]
-
+        labels, values = zip(*sorted(contributions.items(), key=lambda x: abs(x[1].n), reverse=True))
+        values = [values.n for values in values]
+        
         # Determining hatching patterns: empty string for positive, cross-hatch for negative
         hatches = ['//' if contributions[key].n < 0 else '' for key in labels]
 
-        # Creating the pie chart
-        wedges, _ = self._axs.pie(values, labels=labels, startangle=90, rotatelabels =True, textprops=self._textprops)
+        # Creating the pie chart  
+        wedges, _ = self._axs.pie(np.abs(values), labels=labels, startangle=90, rotatelabels =True, textprops=self._textprops)
 
         # Applying hatching patterns to the wedges
         for wedge, hatch in zip(wedges, hatches):
@@ -211,8 +224,7 @@ class _PiePlotter(_Plotter):
         else:
             title_text = f'Contributions to {self._index_name}'
         self._axs.grid(True, which='both', axis='y', color='gray', linestyle='-', linewidth=0.5)
-        self._axs.set_title(title_text, pad=50) # Pad set to avoid overlap with labels
-
+        self._axs.set_title(title_text, pad=80) # Pad set to avoid overlap with labels
 
 class _InteractivePiePlotter(_Plotter):
     """A class for creating interactive pie charts of contributions to integral indices."""
@@ -660,9 +672,12 @@ class InteractivePieLegend:
         sys.stderr = log
 
         port = _find_free_port()
-        if open_browser:
-            threading.Timer(1, self._open_browser(port)).start()
-        self._app.run(host='localhost', port=port)
+        if not config.generating_docs:
+            if open_browser:
+                threading.Timer(1, self._open_browser(port)).start()
+
+            
+            self._app.run(host='localhost', port=port)
 
     def serve(self):
         """Start the Flask server to display the interactive sunburst chart without a browser tab."""

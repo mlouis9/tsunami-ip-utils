@@ -246,8 +246,7 @@ def generate_heatmap_from_comparison(comparison_excel_path: Union[str, Path], ba
     unique_headers = comparison.columns.get_level_values(1).unique()
 
     plot_dict = {}
-    # Assuming `config` is a predefined dictionary that includes 'COMPARISON_HEATMAP_LABELS'
-    heatmap_labels = config['COMPARISON_HEATMAP_LABELS']
+    heatmap_labels = config.COMPARISON_HEATMAP_LABELS
 
     # Extract a separate 2D numpy array for each unique header in level 1
     for index, header in enumerate(unique_headers):
