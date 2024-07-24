@@ -7,6 +7,10 @@ from ._base_plotter import _Plotter
 import numpy as np
 from typing import Dict, Union, Tuple
 from uncertainties import ufloat
+from tsunami_ip_utils._utils import _isotope_reaction_list_to_nested_dict
+import matplotlib as mpl
+
+mpl.rcParams['hatch.linewidth'] = 0.25
 
 class _BarPlotter(_Plotter):
     """Class for creating bar plots of contributions to integral indices on a nuclide-wise and nuclide-reaction-wise basis."""
@@ -79,52 +83,46 @@ class _BarPlotter(_Plotter):
         self._axs.bar(contributions.keys(), [contribution.n for contribution in contributions.values()],
             yerr=[contribution.s for contribution in contributions.values()], capsize=5, error_kw={'elinewidth': 0.5})
 
-    def _nested_barchart(self, contributions):
-        """Create a bar chart of the contributions to the integral index on a nuclide-reaction-wise basis.
+    def _nested_barchart(self, contributions: Dict[str, Dict[str, ufloat]]):
+        """Create a bar chart of the contributions to the integral index on a nuclide-reaction-wise basis."""
+        # Collect all unique reactions across all nuclides
+        all_reactions = set()
+        for nuclide_reactions in contributions.values():
+            all_reactions.update(nuclide_reactions.keys())
+        all_reactions = sorted(all_reactions)
 
-        Parameters
-        ----------
-        contributions
-            A dictionary of the form ``{nuclide: {reaction: contribution}}``, where contribution is a ``ufloat`` object
-            representing the contribution of the nuclide to the integral index through the given reaction."""
-        
         # Colors for each reaction type
-        num_reactions = len(next(iter(contributions.values())))
-        cmap = plt.get_cmap('Set1')
-        colors = cmap(np.linspace(0, 1, num_reactions))
+        cmap = plt.get_cmap('rainbow')
+        colors = cmap(np.linspace(0, 1, len(all_reactions)))
 
         # Variables to hold the bar positions and labels
         indices = range(len(contributions))
         labels = list(contributions.keys())
 
         # Bottom offset for each stack
-        bottoms_pos = [0] * len(contributions)
-        bottoms_neg = [0] * len(contributions)
+        bottoms_pos = np.zeros(len(contributions))
+        bottoms_neg = np.zeros(len(contributions))
 
-        color_index = 0
-        for reaction in next(iter(contributions.values())).keys():
-            values = [contributions[nuclide][reaction].n for nuclide in contributions]
-            errs = [contributions[nuclide][reaction].s for nuclide in contributions]
-            # Stacking positive values
+        for reaction, color in zip(all_reactions, colors):
+            values = [(contributions[nuclide].get(reaction, ufloat(0, 0)).n if reaction in contributions[nuclide] else 0) for nuclide in contributions]
+            errs = [(contributions[nuclide].get(reaction, ufloat(0, 0)).s if reaction in contributions[nuclide] else 0) for nuclide in contributions]
             pos_values = [max(0, v) for v in values]
             neg_values = [min(0, v) for v in values]
-            self._axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=colors[color_index % len(colors)],
-                    yerr=errs, capsize=5, error_kw={'capthick': 0.5})
-            self._axs.bar(indices, neg_values, bottom=bottoms_neg, color=colors[color_index % len(colors)],
-                    yerr=errs, capsize=5, error_kw={'capthick': 0.5})
-            # Update the bottom positions
-            bottoms_pos = [bottoms_pos[i] + pos_values[i] for i in range(len(bottoms_pos))]
-            bottoms_neg = [bottoms_neg[i] + neg_values[i] for i in range(len(bottoms_neg))]
-            color_index += 1
+            self._axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=color,
+                          yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+            self._axs.bar(indices, neg_values, bottom=bottoms_neg, color=color,
+                          yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+            bottoms_pos += pos_values
+            bottoms_neg += neg_values
 
         # Adding 'effective' box with dashed border
         total_values = [sum(contributions[label][r].n for r in contributions[label]) for label in labels]
         for idx, val in zip(indices, total_values):
-            self._axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.5)
+            self._axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.25)
 
         self._axs.set_xticks(indices)
         self._axs.set_xticklabels(labels)
-        self._axs.legend()
+        self._axs.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize='small') 
 
     def _style(self):
         if self.plot_redundant and self.nested:

@@ -21,6 +21,8 @@ from matplotlib.axes import Axes
 import plotly
 from pathlib import Path
 
+plt.rcParams['hatch.linewidth'] = 0.6
+
 class _PiePlotter(_Plotter):
     """A class for creating static pie charts of contributions to integral indices."""
     _index_name: str
@@ -64,9 +66,10 @@ class _PiePlotter(_Plotter):
               through the given reaction.
         nested
             Wether the contributions are on a reaction-wise basis or not."""
+        
         self._nested = nested
         self._fig, self._axs = plt.subplots()
-        self._textprops = dict(va="center", rotation_mode = 'anchor', fontsize=8)
+        self._textprops = dict(va="center", rotation_mode = 'anchor', fontsize=6)
         if nested:
             self._nested_pie_chart(contributions)
         else:
@@ -89,7 +92,6 @@ class _PiePlotter(_Plotter):
             A dictionary of the form ``{nuclide: {reaction: contribution}}``, where contribution is a ``ufloat`` object
             representing the contribution of the nuclide to the integral index through the given reaction."""
         # Create a nested ring chart
-        num_reactions = len(next(iter(contributions.values())))
         nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
         nuclide_totals = { nuclide: sum(contribution.n for contribution in contributions[nuclide].values()) \
                         for nuclide in contributions }
@@ -146,27 +148,26 @@ class _PiePlotter(_Plotter):
 
         # Plot the inner ring for nuclide totals
         inner_ring, _ = self._axs.pie(wedge_widths, radius=0.7, labels=nuclide_labels, \
-                                colors=nuclide_colors, labeldistance=0.6, textprops={'fontsize': 8}, \
-                                    wedgeprops=dict(width=0.3, edgecolor='w'))
+                                colors=nuclide_colors, labeldistance=0.3, textprops={'fontsize': 6}, \
+                                    rotatelabels=True, wedgeprops=dict(width=0.4, edgecolor='w'))
 
         # Add hatches to the negative total sum wedges
         for wedge, hatch in zip(inner_ring, inner_wedge_hatches):
             if hatch:
                 wedge.set_hatch(hatch)
 
-        # Get colors for reactions from the "rainbow" colormap
-        reaction_colors = plt.get_cmap('Set1')(np.linspace(0, 1, num_reactions))
-
         # Plot the outer ring for reaction-specific contributions
         outer_labels = []
         outer_colors = []
         outer_sizes = []
         outer_hatches = []
+        nuclide_colors = plt.get_cmap('rainbow')(np.linspace(0, 1, len(contributions.keys())))
         for i, (nuclide, reactions) in enumerate(contributions.items()):
+            blended_color = blend_colors(nuclide_colors[i], [1, 1, 1, 1], 0.8)
             for j, (reaction, contribution) in enumerate(list(reactions.items())):
-                outer_labels.append(f"{nuclide} - {reaction}")
+                outer_labels.append(reaction)
                 
-                outer_colors.append(reaction_colors[j])
+                outer_colors.append(blended_color)
                 outer_sizes.append(np.abs(contribution.n))
                 
                 if contribution.n < 0:
@@ -174,9 +175,9 @@ class _PiePlotter(_Plotter):
                 else:
                     outer_hatches.append(None)
 
-        outer_ring, _ = self._axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.9, colors=outer_colors, \
-                textprops=self._textprops, startangle=inner_ring[0].theta1, counterclock=True, \
-                    rotatelabels =True, wedgeprops=dict(width=0.3, edgecolor='w'))
+        outer_ring, _ = self._axs.pie(outer_sizes, radius=1, labels=outer_labels, labeldistance=0.7, colors=outer_colors, \
+                textprops={'fontsize': 6}, startangle=inner_ring[0].theta1, counterclock=True, \
+                    rotatelabels=True, wedgeprops=dict(width=0.4, edgecolor='w'))
 
         # Add hatches to the negative contribution wedges
         for wedge, hatch in zip(outer_ring, outer_hatches):
