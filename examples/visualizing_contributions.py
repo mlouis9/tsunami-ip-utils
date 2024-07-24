@@ -48,3 +48,60 @@ plt.show()
 fig, axs = contribution_plot(contributions, plot_type='pie',integral_index_name='Δk/k')
 plt.tight_layout()
 plt.show()
+
+# %%
+# Interactive Pie Chart
+# ^^^^^^^^^^^^^^^^^^^^^
+# The contributions can also be plotted as an interactive plotly pie chart.
+
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='Δk/k', interactive_legend=False)
+fig.show()
+
+# %%
+# Interactive Pie Chart With Interactive Legend
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# The contributions can also be plotted as an interactive plotly pie chart with an interactive legend. This feature has
+# yet to be formally implemented in Plotly Express (although an issue is open `here <https://github.com/plotly/plotly.py/issues/4692>`_ ).
+
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='Δk/k', interactive_legend=True)
+fig.show()
+
+# %%
+# Reaction-Wise Contributions
+# ---------------------------
+# The isotope-reaction-wise contributions can be plotted similarly.
+
+# %%
+# Bar Chart
+# ^^^^^^^^^
+
+contributions = uncertainty_contributions_nuclide_reaction['application'][0]
+
+fig, axs = contribution_plot(contributions, plot_type='bar',integral_index_name='Δk/k')
+plt.tight_layout()
+plt.show()
+
+# %%
+# Pie Chart
+# ^^^^^^^^^
+
+fig, axs = contribution_plot(contributions, plot_type='pie',integral_index_name='Δk/k')
+plt.tight_layout()
+plt.show()
+
+# %%
+# Interactive Pie Chart
+# ^^^^^^^^^^^^^^^^^^^^^
+
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='Δk/k', interactive_legend=False)
+fig.show()
+
+# %%
+# Interactive Pie Chart With Interactive Legend
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='Δk/k', interactive_legend=True)
+fig.show()
+
+# %%
+# Test3

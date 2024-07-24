@@ -12,7 +12,7 @@ import pickle
 from paths import EXAMPLES
 
 # Create a list of application and experiment SDF files (same set of applications and experiments)
-applications = [ f"{EXAMPLES}/data/example_sdfs/sphere_model_{i}.sdf" for i in range(1, 3) ]
+applications = [ f"{EXAMPLES}/data/example_sdfs/HMF/HEU-MET-FAST-003-00{i}.sdf" for i in range(1, 3) ]
 experiments = applications
 data = E_calculation_comparison(applications, experiments)
 E_total_comparison = data['total']
@@ -58,6 +58,6 @@ for E_type in data.keys():
 
 # %%
 # References
-# ^^^^^^^^^^
+# ----------
 # .. [Bess2019] J. Bess, "International handbook of evaluated criticality safety benchmark experiments (ICSBEP)," 
 #   Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95) 3 (2019).
