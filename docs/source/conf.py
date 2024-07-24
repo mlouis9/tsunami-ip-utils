@@ -5,6 +5,8 @@ import inspect
 from sphinx_gallery.scrapers import figure_rst
 from pathlib import Path
 import uuid
+from tsunami_ip_utils import config
+config.generating_docs = True # This is necessary for generating documentation properly
 
 src_path = os.path.abspath('../../src')
 ext_path = os.path.abspath('./_ext')
@@ -63,6 +65,10 @@ def plotly_scraper(block, block_vars, gallery_conf):
 
     <iframe src="../_static/{plot_filename}" width="100%" height="500" frameborder="0"></iframe>
         """
+
+        # Now delete fig from global variables to avoid it overwriting the next plot
+        del block_vars['example_globals']['fig']
+
         return html_rst
 
     else:
