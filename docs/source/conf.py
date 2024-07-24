@@ -3,6 +3,8 @@ import logging
 from docutils.parsers.rst import Directive
 import inspect
 from sphinx_gallery.scrapers import figure_rst
+from pathlib import Path
+import uuid
 
 src_path = os.path.abspath('../../src')
 ext_path = os.path.abspath('./_ext')
@@ -26,6 +28,8 @@ release = '0.0.1'
 
 # -- Plotly Image Scraper -----------------------------------------------------
 def plotly_scraper(block, block_vars, gallery_conf):
+    output_dir = Path(__file__).parent / "_static"
+
     # Check if 'fig' is in the example_globals and if it can generate HTML
     fig = block_vars['example_globals'].get('fig', None)
     if fig and hasattr(fig, 'to_html'):
@@ -38,9 +42,32 @@ def plotly_scraper(block, block_vars, gallery_conf):
 
         """
         return html_rst
+    elif fig and hasattr(fig, 'write_html'):
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Create a unique filename for each plot HTML
+        plot_filename = f"plot_{uuid.uuid4()}.html"
+        plot_path = output_dir / plot_filename
+
+        html_output = fig.write_html()
+        indented_html = '\n    '.join(html_output.splitlines())
+        
+        # Write the HTML to a file
+        with open(plot_path, 'w') as file:
+            file.write(indented_html)
+
+        # Generate the RST snippet with an iframe
+        html_rst = f"""
+.. raw:: html
+
+    <iframe src="../_static/{plot_filename}" width="100%" height="500" frameborder="0"></iframe>
+        """
+        return html_rst
+
     else:
         # Handle cases where 'fig' is not available or does not have 'to_html'
-        print("No 'fig' found or 'fig' lacks 'to_html' method")
+        print("No 'fig' found or 'fig' lacks 'to_html' or 'write_html' methods")
         return ''
 
 # -- General configuration ---------------------------------------------------

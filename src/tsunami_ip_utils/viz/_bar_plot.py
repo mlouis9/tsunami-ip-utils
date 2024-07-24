@@ -16,7 +16,7 @@ class _BarPlotter(_Plotter):
     """The axes object for the plot."""
     _index_name: str
     """The name of the integral index being plotted."""
-    def __init__(self, integral_index_name: str, plot_redundant: bool=False):
+    def __init__(self, integral_index_name: str, plot_redundant: bool=False, **kwargs):
         """Initializes a bar plot of the contributions to the given integral index.
         
         Parameters
