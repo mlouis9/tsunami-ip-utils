@@ -3,7 +3,7 @@ Visualizing Contributions
 =========================
 
 This example illustrates the use of the various tools for visualizing contributions to a TSUNAMI-IP integral index (such as
-:math:`E`, or even contributions to :math:`\Delta k/k`). This example shows the visualization of :math:`\Delta k/k` contributions,
+:math:`E`, or even contributions to :math:`(\Delta k/k)^2`). This example shows the visualization of :math:`(\Delta k/k)^2` contributions,
 but the same tools can be used for visualizing contributions to :math:`E`.
 """
 

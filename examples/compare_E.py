@@ -1,6 +1,6 @@
 """
-Comparing Calculated E and TSUNAMI-IP E for a Set of SDF Files
-==============================================================
+Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files
+============================================================
 
 This example demonstrates the use of ``tsunami_ip_utils`` for calculating the similarity index :math:`E` for a set of TSUNAMI-IP 
 SDF files and comparing to the TSUNAMI-IP calculated value. This example uses a set of 12 SDF files generated from the highly 
