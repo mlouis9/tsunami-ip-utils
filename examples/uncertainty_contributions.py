@@ -79,4 +79,29 @@ print(uncertainty_contributions_nuclide['application'])
 print(uncertainty_contributions_nuclide['experiment'])
 
 # %%
-# Test
+# Variance Contributions
+# ----------------------
+# The contributions to the nuclear data induced variance can also be obtained by passing the ``variance=True`` argument to the
+# function. This will return the contributions to the variance, rather than the uncertainty.
+
+variance_contributions_nuclide, variance_contributions_nuclide_reaction = \
+      get_uncertainty_contributions(application_filenames, variance=True)
+
+print(variance_contributions_nuclide['application'])
+
+# %%
+# The variances are just the squares of the uncertainties, except when the are negative, in which case the variance is the
+# negative of the square of the uncertainty.
+
+variance_contribution = variance_contributions_nuclide['application'][0][0]['contribution']
+uncertainty_contribution = uncertainty_contributions_nuclide['application'][0][0]['contribution']
+squared_uncertainty = uncertainty_contribution**2 if uncertainty_contribution >= 0 else  -(uncertainty_contribution)**2
+
+print(variance_contribution, squared_uncertainty)
+assert ( variance_contribution.n == squared_uncertainty.n ) and ( variance_contribution.s == squared_uncertainty.s )
+
+# %%
+# Note that even though the variance contribution and the squared uncertainty contribution have the same nominal value
+# and standard deviation, they are not equal, i.e. ``variance_contribution == squared_uncertainty`` evaluates to ``False``. 
+# This is because the uncertainties are represented as :func:`uncertainties.ufloat` which represent distinct random variables, 
+# as discussed in `the uncertainties package documentation <https://pythonhosted.org/uncertainties/user_guide.html#comparison-operators>`_.

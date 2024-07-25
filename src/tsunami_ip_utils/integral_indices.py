@@ -437,10 +437,11 @@ def calculate_E_contributions(application_filenames: List[str], experiment_filen
 @_convert_paths
 def get_uncertainty_contributions(application_filenames: Optional[Union[ List[str], List[Path] ]]=None, 
                                   experiment_filenames: Optional[Union[ List[str], List[Path] ]]=None,
-                                   ) -> Tuple[ Dict[ str, List[unumpy.uarray] ], Dict[ str,  List[unumpy.uarray] ] ]:
+                                  variance: bool=False
+                                  ) -> Tuple[ Dict[ str, List[unumpy.uarray] ], Dict[ str,  List[unumpy.uarray] ] ]:
     """Read the contributions to the uncertainty in :math:`k_{\\text{eff}}` (i.e. :math:`\\frac{dk}{k}`) for each 
     application and each available experiment on a nuclide basis and on a nuclide-reaction basis from the
-    provided TSUNAMI-IP ``.out`` or ``.sdf`` files. =
+    provided TSUNAMI-IP ``.out`` or ``.sdf`` files.
 
     Parameters
     ----------
@@ -448,6 +449,8 @@ def get_uncertainty_contributions(application_filenames: Optional[Union[ List[st
         (Optional) Paths to the application output (``.out``) or ``.sdf`` files.
     experiment_filenames
         (Optional) Paths to the experiment output (``.out``) or ``.sdf`` files.
+    variance
+        If the contributions to the nuclear data induced variance should be returned, default is ``False``.
 
     Returns
     -------
@@ -518,5 +521,14 @@ def get_uncertainty_contributions(application_filenames: Optional[Union[ List[st
         for i, experiment_filename in enumerate(experiment_filenames):
             dk_over_k_nuclide_wise['experiment'][i], dk_over_k_nuclide_reaction_wise['experiment'][i] = \
                 read_uncertainty_contributions_out(experiment_filename)
+            
+    if variance:
+        for key in dk_over_k_nuclide_wise.keys():
+            # Now square all of the contributions for each system (application or experiment)
+            for contributions_list in [dk_over_k_nuclide_wise[key], dk_over_k_nuclide_reaction_wise[key]]:
+                for system in contributions_list:
+                    for nuclide_index, contribution_dict in enumerate(system):
+                        contribution = contribution_dict['contribution']
+                        system[nuclide_index]['contribution'] = (contribution)**2 if contribution > 0 else -(contribution)**2
             
     return dk_over_k_nuclide_wise, dk_over_k_nuclide_reaction_wise
