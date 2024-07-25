@@ -80,8 +80,13 @@ class _BarPlotter(_Plotter):
         contributions
             A dictionary of the form ``{nuclide: contribution}``, where contribution is a ``ufloat`` object representing the
             contribution of the nuclide to the integral index."""
-        self._axs.bar(contributions.keys(), [contribution.n for contribution in contributions.values()],
-            yerr=[contribution.s for contribution in contributions.values()], capsize=5, error_kw={'elinewidth': 0.5})
+        sorted_contributions = sorted(contributions.items(), key=lambda item: abs(item[1].n), reverse=True)
+        labels = [item[0] for item in sorted_contributions]
+        values = [item[1].n for item in sorted_contributions]
+        errors = [item[1].s for item in sorted_contributions]
+
+        self._axs.bar(labels, values, yerr=errors, capsize=5, error_kw={'elinewidth': 0.5})
+        self._axs.axhline(0, color='black', linewidth=0.8)  # Add a line at y=0 for clarity
 
     def _nested_barchart(self, contributions: Dict[str, Dict[str, ufloat]]):
         """Create a bar chart of the contributions to the integral index on a nuclide-reaction-wise basis."""
@@ -95,34 +100,39 @@ class _BarPlotter(_Plotter):
         cmap = plt.get_cmap('rainbow')
         colors = cmap(np.linspace(0, 1, len(all_reactions)))
 
+        # Calculate total values for each nuclide and sort the data
+        total_values = {label: sum(contributions[label][r].n for r in contributions[label]) for label in contributions}
+        sorted_data = sorted(total_values.items(), key=lambda x: abs(x[1]), reverse=True)
+        sorted_labels = [item[0] for item in sorted_data]
+        sorted_total_values = [item[1] for item in sorted_data]
+
         # Variables to hold the bar positions and labels
-        indices = range(len(contributions))
-        labels = list(contributions.keys())
+        indices = range(len(sorted_labels))
+        labels = sorted_labels
 
         # Bottom offset for each stack
-        bottoms_pos = np.zeros(len(contributions))
-        bottoms_neg = np.zeros(len(contributions))
+        bottoms_pos = np.zeros(len(sorted_labels))
+        bottoms_neg = np.zeros(len(sorted_labels))
 
         for reaction, color in zip(all_reactions, colors):
-            values = [(contributions[nuclide].get(reaction, ufloat(0, 0)).n if reaction in contributions[nuclide] else 0) for nuclide in contributions]
-            errs = [(contributions[nuclide].get(reaction, ufloat(0, 0)).s if reaction in contributions[nuclide] else 0) for nuclide in contributions]
+            values = [(contributions[nuclide].get(reaction, ufloat(0, 0)).n if reaction in contributions[nuclide] else 0) for nuclide in sorted_labels]
+            errs = [(contributions[nuclide].get(reaction, ufloat(0, 0)).s if reaction in contributions[nuclide] else 0) for nuclide in sorted_labels]
             pos_values = [max(0, v) for v in values]
             neg_values = [min(0, v) for v in values]
             self._axs.bar(indices, pos_values, label=reaction, bottom=bottoms_pos, color=color,
-                          yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+                        yerr=errs, capsize=5, error_kw={'capthick': 0.5})
             self._axs.bar(indices, neg_values, bottom=bottoms_neg, color=color,
-                          yerr=errs, capsize=5, error_kw={'capthick': 0.5})
+                        yerr=errs, capsize=5, error_kw={'capthick': 0.5})
             bottoms_pos += pos_values
             bottoms_neg += neg_values
 
         # Adding 'effective' box with dashed border
-        total_values = [sum(contributions[label][r].n for r in contributions[label]) for label in labels]
-        for idx, val in zip(indices, total_values):
+        for idx, val in zip(indices, sorted_total_values):
             self._axs.bar(idx, abs(val), bottom=0 if val > 0 else val, color='none', edgecolor='black', hatch='///', linewidth=0.25)
 
         self._axs.set_xticks(indices)
         self._axs.set_xticklabels(labels)
-        self._axs.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize='small') 
+        self._axs.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize='small')
 
     def _style(self):
         if self.plot_redundant and self.nested:
