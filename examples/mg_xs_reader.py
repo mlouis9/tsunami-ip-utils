@@ -34,6 +34,40 @@ print(out)
 
 # %%
 # This function is parallel, and reads cross section libraries on multiple cores, which can be useful for large libraries.
-# This function is not the most user-friendly, and requires teh user to input a nuclide_reaction_dict in terms of nuclide
-# ZAID and reaction MT numbers. This function is primarily used by the :mod:`tsunami_ip_utils.perturbations` module for
+# This function isn't the most user-friendly, and requires the user to input a nuclide_reaction_dict in terms of nuclide
+# ZAID and reaction MT numbers, but it is primarily used by the :mod:`tsunami_ip_utils.perturbations` module for
 # reading cross sections for perturbation calculations.
+
+# %%
+# Caching a Multigroup Cross Section Library
+# ------------------------------------------
+# If working with python-based applications that deal with SCALE multigroup cross section data, it may be useful to cache the
+# cross section libary in a convenient format for reading into python, like a ``.pkl`` file. To avoid having to manually supply
+# the list of all nuclides and reactions in the multigroup library, the :func:`tsunami_ip_utils.xs.read_multigroup_xs` function
+# can be run with the ``return_available_nuclide_reactions`` flag set to ``True``. This will return a dictionary of all nuclides
+# and reactions in the library, which can then be used to read the library and cache it.
+
+out, available_nuclide_reactions = read_multigroup_xs(
+    multigroup_library_path, 
+    nuclide_reaction_dict, 
+    return_available_nuclide_reactions=True
+)
+print(available_nuclide_reactions)
+
+# %%
+# The list of all available nuclide reactions can then be supplied to the function to read the entire library.
+
+out = read_multigroup_xs(multigroup_library_path, available_nuclide_reactions)
+
+# %%
+# And the cross sections can be easily cached
+
+import pickle
+
+with open(EXAMPLES / 'data' / 'dummy_52_v7.1.pkl', 'wb') as f:
+    pickle.dump(out, f)
+
+# Now compare the dump to the gold standard
+import filecmp
+
+assert filecmp.cmp(EXAMPLES / 'data' / 'dummy_52_v7.1.pkl', EXAMPLES / 'gold' / 'dummy_52_v7.1.pkl')

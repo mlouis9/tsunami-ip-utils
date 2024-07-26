@@ -200,10 +200,17 @@ def _parse_from_total_library(filename: Union[str, Path], **kwargs: dict
         # Now record all available nuclide reactions
         if nuclide not in all_nuclide_reactions:
             all_nuclide_reactions[nuclide] = []
-        all_nuclide_reactions[nuclide].append(reaction)
+        
+        duplicate_reaction = False
+        if reaction != '0':
+            if reaction in all_nuclide_reactions[nuclide]:
+                duplicate_reaction = True # Not sure why these occur
+            else:
+                all_nuclide_reactions[nuclide].append(reaction)
 
         # Check if the nuclide and reaction are in the nuclide_reaction_dict
-        if nuclide in nuclide_reaction_dict and reaction in nuclide_reaction_dict[nuclide]:
+        nuclide_reaction_is_requested = nuclide in nuclide_reaction_dict and reaction in nuclide_reaction_dict[nuclide]
+        if nuclide_reaction_is_requested and not duplicate_reaction:
             xs_data_match = xs_data_pattern.search(data, header_end)
             if xs_data_match:
                 xs_data_text = xs_data_match.group(1)
