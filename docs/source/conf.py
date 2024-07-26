@@ -94,6 +94,8 @@ extensions = [
 intersphinx_mapping = {
     'tsunami_ip_utils': ('https://tsunami-ip-utils.readthedocs.io/en/latest', None),
     'uncertainties': ('https://uncertainties.readthedocs.io/en/latest/', None),
+    'pathlib': ('https://pathlib.readthedocs.io/en/pep428', None),
+    'numpy': ('https://numpy.org/devdocs', None)
 }
 
 sphinx_gallery_conf = {
