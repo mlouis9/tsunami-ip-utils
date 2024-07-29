@@ -35,6 +35,7 @@ import typing
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from pathlib import Path
+import plotly.io as pio
 
 def _replace_spearman_and_pearson(text: str, new_pearson: float, new_spearman: float) -> str:
     """Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful
@@ -827,7 +828,7 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
 
         return instance
 
-    def write_html(self, filename: Union[str, Path]) -> None:
+    def write_html(self, filename: typing.Optional[Union[str, Path]]=None) -> Union[None, str]:
         """Save the current state of the interactive scatter plot to an HTML file. This method saves the current state of the
         interactive scatter plot to an HTML file that can be viewed in a web browser.
 
@@ -842,4 +843,7 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
         the plot. The interactivity will not be preserved in the saved HTML file."""
         
         # Utilize Plotly's write_html to save the current state of the figure
-        self.fig.write_html(filename)
+        if filename is not None:
+            self.fig.write_html(filename)
+        else:
+            return pio.to_html(self.fig, full_html=True)

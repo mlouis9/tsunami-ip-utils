@@ -22,8 +22,13 @@ import threading
 from .plot_utils import _find_free_port
 import pickle
 import tsunami_ip_utils
-from typing import Union, List
+from typing import Union, List, Optional
 import tsunami_ip_utils.config as config
+import time, requests
+import signal
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import multiprocessing
 
 # Style constants
 GRAPH_STYLE = {
@@ -38,7 +43,8 @@ GRAPH_STYLE = {
 }
 
 def _create_app(external_stylesheets):
-    return dash.Dash(__name__, external_stylesheets=external_stylesheets)
+    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+    return app
 
 def _create_column_headers(num_cols: int) -> None:
     """Create column headers for the matrix plot. Each column header is a div element with the text 'Application i' where i is
@@ -285,7 +291,82 @@ class InteractiveMatrixPlot:
                         plot_objects_array[i,j] = InteractivePieLegend.load_state(data_dict=plot_object)
 
         return _interactive_matrix_plot(plot_objects_array)
-    
+
+    def write_html(self, filename: Optional[Union[str, Path]]=None) -> None:
+        """Write the HTML content of the interactive matrix plot to a file.
+
+        Parameters
+        ----------
+        filename
+            Name of the HTML file to write the content to. The file extension should be `'.html'`.
+        """
+        # Create a new Dash app instance
+        app = _create_app(external_stylesheets=[])
+
+        num_rows = self._plot_objects_array.shape[0]
+        num_cols = self._plot_objects_array.shape[1]
+
+        column_headers = _create_column_headers(num_cols)
+        header_row = html.Div([html.Div('', style={'flex': 'none', 'width': '71px', 'borderBottom': '1px solid black'})] + column_headers, style={'display': 'flex'})
+
+        rows = [header_row]
+        for i in range(num_rows):
+            row = [_create_row_label(i)]
+            for j in range(num_cols):
+                plot_object = self._plot_objects_array[i, j]
+                if isinstance(plot_object, InteractiveScatterLegend):
+                    plot_element = html.Iframe(srcDoc=plot_object.write_html(), style=GRAPH_STYLE)
+                elif isinstance(plot_object, InteractivePieLegend):
+                    plot_element = html.Iframe(srcDoc=plot_object.write_html(), style=GRAPH_STYLE)
+                else:
+                    plot_element = html.Div('Plot not available', style=GRAPH_STYLE)
+                row.append(plot_element)
+            rows.append(html.Div(row, style={'display': 'flex'}))
+
+        _generate_layout(app, rows)
+
+        port = _find_free_port()
+        def run_app():
+            log = open(os.devnull, 'w')
+            sys.stdout = log
+            sys.stderr = log
+            app.run_server('localhost', port, debug=False)
+
+        # Start the app in a separate thread
+        process = multiprocessing.Process(target=run_app)
+        process.start()
+
+        # Set up a headless Chrome browser using Selenium
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+        driver = webdriver.Chrome(options=chrome_options)
+
+        try:
+            # Load the Dash app in the headless browser
+            driver.get(f"http://localhost:{port}")
+
+            # Wait for the app to finish loading (you can adjust the sleep time if needed)
+            time.sleep(1)
+
+            # Capture the fully rendered HTML content
+            html_content = driver.page_source
+
+            # Write the HTML content to the specified file
+            if filename is not None:
+                with open(filename, "w") as file:
+                    file.write(html_content)
+            else:
+                return html_content
+
+        finally:
+            # Quit the headless browser
+            driver.quit()
+
+            # Stop the Dash server
+            requests.post(f"http://localhost:{port}/shutdown")
+            process.terminate()
+            process.join()
+
 
 def load_interactive_matrix_plot(filename):
     """Loads an interactive matrix plot from a saved state pickle file. This function is purely for convenience and is a
@@ -312,6 +393,11 @@ def _interactive_matrix_plot(plot_objects_array: np.ndarray) -> InteractiveMatri
     current_directory = Path(__file__).parent
     external_stylesheets = [str(current_directory / 'css' / 'matrix_plot.css')]
     app = _create_app(external_stylesheets)
+    @app.server.route('/shutdown', methods=['POST'])
+    def shutdown():
+        """Function to shutdown the server"""
+        os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
+        return 'Server shutting down...'
 
     num_rows = plot_objects_array.shape[0]
     num_cols = plot_objects_array.shape[1]
