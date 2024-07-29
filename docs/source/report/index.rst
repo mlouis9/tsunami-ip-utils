@@ -6,10 +6,6 @@ Investigation of Correlation Methods for use in Criticality Safety
 :Author: Alex Lang
 :Author: Walid Metwally
 
-.. role:: raw-latex(raw)
-   :format: latex
-..
-
 Background
 ==========
 
@@ -753,6 +749,8 @@ experiment application pair, the sensitivity data files are read,
 then the dot product is taken with a (cached) sampled perturbed
 cross-section library to generate each point in the correlation plot, as
 shown in Eq. :eq:`eq-variable-definition`.
+
+.. _manual-final-results:
 
 Results
 -------

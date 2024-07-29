@@ -1,0 +1,1 @@
+NOTE that the u235-dummy SDFS were created using the dummy 56 group cross section library, and are not intended for production use.
