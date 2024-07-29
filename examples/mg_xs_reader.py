@@ -9,7 +9,7 @@ for creating text dumps of COVERX formatted libraries. More details are given he
 # %%
 # A Disclaimer
 # ------------
-# The COVERX formatted cross section library referenced in this example ``dummy_52_v7.1`` was created with AMPX using ExSite
+# The COVERX formatted cross section library referenced in this example ``dummy_56_v7.1`` was created with AMPX using ExSite
 # and publicly available cross section data from `ENDF VII.1 <https://www.nndc.bnl.gov/endf-b7.1/download.html>`_.
 # This library is **NOT** intended for use in simulations, and only contains a small subset of nuclides and reactions. This
 # library is included purely for demonstration purposes, and when using functionality in this package that requires nuclear
@@ -28,9 +28,9 @@ from tsunami_ip_utils.xs import read_multigroup_xs
 from paths import EXAMPLES
 
 nuclide_reaction_dict = {'92235': ['1', '18'], '5011': ['1', '27'], '94239': ['1', '18']}
-multigroup_library_path = EXAMPLES / 'data' / 'dummy_52_v7.1'
+multigroup_library_path = EXAMPLES / 'data' / 'dummy_56_v7.1'
 out = read_multigroup_xs(multigroup_library_path, nuclide_reaction_dict)
-print(out)
+print(len(out['92235']['1']))
 
 # %%
 # This function is parallel, and reads cross section libraries on multiple cores, which can be useful for large libraries.
@@ -64,10 +64,18 @@ out = read_multigroup_xs(multigroup_library_path, available_nuclide_reactions)
 
 import pickle
 
-with open(EXAMPLES / 'data' / 'dummy_52_v7.1.pkl', 'wb') as f:
+with open(EXAMPLES / 'data' / 'dummy_56_v7.1.pkl', 'wb') as f:
     pickle.dump(out, f)
 
 # Now compare the dump to the gold standard
 import filecmp
 
-assert filecmp.cmp(EXAMPLES / 'data' / 'dummy_52_v7.1.pkl', EXAMPLES / 'gold' / 'dummy_52_v7.1.pkl')
+assert filecmp.cmp(EXAMPLES / 'data' / 'dummy_56_v7.1.pkl', EXAMPLES / 'gold' / 'dummy_56_v7.1.pkl')
+
+# %%
+# A Future Improvement
+# ---------------------
+# It is unfortunate that to cache a cross section library, the library must be read twice (the most consuming part is making
+# the text dump again). This is a limitation of the current implementation, and may be improved in the future. To avoid this,
+# the text dump just needs to be saved so that it can be read by the second function call. This could all be implemented by
+# adding an additional flag to the :func:`tsunami_ip_utils.xs.read_multigroup_xs` that does this under the hood.

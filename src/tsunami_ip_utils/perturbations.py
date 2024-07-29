@@ -20,6 +20,7 @@ from tqdm.contrib.concurrent import process_map
 from typing import List, Tuple, Dict, Union
 from tsunami_ip_utils import config
 from numpy.typing import ArrayLike
+from tsunami_ip_utils.config import cache_dir
 
 # Number of xs perturbation samples available in SCALE
 NUM_SAMPLES = config.NUM_SAMPLES
@@ -212,7 +213,6 @@ def generate_points(application_path: Union[Path, List[Path]], experiment_path: 
     all_nuclide_reactions.update(experiment_nuclide_reactions)
 
     # Make a directory to store all cached cross section libraries if it doesn't already exist
-    cache_dir = Path.home() / ".tsunami_ip_utils_cache"
     if not cache_dir.exists():
         os.mkdir(cache_dir)
 
@@ -357,7 +357,6 @@ def cache_all_libraries(base_library: Path, perturbation_factors: Path, reset_ca
     all_nuclide_reactions = { '92235': ['18'] } # u-235 fission
 
     # Make a directory to store all cached cross section libraries if it doesn't already exist
-    cache_dir = Path.home() / ".tsunami_ip_utils_cache"
     if not cache_dir.exists():
         os.mkdir(cache_dir)
 

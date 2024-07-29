@@ -6,7 +6,9 @@ from sphinx_gallery.scrapers import figure_rst
 from pathlib import Path
 import uuid
 from tsunami_ip_utils import config
+
 config.generating_docs = True # This is necessary for generating documentation properly
+config.cache_dir = Path(__file__).parent / '..' / '..' / 'examples' / 'data' / 'cached_xs_data'
 
 src_path = os.path.abspath('../../src')
 ext_path = os.path.abspath('./_ext')

@@ -1,4 +1,5 @@
 """A package level configuration module."""
+from pathlib import Path
 
 NUM_SAMPLES = 1000
 """Number of cross section perturbation factors available in SCALE."""
@@ -28,3 +29,7 @@ COMPARISON_HEATMAP_LABELS = {
 generating_docs = False
 """Whether or not to kill interactive legend (flask/dash applications) plots after a short amount of time. This is
 not intended for use by users, but is necessary for generating documentation properly."""
+
+cache_dir = Path("~/.tsunami_ip_utils_cache").expanduser()
+"""Directory to store cached cross section libraries and perturbations. This is also where the package will look for already cached
+data, so be sure it corresponds with where your cached data actually is, if you have manually changed this."""

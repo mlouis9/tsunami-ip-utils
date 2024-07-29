@@ -38,7 +38,7 @@ clean:
 	@echo "Cleaning up build directories..."
 	rm -r "$(BUILDDIR)"
 	rm -r "$(SOURCEDIR)/auto_examples"
-	rm -r "$(SOURCEDIR)/_static"
+	rm "$(SOURCEDIR)/_static/"*
 	@echo "Clean-up done."
 
 
