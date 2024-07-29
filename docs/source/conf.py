@@ -91,6 +91,18 @@ extensions = [
     'globalparam',                 # Custom extension for global parameters
     'sphinx_gallery.gen_gallery',  # Generate gallery of examples
     'sphinx.ext.intersphinx',      # Link to other projects' documentation
+    'sphinxcontrib.pdfembed',      # Embed PDFs in the documentation
+]
+
+mathjax3_config = {
+    'TeX': {
+        'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True},
+    },
+    'extensions': ['tex2jax.js'],
+}
+
+html_css_files = [
+    'css/custom.css',
 ]
 
 intersphinx_mapping = {

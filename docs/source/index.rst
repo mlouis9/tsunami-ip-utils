@@ -14,6 +14,7 @@ Welcome to tsunami_ip_utils's documentation!
    Private API <private_api/index>
    Paths <paths>
    Examples <auto_examples/index>
+   Report <report/index>
 
 Indices and tables
 ==================
