@@ -95,10 +95,13 @@ extensions = [
 ]
 
 mathjax3_config = {
-    'TeX': {
-        'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True},
+    "TeX": {
+        "extensions": ["AMSmath.js", "AMSsymbols.js"],
+        "equationNumbers": {
+            "autoNumber": "AMS",
+            "useLabelIds": True,
+        },
     },
-    'extensions': ['tex2jax.js'],
 }
 
 html_css_files = [
@@ -127,6 +130,8 @@ autodoc_default_options = {
     'inherited-members': True,
     'exclude-members': '__class__',
 }
+
+numfig = True # Figure numbering
 
 templates_path = ['_templates']
 exclude_patterns = []

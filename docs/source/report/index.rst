@@ -131,7 +131,7 @@ factor to ensure that if :math:`\boldsymbol{S}_A=\boldsymbol{S}_B` when
 :math:`c_k=1`, and if :math:`\boldsymbol{S}_A=-\boldsymbol{S}_B`, then
 :math:`c_k=-1`. This definition is aesthetically similar to that of
 Pearson’s correlation coefficient between two random variables :math:`X`
-and :math:`Y`, as in Eq. (`[eq-pearson] <#eq-pearson>`__). The only
+and :math:`Y`, as in Eq. :eq:`eq-pearson`. The only
 caveat is that the nuclear data covariance matrices can sometimes be
 problematic:raw-latex:`\cite{osti_950002}` and lead to nonphysical
 results unless certain heuristic rules are applied (i.e., those in the
@@ -276,7 +276,7 @@ coefficient of the rank variables. Explicitly,
 
 For a discrete sample, the data-points :math:`x_i` and :math:`y_i` are
 first ranked (i.e., sorted by magnitude), and then Eq.
-(`[eq-sample-pearson] <#eq-sample-pearson>`__) is used to compute the
+:eq:`eq-sample-pearson` is used to compute the
 sample Spearman correlation coefficient. This measure of correlation is
 nonparametric, and it assesses the presence of *any* relationship
 between two variables that can be expressed in terms of a monotonic
@@ -307,12 +307,12 @@ The total nuclear data–induced variance in the criticality eigenvalue
 :math:`\sigma_k^2` for a system A is given by
 
 .. math::
-
-   \begin{split}:label: eq-sigmaksq
+   :label: eq-sigmaksq
 
    \label{eq-sigmaksq}
-           \sigma_k^2 = \boldsymbol{S}_A \boldsymbol{C}_{\alpha,\alpha}\boldsymbol{S}_A^T\nonumber
-       \end{split}.
+   \begin{split}
+        \sigma_k^2 = \boldsymbol{S}_A \boldsymbol{C}_{\alpha,\alpha}\boldsymbol{S}_A^T\nonumber
+    \end{split}.
 
 The total nuclear data induced variance can be divided into
 contributions from each cross-section covariance via
@@ -432,15 +432,15 @@ workflows.:raw-latex:`\cite{dabbas2021interactive}`
 Isotope-Wise
 ~~~~~~~~~~~~
 
-An example of the isotope-wise contribution plots is shown in Fig.
-`1 <#fig-isotope-wise-hmf-example>`__. In general, an imperfect
+An example of the isotope-wise contribution plots is shown in
+:numref:`fig-isotope-wise-hmf-example`. In general, an imperfect
 correspondence with the calculated correlation coefficient and the
 TSUNAMI-IP :math:`c_k` value was observed. A subset of experiments from
 the Verified, Archived Library of Inputs and Data (VALID) in the mixed
 U/Pu thermal compound (MCT) and the highly enriched uranium fast metal
-(HMF) series were analyzed; the results are shown in Figs.
-`1 <#fig-isotope-wise-hmf-example>`__ and
-`[fig-isotope-wise-mct-comparison] <#fig-isotope-wise-mct-comparison>`__,
+(HMF) series were analyzed; the results are shown in
+:numref:`fig-isotope-wise-hmf-comparison` and
+:numref:`fig-isotope-wise-mct-comparison`,
 indicating good agreement for cases with large :math:`c_k`.
 
 .. figure:: media/isotope_wise_HMF_example.png
@@ -450,46 +450,73 @@ indicating good agreement for cases with large :math:`c_k`.
    An isotope-wise Plotly correlation plot between an experiment and
    application taken from the HMF series of critical experiments
 
-.. figure:: media/isotope_wise_HMF_calculated.png
-   :alt: Calculated
+.. -----------------------------------------------------------------------------------------------------------------------
+.. Subfigure
+.. -----------------------------------------------------------------------------------------------------------------------
 
-   Calculated
+.. raw:: html
 
-.. figure:: media/isotope_wise_HMF_tsunami_ip.png
-   :alt: TSUNAMI-IP
+   <div class="figures-container">
+       <div class="figure">
+           <img src="../_static/media/isotope_wise_HMF_calculated.png" alt="Calculated">
+           <figcaption>Calculated</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_wise_HMF_tsunami_ip.png" alt="TSUNAMI-IP">
+           <figcaption>TSUNAMI-IP</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_wise_HMF_percent_diff.png" alt="Percent Difference">
+           <figcaption>Percent Difference</figcaption>
+       </div>
+    </div>
+.. figure:: /_static/transparent.jpg
+   :name: fig-isotope-wise-hmf-comparison
 
-   TSUNAMI-IP
+   Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the HMF series of 
+   critical experiments :raw-latex:`\cite{bess2019international}`
 
-.. figure:: media/isotope_wise_HMF_percent_diff.png
-   :alt: Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
 
-   Percent Difference
 
-.. figure:: media/isotope_wise_MCT_calculated.png
-   :alt: Calculated
+.. -----------------------------------------------------------------------------------------------------------------------
+.. Subfigure
+.. -----------------------------------------------------------------------------------------------------------------------
 
-   Calculated
+.. raw:: html
 
-.. figure:: media/isotope_wise_MCT_tsunami_ip.png
-   :alt: TSUNAMI-IP
+   <div class="figures-container">
+       <div class="figure">
+           <img src="../_static/media/isotope_wise_MCT_calculated.png" alt="Calculated">
+           <figcaption>Calculated</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_wise_MCT_tsunami_ip.png" alt="TSUNAMI-IP">
+           <figcaption>TSUNAMI-IP</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_wise_MCT_percent_diff.png" alt="Percent Difference">
+           <figcaption>Percent Difference</figcaption>
+       </div>
+    </div>
+.. figure:: /_static/transparent.jpg
+   :name: fig-isotope-wise-mct-comparison
 
-   TSUNAMI-IP
+   Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the MCT series of 
+   critical experiments :raw-latex:`\cite{bess2019international}`
 
-.. figure:: media/isotope_wise_MCT_percent_diff.png
-   :alt: Percent Difference
-
-   Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
 
 Isotope-Reaction–Wise
 ~~~~~~~~~~~~~~~~~~~~~
 
-For reactions, the contribution correlation plots are as shown in Fig.
-`2 <#fig-isotope-reaction-wise-hmf-example>`__. Again, several test
+For reactions, the contribution correlation plots are as shown in 
+:numref:`fig-isotope-reaction-wise-hmf-example`. Again, several test
 cases were analyzed, and the results showing the difference in the
-calculated and TSUNAMI-IP :math:`c_k` values are shown in Figs.
-`[fig-isotope-reaction-wise-hmf-comparison] <#fig-isotope-reaction-wise-hmf-comparison>`__
+calculated and TSUNAMI-IP :math:`c_k` values are shown in 
+:numref:`fig-isotope-reaction-wise-hmf-comparison`
 and
-`[fig-isotope-reaction-wise-mct-comparison] <#fig-isotope-reaction-wise-mct-comparison>`__.
+:numref:`fig-isotope-reaction-wise-mct-comparison`.
 The results show good agreement except for the HMF cases, in which the
 errors are as large as 20%, and are not generally correlated with
 smaller :math:`c_k`.
@@ -501,35 +528,61 @@ smaller :math:`c_k`.
    A Reaction–wise Plotly correlation plot between an experiment and
    application taken from the HMF series of critical experiments
 
-.. figure:: media/isotope_reaction_wise_HMF_calculated.png
-   :alt: Calculated
+.. -----------------------------------------------------------------------------------------------------------------------
+.. Subfigure
+.. -----------------------------------------------------------------------------------------------------------------------
 
-   Calculated
+.. raw:: html
 
-.. figure:: media/isotope_reaction_wise_HMF_tsunami_ip.png
-   :alt: TSUNAMI-IP
+   <div class="figures-container">
+       <div class="figure">
+           <img src="../_static/media/isotope_reaction_wise_HMF_calculated.png" alt="Calculated">
+           <figcaption>Calculated</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_reaction_wise_HMF_tsunami_ip.png" alt="TSUNAMI-IP">
+           <figcaption>TSUNAMI-IP</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_reaction_wise_HMF_percent_diff.png" alt="Percent Difference">
+           <figcaption>Percent Difference</figcaption>
+       </div>
+    </div>
+.. figure:: /_static/transparent.jpg
+   :name: fig-isotope-reaction-wise-hmf-comparison
 
-   TSUNAMI-IP
+   Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the HMF series of 
+   critical experiments :raw-latex:`\cite{bess2019international}`
 
-.. figure:: media/isotope_reaction_wise_HMF_percent_diff.png
-   :alt: Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
 
-   Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
+.. Subfigure
+.. -----------------------------------------------------------------------------------------------------------------------
 
-.. figure:: media/isotope_reaction_wise_MCT_calculated.png
-   :alt: Calculated
+.. raw:: html
 
-   Calculated
+   <div class="figures-container">
+       <div class="figure">
+           <img src="../_static/media/isotope_reaction_wise_MCT_calculated.png" alt="Calculated">
+           <figcaption>Calculated</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_reaction_wise_MCT_tsunami_ip.png" alt="TSUNAMI-IP">
+           <figcaption>TSUNAMI-IP</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/isotope_reaction_wise_MCT_percent_diff.png" alt="Percent Difference">
+           <figcaption>Percent Difference</figcaption>
+       </div>
+    </div>
+.. figure:: /_static/transparent.jpg
+   :name: fig-isotope-reaction-wise-mct-comparison
 
-.. figure:: media/isotope_reaction_wise_MCT_tsunami_ip.png
-   :alt: TSUNAMI-IP
+   Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the MCT series of 
+   critical experiments :raw-latex:`\cite{bess2019international}`
 
-   TSUNAMI-IP
-
-.. figure:: media/isotope_reaction_wise_MCT_percent_diff.png
-   :alt: Percent Difference
-
-   Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
 
 Consistent Random Variables
 ===========================
@@ -537,7 +590,7 @@ Consistent Random Variables
 To find a method that better agrees with the calculated :math:`c_k`
 value, a set of consistent random variables was selected with a
 correlation coefficient calculated with Eq.
-(`[eq-pearson] <#eq-pearson>`__). One identified pair is given below:
+:eq:`eq-pearson`. One identified pair is given below:
 
 .. math::
    :label: eq-variable-definition
@@ -553,18 +606,18 @@ representing the underlying nuclear data *treated as a random variable*,
 and :math:`\boldsymbol{S}_A` and :math:`\boldsymbol{S}_B` are row
 vectors containing the nuclide reaction and group-wise sensitivities for
 systems :math:`A` and :math:`B`. Defining random variables in this way
-does not require Eq. (`[eq-sample-pearson] <#eq-sample-pearson>`__)
+does not require Eq. :eq:`eq-sample-pearson`
 because the underlying random variables are known, and Eq.
-(`[eq-pearson] <#eq-pearson>`__) can be used instead. This way, the
+:eq:`eq-pearson` can be used instead. This way, the
 formula for the correlation coefficient does not explicitly depend on
 the sample size :math:`N` as in the previous case. First note that
 
 .. math::
 
    \begin{split}
-           \text{Var}\left(X\right) &= \text{Var}\left(\sum_{i=1}^NS_{A,i}\sigma_i\right)\nonumber\\
-           &= \sum_{i,j=1}^NS_{A,i}S_{A,j}\text{Cov}\left(\sigma_i, \sigma_j\right)\hspace{5mm}\text{by Eq. (}\eqref{eq-variance-linear-combination}\text{)}
-       \end{split}.
+       \text{Var}\left(X\right) &= \text{Var}\left(\sum_{i=1}^N S_{A,i} \sigma_i\right)\nonumber\\
+       &= \sum_{i,j=1}^N S_{A,i} S_{A,j} \text{Cov}\left(\sigma_i, \sigma_j\right)\hspace{5mm}\text{by Eq.}~\eqref{eq-variance-linear-combination}
+   \end{split}
 
 Now, because :math:`\sigma_i` and :math:`\sigma_j` represent the
 group-wise cross section for a given nuclide reaction pair treated as a
@@ -605,7 +658,7 @@ and
        \end{split}
 
 Substituting the above expressions into Eq.
-(`[eq-pearson] <#eq-pearson>`__) gives
+:eq:`eq-pearson` gives
 
 .. math::
 
@@ -620,7 +673,7 @@ Relation to the Bias
 
 Note that the variance and covariance of a random variable are invariant
 to constant shifts, as shown in Eq.
-(`[eq-shift-property-variance] <#eq-shift-property-variance>`__), so the
+:eq:`eq-shift-property-variance`, so the
 following pairs of random variables have the same correlation
 coefficient:
 
@@ -684,7 +737,7 @@ Implementation
 To compute the correlation coefficient using the two random variables
 defined above, it is necessary to sample from them and then compute the
 sample Pearson correlation coefficient given in Eq.
-(`[eq-sample-pearson] <#eq-sample-pearson>`__). SCALE’s sampler utility
+:eq:`eq-sample-pearson`. SCALE’s sampler utility
 has the capability to randomly sample cross sections consistent with a
 specified nuclear data and nuclear data covariance library. This utility
 reads a set of statically generated cross-section perturbation factors
@@ -699,22 +752,22 @@ experiment application pair, the sensitivity data files are read,
 :math:`\boldsymbol{S}_A` and :math:`\boldsymbol{S}_B` are generated, and
 then the dot product is taken with a (cached) sampled perturbed
 cross-section library to generate each point in the correlation plot, as
-shown in Eq. (`[eq-variable-definition] <#eq-variable-definition>`__).
+shown in Eq. :eq:`eq-variable-definition`.
 
 Results
 -------
 
-An example plot is presented in Fig. `3 <#fig-perturbation-example>`__,
+An example plot is presented in :numref:`fig-perturbation-example`,
 showing near-agreement between the calculated and TSUNAMI-IP values. As
 before, the errors were calculated for a set of experiments, and the
-results are shown in Figs.
-`[fig-perturbation-mct-comparison] <#fig-perturbation-mct-comparison>`__
+results are shown in
+:numref:`fig-perturbation-mct-comparison`
 and
-`[fig-perturbation-hmf-comparison] <#fig-perturbation-hmf-comparison>`__.
+:numref:`fig-perturbation-hmf-comparison`.
 Despite the clean theoretical derivation in the previous section, the
 errors are *very* large (for the MCT cases, as high as 100%). The
 calculated errors are much larger than the sample standard deviation
-calculated by Eq. (`[eq-pearson-stddev] <#eq-pearson-stddev>`__). For
+calculated by Eq. :eq:`eq-pearson-stddev`. For
 :math:`N=500` and :math:`\rho=0.8` (smaller :math:`\rho` implies larger
 uncertainty, so :math:`\rho=0.8` is conservative),
 :math:`\sigma_r\approx 0.016`, which implies a 2\ :math:`\sigma` percent
@@ -722,43 +775,69 @@ difference of :math:`\sim 4\%`, which is much smaller than the observed
 errors.
 
 .. figure:: media/perturbation_HMF_example.png
-   :alt: A correlation plot generated using the variables defined in Eq. (`[eq-variable-definition] <#eq-variable-definition>`__) for a given experiment application pair from the HMF series of critical experiments
+   :alt: A correlation plot generated using the variables defined in Eq. :eq:`eq-variable-definition` for a given experiment application pair from the HMF series of critical experiments
    :name: fig-perturbation-example
 
    A correlation plot generated using the variables defined in Eq.
-   (`[eq-variable-definition] <#eq-variable-definition>`__) for a given
+   :eq:`eq-variable-definition` for a given
    experiment application pair from the HMF series of critical
    experiments
 
-.. figure:: media/perturbation_MCT_calculated.png
-   :alt: Calculated
+.. -----------------------------------------------------------------------------------------------------------------------
+.. Subfigure
+.. -----------------------------------------------------------------------------------------------------------------------
 
-   Calculated
+.. raw:: html
 
-.. figure:: media/perturbation_MCT_tsunami_ip.png
-   :alt: TSUNAMI-IP
+   <div class="figures-container">
+       <div class="figure">
+           <img src="../_static/media/perturbation_HMF_calculated.png" alt="Calculated">
+           <figcaption>Calculated</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/perturbation_HMF_tsunami_ip.png" alt="TSUNAMI-IP">
+           <figcaption>TSUNAMI-IP</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/perturbation_HMF_percent_diff.png" alt="Percent Difference">
+           <figcaption>Percent Difference</figcaption>
+       </div>
+    </div>
+.. figure:: /_static/transparent.jpg
+   :name: fig-perturbation-hmf-comparison
 
-   TSUNAMI-IP
+   Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP 
+   :math:`c_k`` values for the HMF series of critical experiments :raw-latex:`\cite{bess2019international}`
 
-.. figure:: media/perturbation_MCT_percent_diff.png
-   :alt: Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
 
-   Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
+.. Subfigure
+.. -----------------------------------------------------------------------------------------------------------------------
 
-.. figure:: media/perturbation_HMF_calculated.png
-   :alt: Calculated
+.. raw:: html
 
-   Calculated
+   <div class="figures-container">
+       <div class="figure">
+           <img src="../_static/media/perturbation_MCT_calculated.png" alt="Calculated">
+           <figcaption>Calculated</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/perturbation_MCT_tsunami_ip.png" alt="TSUNAMI-IP">
+           <figcaption>TSUNAMI-IP</figcaption>
+       </div>
+       <div class="figure">
+           <img src="../_static/media/perturbation_MCT_percent_diff.png" alt="Percent Difference">
+           <figcaption>Percent Difference</figcaption>
+       </div>
+    </div>
+.. figure:: /_static/transparent.jpg
+   :name: fig-perturbation-mct-comparison
 
-.. figure:: media/perturbation_HMF_tsunami_ip.png
-   :alt: TSUNAMI-IP
+   Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP 
+   :math:`c_k` values for the MCT series of critical experiments :raw-latex:`\cite{bess2019international}`
 
-   TSUNAMI-IP
-
-.. figure:: media/perturbation_HMF_percent_diff.png
-   :alt: Percent Difference
-
-   Percent Difference
+.. -----------------------------------------------------------------------------------------------------------------------
 
 Future Work
 ===========
