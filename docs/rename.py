@@ -10,4 +10,4 @@ rename_and_remove_files("source/private_api")
 
 # Now move paths module to the root directory and rename it to paths.rst
 os.rename("source/public_api/paths.rst", "source/paths.rst")
-os.remove("source/private_api/paths.rst") 
+os.remove("source/private_api/paths.rst")

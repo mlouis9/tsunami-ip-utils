@@ -42,3 +42,11 @@ fig.show()
 # values necessarily have a sampling distribution with some uncertainty. This uncertainty is generally less than 5% for a sample size
 # greater than 200, but this depends on the value of :math:`c_k` (see :ref:`the technical manual <manual-final-results>` for
 # more details). 
+
+# %%
+# The perturbation plot can also be saved as a PNG image using the following code block:
+
+with open( EXAMPLES / '_static' / 'perturbation_plot.png', 'wb' ) as f:
+    f.write( fig.to_image('png') )
+
+# sphinx_gallery_thumbnail_path = '../../examples/_static/perturbation_plot.png'

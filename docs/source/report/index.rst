@@ -466,7 +466,7 @@ indicating good agreement for cases with large :math:`c_k`.
            <figcaption>Percent Difference</figcaption>
        </div>
     </div>
-.. figure:: /_static/transparent.jpg
+.. figure:: /_static/media/transparent.jpg
    :name: fig-isotope-wise-hmf-comparison
 
    Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the HMF series of 
@@ -495,7 +495,7 @@ indicating good agreement for cases with large :math:`c_k`.
            <figcaption>Percent Difference</figcaption>
        </div>
     </div>
-.. figure:: /_static/transparent.jpg
+.. figure:: /_static/media/transparent.jpg
    :name: fig-isotope-wise-mct-comparison
 
    Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the MCT series of 
@@ -544,7 +544,7 @@ smaller :math:`c_k`.
            <figcaption>Percent Difference</figcaption>
        </div>
     </div>
-.. figure:: /_static/transparent.jpg
+.. figure:: /_static/media/transparent.jpg
    :name: fig-isotope-reaction-wise-hmf-comparison
 
    Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the HMF series of 
@@ -572,7 +572,7 @@ smaller :math:`c_k`.
            <figcaption>Percent Difference</figcaption>
        </div>
     </div>
-.. figure:: /_static/transparent.jpg
+.. figure:: /_static/media/transparent.jpg
    :name: fig-isotope-reaction-wise-mct-comparison
 
    Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the MCT series of 
@@ -801,7 +801,7 @@ errors.
            <figcaption>Percent Difference</figcaption>
        </div>
     </div>
-.. figure:: /_static/transparent.jpg
+.. figure:: /_static/media/transparent.jpg
    :name: fig-perturbation-hmf-comparison
 
    Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP 
@@ -829,7 +829,7 @@ errors.
            <figcaption>Percent Difference</figcaption>
        </div>
     </div>
-.. figure:: /_static/transparent.jpg
+.. figure:: /_static/media/transparent.jpg
    :name: fig-perturbation-mct-comparison
 
    Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP 
