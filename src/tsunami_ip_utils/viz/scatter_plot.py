@@ -25,7 +25,7 @@ import sys, os, signal
 import threading
 import webbrowser
 import sys
-from plotly.graph_objs import Figure
+import plotly.graph_objs as go
 from pyparsing import *
 import re
 from uncertainties import ufloat
@@ -116,7 +116,7 @@ def _update_percent_difference(text: str, reference_value: float) -> Tuple[str, 
     
     return updated_text, percent_difference
 
-class EnhancedPlotlyFigure(Figure):
+class EnhancedPlotlyFigure(go.Figure):
     """This class wraps a plotly express figure object (intended for a scatter plot) and adds additional attributes for the
     summary statistics and linear regression data. This class is intended to be used with the :class:`.InteractiveScatterPlotter`
     class."""
