@@ -19,7 +19,7 @@ conditions. To ensure that these computational methods for ensuring
 operational safety are reliable, they must be rigorously validated
 against physical experiments. The American National Institute of
 Standards (ANSI) outlines the procedure for code validation for
-criticality safety in ANSI/ANS-8.1. :raw-latex:`\cite{bowen2008ansi}`
+criticality safety in ANSI/ANS-8.1 :cite:p:`bowen2008ansi`.
 The standard requires that the computational bias for a particular
 application is well quantified by comparison with experiments within
 some *range of applicability*. The standard defines the range of
@@ -27,9 +27,9 @@ applicability as “the limiting ranges of material compositions,
 geometric arrangements, neutron energy spectra, and other relevant
 parameters  e.g., heterogeneity, leakage, interaction, absorption, etc.
 within which the bias of a computational method is
-established”:raw-latex:`\cite{ans1993nuclear}` For systems that may lack
+established” :cite:p:`bowen2008ansi` For systems that may lack
 applicable experiments entirely (e.g., UF\ :sub:`6` transportation
-cylinders :raw-latex:`\cite{osti_1797631}`), the standard allows for
+cylinders :cite:p:`osti_1797631`), the standard allows for
 using trends in the bias to extend the experimental data to the
 application system.
 
@@ -38,13 +38,13 @@ which system characteristics should be used for defining similarity for
 the trending analysis (neutron spectrum, fuel enrichment, etc.). A key
 development was the introduction of quantitative similarity metrics
 based on system sensitivity and nuclear data–induced
-uncertainty.:raw-latex:`\cite{broadhead2004sensitivity}` The conjecture
+uncertainty :cite:p:`broadhead2004sensitivity`. The conjecture
 is that systems will have similar biases if they have similar
 sensitivity/uncertainty profiles (on a nuclide-reaction group-wise
 level) because it is thought that the bias is primarily the result of
 uncertainties in the underlying nuclear data. These similarity indices
 can then be used with bias trending analysis tools like those provided
-by the SCALE code sequence VADER:raw-latex:`\cite{hart2022creation}` to
+by the SCALE code sequence VADER :cite:p:`hart2022creation` to
 provide a quantitative physics–based method for estimating computational
 bias that does not rely on expert judgement.
 
@@ -52,9 +52,9 @@ Important Similarity Indices
 ----------------------------
 
 Of the several similarity indices defined by Broadhead et al.,
-:raw-latex:`\cite{broadhead2004sensitivity}` the two prominent indices
+:cite:p:`broadhead2004sensitivity` the two prominent indices
 available in SCALE are :math:`E` and
-:math:`c_k`.:raw-latex:`\cite{osti_1959594}`
+:math:`c_k` :cite:p:`osti_1959594`.
 
 The Sensitivity-Based Similarity Index: :math:`E`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,12 +64,12 @@ sensitivity profiles (i.e., the set of group-wise :math:`k_{\text{eff}}`
 sensitivities for each nuclide-reaction pair), which may be calculated
 using standard methods like Contributon-Linked eigenvalue
 sensitivity/uncertainty estimation via Tracklength importance
-Characterization (CLUTCH),:raw-latex:`\cite{perfetti2012advanced}`
+Characterization (CLUTCH), :cite:p:`perfetti2012advanced`
 Iterated Fission
-Probability,:raw-latex:`\cite{hurwitz1948note, kiedrowski2009adjoint}`
+Probability, :cite:p:`hurwitz1948note, kiedrowski2009adjoint`
 direct perturbation, and others. Most of these methods are implemented
 in SCALE’s TSUNAMI-3D
-sequence.:raw-latex:`\cite{marshall2020review, perfetti2015scale}` It
+sequence :cite:p:`marshall2020review, perfetti2015scale`. It
 was thought that if two systems are similar, their eigenvalue response
 to perturbations in input nuclear data, or their sensitivity profiles,
 should be similar. The integral index :math:`E` was designed to automate
@@ -99,7 +99,7 @@ The Uncertainty-Based Similarity Index: :math:`c_k`
 The most widely used similarity index in criticality safety is
 :math:`c_k`. It represents the degree to which nuclear data–induced
 uncertainties in :math:`k_{\text{eff}}` are correlated between two
-systems.:raw-latex:`\cite{broadhead2004sensitivity}` The :math:`c_k`
+systems :cite:p:`broadhead2004sensitivity`. The :math:`c_k`
 similarity index between systems A and B is given by
 
 .. math::
@@ -133,12 +133,12 @@ factor to ensure that if :math:`\boldsymbol{S}_A=\boldsymbol{S}_B` when
 Pearson’s correlation coefficient between two random variables :math:`X`
 and :math:`Y`, as in Eq. :eq:`eq-pearson`. The only
 caveat is that the nuclear data covariance matrices can sometimes be
-problematic:raw-latex:`\cite{osti_950002}` and lead to nonphysical
+problematic :cite:p:`osti_950002` and lead to nonphysical
 results unless certain heuristic rules are applied (i.e., those in the
-:math:`\texttt{cov\_fix}` option).:raw-latex:`\cite{osti_1959594}`
+:math:`\texttt{cov\_fix}` option) :cite:p:`osti_1959594`.
 Furthermore there are concerns about the presence of unevaluated
 cross-section covariances and their impact on
-similarity.:raw-latex:`\cite{osti_950002}`
+similarity :cite:p:`osti_950002`.
 
 Bias Estimation and Acceptance Criteria
 ---------------------------------------
@@ -153,13 +153,13 @@ the application would provide a useful estimation of the bias, so a
 cutoff of some sort is necessary. For thermal systems, parametric
 studies have been performed over the cutoff, and the cutoffs that were
 found to minimize the bias error were
-identified.:raw-latex:`\cite{broadhead2004sensitivity}` In addition, the
+identified :cite:p:`broadhead2004sensitivity`. In addition, the
 number of experiments needed to obtain a given confidence in the
 estimated bias was also explored. From these considerations, a
 :math:`c_k` cutoff of :math:`0.9` was chosen as a general
-recommendation:raw-latex:`\cite{broadhead2004sensitivity}` and is
+recommendation :cite:p:`broadhead2004sensitivity` and is
 commonly used in regulatory
-guidance,:raw-latex:`\cite{scaglione2014approach}` but lower :math:`c_k`
+guidance, :cite:p:`scaglione2014approach` but lower :math:`c_k`
 cutoffs can be used, although they require more experiments to achieve
 the same confidence in the estimated bias. These criteria are a general
 heuristic, and optimal :math:`c_k` cutoffs depend on the physical
@@ -174,7 +174,7 @@ sufficient flexibility when selecting a suite of experiments for code
 validation. However, the recent interest in high-assay low-enriched
 uranium (HALEU) has required designing systems (mainly for
 transportation) for which there is a general lack of applicable
-experiments:raw-latex:`\cite{fassino2024current}`. For these
+experiments :cite:p:`fassino2024current`. For these
 applications, practitioners are required to make an estimation of the
 computational bias, despite having few or no experiments with
 :math:`c_k\geq 0.9`. As discussed, there is a complex relationship
@@ -251,14 +251,14 @@ calculations. Although common, this estimator often provides a biased
 estimate of the (population) correlation coefficient. The sampling
 distribution of this sample statistic is complicated, involving the
 gamma function and hypergeometric
-functions,:raw-latex:`\cite{hotelling1951impact, hotelling1953new}` and
+functions, :cite:p:`hotelling1951impact, hotelling1953new` and
 it often results in skewed distributions that can be corrected for with
-sophisticated estimators. :raw-latex:`\cite{gnambs2023brief}` However,
+sophisticated estimators :cite:p:`gnambs2023brief`. However,
 the effect of the bias is not significant with a large number of
 samples. This sampling distribution can also be used to derive an
 estimator for the standard deviation of the (estimated) Pearson
 correlation coefficient, :math:`\sigma_r`, for which an approximate
-expression:raw-latex:`\cite{gnambs2023brief}` is given by
+expression :cite:p:`gnambs2023brief` is given by
 
 .. math::
    :label: eq-pearson-stddev
@@ -297,7 +297,7 @@ correlation coefficient would equal the corresponding :math:`c_k`)
 should be the nuclide-reaction group-wise nuclear data uncertainty
 contributions. Because of the difficulty of extracting group-wise
 nuclear covariance data from AMPX
-libraries,:raw-latex:`\cite{wiarda2016ampx}` first nuclide-wise and then
+libraries, :cite:p:`wiarda2016ampx` first nuclide-wise and then
 nuclide reaction– wise contributions were considered.
 
 Defining the :math:`\sigma_k^2` Contributions
@@ -351,7 +351,7 @@ principle submatrix of :math:`\boldsymbol{C}_{\alpha, \alpha}` and is
 therefore positive semi-definite, as well. This is not necessarily true
 for cross covariances, where :math:`\alpha_x^k\neq \alpha_y^j`, so they
 may be and often are
-*negative*.:raw-latex:`\cite{broadhead1999sensitivity}` Strictly
+*negative* :cite:p:`broadhead1999sensitivity`. Strictly
 speaking, because they are possibly negative, these contributions to the
 variance cannot be viewed as variances, even though they are denoted by
 :math:`\sigma_{k_{x,y}^{i,j}}^2`. Instead, they are more akin to
@@ -427,7 +427,7 @@ examine the contributions to similarity indices, so an interactive
 plotting framework was chosen. Plotly is a python framework for easily
 creating interactive web-based apps and is often used for
 production-level scientific visualization
-workflows.:raw-latex:`\cite{dabbas2021interactive}`
+workflows :cite:p:`dabbas2021interactive`.
 
 Isotope-Wise
 ~~~~~~~~~~~~
@@ -474,7 +474,7 @@ indicating good agreement for cases with large :math:`c_k`.
    :name: fig-isotope-wise-hmf-comparison
 
    Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the HMF series of 
-   critical experiments :raw-latex:`\cite{bess2019international}`
+   critical experiments :cite:p:`bess2019international`
 
 .. -----------------------------------------------------------------------------------------------------------------------
 
@@ -503,7 +503,7 @@ indicating good agreement for cases with large :math:`c_k`.
    :name: fig-isotope-wise-mct-comparison
 
    Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the MCT series of 
-   critical experiments :raw-latex:`\cite{bess2019international}`
+   critical experiments :cite:p:`bess2019international`
 
 .. -----------------------------------------------------------------------------------------------------------------------
 
@@ -552,7 +552,7 @@ smaller :math:`c_k`.
    :name: fig-isotope-reaction-wise-hmf-comparison
 
    Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the HMF series of 
-   critical experiments :raw-latex:`\cite{bess2019international}`
+   critical experiments :cite:p:`bess2019international`
 
 .. -----------------------------------------------------------------------------------------------------------------------
 
@@ -580,7 +580,7 @@ smaller :math:`c_k`.
    :name: fig-isotope-reaction-wise-mct-comparison
 
    Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP :math:`c_k` values for the MCT series of 
-   critical experiments :raw-latex:`\cite{bess2019international}`
+   critical experiments :cite:p:`bess2019international`
 
 .. -----------------------------------------------------------------------------------------------------------------------
 
@@ -742,9 +742,9 @@ has the capability to randomly sample cross sections consistent with a
 specified nuclear data and nuclear data covariance library. This utility
 reads a set of statically generated cross-section perturbation factors
 (1,000 samples total in SCALE 6.3
-libraries:raw-latex:`\cite{osti_1959594}`) and generates a perturbed
+libraries :cite:p:`osti_1959594`) and generates a perturbed
 cross-section library which can then be read using standard AMPX
-processing utilities.:raw-latex:`\cite{osti_1959594}` To avoid having to
+processing utilities :cite:p:`osti_1959594`. To avoid having to
 read and write perturbed cross-section libraries repeatedly for
 different experiment application pairs, all of the perturbed libraries
 were generated, read, and then cached as ``.pkl`` files. For a given
@@ -807,7 +807,7 @@ errors.
    :name: fig-perturbation-hmf-comparison
 
    Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP 
-   :math:`c_k`` values for the HMF series of critical experiments :raw-latex:`\cite{bess2019international}`
+   :math:`c_k`` values for the HMF series of critical experiments :cite:p:`bess2019international`
 
 .. -----------------------------------------------------------------------------------------------------------------------
 
@@ -835,7 +835,7 @@ errors.
    :name: fig-perturbation-mct-comparison
 
    Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP 
-   :math:`c_k` values for the MCT series of critical experiments :raw-latex:`\cite{bess2019international}`
+   :math:`c_k` values for the MCT series of critical experiments :cite:p:`bess2019international`
 
 .. -----------------------------------------------------------------------------------------------------------------------
 
@@ -855,13 +855,13 @@ In addition, the inconsistency with the nuclear data sampling method
 must be understood. It is possible that there is a subtle difference in
 how :math:`c_k` is calculated in TSUNAMI-IP that’s causing the
 discrepancy. In any case, wildly different calculated correlations in
-cases like Fig. `4 <#fig-perturbation-mct-bad-example>`__ need to be
+cases like :numref:`fig-perturbation-mct-bad-example` need to be
 understood. In this case, not only is the correlation coefficient wrong
 in magnitude, but it is even wrong in direction. Also, the scales of the
 application and experiment are *very* different. If these values are
 truly to be interpreted as :math:`\Delta k`\ s (as Section
 `4.1 <#sec-relation-to-the-bias>`__ would suggest), then the values of
-:math:`\pm 1` shown in Fig. `4 <#fig-perturbation-mct-bad-example>`__
+:math:`\pm 1` shown in :numref:`fig-perturbation-mct-bad-example`
 are concerningly large and inconsistent with the calculated nuclear
 data–induced uncertainty of :math:`\sim 1-5\%`.(i.e., a :math:`\Delta k`
 of :math:`\pm 1` from nuclear data–induced uncertainty is several orders
@@ -871,7 +871,7 @@ reactions (e.g., “total” or “capture” in SCALE) are handled in
 TSUNAMI-IP. This idea could further be evaluated by explicitly computing
 :math:`k_{\text{eff}}` for a system and application subject to randomly
 sampled cross sections using SCALE’s sampler
-routine.:raw-latex:`\cite{osti_1959594}`
+routine :cite:p:`osti_1959594`.
 
 .. figure:: media/perturbation_MCT_bad_example.png
    :alt: An MCT case with exceptionally large disagreement with the TSUNAMI-IP calculated :math:`c_k`
@@ -893,6 +893,8 @@ This work was supported in part by the US Department of Energy, Office
 of Science, Office of Workforce Development for Teachers and Scientists
 (WDTS) under the Science Undergraduate Laboratory Internships Program
 (SULI).
+
+.. bibliography::
 
 Relevant Identities
 ===================

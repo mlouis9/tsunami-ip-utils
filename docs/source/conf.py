@@ -91,8 +91,10 @@ extensions = [
     'globalparam',                 # Custom extension for global parameters
     'sphinx_gallery.gen_gallery',  # Generate gallery of examples
     'sphinx.ext.intersphinx',      # Link to other projects' documentation
-    'sphinxcontrib.pdfembed',      # Embed PDFs in the documentation
+    'sphinxcontrib.bibtex',        # Add bibliography
 ]
+
+bibtex_bibfiles = ['bibliography.bib']
 
 mathjax3_config = {
     "TeX": {
