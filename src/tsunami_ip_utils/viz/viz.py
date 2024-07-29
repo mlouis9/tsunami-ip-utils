@@ -153,7 +153,7 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
         raise ValueError(f"Unsupported plot type: {plot_type}")
 
     # Create the plot and style it
-    plotter.create_plot(contribution_pairs, isotopes, all_reactions)
+    plotter._create_plot(contribution_pairs, isotopes, all_reactions)
 
     return plotter.fig
 

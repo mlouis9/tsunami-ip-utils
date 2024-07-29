@@ -137,21 +137,21 @@ def _create_update_figure_callback(app, graph_id, app_instance):
             clicked_trace_name = current_fig.data[clicked_trace_index].name
 
             # Update excluded isotopes based on the clicked trace
-            if restyleData[0]['visible'][0] == 'legendonly' and clicked_trace_name not in app_instance.excluded_isotopes:
-                app_instance.excluded_isotopes.append(clicked_trace_name)
-            elif restyleData[0]['visible'][0] == True and clicked_trace_name in app_instance.excluded_isotopes:
-                app_instance.excluded_isotopes.remove(clicked_trace_name)
+            if restyleData[0]['visible'][0] == 'legendonly' and clicked_trace_name not in app_instance._excluded_isotopes:
+                app_instance._excluded_isotopes.append(clicked_trace_name)
+            elif restyleData[0]['visible'][0] == True and clicked_trace_name in app_instance._excluded_isotopes:
+                app_instance._excluded_isotopes.remove(clicked_trace_name)
 
             # Update DataFrame based on excluded isotopes
             updated_df = app_instance.df.copy()
-            updated_df = updated_df[~updated_df['Isotope'].isin(app_instance.excluded_isotopes)]
+            updated_df = updated_df[~updated_df['Isotope'].isin(app_instance._excluded_isotopes)]
 
             # Recalculate the regression and summary statistics
-            app_instance.add_regression_and_stats(updated_df)
+            app_instance._add_regression_and_stats(updated_df)
 
             # Update trace visibility based on excluded isotopes
             for trace in app_instance.fig.data:
-                if trace.name in app_instance.excluded_isotopes:
+                if trace.name in app_instance._excluded_isotopes:
                     trace.visible = 'legendonly'
                 else:
                     trace.visible = True
@@ -238,7 +238,7 @@ class InteractiveMatrixPlot:
         if not config.generating_docs:
             if open_browser:
                 threading.Timer(1, self._open_browser(port)).start()
-            self._app.run(host='localhost', port=port)
+            self._app.run(host='localhost', port=port, debug=True)
     
     def save_state(self, filename: Union[str, Path]) -> None:
         """Save the state of the interactive matrix plot to a pickle file. The state includes the 2D numpy array of plot objects

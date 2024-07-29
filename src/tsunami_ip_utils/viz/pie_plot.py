@@ -692,7 +692,7 @@ class InteractivePieLegend:
         thread.daemon = True  # This ensures thread exits when main program exits
         thread.start()
 
-    def write_html(self, filename: Union[str, Path]=None) -> Union[None, str]:
+    def write_html(self, filename: Optional[Union[str, Path]]=None) -> Union[None, str]:
         """Write the HTML content of the interactive sunburst chart to a file.
         
         Parameters
