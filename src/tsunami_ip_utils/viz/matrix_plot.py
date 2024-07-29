@@ -23,6 +23,7 @@ from .plot_utils import _find_free_port
 import pickle
 import tsunami_ip_utils
 from typing import Union, List
+import tsunami_ip_utils.config as config
 
 # Style constants
 GRAPH_STYLE = {
@@ -234,9 +235,10 @@ class InteractiveMatrixPlot:
             sys.stdout = log
 
         port = _find_free_port()
-        if open_browser:
-            threading.Timer(1, self._open_browser(port)).start()
-        self._app.run(host='localhost', port=port)
+        if not config.generating_docs:
+            if open_browser:
+                threading.Timer(1, self._open_browser(port)).start()
+            self._app.run(host='localhost', port=port)
     
     def save_state(self, filename: Union[str, Path]) -> None:
         """Save the state of the interactive matrix plot to a pickle file. The state includes the 2D numpy array of plot objects
