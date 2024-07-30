@@ -22,7 +22,7 @@ import threading
 from .plot_utils import _find_free_port
 import pickle
 import tsunami_ip_utils
-from typing import Union, List, Optional
+from typing import Union, List, Dict, Optional
 import tsunami_ip_utils.config as config
 import time, requests
 import signal
@@ -46,30 +46,49 @@ def _create_app(external_stylesheets):
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
     return app
 
-def _create_column_headers(num_cols: int) -> None:
+def _create_column_headers(num_cols: int, labels: Optional[List[str]]=None) -> None:
     """Create column headers for the matrix plot. Each column header is a div element with the text 'Application i' where i is
     the column index. The column headers are styled to be centered and have a border on the right and bottom.
     
     Parameters
     ----------
     num_cols
-        Number of columns in the matrix plot."""
-    return [html.Div(
-        f'Application {i+1}', 
-        style={
-            'flex': '1', 
-            'minWidth': '800px', 
-            'textAlign': 'center', 
-            'padding': '10px', 
-            'borderRight': '1px solid black', 
-            'borderBottom': '1px solid black', 
-            'display': 'flex', 
-            'alignItems': 'center', 
-            'justifyContent': 'center'
-        }
-    ) for i in range(num_cols)]
+        Number of columns in the matrix plot.
+    labels
+        List of labels for the columns of the matrix plot. Default is ``None``."""
+    if labels is None:
+        div = [html.Div(
+            f'Application {i+1}', 
+            style={
+                'flex': '1', 
+                'minWidth': '800px', 
+                'textAlign': 'center', 
+                'padding': '10px', 
+                'borderRight': '1px solid black', 
+                'borderBottom': '1px solid black', 
+                'display': 'flex', 
+                'alignItems': 'center', 
+                'justifyContent': 'center'
+            }
+        ) for i in range(num_cols)]
+    else:
+        div = [html.Div(
+            label, 
+            style={
+                'flex': '1', 
+                'minWidth': '800px', 
+                'textAlign': 'center', 
+                'padding': '10px', 
+                'borderRight': '1px solid black', 
+                'borderBottom': '1px solid black', 
+                'display': 'flex', 
+                'alignItems': 'center', 
+                'justifyContent': 'center'
+            }
+        ) for label in labels]
+    return div
 
-def _create_row_label(i: int) -> html.Div:
+def _create_row_label(i: int, label: Optional[str]=None) -> html.Div:
     """Create a row label for the matrix plot. The row label is a div element with the text 'Experiment i' where i is the row
     index. The row label is styled to be centered and have a border on the right and bottom. The text is rotated -90 degrees to
     make it vertical.
@@ -78,34 +97,64 @@ def _create_row_label(i: int) -> html.Div:
     ----------
     i
         Row index of the matrix plot.
+    label
+        An optional label for the row (to use instead of ``Experiment i``). Default is ``None``.
         
     Returns
     -------
         A div element representing the row label."""
-    return html.Div(
-        html.Span(
-            f'Experiment {i+1}',
+    if label is None:
+        div = html.Div(
+            html.Span(
+                f'Experiment {i+1}',
+                style={
+                    'display': 'block',
+                    'overflow': 'visible',
+                    'transform': 'rotate(-90deg)',
+                    'transformOrigin': 'center',
+                    'whiteSpace': 'nowrap',
+                }
+            ), 
             style={
-                'display': 'block',
-                'overflow': 'visible',
-                'transform': 'rotate(-90deg)',
-                'transformOrigin': 'center',
-                'whiteSpace': 'nowrap',
+                'flex': 'none',
+                'width': '50px', 
+                'textAlign': 'center', 
+                'marginRight': '0', 
+                'padding': '10px', 
+                'borderRight': '1px solid black', 
+                'borderBottom': '1px solid black', 
+                'display': 'flex', 
+                'alignItems': 'center', 
+                'justifyContent': 'center'
             }
-        ), 
-        style={
-            'flex': 'none',
-            'width': '50px', 
-            'textAlign': 'center', 
-            'marginRight': '0', 
-            'padding': '10px', 
-            'borderRight': '1px solid black', 
-            'borderBottom': '1px solid black', 
-            'display': 'flex', 
-            'alignItems': 'center', 
-            'justifyContent': 'center'
-        }
-    )
+        )
+    else:
+        div = html.Div(
+            html.Span(
+                label,
+                style={
+                    'display': 'block',
+                    'overflow': 'visible',
+                    'transform': 'rotate(-90deg)',
+                    'transformOrigin': 'center',
+                    'whiteSpace': 'nowrap',
+                }
+            ), 
+            style={
+                'flex': 'none',
+                'width': '50px', 
+                'textAlign': 'center', 
+                'marginRight': '0', 
+                'padding': '10px', 
+                'borderRight': '1px solid black', 
+                'borderBottom': '1px solid black', 
+                'display': 'flex', 
+                'alignItems': 'center', 
+                'justifyContent': 'center'
+            }
+        )
+
+    return div
 
 def _create_plot_element(i: int, j: int, plot_object: Union[InteractiveScatterLegend, InteractivePieLegend, go.Figure]
                         ) -> Union[dcc.Graph, html.Iframe]:
@@ -244,7 +293,7 @@ class InteractiveMatrixPlot:
         if not config.generating_docs:
             if open_browser:
                 threading.Timer(1, self._open_browser(port)).start()
-            self._app.run(host='localhost', port=port, debug=True)
+            self._app.run(host='localhost', port=port, debug=False)
     
     def save_state(self, filename: Union[str, Path]) -> None:
         """Save the state of the interactive matrix plot to a pickle file. The state includes the 2D numpy array of plot objects
@@ -374,7 +423,7 @@ def load_interactive_matrix_plot(filename):
     return InteractiveMatrixPlot.load_state(filename)
 
 
-def _interactive_matrix_plot(plot_objects_array: np.ndarray) -> InteractiveMatrixPlot:
+def _interactive_matrix_plot(plot_objects_array: np.ndarray, labels: Optional[Dict[str, List]]) -> InteractiveMatrixPlot:
     """Create an interactive matrix plot from a 2D numpy array of plot objects. This function creates a Dash app that displays
     the matrix plot. The matrix is constructed from the plot objects array, where each plot object is an instance of either
     :class:`tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend` or :class:`tsunami_ip_utils.viz.pie_plot.InteractivePieLegend`.
@@ -385,6 +434,9 @@ def _interactive_matrix_plot(plot_objects_array: np.ndarray) -> InteractiveMatri
     ----------
     plot_objects_array
         2D numpy array of plot objects to be displayed in the matrix plot.
+    labels
+        Dictionary of lists containing the labels for the rows and columns of the matrix plot. Keys are ``'applications'`` and 
+        ``'experiments'``. Default is ``None``. Most commonly, this is the sdf filename for the given application/experiment.
 
     Returns
     -------
@@ -402,12 +454,15 @@ def _interactive_matrix_plot(plot_objects_array: np.ndarray) -> InteractiveMatri
     num_rows = plot_objects_array.shape[0]
     num_cols = plot_objects_array.shape[1]
 
-    column_headers = _create_column_headers(num_cols)
+    column_headers = _create_column_headers(num_cols, labels['applications']) if labels else _create_column_headers(num_cols)
     header_row = html.Div([html.Div('', style={'flex': 'none', 'width': '71px', 'borderBottom': '1px solid black'})] + column_headers, style={'display': 'flex'})
 
     rows = [header_row]
     for i in range(num_rows):
-        row = [_create_row_label(i)]
+        if labels is not None:
+            row = [_create_row_label(i, labels['experiments'][i])]
+        else:
+            row = [_create_row_label(i)]
         for j in range(num_cols):
             plot_object = plot_objects_array[i, j]
             plot_element = _create_plot_element(i, j, plot_object) if plot_object else html.Div('Plot not available', style=GRAPH_STYLE)

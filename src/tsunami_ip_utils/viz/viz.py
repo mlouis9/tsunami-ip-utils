@@ -6,7 +6,7 @@ from .plot_utils import _determine_plot_type
 from tsunami_ip_utils.integral_indices import _add_missing_reactions_and_nuclides
 import numpy as np
 from uncertainties import ufloat, unumpy
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union, Optional
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -178,7 +178,8 @@ def perturbation_plot(points: List[Tuple[ufloat, ufloat]]) -> EnhancedPlotlyFigu
     return plotter._get_plot()
 
 
-def matrix_plot(plot_objects_array: np.ndarray, plot_type: str) -> InteractiveMatrixPlot:
+def matrix_plot(plot_objects_array: np.ndarray, plot_type: str, labels: Optional[Dict[str, List]]=None
+                ) -> InteractiveMatrixPlot:
     """Creates a Dash app to display a matrix of plots from a numpy object array of figure objects.
     
     Parameters
@@ -188,6 +189,9 @@ def matrix_plot(plot_objects_array: np.ndarray, plot_type: str) -> InteractiveMa
     plot_type
         Type of plot to create. Default is ``'interactive'`` which creates an interactive matrix plot (served by a Dash app). 
         Other options are ``'static'``, which creates a static matplotlib matrix plot.
+    labels
+        Dictionary of lists containing the labels for the rows and columns of the matrix plot. Keys are ``'expeirments'`` and 
+        ``'applications'``. Default is ``None``. Most commonly, this is the sdf filename for the given application/experiment.
         
     Returns
     -------
@@ -195,7 +199,7 @@ def matrix_plot(plot_objects_array: np.ndarray, plot_type: str) -> InteractiveMa
           calling ``app.show()``.
         * If ``plot_type`` is ``'static'``, raises a ``NotImplementedError``."""
     if plot_type == 'interactive':
-        return _interactive_matrix_plot(plot_objects_array)
+        return _interactive_matrix_plot(plot_objects_array, labels)
     elif plot_type == 'static':
         raise NotImplementedError("Static matrix plots are not yet supported")
 
