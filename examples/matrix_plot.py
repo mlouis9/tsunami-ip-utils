@@ -50,6 +50,16 @@ fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive')
 fig.show()
 
 # %%
+# This plot is fully interactive. You can hold shift and scroll using the mousewheel to scroll horizontally, or just use the
+# mousewheel alone to scroll vertically. Individual subfigures can also be saved by clicking the camera icon in the top right,
+# or the entire plot can be saved by calling the ``to_image`` method on the figure object.
+
+fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive')
+fig.to_image( EXAMPLES / '_static' / 'matrix_plot.png' )
+
+# sphinx_gallery_thumbnail_path = '../../examples/_static/matrix_plot.png'
+
+# %%
 # Note if the default, nondescriptive labels aren't preferred, an arbitrary dictionary of labels for the applications and
 # experiments may be passed instead. Perhaps the most useful is the SDF file names.
 
@@ -59,6 +69,10 @@ labels = {
 }
 fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=labels)
 fig.show()
+
+# %% 
+# On the diagonals, where the application and experiment are the same, the plot is a pie chart of contributions to the
+# nuclear-data indcued uncertainty,
 
 # %%
 # Matrix of Perturbation Correlation Plots
