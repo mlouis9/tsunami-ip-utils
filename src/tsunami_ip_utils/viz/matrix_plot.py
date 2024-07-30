@@ -251,7 +251,7 @@ class InteractiveMatrixPlot:
     """Dash app object that displays the interactive matrix plot."""
     _plot_objects_array: np.ndarray
     """2D numpy array of plot objects to be displayed in the matrix plot."""
-    def __init__(self, app: dash.Dash, plot_objects_array: np.ndarray) -> None:
+    def __init__(self, app: dash.Dash, plot_objects_array: np.ndarray, labels: Optional[Dict[str, List]]=None) -> None:
         """Initialize the InteractiveMatrixPlot object with the Dash app and the 2D numpy array of plot objects.
         
         Parameters
@@ -259,9 +259,14 @@ class InteractiveMatrixPlot:
         app
             Dash app object that displays the interactive matrix plot.
         plot_objects_array
-            2D numpy array of plot objects to be displayed in the matrix plot."""
+            2D numpy array of plot objects to be displayed in the matrix plot.
+        labels
+            Dictionary of lists containing the labels for the rows and columns of the matrix plot. Keys are ``'applications'`` 
+            and ``'experiments'``. Default is ``None``.
+        """
         self._app = app
         self._plot_objects_array = plot_objects_array
+        self._labels = labels
     
     def _open_browser(self, port: int) -> None:
         """Open the browser to display the interactive matrix plot.
@@ -355,12 +360,12 @@ class InteractiveMatrixPlot:
         num_rows = self._plot_objects_array.shape[0]
         num_cols = self._plot_objects_array.shape[1]
 
-        column_headers = _create_column_headers(num_cols)
+        column_headers = _create_column_headers(num_cols, self._labels['applications']) if self._labels else _create_column_headers(num_cols)
         header_row = html.Div([html.Div('', style={'flex': 'none', 'width': '71px', 'borderBottom': '1px solid black'})] + column_headers, style={'display': 'flex'})
 
         rows = [header_row]
         for i in range(num_rows):
-            row = [_create_row_label(i)]
+            row = [_create_row_label(i, self._labels['experiments'][i])] if self._labels else [_create_row_label(i)]
             for j in range(num_cols):
                 plot_object = self._plot_objects_array[i, j]
                 if isinstance(plot_object, InteractiveScatterLegend):
@@ -472,4 +477,4 @@ def _interactive_matrix_plot(plot_objects_array: np.ndarray, labels: Optional[Di
         rows.append(html.Div(row, style={'display': 'flex'}))
 
     _generate_layout(app, rows)
-    return InteractiveMatrixPlot(app, plot_objects_array)
+    return InteractiveMatrixPlot(app, plot_objects_array, labels=labels)

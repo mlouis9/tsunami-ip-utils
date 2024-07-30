@@ -67,49 +67,66 @@ def plotly_scraper(block, block_vars, gallery_conf):
             html_rst = f"""
 .. raw:: html
 
-    <div id="zoomControls">
-        <button type="button" onclick="zoom(1)">- Zoom Out</button>
-        <button type="button" onclick="zoom(-1)">+ Zoom In</button>
+    <div class="zoomControls">
+        <button type="button" onclick="zoom(1, this)">- Zoom Out</button>
+        <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
     </div>
-    <div id="iframe_container">
-        <iframe src="../_static/{plot_filename}" width="200%" height="200%" frameborder="0" id="myiframe"></iframe>
+    <div class="iframe_container">
+        <iframe src="../_static/{plot_filename}" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
     </div>
     <script>
-        var w = $(window).width()*2;
-        var h = $(window).height()*2;
-        var scale = 0.5;
+        function zoom(direction, element) {{
+            // Find the closest parent container that includes both the buttons and the iframe
+            const zoomContainer = element.closest('.zoomControls');
+            const iframeContainer = zoomContainer.nextElementSibling;
+            const iframe = iframeContainer.querySelector('.myiframe');
 
-        function zoom(x) {{
-        if (x === -1) {{
-            scale = scale * 1.1;
-            w = w * 0.9;
-            h = h * 0.9;
-            $("#myiframe").width(w + "px");
-            $("#myiframe").height(h + "px")
-        }} else {{
-            scale = scale * 0.9;
-            w = w * 1.1;
-            h = h * 1.1;
-            $("#myiframe").width(w + "px");
-            $("#myiframe").height(h + "px")
+            // Initialize or retrieve the current scale
+            let currentScale = parseFloat($(iframe).data('scale')) || 0.5;
+            let originalWidth = parseFloat($(iframe).data('originalWidth')) || $(iframe).width();
+            let originalHeight = parseFloat($(iframe).data('originalHeight')) || $(iframe).height();
+
+            if (direction === 1) {{
+                currentScale /= 1.1;
+            }} else {{
+                currentScale *= 1.1;
+            }}
+
+            let scaledWidth = originalWidth / currentScale;
+            let scaledHeight = originalHeight / currentScale;
+
+            // Store the updated scale
+            $(iframe).data('scale', currentScale);
+
+            // Apply the new scale as a CSS transform
+            $(iframe).css('transform', `scale(${{currentScale}})`);
+            $(iframe).css('width', `${{scaledWidth}}px`);
+            $(iframe).css('height', `${{scaledHeight}}px`);
         }}
 
-        $('#myiframe').css('transform', `scale(${{scale}})`);
-        }}
+        function applyInitialScale() {{
+            document.querySelectorAll('.myiframe').forEach(iframe => {{
+                let initialScale = 0.5;
+                let originalWidth = $(iframe).width();
+                let originalHeight = $(iframe).height();
 
-        function applyScale() {{
-            var iframe = document.getElementById('myiframe');
-            iframe.style.transform = 'scale(0.5)';
-            iframe.style.transformOrigin = '0 0'; // Transform from top left corner
+                $(iframe).data('scale', initialScale);
+                $(iframe).data('originalWidth', originalWidth);
+                $(iframe).data('originalHeight', originalHeight);
+
+                let scaledWidth = originalWidth / initialScale;
+                let scaledHeight = originalHeight / initialScale;
+
+                iframe.style.width = `${{scaledWidth}}px`;
+                iframe.style.height = `${{scaledHeight}}px`;
+                iframe.style.transform = 'scale(0.5)'; // Apply a neutral scale since size is already adjusted
+                iframe.style.transformOrigin = '0 0'; // Transform from top left corner
+            }});
         }}
 
         window.onload = function() {{
-            var container = document.getElementById('iframe_container');
-            var iframe = document.getElementById('myiframe');
-            // Set the iframe size to 200% of the container's dimensions
-            iframe.style.width = "200%";
-            iframe.style.height = "200%";
-            applyScale(); // Apply initial scale when the page loads
+            // Apply initial scale to all iframes when the page loads
+            applyInitialScale();
         }};
     </script>
             """

@@ -34,7 +34,7 @@ span.eqno a.headerlink {
     }
 }
 
-#iframe_container {
+.iframe_container {
     background-color: #ffffff;
     padding: 0;
     height: 800px;
@@ -42,7 +42,7 @@ span.eqno a.headerlink {
     overflow: scroll;
 }
   
-#myiframe {
+.myiframe {
     overflow: scroll;
     border: 0;
     width: 100%;
