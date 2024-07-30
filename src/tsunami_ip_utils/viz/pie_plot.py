@@ -21,6 +21,8 @@ from matplotlib.axes import Axes
 import plotly
 from pathlib import Path
 from tsunami_ip_utils import config
+import tempfile
+from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
 
 plt.rcParams['hatch.linewidth'] = 0.6
 
@@ -768,3 +770,17 @@ class InteractivePieLegend:
         df = state['df']
         instance = cls(fig, df)
         return instance
+    
+    def to_image(self, filename: Union[str, Path]) -> None:
+        """Write the initial state of the interactive plot to an image file. This function saves the plot as an 
+        image by using selenium webdriver.
+        
+        Parameters
+        ----------
+        filename
+            Name of the image file to save the matrix plot to. The file extension should be ``'.png'``, ``.jpg``, etc."""
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            html_filename = f.name + '.html'
+        self.write_html(html_filename)
+        _capture_html_as_image(html_filename, filename)
+        os.remove(html_filename)

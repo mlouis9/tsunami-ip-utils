@@ -26,6 +26,8 @@ pyyaml = "*"
 pytest-mpl = "*"
 pytest = "*"
 pyprojroot = "*"
+selenium = "*"
+webdriver-manager = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

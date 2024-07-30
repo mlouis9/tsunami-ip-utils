@@ -29,6 +29,8 @@ import signal
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import multiprocessing
+import tempfile
+from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
 
 # Style constants
 GRAPH_STYLE = {
@@ -229,7 +231,7 @@ def _generate_layout(app: dash.Dash, rows: List[html.Div]) -> None:
         List of div elements representing the rows of the matrix plot."""
     app.layout = html.Div([
         html.H1("Matrix of Plots", style={'textAlign': 'center', 'marginLeft': '121px'}),
-        html.Div(rows, style={'display': 'flex', 'flexDirection': 'column', 'width': '100%', 'overflowX': 'auto'}),
+        html.Div(rows, id='matrix-plot',style={'display': 'flex', 'flexDirection': 'column', 'width': '100%', 'overflowX': 'auto'}),
         html.Script("""
         window.addEventListener('resize', function() {
             const graphs = Array.from(document.querySelectorAll('.js-plotly-plot'));
@@ -420,6 +422,20 @@ class InteractiveMatrixPlot:
             requests.post(f"http://localhost:{port}/shutdown")
             process.terminate()
             process.join()
+    
+    def to_image(self, filename: Union[str, Path]):
+        """Write the initial state of the InteractiveMatrixPlot to an image file. This function saves the matrix plot as an 
+        image by using selenium webdriver.
+        
+        Parameters
+        ----------
+        filename
+            Name of the image file to save the matrix plot to. The file extension should be ``'.png'``, ``.jpg``, etc."""
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            html_filename = f.name + '.html'
+        self.write_html(html_filename)
+        _capture_html_as_image(html_filename, filename, matrix=True)
+        os.remove(html_filename)
 
 
 def load_interactive_matrix_plot(filename):

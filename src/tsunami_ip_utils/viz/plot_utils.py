@@ -9,6 +9,11 @@ from uncertainties import unumpy
 from pathlib import Path
 from uncertainties import ufloat
 import tsunami_ip_utils
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+from selenium.webdriver.common.by import By
 
 def _find_free_port() -> int:
     """Finds a free port on localhost for running a Flask/Dash server. This is done by creating a socket and binding it
@@ -149,3 +154,49 @@ def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> 
             plot_objects_array[i, j] = fig
 
     return plot_objects_array
+
+def _capture_html_as_image(html_file: Path, output_image: Path, matrix: bool=False) -> None:
+    """Captures an HTML file as an image using Selenium WebDriver. This is useful for saving interactive plots as static
+    images.
+
+    Parameters
+    ----------
+    html_file
+        Path to the HTML file to capture.
+    output_image
+        Path to save the output image
+    matrix
+        Whether or not the html file is a matrix plot. If ``True``, the function searches for a div element with a specific
+        id to determine the necessary size of the webbrowser.
+    """
+    # Setup WebDriver
+    service = Service(ChromeDriverManager().install())
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(service=service, options=options)
+
+    # Load HTML file
+    html_file = Path("file://" + str(html_file))
+    driver.get(str(html_file))
+
+    def get_scroll_dimension(axis):
+        return driver.execute_script(f"return document.body.parentNode.scroll{axis}")
+    
+    def get_element_scroll_dimension(element_id, property):
+        script = f"return document.getElementById('{element_id}').scroll{property};"
+        return driver.execute_script(script)
+
+    # get the page scroll dimensions
+    if matrix:
+        width = get_element_scroll_dimension("matrix-plot", "Width")
+    else:
+        width = get_scroll_dimension("Width")
+    height = get_scroll_dimension("Height")
+
+    # set the browser window size
+    driver.set_window_size(width, height)
+    time.sleep(1)
+
+    # Take screenshot
+    driver.save_screenshot(str(output_image))
+    driver.quit()

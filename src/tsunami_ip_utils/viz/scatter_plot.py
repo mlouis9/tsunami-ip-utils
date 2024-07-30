@@ -36,6 +36,8 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from pathlib import Path
 import plotly.io as pio
+import tempfile
+from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
 
 def _replace_spearman_and_pearson(text: str, new_pearson: float, new_spearman: float) -> str:
     """Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful
@@ -847,3 +849,17 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
             self.fig.write_html(filename)
         else:
             return pio.to_html(self.fig, full_html=True)
+        
+    def to_image(self, filename: Union[str, Path]) -> None:
+        """Write the initial state of the interactive plot to an image file. This function saves the plot as an 
+        image by using selenium webdriver.
+        
+        Parameters
+        ----------
+        filename
+            Name of the image file to save the matrix plot to. The file extension should be ``'.png'``, ``.jpg``, etc."""
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            html_filename = f.name + '.html'
+        self.write_html(html_filename)
+        _capture_html_as_image(html_filename, filename)
+        os.remove(html_filename)
