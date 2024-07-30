@@ -6,6 +6,7 @@ from sphinx_gallery.scrapers import figure_rst
 from pathlib import Path
 import uuid
 from tsunami_ip_utils import config
+from tsunami_ip_utils.viz.matrix_plot import InteractiveMatrixPlot
 
 config.generating_docs = True # This is necessary for generating documentation properly
 config.cache_dir = Path(__file__).parent / '..' / '..' / 'examples' / 'data' / 'cached_xs_data'
@@ -62,7 +63,58 @@ def plotly_scraper(block, block_vars, gallery_conf):
             file.write(indented_html)
 
         # Generate the RST snippet with an iframe
-        html_rst = f"""
+        if isinstance(fig, InteractiveMatrixPlot):
+            html_rst = f"""
+.. raw:: html
+
+    <div id="zoomControls">
+        <button type="button" onclick="zoom(1)">- Zoom Out</button>
+        <button type="button" onclick="zoom(-1)">+ Zoom In</button>
+    </div>
+    <div id="iframe_container">
+        <iframe src="../_static/{plot_filename}" width="200%" height="200%" frameborder="0" id="myiframe"></iframe>
+    </div>
+    <script>
+        var w = $(window).width()*2;
+        var h = $(window).height()*2;
+        var scale = 0.5;
+
+        function zoom(x) {{
+        if (x === -1) {{
+            scale = scale * 1.1;
+            w = w * 0.9;
+            h = h * 0.9;
+            $("#myiframe").width(w + "px");
+            $("#myiframe").height(h + "px")
+        }} else {{
+            scale = scale * 0.9;
+            w = w * 1.1;
+            h = h * 1.1;
+            $("#myiframe").width(w + "px");
+            $("#myiframe").height(h + "px")
+        }}
+
+        $('#myiframe').css('transform', `scale(${{scale}})`);
+        }}
+
+        function applyScale() {{
+            var iframe = document.getElementById('myiframe');
+            iframe.style.transform = 'scale(0.5)';
+            iframe.style.transformOrigin = '0 0'; // Transform from top left corner
+        }}
+
+        window.onload = function() {{
+            var container = document.getElementById('iframe_container');
+            var iframe = document.getElementById('myiframe');
+            // Set the iframe size to 200% of the container's dimensions
+            iframe.style.width = "200%";
+            iframe.style.height = "200%";
+            applyScale(); // Apply initial scale when the page loads
+        }};
+    </script>
+            """
+        else:
+            html_rst = f"""
 .. raw:: html
 
     <iframe src="../_static/{plot_filename}" width="100%" height="500" frameborder="0"></iframe>
