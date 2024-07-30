@@ -31,6 +31,10 @@ from selenium.webdriver.chrome.options import Options
 import multiprocessing
 import tempfile
 from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
+import base64
+import io
+import matplotlib
+import matplotlib.pyplot as plt
 
 # Style constants
 GRAPH_STYLE = {
@@ -174,6 +178,15 @@ def _create_plot_element(i: int, j: int, plot_object: Union[InteractiveScatterLe
             response = client.get('/')
             html_content = response.data.decode('utf-8')
             return html.Iframe(srcDoc=html_content, style=GRAPH_STYLE)
+    elif isinstance(plot_object, tuple):
+        if isinstance(plot_object[0], matplotlib.figure.Figure):
+            # Convert matplotlib figure to PNG image
+            buf = io.BytesIO()
+            plt.tight_layout()
+            plot_object[0].savefig(buf, format='png')
+            buf.seek(0)
+            encoded_image = base64.b64encode(buf.read()).decode("utf-8")
+            return html.Img(src='data:image/png;base64,{}'.format(encoded_image), style=GRAPH_STYLE)
     else:
         return dcc.Graph(figure=plot_object, style=GRAPH_STYLE)
 
@@ -374,6 +387,15 @@ class InteractiveMatrixPlot:
                     plot_element = html.Iframe(srcDoc=plot_object.write_html(), style=GRAPH_STYLE)
                 elif isinstance(plot_object, InteractivePieLegend):
                     plot_element = html.Iframe(srcDoc=plot_object.write_html(), style=GRAPH_STYLE)
+                elif isinstance(plot_object, tuple):
+                    if isinstance(plot_object[0], matplotlib.figure.Figure):
+                        # Convert matplotlib figure to PNG image
+                        buf = io.BytesIO()
+                        plt.tight_layout()
+                        plot_object[0].savefig(buf, format='png')
+                        buf.seek(0)
+                        encoded_image = base64.b64encode(buf.read()).decode("utf-8")
+                        plot_element = html.Img(src='data:image/png;base64,{}'.format(encoded_image), style=GRAPH_STYLE)
                 else:
                     plot_element = html.Div('Plot not available', style=GRAPH_STYLE)
                 row.append(plot_element)

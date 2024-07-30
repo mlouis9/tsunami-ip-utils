@@ -36,6 +36,8 @@ experiment_files = application_files
 contributions_nuclide, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files)
 
 # %%
+# Nuclide-Wise Contributions
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Now, the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function needs a numpy array of plot objects to generate the matrix plot.
 # We can generate this array using the :func:`tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions` function.
 # This function takes a dictionary of contributions and the name of the integral index, and returns a numpy array of plot objects
@@ -71,8 +73,41 @@ fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=la
 fig.show()
 
 # %% 
+# Changing the Diagonal Plot Type
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # On the diagonals, where the application and experiment are the same, the plot is a pie chart of contributions to the
-# nuclear-data indcued uncertainty,
+# nuclear-data indcued uncertainty, as shown in :ref:`sphx_glr_auto_examples_visualizing_contributions.py`. However, other
+# types of plots, such as static bar plots can be used instead. This is done by specifying the ``diagonal_type`` in 
+# the :func:`tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions` function. Note that any plot type
+# available in :func:`tsunami_ip_utils.viz.viz.contribution_plot` can be used.
+
+# %%
+# Static Pie Chart Diagonals
+# """"""""""""""""""""""""""
+# For a static pie chart, the ``diagonal_type`` should be set to ``'pie'``
+
+plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(
+    contributions_nuclide, 
+    '(Δk/k)^2', 
+    diagonal_type='pie'
+)
+fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=labels)
+fig.show()
+
+# %%
+# Static Bar Chart Diagonals
+# """"""""""""""""""""""""""
+# For a static pie chart, the ``diagonal_type`` should be set to ``'bar'``
+
+plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(
+    contributions_nuclide, 
+    '(Δk/k)^2', 
+    diagonal_type='bar'
+)
+fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=labels)
+fig.show()
+
+# test test
 
 # %%
 # Matrix of Perturbation Correlation Plots
