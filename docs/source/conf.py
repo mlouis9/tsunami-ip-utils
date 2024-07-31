@@ -41,9 +41,9 @@ release = '0.0.1'
 
 def unexpand_home(path):
     home = str(Path.home())
-    path = str(path)
-    if path.startswith(home):
-        return '~' + path[len(home):]
+    str_path = str(path)
+    if str_path.startswith(home):
+        return Path('~' + str_path[len(home):])
     return path
 
 # -- Plotly Image Scraper -----------------------------------------------------
