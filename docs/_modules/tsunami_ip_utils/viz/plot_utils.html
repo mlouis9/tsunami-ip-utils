@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.viz.plot_utils &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.viz.plot_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.viz.plot_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Various utility functions for creating interactive plots, including functions for generating plot objects from</span>
+<span class="sd">contributions and perturbations. These functions are used in the interactive plotting functions in the ``viz`` module.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils._utils</span> <span class="kn">import</span> <span class="n">_filter_redundant_reactions</span><span class="p">,</span> <span class="n">_isotope_reaction_list_to_nested_dict</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">unumpy</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">ufloat</span>
+<span class="kn">import</span> <span class="nn">tsunami_ip_utils</span>
+<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.chrome.service</span> <span class="kn">import</span> <span class="n">Service</span>
+<span class="kn">from</span> <span class="nn">webdriver_manager.chrome</span> <span class="kn">import</span> <span class="n">ChromeDriverManager</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="kn">import</span> <span class="n">By</span>
+
+<span class="k">def</span> <span class="nf">_find_free_port</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds a free port on localhost for running a Flask/Dash server. This is done by creating a socket and binding it</span>
+<span class="sd">    to an available port. The socket is then closed and the port number is returned.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A free port number.&quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># Let the OS pick an available port</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">port</span>
+
+<span class="k">def</span> <span class="nf">_determine_plot_type</span><span class="p">(</span><span class="n">contributions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span> <span class="nb">dict</span> <span class="p">],</span> <span class="n">plot_redundant_reactions</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines whether the contributions are nuclide-wise or nuclide-reaction-wise and whether to plot redundant</span>
+<span class="sd">    reactions or not. Then converts the contributions (list of dictionaries) to a dictionary of contributions keyed by</span>
+<span class="sd">    isotope then by reaction type if necessary.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    contributions</span>
+<span class="sd">        List of dictionaries containing the contributions to the similarity parameter for each</span>
+<span class="sd">        nuclide or nuclide-reaction pair.</span>
+<span class="sd">    plot_redundant_reactions</span>
+<span class="sd">        Whether to plot redundant reactions (or irrelevant reactions) when considering</span>
+<span class="sd">        nuclide-reaction-wise contributions.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        - contributions</span>
+<span class="sd">            Contributions to the similarity parameter keyed by isotope then by reaction type (if necessary).</span>
+<span class="sd">        - nested_plot</span>
+<span class="sd">            Whether the plot is nested by nuclide then by reaction type.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;reaction_type&#39;</span> <span class="ow">in</span> <span class="n">contributions</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="c1"># Nuclide-reaction-wise contributions</span>
+        <span class="n">nested_plot</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># Nested plot by nuclide then by reaction type</span>
+
+        <span class="c1"># Create a dictionary of contributions keyed by isotope then by reaction type</span>
+        <span class="n">contributions</span> <span class="o">=</span> <span class="n">_isotope_reaction_list_to_nested_dict</span><span class="p">(</span><span class="n">contributions</span><span class="p">,</span> <span class="s1">&#39;contribution&#39;</span><span class="p">)</span>
+
+        <span class="c1"># If viewing nuclide-reaction wise contributions, it&#39;s important (at least for the visualizations in this function)</span>
+        <span class="c1"># that if viewing the true contributions to the nuclide total, that redundant interactions (e.g. capture and fission</span>
+        <span class="c1"># + (n, g)) and irrelevant interactions (e.g. chi and nubar) are not plotted.</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plot_redundant_reactions</span><span class="p">:</span>
+            <span class="c1"># Remove redundant interactions</span>
+            <span class="n">contributions</span> <span class="o">=</span> <span class="n">_filter_redundant_reactions</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># Nuclide-wise contributions</span>
+        <span class="n">nested_plot</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">contributions</span> <span class="o">=</span> <span class="p">{</span> <span class="n">contribution</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]:</span> <span class="n">contribution</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contributions</span> <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">contributions</span><span class="p">,</span> <span class="n">nested_plot</span>
+
+<div class="viewcode-block" id="generate_plot_objects_array_from_contributions">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_plot_objects_array_from_contributions</span><span class="p">(</span><span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span> <span class="p">]</span> <span class="p">],</span> <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a matrix of plot objects (for creating a matrix plot) for the given contributions to an arbitrary integral index.</span>
+<span class="sd">    This is valid for plots of :math:`\\Delta k/k` contributions, :math:`E` contributions, :math:`c_k` contributions, etc..</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    contributions</span>
+<span class="sd">        Dictionary of a list of contributions to the integral index keyed by application or experiment.</span>
+<span class="sd">    integral_index_name</span>
+<span class="sd">        Name of the integral index being plotted.</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Additional keyword arguments. The following are supported:</span>
+<span class="sd">        </span>
+<span class="sd">        - diagonal_type (str)</span>
+<span class="sd">            Type of plot to create on the diagonal. Default is ``&#39;interactive_pie&#39;`` which creates an interactive</span>
+<span class="sd">            pie chart.</span>
+<span class="sd">        - off_diagonal_type (str)</span>
+<span class="sd">            Type of plot to create off the diagonal. Default is ``&#39;interactive_scatter&#39;`` which creates an interactive</span>
+<span class="sd">            scatter plot.</span>
+<span class="sd">        - interactive_contribution_legend (bool)</span>
+<span class="sd">            Whether to make the legend interactive for the contribution plots. Default is ``True``.</span>
+<span class="sd">        - interactive_correlation_legend (bool)</span>
+<span class="sd">            Whether to make the legend interactive for the correlation plots. Default is ``True``.</span>
+<span class="sd">            </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        2D numpy array of plot objects to be plotted with the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz</span> <span class="kn">import</span> <span class="n">contribution_plot</span><span class="p">,</span> <span class="n">correlation_plot</span> <span class="c1"># Import here to avoid circular import</span>
+    
+    <span class="c1"># Get options for legend interactivity and the diagonal plot type if supplied</span>
+    <span class="n">diagonal_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;diagonal_type&#39;</span><span class="p">,</span> <span class="s1">&#39;interactive_pie&#39;</span><span class="p">)</span>
+    <span class="n">off_diagonal_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;off_diagonal_type&#39;</span><span class="p">,</span> <span class="s1">&#39;interactive_scatter&#39;</span><span class="p">)</span>
+    <span class="n">interactive_correlation_legend</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;interactive_correlation_legend&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">interactive_contribution_legend</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;interactive_contribution_legend&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">num_applications</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">contributions</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">])</span>
+    <span class="n">num_experiments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">contributions</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Construct plot matrix</span>
+    <span class="n">plot_objects_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span> <span class="p">(</span> <span class="n">num_applications</span><span class="p">,</span> <span class="n">num_experiments</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span> <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">application_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_applications</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">experiment_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_experiments</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">experiment_index</span> <span class="o">==</span> <span class="n">application_index</span><span class="p">:</span>
+                <span class="c1"># On the diagonal, make a contribution plot, as a correlation plot is not useful when comparing the same</span>
+                <span class="c1"># application and experiment</span>
+                <span class="n">plot_objects_array</span><span class="p">[</span><span class="n">application_index</span><span class="p">,</span> <span class="n">experiment_index</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">contribution_plot</span><span class="p">(</span>
+                    <span class="n">contributions</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">][</span><span class="n">application_index</span><span class="p">],</span>
+                    <span class="n">plot_type</span><span class="o">=</span><span class="n">diagonal_type</span><span class="p">,</span>
+                    <span class="n">integral_index_name</span><span class="o">=</span><span class="n">integral_index_name</span><span class="p">,</span>
+                    <span class="n">interactive_legend</span><span class="o">=</span><span class="n">interactive_contribution_legend</span><span class="p">,</span>     
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plot_objects_array</span><span class="p">[</span><span class="n">application_index</span><span class="p">,</span> <span class="n">experiment_index</span><span class="p">]</span> <span class="o">=</span>  \
+                <span class="n">correlation_plot</span><span class="p">(</span>
+                    <span class="n">contributions</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">][</span><span class="n">application_index</span><span class="p">],</span> 
+                    <span class="n">contributions</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">],</span> 
+                    <span class="n">plot_type</span><span class="o">=</span><span class="n">off_diagonal_type</span><span class="p">,</span>
+                    <span class="n">integral_index_name</span><span class="o">=</span><span class="n">integral_index_name</span><span class="p">,</span> 
+                    <span class="n">plot_redundant_reactions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                    <span class="n">interactive_legend</span><span class="o">=</span><span class="n">interactive_correlation_legend</span>
+                <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plot_objects_array</span></div>
+
+
+<div class="viewcode-block" id="generate_plot_objects_array_from_perturbations">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_perturbations">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_plot_objects_array_from_perturbations</span><span class="p">(</span><span class="n">points_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a matrix of plot objects (for creating a matrix plot) from a numpy array of perturbation points. This is</span>
+<span class="sd">    used for a matrix of perturbation plots only.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    points_array</span>
+<span class="sd">        2D numpy array of points generated from the perturbation test. Shape ``(num_applications, num_experiments)``.</span>
+<span class="sd">            </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        2D numpy array of plot objects to be plotted with the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz</span> <span class="kn">import</span> <span class="n">perturbation_plot</span> <span class="c1"># Import here to avoid circular import</span>
+    
+    <span class="c1"># Construct plot matrix</span>
+    <span class="n">num_applications</span><span class="p">,</span> <span class="n">num_experiments</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">points_array</span><span class="p">)</span>
+    <span class="n">plot_objects_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span> <span class="p">(</span> <span class="n">num_applications</span><span class="p">,</span> <span class="n">num_experiments</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points_array</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">perturbation_plot</span><span class="p">(</span><span class="n">points_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+            <span class="n">plot_objects_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">fig</span>
+
+    <span class="k">return</span> <span class="n">plot_objects_array</span></div>
+
+
+<span class="k">def</span> <span class="nf">_capture_html_as_image</span><span class="p">(</span><span class="n">html_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_image</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">matrix</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Captures an HTML file as an image using Selenium WebDriver. This is useful for saving interactive plots as static</span>
+<span class="sd">    images.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    html_file</span>
+<span class="sd">        Path to the HTML file to capture.</span>
+<span class="sd">    output_image</span>
+<span class="sd">        Path to save the output image</span>
+<span class="sd">    matrix</span>
+<span class="sd">        Whether or not the html file is a matrix plot. If ``True``, the function searches for a div element with a specific</span>
+<span class="sd">        id to determine the necessary size of the webbrowser.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Setup WebDriver</span>
+    <span class="n">service</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span><span class="n">ChromeDriverManager</span><span class="p">()</span><span class="o">.</span><span class="n">install</span><span class="p">())</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">ChromeOptions</span><span class="p">()</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--headless&quot;</span><span class="p">)</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="c1"># Load HTML file</span>
+    <span class="n">html_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;file://&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">html_file</span><span class="p">))</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">html_file</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_scroll_dimension</span><span class="p">(</span><span class="n">axis</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;return document.body.parentNode.scroll</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">get_element_scroll_dimension</span><span class="p">(</span><span class="n">element_id</span><span class="p">,</span> <span class="nb">property</span><span class="p">):</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;return document.getElementById(&#39;</span><span class="si">{</span><span class="n">element_id</span><span class="si">}</span><span class="s2">&#39;).scroll</span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s2">;&quot;</span>
+        <span class="k">return</span> <span class="n">driver</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+
+    <span class="c1"># get the page scroll dimensions</span>
+    <span class="k">if</span> <span class="n">matrix</span><span class="p">:</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">get_element_scroll_dimension</span><span class="p">(</span><span class="s2">&quot;matrix-plot&quot;</span><span class="p">,</span> <span class="s2">&quot;Width&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">get_scroll_dimension</span><span class="p">(</span><span class="s2">&quot;Width&quot;</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">get_scroll_dimension</span><span class="p">(</span><span class="s2">&quot;Height&quot;</span><span class="p">)</span>
+
+    <span class="c1"># set the browser window size</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">set_window_size</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Take screenshot</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_image</span><span class="p">))</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

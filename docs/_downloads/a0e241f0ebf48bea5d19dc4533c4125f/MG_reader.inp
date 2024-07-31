@@ -1,0 +1,18 @@
+=shell
+cp $multigroup_library_path ft31f001
+end
+
+=tabasco
+0$$$$ 31 32 e
+1$$$$ 1 e t
+2$$$$ $nuclide_zaid e
+3$$$$ $reaction_mt e t
+end
+
+=charmin
+input=32 output=33 double to $plot_option
+end
+
+=shell
+cp ft33f001 $output_file_path
+end

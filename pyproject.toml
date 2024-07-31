@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "tsunami_ip_utils"
+version = "0.0.4"
+description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
+authors = [
+    "Matthew Louis <matthewlouis31@gmail.com>"
+]
+license = "MIT"
+readme = "README.md"
+documentation = "https://tsunami-ip-utils.readthedocs.io"
+include = ["src/tsunami_ip_utils/config.yaml"]
+
+# Dependencies section: specify your package dependencies here
+[tool.poetry.dependencies]
+python = "^3.8"
+plotly = "~5.22.0"
+matplotlib = "*"
+pandas = "*"
+uncertainties = "*"
+scipy = "*"
+flask = "*"
+dash = "*"
+h5py = "*"
+tqdm = "*"
+pyyaml = "*"
+pytest-mpl = "*"
+pytest = "*"
+pyprojroot = "*"
+selenium = "*"
+webdriver-manager = "*"
+IPython = "*"
+pyprojroot = "*"
+kaleido = "*"
+openpyxl = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+# Additional metadata and URLs for the project
+[tool.poetry.urls]
+"Homepage" = "https://github.com/mlouis9/tsunami_ip_utils"
+"Issues" = "https://github.com/mlouis9/tsunami_ip_utils/issues"

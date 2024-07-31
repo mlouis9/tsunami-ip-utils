@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"TeX": {"extensions": ["AMSmath.js", "AMSsymbols.js"], "equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cache Base and Perturbed Cross Section Libraries" href="caching_cross_sections.html" />
+    <link rel="prev" title="paths module" href="../paths.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../paths.html">Paths</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="caching_cross_sections.html">Cache Base and Perturbed Cross Section Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sdf_readers.html">SDF Readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multigroup_xs_reader.html">SCALE Multigroup Cross Section Reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compare_E.html">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualizing_contributions.html">Visualizing Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertainty_contributions.html">Uncertainty Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation_plot/index.html">Correlation Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_plot/index.html">Matrix Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
+<p>This directory contains examples of how to use the <code class="docutils literal notranslate"><span class="pre">tsunami_ip_utils</span></code> package.</p>
+<p><strong class="pseudo-header">General Examples</strong></p>
+<p>Below is a gallery of general examples</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Cache Base and Perturbed Cross Section Libraries"><img alt="" src="../_images/sphx_glr_caching_cross_sections_thumb.png" />
+<p><a class="reference internal" href="caching_cross_sections.html#sphx-glr-auto-examples-caching-cross-sections-py"><span class="std std-ref">Cache Base and Perturbed Cross Section Libraries</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Cache Base and Perturbed Cross Section Libraries</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This demonstrates how to use the tools for reading TSUNAMI-B formatted Sensitivity Data Files (SDFs)."><img alt="" src="../_images/sphx_glr_sdf_readers_thumb.png" />
+<p><a class="reference internal" href="sdf_readers.html#sphx-glr-auto-examples-sdf-readers-py"><span class="std std-ref">SDF Readers</span></a></p>
+  <div class="sphx-glr-thumbnail-title">SDF Readers</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to read SCALE multigroup cross section libraries. This functionality relies on AMPX modules for creating text dumps of COVERX formatted libraries. More details are given here: mg_reader.inp. "><img alt="" src="../_images/sphx_glr_multigroup_xs_reader_thumb.png" />
+<p><a class="reference internal" href="multigroup_xs_reader.html#sphx-glr-auto-examples-multigroup-xs-reader-py"><span class="std std-ref">SCALE Multigroup Cross Section Reader</span></a></p>
+  <div class="sphx-glr-thumbnail-title">SCALE Multigroup Cross Section Reader</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the use of tsunami_ip_utils for calculating the similarity index E for a set of TSUNAMI-IP  SDF files and comparing to the TSUNAMI-IP calculated value. This example uses a set of 12 SDF files generated from the highly  enriched uranium fast metal (HMF) series of critical experiments [Bess2019]_."><img alt="" src="../_images/sphx_glr_compare_E_thumb.png" />
+<p><a class="reference internal" href="compare_E.html#sphx-glr-auto-examples-compare-e-py"><span class="std std-ref">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example illustrates the use of the various tools for visualizing contributions to a TSUNAMI-IP integral index (such as E, or even contributions to (\Delta k/k)^2). This example shows the visualization of (\Delta k/k)^2 contributions, but the same tools can be used for visualizing contributions to E."><img alt="" src="../_images/sphx_glr_visualizing_contributions_thumb.png" />
+<p><a class="reference internal" href="visualizing_contributions.html#sphx-glr-auto-examples-visualizing-contributions-py"><span class="std std-ref">Visualizing Contributions</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Visualizing Contributions</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Uncertainty Contributions"><img alt="" src="../_images/sphx_glr_uncertainty_contributions_thumb.png" />
+<p><a class="reference internal" href="uncertainty_contributions.html#sphx-glr-auto-examples-uncertainty-contributions-py"><span class="std std-ref">Uncertainty Contributions</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Uncertainty Contributions</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+<p><strong class="pseudo-header">Correlation Plots</strong></p>
+<p>These examples demonstrate how to create correlation plots using the methods described in <a class="reference internal" href="../report/index.html#sec-a-correlation-based-approach"><span class="std std-ref">the technical manual</span></a>.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Contribution Correlation Plots"><img alt="" src="../_images/sphx_glr_contribution_correlation_plot_thumb.png" />
+<p><a class="reference internal" href="correlation_plot/contribution_correlation_plot.html#sphx-glr-auto-examples-correlation-plot-contribution-correlation-plot-py"><span class="std std-ref">Contribution Correlation Plots</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Contribution Correlation Plots</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to generate a perturbation correlation plot using the  tsunami_ip_utils.perturbations.generate_points "><img alt="" src="../_images/sphx_glr_perturbation_correlation_plot_thumb.png" />
+<p><a class="reference internal" href="correlation_plot/perturbation_correlation_plot.html#sphx-glr-auto-examples-correlation-plot-perturbation-correlation-plot-py"><span class="std std-ref">Perturbation Correlation Plots</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Perturbation Correlation Plots</div>
+</div></div><p><strong class="pseudo-header">Matrix Plots</strong></p>
+<p>These examples demonstrate the use of the <a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.matrix_plot" title="tsunami_ip_utils.viz.viz.matrix_plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.viz.matrix_plot()</span></code></a> function to generate a matrix of plots.
+This is useful for comparing multiple applications and experiments in a single figure.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Matrices With a Different Set of Applications and Experiments"><img alt="" src="../_images/sphx_glr_different_applications_and_experiments_thumb.png" />
+<p><a class="reference internal" href="matrix_plot/different_applications_and_experiments.html#sphx-glr-auto-examples-matrix-plot-different-applications-and-experiments-py"><span class="std std-ref">Matrices With a Different Set of Applications and Experiments</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Matrices With a Different Set of Applications and Experiments</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Matrix of Perturbation Plots"><img alt="" src="../_images/sphx_glr_matrix_of_perturbation_plots_thumb.png" />
+<p><a class="reference internal" href="matrix_plot/matrix_of_perturbation_plots.html#sphx-glr-auto-examples-matrix-plot-matrix-of-perturbation-plots-py"><span class="std std-ref">Matrix of Perturbation Plots</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Matrix of Perturbation Plots</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Non-Square Matrix Plots"><img alt="" src="../_images/sphx_glr_nonsquare_plot_thumb.png" />
+<p><a class="reference internal" href="matrix_plot/nonsquare_plot.html#sphx-glr-auto-examples-matrix-plot-nonsquare-plot-py"><span class="std std-ref">Non-Square Matrix Plots</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Non-Square Matrix Plots</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Matrix of Contribution Correlation Plots"><img alt="" src="../_images/sphx_glr_matrix_of_contribution_plots_thumb.png" />
+<p><a class="reference internal" href="matrix_plot/matrix_of_contribution_plots.html#sphx-glr-auto-examples-matrix-plot-matrix-of-contribution-plots-py"><span class="std std-ref">Matrix of Contribution Correlation Plots</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Matrix of Contribution Correlation Plots</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Changing Plot Defaults"><img alt="" src="../_images/sphx_glr_changing_plot_defaults_thumb.png" />
+<p><a class="reference internal" href="matrix_plot/changing_plot_defaults.html#sphx-glr-auto-examples-matrix-plot-changing-plot-defaults-py"><span class="std std-ref">Changing Plot Defaults</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Changing Plot Defaults</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-footer sphx-glr-footer-gallery docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/07fcc19ba03226cd3d83d4e40ec44385/auto_examples_python.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">auto_examples_python.zip</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/6f1e7a639e0699d6164445b55e6c116d/auto_examples_jupyter.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Jupyter</span> <span class="pre">notebooks:</span> <span class="pre">auto_examples_jupyter.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../paths.html" class="btn btn-neutral float-left" title="paths module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="caching_cross_sections.html" class="btn btn-neutral float-right" title="Cache Base and Perturbed Cross Section Libraries" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

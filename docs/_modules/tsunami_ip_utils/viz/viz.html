@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.viz.viz &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.viz.viz</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.viz.viz</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">._bar_plot</span> <span class="kn">import</span> <span class="n">_BarPlotter</span>
+<span class="kn">from</span> <span class="nn">.pie_plot</span> <span class="kn">import</span> <span class="n">_PiePlotter</span><span class="p">,</span> <span class="n">_InteractivePiePlotter</span>
+<span class="kn">from</span> <span class="nn">.scatter_plot</span> <span class="kn">import</span> <span class="n">_ScatterPlotter</span><span class="p">,</span> <span class="n">_InteractiveScatterPlotter</span><span class="p">,</span> <span class="n">_InteractivePerturbationScatterPlotter</span>
+<span class="kn">from</span> <span class="nn">.matrix_plot</span> <span class="kn">import</span> <span class="n">_interactive_matrix_plot</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">_determine_plot_type</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.integral_indices</span> <span class="kn">import</span> <span class="n">_add_missing_reactions_and_nuclides</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">ufloat</span><span class="p">,</span> <span class="n">unumpy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils._utils</span> <span class="kn">import</span> <span class="n">_parse_ufloats</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.axes</span> <span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.pie_plot</span> <span class="kn">import</span> <span class="n">InteractivePieLegend</span>
+<span class="kn">import</span> <span class="nn">plotly</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.scatter_plot</span> <span class="kn">import</span> <span class="n">InteractiveScatterLegend</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.scatter_plot</span> <span class="kn">import</span> <span class="n">EnhancedPlotlyFigure</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.matrix_plot</span> <span class="kn">import</span> <span class="n">InteractiveMatrixPlot</span>
+
+<div class="viewcode-block" id="contribution_plot">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.contribution_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">contribution_plot</span><span class="p">(</span><span class="n">contributions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">plot_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> 
+                      <span class="n">plot_redundant_reactions</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
+                      <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">Axes</span><span class="p">],</span> <span class="n">plotly</span><span class="o">.</span><span class="n">graph_objs</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">InteractivePieLegend</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the contributions to an arbitrary similarity parameter for a single experiment application pair</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    contributions</span>
+<span class="sd">        List of dictionaries containing the contributions to the similarity parameter for each</span>
+<span class="sd">        nuclide or nuclide-reaction pair.</span>
+<span class="sd">    plot_type</span>
+<span class="sd">        Type of plot to create. Default is ``&#39;bar&#39;`` which creates a matplotlib bar plot. Other options are:</span>
+<span class="sd">        </span>
+<span class="sd">        - ``&#39;pie&#39;``</span>
+<span class="sd">            Creates a ``matplotlib`` pie chart.</span>
+<span class="sd">        - ``&#39;interactive_pie&#39;``</span>
+<span class="sd">            Creates an interactive Plotly sunburst chart.</span>
+<span class="sd">    integral_index_name</span>
+<span class="sd">        Name of the integral index being plotted. Default is ``&#39;E&#39;``.</span>
+<span class="sd">    plot_redundant_reactions</span>
+<span class="sd">        Whether to plot redundant reactions (or irrelevant reactions) when considering</span>
+<span class="sd">        nuclide-reaction-wise contributions. Default is ``True``.</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Additional keyword arguments to pass to the plotting function.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;bar&#39;``, returns a tuple containing the matplotlib figure and axes objects. These</span>
+<span class="sd">          can be used to further style the plot or save it to a file. Can be plotted by calling ``plt.show()``.</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;pie&#39;``, returns a Plotly figure object which can be displayed by calling ``fig.show()``</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;interactive_pie&#39;``, returns a :class:`.InteractivePieLegend` object which can be displayed by</span>
+<span class="sd">          calling ``fig.show()``&quot;&quot;&quot;</span>
+
+    <span class="c1"># Determine if the contributions are nuclide-wise or nuclide-reaction-wise</span>
+    <span class="n">contributions</span><span class="p">,</span> <span class="n">nested_plot</span> <span class="o">=</span> <span class="n">_determine_plot_type</span><span class="p">(</span><span class="n">contributions</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">)</span>
+
+    <span class="n">plotters</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="n">_BarPlotter</span><span class="p">(</span><span class="n">integral_index_name</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+        <span class="s1">&#39;pie&#39;</span><span class="p">:</span> <span class="n">_PiePlotter</span><span class="p">(</span><span class="n">integral_index_name</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+        <span class="s1">&#39;interactive_pie&#39;</span><span class="p">:</span> <span class="n">_InteractivePiePlotter</span><span class="p">(</span><span class="n">integral_index_name</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Get the requested plotter</span>
+    <span class="n">plotter</span> <span class="o">=</span> <span class="n">plotters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">plot_type</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">plotter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported plot type&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create the plot and style it</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">_create_plot</span><span class="p">(</span><span class="n">contributions</span><span class="p">,</span> <span class="n">nested_plot</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plotter</span><span class="o">.</span><span class="n">_get_plot</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="correlation_plot">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.correlation_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">correlation_plot</span><span class="p">(</span><span class="n">application_contributions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">experiment_contributions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">plot_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> 
+                     <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
+                     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">Axes</span><span class="p">],</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">,</span> <span class="n">InteractiveScatterLegend</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a correlation plot for a given application-experiment pair for which the contributions to the similarity</span>
+<span class="sd">    parameter are given.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_contributions</span>
+<span class="sd">        List of dictionaries containing the contributions to the similarity parameter</span>
+<span class="sd">        for the application.</span>
+<span class="sd">    experiment_contributions</span>
+<span class="sd">        List of dictionaries containing the contributions to the similarity parameter</span>
+<span class="sd">        for the experiment.</span>
+<span class="sd">    plot_type</span>
+<span class="sd">        Type of plot to create. Default is ``&#39;scatter&#39;`` which creates a matplotlib scatter plot. Other options</span>
+<span class="sd">        are ``&#39;interactive_scatter&#39;``, which creates a Plotly scatter plot.</span>
+<span class="sd">    integral_index_name</span>
+<span class="sd">        Name of the integral index being plotted. Default is ``&#39;E&#39;``</span>
+<span class="sd">    plot_redundant_reactions</span>
+<span class="sd">        Whether to plot redundant reactions (or irrelevant reactions) when considering</span>
+<span class="sd">        nuclide-reaction-wise contributions. Default is ``True``.</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Additional keyword arguments to pass to the plotting function.</span>
+
+<span class="sd">        - ``interactive_legend``: bool</span>
+<span class="sd">            Whether to include an interactive legend in the plot. Default is ``False``. Only applicable if</span>
+<span class="sd">            ``plot_type`` is ``&#39;interactive_scatter&#39;``.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;scatter&#39;``, returns a tuple containing the matplotlib figure and axes objects. These</span>
+<span class="sd">          can be used to further style the plot or save it to a file. Can be plotted by calling ``plt.show()``.</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;interactive_scatter&#39;`` and ``interactive_legend`` is ``False``, returns a Plotly figure </span>
+<span class="sd">          object which can be displayed by calling ``fig.show()``</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;interactive_scatter&#39;`` and ``interactive_legend`` is ``True``, returns a </span>
+<span class="sd">          :class:`.InteractiveScatterLegend` object which can be displayed by calling ``fig.show()``</span>
+<span class="sd">          </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Technically, if ``plot_type`` is ``interactive_scatter`` and ``interactive_legend`` is ``False``, the function will</span>
+<span class="sd">    return a :class:`.EnhancedPlotlyFigure` object, which is a wrapper of Plotly&#39;s ``Figure`` class, which has additional</span>
+<span class="sd">    attributes related to the statistics of the scatter plot.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Determine if the contributions are nuclide-wise or nuclide-reaction-wise</span>
+    <span class="n">application_contributions</span><span class="p">,</span> <span class="n">application_nested</span> <span class="o">=</span> <span class="n">_determine_plot_type</span><span class="p">(</span><span class="n">application_contributions</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">)</span>
+    <span class="n">experiment_contributions</span><span class="p">,</span> <span class="n">experiment_nested</span> <span class="o">=</span> <span class="n">_determine_plot_type</span><span class="p">(</span><span class="n">experiment_contributions</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">application_nested</span> <span class="o">!=</span> <span class="n">experiment_nested</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Application and experiment contributions must have the same nested structure&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nested</span> <span class="o">=</span> <span class="n">application_nested</span> <span class="c1"># They are be the same, so arbitrarily choose one</span>
+
+    <span class="c1"># Get the list of isotopes for which contributions are available</span>
+    <span class="n">isotopes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">application_contributions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">experiment_contributions</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="n">all_reactions</span> <span class="o">=</span> <span class="n">_add_missing_reactions_and_nuclides</span><span class="p">(</span><span class="n">application_contributions</span><span class="p">,</span> <span class="n">experiment_contributions</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;contribution&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Now convert the contributions for the application and experiment into a list of x, y pairs for plotting</span>
+    <span class="n">contribution_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">nested</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">isotopes</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_reactions</span><span class="p">:</span>
+                <span class="n">contribution_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">application_contributions</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">],</span> \
+                                           <span class="n">experiment_contributions</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">isotopes</span><span class="p">:</span>
+            <span class="n">contribution_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">application_contributions</span><span class="p">[</span><span class="n">isotope</span><span class="p">],</span> <span class="n">experiment_contributions</span><span class="p">[</span><span class="n">isotope</span><span class="p">]))</span>
+
+    <span class="n">plotters</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;scatter&#39;</span><span class="p">:</span> <span class="n">_ScatterPlotter</span><span class="p">(</span><span class="n">integral_index_name</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">,</span> <span class="n">nested</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+        <span class="s1">&#39;interactive_scatter&#39;</span><span class="p">:</span> <span class="n">_InteractiveScatterPlotter</span><span class="p">(</span><span class="n">integral_index_name</span><span class="p">,</span> <span class="n">plot_redundant_reactions</span><span class="p">,</span> <span class="n">nested</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Get the requested plotter</span>
+    <span class="n">plotter</span> <span class="o">=</span> <span class="n">plotters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">plot_type</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">plotter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported plot type: </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create the plot and style it</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">_create_plot</span><span class="p">(</span><span class="n">contribution_pairs</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">,</span> <span class="n">all_reactions</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plotter</span><span class="o">.</span><span class="n">_get_plot</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="perturbation_plot">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.perturbation_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">perturbation_plot</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">ufloat</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plots the perturbation points for a given application-experiment pair for which the perturbation points have already</span>
+<span class="sd">    been calculated.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    points: </span>
+<span class="sd">        List of tuples containing the perturbation points for the application-experiment pair.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A (enhanced) Plotly figure object which can be displayed by calling ``fig.show()``.&quot;&quot;&quot;</span>
+    
+    <span class="c1"># Extracting data</span>
+    <span class="n">plotter</span> <span class="o">=</span> <span class="n">_InteractivePerturbationScatterPlotter</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">_create_plot</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plotter</span><span class="o">.</span><span class="n">_get_plot</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="matrix_plot">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.matrix_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">matrix_plot</span><span class="p">(</span><span class="n">plot_objects_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveMatrixPlot</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a Dash app to display a matrix of plots from a numpy object array of figure objects.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    plot_objects_array</span>
+<span class="sd">        A 2D numpy array of figure objects.</span>
+<span class="sd">    plot_type</span>
+<span class="sd">        Type of plot to create. Default is ``&#39;interactive&#39;`` which creates an interactive matrix plot (served by a Dash app). </span>
+<span class="sd">        Other options are ``&#39;static&#39;``, which creates a static matplotlib matrix plot.</span>
+<span class="sd">    labels</span>
+<span class="sd">        Dictionary of lists containing the labels for the rows and columns of the matrix plot. Keys are ``&#39;expeirments&#39;`` and </span>
+<span class="sd">        ``&#39;applications&#39;``. Default is ``None``. Most commonly, this is the sdf filename for the given application/experiment.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;interactive&#39;``, returns a :class:`.InteractiveMatrixPlot` object which can be run by </span>
+<span class="sd">          calling ``app.show()``.</span>
+<span class="sd">        * If ``plot_type`` is ``&#39;static&#39;``, raises a ``NotImplementedError``.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s1">&#39;interactive&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_interactive_matrix_plot</span><span class="p">(</span><span class="n">plot_objects_array</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s1">&#39;static&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Static matrix plots are not yet supported&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="BlockingFigureWrapper">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.BlockingFigureWrapper">[docs]</a>
+<span class="k">class</span> <span class="nc">BlockingFigureWrapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class wraps a ``matplotlib.figure.Figure`` instance and blocks the execution of the program until the figure</span>
+<span class="sd">    is closed. This is useful for displaying figures in a Jupyter notebook or other interactive environments where the</span>
+<span class="sd">    program would otherwise continue executing and close the figure immediately, i.e. ``figure.show()`` is non-blocking. </span>
+<span class="sd">    This is nice for creating multiple plots programmatically via a plotting function, then returning the relevant figure </span>
+<span class="sd">    and axs objects, after which the user can make changes and plot or save the figures individually. This functionality</span>
+<span class="sd">    is not allowed with ``plt.show()``, because it shows all plots created in a given session (and so will show multiple plots</span>
+<span class="sd">    instead of just a selected one).&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BlockingFigureWrapper.__init__">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.BlockingFigureWrapper.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="n">Figure</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">figure</span><span class="p">,</span> <span class="n">Figure</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected a matplotlib.figure.Figure instance&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_figure</span> <span class="o">=</span> <span class="n">figure</span></div>
+
+
+<div class="viewcode-block" id="BlockingFigureWrapper.show">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.BlockingFigureWrapper.show">[docs]</a>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display the figure and block the program until the user presses Enter.&quot;&quot;&quot;</span>
+        <span class="c1"># Show the figure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_figure</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Press Enter to continue...&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delegate all other attribute access to the wrapped matplotlib figure instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_figure</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="generate_heatmap_from_comparison">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.generate_heatmap_from_comparison">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_heatmap_from_comparison</span><span class="p">(</span><span class="n">comparison_excel_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">base_fontsize</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">6</span>
+                                     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a heatmap from a comparison excel file generated by :func:`tsunami_ip_utils.comparisons.correlation_comparison`.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    comparison_excel_path</span>
+<span class="sd">        Path to the comparison excel file.</span>
+<span class="sd">    base_fontsize</span>
+<span class="sd">        Base font size for the heatmap (there is some heuristic for scaling fontsize with matrix size). Default is 6.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A dictionary containing the matplotlib figure and axes objects for each unique header in the comparison excel file.&quot;&quot;&quot;</span>
+    
+    <span class="n">comparison</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">comparison_excel_path</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># Get unique secondary headers from level 1 of the MultiIndex</span>
+    <span class="n">unique_headers</span> <span class="o">=</span> <span class="n">comparison</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+    <span class="n">plot_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">heatmap_labels</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">COMPARISON_HEATMAP_LABELS</span>
+
+    <span class="c1"># Extract a separate 2D numpy array for each unique header in level 1</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">header</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unique_headers</span><span class="p">):</span>
+        <span class="c1"># Filter the DataFrame for the current header</span>
+        <span class="n">filtered_df</span> <span class="o">=</span> <span class="n">comparison</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Convert the filtered DataFrame to a numpy array</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">_parse_ufloats</span><span class="p">(</span><span class="n">filtered_df</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+        
+        <span class="c1"># Now plot the array</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">cax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+        <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cax</span><span class="p">)</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">heatmap_labels</span><span class="p">[</span><span class="n">header</span><span class="p">])</span>
+
+        <span class="c1"># Annotate cells with values</span>
+        <span class="n">font_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base_fontsize</span><span class="p">,</span> <span class="mi">200</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">ndenumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_size</span><span class="p">)</span>
+
+        <span class="c1"># Set axis labels and ticks</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Application&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Experiment&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labeltop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">plot_dict</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">BlockingFigureWrapper</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()),</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">plot_dict</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uncertainty Contributions &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Correlation Plots" href="correlation_plot/index.html" />
+    <link rel="prev" title="Visualizing Contributions" href="visualizing_contributions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../paths.html">Paths</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="caching_cross_sections.html">Cache Base and Perturbed Cross Section Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sdf_readers.html">SDF Readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multigroup_xs_reader.html">SCALE Multigroup Cross Section Reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compare_E.html">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualizing_contributions.html">Visualizing Contributions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Uncertainty Contributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#isotope-wise-contributions">Isotope-Wise Contributions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#isotope-reaction-wise-contributions">Isotope-Reaction-Wise Contributions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-contributions-for-a-single-file">Getting Contributions for a Single File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variance-contributions">Variance Contributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="correlation_plot/index.html">Correlation Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_plot/index.html">Matrix Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Uncertainty Contributions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/uncertainty_contributions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-uncertainty-contributions-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="uncertainty-contributions">
+<span id="sphx-glr-auto-examples-uncertainty-contributions-py"></span><h1>Uncertainty Contributions<a class="headerlink" href="#uncertainty-contributions" title="Link to this heading"></a></h1>
+<p>This example demonstrates how to read (nuclear-data induced) uncertainty contributions from a set of TSUNAMI-B SDF files.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Getting the Contributions</span>
+<span class="c1"># -------------------------</span>
+<span class="c1"># The first step is to get the contributions to the uncertainty. This can be done using the</span>
+<span class="c1"># :func:`tsunami_ip_utils.integral_indices.get_uncertainty_contributions` function.</span>
+
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.integral_indices</span> <span class="kn">import</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.integral_indices.get_uncertainty_contributions" title="tsunami_ip_utils.integral_indices.get_uncertainty_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-integral_indices sphx-glr-backref-type-py-function"><span class="n">get_uncertainty_contributions</span></a>
+<span class="kn">from</span> <span class="nn">paths</span> <span class="kn">import</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a>
+
+<span class="n">application_filenames</span> <span class="o">=</span> <span class="p">[</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a><span class="si">}</span><span class="s2">/data/example_sdfs/HMF/HEU-MET-FAST-003-00</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.sdf&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="p">]</span>
+<span class="n">experiment_filenames</span>  <span class="o">=</span> <span class="p">[</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a><span class="si">}</span><span class="s2">/data/example_sdfs/HMF/HEU-MET-FAST-003-00</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.sdf&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="p">]</span>
+<span class="n">uncertainty_contributions_nuclide</span><span class="p">,</span> <span class="n">uncertainty_contributions_nuclide_reaction</span> <span class="o">=</span> \
+      <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.integral_indices.get_uncertainty_contributions" title="tsunami_ip_utils.integral_indices.get_uncertainty_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-integral_indices sphx-glr-backref-type-py-function"><span class="n">get_uncertainty_contributions</span></a><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As explained in the API documentation, the above function returns two dictionaries. The first dictionary,
+<code class="docutils literal notranslate"><span class="pre">uncertainty_contributions_nuclide</span></code>, contains the contributions to the uncertainty for each nuclide. The second dictionary,
+<code class="docutils literal notranslate"><span class="pre">uncertainty_contributions_nuclide_reaction</span></code>, contains the contributions to the uncertainty for each nuclide-reaction pair.
+Each dictionary has keys <code class="docutils literal notranslate"><span class="pre">'application'</span></code> and <code class="docutils literal notranslate"><span class="pre">'experiment'</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">uncertainty_contributions_nuclide</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">application_nuclide_contributions</span> <span class="o">=</span> <span class="n">uncertainty_contributions_nuclide</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>dict_keys([&#39;application&#39;, &#39;experiment&#39;])
+</pre></div>
+</div>
+<section id="isotope-wise-contributions">
+<h2>Isotope-Wise Contributions<a class="headerlink" href="#isotope-wise-contributions" title="Link to this heading"></a></h2>
+<p>The contents of the dictionary is a list of contributions for each application/experiment. I.e. the (nuclide-wise)
+contributions to the nuclear data induced uncertainty for application 1 (i.e. <code class="docutils literal notranslate"><span class="pre">application_filenames[0]</span></code>) can be
+accessed as follows:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">application_nuclide_contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;contribution&#39;: 1.1869831817995358+/-0.0009513935878905702}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;contribution&#39;: 0.5665193328849952+/-0.004831934771704849}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;contribution&#39;: 0.16184626300599841+/-0.00012274171911905328}, {&#39;isotope&#39;: &#39;u-235 - u-238&#39;, &#39;contribution&#39;: 0.050524528884493325+/-3.775832291069502e-06}]
+</pre></div>
+</div>
+<p>The ouput is a list of dictionaries with the keys <code class="docutils literal notranslate"><span class="pre">'isotope'</span></code> and <code class="docutils literal notranslate"><span class="pre">'contribution'</span></code>. The contributions are the nuclide-wise
+contributions to the nuclear data induced uncertainty. For TSUNAMI-B formatted SDFs, these values have an associated
+(monte carlo) uncertainty, and so are represented as <a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.ufloat" title="(in uncertainties v1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">uncertainties.ufloat()</span></code></a> objects.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">application_nuclide_contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;contribution&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1.1870+/-0.0010
+</pre></div>
+</div>
+<p>These objects automatically handle uncertainty propagation, and there use is further documented in the <a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#module-uncertainties" title="(in uncertainties v1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">uncertainties</span></code></a>
+package.</p>
+</section>
+<section id="isotope-reaction-wise-contributions">
+<h2>Isotope-Reaction-Wise Contributions<a class="headerlink" href="#isotope-reaction-wise-contributions" title="Link to this heading"></a></h2>
+<p>Isotope-reaction-wise contributions are accessed similarly.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">application_nuclide_contributions</span> <span class="o">=</span> <span class="n">uncertainty_contributions_nuclide_reaction</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">application_nuclide_contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[{&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;n,gamma - n,gamma&#39;, &#39;contribution&#39;: 1.0762+/-0.0010083}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &quot;n,n&#39; - n,n&#39;&quot;, &#39;contribution&#39;: 0.89654+/-0.0022208}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &quot;n,n&#39; - elastic&quot;, &#39;contribution&#39;: -0.82886+/-0.0022158}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;elastic - elastic&#39;, &#39;contribution&#39;: 0.43714+/-0.00090315}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &quot;n,n&#39; - n,n&#39;&quot;, &#39;contribution&#39;: 0.31603+/-0.00044944}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;chi - chi&#39;, &#39;contribution&#39;: 0.28691+/-0.00081625}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &quot;n,n&#39; - elastic&quot;, &#39;contribution&#39;: -0.25501+/-0.00029919}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;fission - fission&#39;, &#39;contribution&#39;: 0.24183+/-2.7144e-05}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;elastic - n,gamma&#39;, &#39;contribution&#39;: 0.23559+/-0.00054821}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;reaction_type&#39;: &#39;fission - fission&#39;, &#39;contribution&#39;: 0.15883+/-0.00012507}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;elastic - elastic&#39;, &#39;contribution&#39;: 0.12347+/-0.00011876}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;chi - chi&#39;, &#39;contribution&#39;: 0.082855+/-0.00013436}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;nubar - nubar&#39;, &#39;contribution&#39;: 0.080153+/-3.2557e-06}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;nubar - nubar&#39;, &#39;contribution&#39;: 0.070821+/-9.4547e-06}, {&#39;isotope&#39;: &#39;u-235 - u-238&#39;, &#39;reaction_type&#39;: &#39;fission - fission&#39;, &#39;contribution&#39;: 0.059862+/-3.1781e-06}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;elastic - fission&#39;, &#39;contribution&#39;: -0.046224+/-7.8172e-06}, {&#39;isotope&#39;: &#39;u-235 - u-238&#39;, &#39;reaction_type&#39;: &#39;fission - n,gamma&#39;, &#39;contribution&#39;: -0.032105+/-4.4042e-07}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;fission - fission&#39;, &#39;contribution&#39;: 0.023509+/-1.3028e-06}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;n,gamma - n,gamma&#39;, &#39;contribution&#39;: 0.022796+/-1.0321e-06}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;reaction_type&#39;: &#39;nubar - nubar&#39;, &#39;contribution&#39;: 0.020862+/-1.5998e-06}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;reaction_type&#39;: &#39;n,gamma - n,gamma&#39;, &#39;contribution&#39;: 0.015236+/-1.0777e-07}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;reaction_type&#39;: &quot;n,n&#39; - n,n&#39;&quot;, &#39;contribution&#39;: 0.013031+/-7.1888e-06}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;elastic - n,gamma&#39;, &#39;contribution&#39;: 0.010215+/-4.2262e-07}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;reaction_type&#39;: &#39;chi - chi&#39;, &#39;contribution&#39;: 0.010136+/-8.1112e-06}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;n,2n - n,2n&#39;, &#39;contribution&#39;: 0.0090309+/-1.8261e-06}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;n,2n - n,2n&#39;, &#39;contribution&#39;: 0.0070606+/-6.1117e-07}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;elastic - fission&#39;, &#39;contribution&#39;: -0.006939+/-2.54e-07}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;reaction_type&#39;: &#39;elastic - elastic&#39;, &#39;contribution&#39;: 0.0052285+/-1.3973e-06}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;n,2n - elastic&#39;, &#39;contribution&#39;: -0.0035981+/-8.4954e-07}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;n,2n - elastic&#39;, &#39;contribution&#39;: -0.0025521+/-3.5859e-07}, {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;fission - n,gamma&#39;, &#39;contribution&#39;: 5.4626e-05+/-3.3895e-10}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;reaction_type&#39;: &#39;n,2n - n,2n&#39;, &#39;contribution&#39;: 5.0396e-05+/-1.6122e-09}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;reaction_type&#39;: &#39;fission - n,gamma&#39;, &#39;contribution&#39;: -1.2874e-05+/-1.0338e-11}]
+</pre></div>
+</div>
+<p>The output is a list of dictionaries with the keys <code class="docutils literal notranslate"><span class="pre">'isotope'</span></code>, <code class="docutils literal notranslate"><span class="pre">'reaction'</span></code>, and <code class="docutils literal notranslate"><span class="pre">'contribution'</span></code>. The contributions
+are (like before) <a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.ufloat" title="(in uncertainties v1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">uncertainties.ufloat()</span></code></a> objects. A specific contribution can be accessed via</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">application_nuclide_contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">application_nuclide_contributions</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;contribution&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;n,gamma - n,gamma&#39;, &#39;contribution&#39;: 1.0762+/-0.0010083}
+1.0762+/-0.0010
+</pre></div>
+</div>
+</section>
+<section id="getting-contributions-for-a-single-file">
+<h2>Getting Contributions for a Single File<a class="headerlink" href="#getting-contributions-for-a-single-file" title="Link to this heading"></a></h2>
+<p>As discussed in the API documentation, the application_filenames, and experiment_filenames arugments are both optional - to
+streamline the process of getting contributions for a single file, the function can be called with only one argument. For
+example, to get the contributions for the first application file, we can call the function as follows:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">application_filenames</span> <span class="o">=</span> <span class="p">[</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a><span class="si">}</span><span class="s2">/data/example_sdfs/HMF/HEU-MET-FAST-003-001.sdf&quot;</span> <span class="p">]</span>
+<span class="n">uncertainty_contributions_nuclide</span><span class="p">,</span> <span class="n">uncertainty_contributions_nuclide_reaction</span> <span class="o">=</span> \
+      <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.integral_indices.get_uncertainty_contributions" title="tsunami_ip_utils.integral_indices.get_uncertainty_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-integral_indices sphx-glr-backref-type-py-function"><span class="n">get_uncertainty_contributions</span></a><span class="p">(</span><span class="n">application_filenames</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">uncertainty_contributions_nuclide</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[{&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;contribution&#39;: 1.1547475051845695+/-0.000896155210593727}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;contribution&#39;: 0.556418115404617+/-0.004135126369373132}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;contribution&#39;: 0.1570725325098565+/-0.00011949411284427181}, {&#39;isotope&#39;: &#39;u-235 - u-238&#39;, &#39;contribution&#39;: 0.04953563217523321+/-3.3690884432420322e-06}]]
+</pre></div>
+</div>
+<p>Note that since we only passed application filenames, the function only returns the contributions for the application. The
+experiment contributions are an empty list</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">uncertainty_contributions_nuclide</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[]
+</pre></div>
+</div>
+</section>
+<section id="variance-contributions">
+<h2>Variance Contributions<a class="headerlink" href="#variance-contributions" title="Link to this heading"></a></h2>
+<p>The contributions to the nuclear data induced variance can also be obtained by passing the <code class="docutils literal notranslate"><span class="pre">variance=True</span></code> argument to the
+function. This will return the contributions to the variance, rather than the uncertainty.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">variance_contributions_nuclide</span><span class="p">,</span> <span class="n">variance_contributions_nuclide_reaction</span> <span class="o">=</span> \
+      <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.integral_indices.get_uncertainty_contributions" title="tsunami_ip_utils.integral_indices.get_uncertainty_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-integral_indices sphx-glr-backref-type-py-function"><span class="n">get_uncertainty_contributions</span></a><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">variance_contributions_nuclide</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[{&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;contribution&#39;: 1.3334418007299873+/-0.0020696659873825174}, {&#39;isotope&#39;: &#39;u-238 - u-238&#39;, &#39;contribution&#39;: 0.30960111915042576+/-0.004601718442813069}, {&#39;isotope&#39;: &#39;u-234 - u-234&#39;, &#39;contribution&#39;: 0.024671780469059927+/-3.75384858489367e-05}, {&#39;isotope&#39;: &#39;u-235 - u-238&#39;, &#39;contribution&#39;: 0.002453778855+/-3.337798517805328e-07}]]
+</pre></div>
+</div>
+<p>The variances are just the squares of the uncertainties, except when the are negative, in which case the variance is the
+negative of the square of the uncertainty.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">variance_contribution</span> <span class="o">=</span> <span class="n">variance_contributions_nuclide</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span>
+<span class="n">uncertainty_contribution</span> <span class="o">=</span> <span class="n">uncertainty_contributions_nuclide</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span>
+<span class="n">squared_uncertainty</span> <span class="o">=</span> <span class="n">uncertainty_contribution</span><span class="o">**</span><span class="mi">2</span> <span class="k">if</span> <span class="n">uncertainty_contribution</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span>  <span class="o">-</span><span class="p">(</span><span class="n">uncertainty_contribution</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">variance_contribution</span><span class="p">,</span> <span class="n">squared_uncertainty</span><span class="p">)</span>
+<span class="k">assert</span> <span class="p">(</span> <span class="n">variance_contribution</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="n">squared_uncertainty</span><span class="o">.</span><span class="n">n</span> <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span> <span class="n">variance_contribution</span><span class="o">.</span><span class="n">s</span> <span class="o">==</span> <span class="n">squared_uncertainty</span><span class="o">.</span><span class="n">s</span> <span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1.3334+/-0.0021 1.3334+/-0.0021
+</pre></div>
+</div>
+<p>Note that even though the variance contribution and the squared uncertainty contribution have the same nominal value
+and standard deviation, they are not equal, i.e. <code class="docutils literal notranslate"><span class="pre">variance_contribution</span> <span class="pre">==</span> <span class="pre">squared_uncertainty</span></code> evaluates to <code class="docutils literal notranslate"><span class="pre">False</span></code>.
+This is because the uncertainties are represented as <a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.ufloat" title="(in uncertainties v1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">uncertainties.ufloat()</span></code></a> which represent distinct random variables,
+as discussed in <a class="reference external" href="https://pythonhosted.org/uncertainties/user_guide.html#comparison-operators">the uncertainties package documentation</a>.</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.386 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-uncertainty-contributions-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/c14ec1f7d86b22ce7aa508482b0f91da/uncertainty_contributions.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">uncertainty_contributions.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/fb3da721e092e2de35ea02d9672339ab/uncertainty_contributions.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">uncertainty_contributions.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/d05691dd5c0cd1a5e8964708e327c85f/uncertainty_contributions.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">uncertainty_contributions.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="visualizing_contributions.html" class="btn btn-neutral float-left" title="Visualizing Contributions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="correlation_plot/index.html" class="btn btn-neutral float-right" title="Correlation Plots" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

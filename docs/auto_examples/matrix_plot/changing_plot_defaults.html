@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Changing Plot Defaults &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Investigation of Correlation Methods for use in Criticality Safety" href="../../report/index.html" />
+    <link rel="prev" title="Matrix of Contribution Correlation Plots" href="matrix_of_contribution_plots.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../paths.html">Paths</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../caching_cross_sections.html">Cache Base and Perturbed Cross Section Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sdf_readers.html">SDF Readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multigroup_xs_reader.html">SCALE Multigroup Cross Section Reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compare_E.html">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../visualizing_contributions.html">Visualizing Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../uncertainty_contributions.html">Uncertainty Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../correlation_plot/index.html">Correlation Plots</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Matrix Plots</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="different_applications_and_experiments.html">Matrices With a Different Set of Applications and Experiments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="matrix_of_perturbation_plots.html">Matrix of Perturbation Plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nonsquare_plot.html">Non-Square Matrix Plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="matrix_of_contribution_plots.html">Matrix of Contribution Correlation Plots</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Changing Plot Defaults</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#changing-the-diagonal-plot-type">Changing the Diagonal Plot Type</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#static-pie-chart-diagonals">Static Pie Chart Diagonals</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#static-bar-chart-diagonals">Static Bar Chart Diagonals</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#changing-the-off-diagonal-plot-type">Changing the Off-Diagonal Plot Type</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Matrix Plots</a></li>
+      <li class="breadcrumb-item active">Changing Plot Defaults</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/matrix_plot/changing_plot_defaults.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-matrix-plot-changing-plot-defaults-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="changing-plot-defaults">
+<span id="sphx-glr-auto-examples-matrix-plot-changing-plot-defaults-py"></span><h1>Changing Plot Defaults<a class="headerlink" href="#changing-plot-defaults" title="Link to this heading"></a></h1>
+<p>This example demonstrates how to change the default plot settings for the matrix plot. This includes changing the plot
+type on the diagonals, changing the plot type for the off-diagonals.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.viz</span> <span class="kn">import</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.matrix_plot" title="tsunami_ip_utils.viz.matrix_plot" class="sphx-glr-backref-module-tsunami_ip_utils-viz sphx-glr-backref-type-py-module"><span class="n">matrix_plot</span></a>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.plot_utils</span> <span class="kn">import</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" title="tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-viz-plot_utils sphx-glr-backref-type-py-function"><span class="n">generate_plot_objects_array_from_contributions</span></a>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.integral_indices</span> <span class="kn">import</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.integral_indices.get_uncertainty_contributions" title="tsunami_ip_utils.integral_indices.get_uncertainty_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-integral_indices sphx-glr-backref-type-py-function"><span class="n">get_uncertainty_contributions</span></a>
+<span class="kn">from</span> <span class="nn">paths</span> <span class="kn">import</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a>
+
+<span class="n">application_files</span> <span class="o">=</span> <span class="p">[</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;example_sdfs&#39;</span> <span class="o">/</span> <span class="s1">&#39;MCT&#39;</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;MIX-COMP-THERM-001-00</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.sdf&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="p">]</span>
+<span class="n">experiment_files</span> <span class="o">=</span> <span class="n">application_files</span>
+
+<span class="n">contributions_nuclide</span><span class="p">,</span> <span class="n">contributions_nuclide_reaction</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.integral_indices.get_uncertainty_contributions" title="tsunami_ip_utils.integral_indices.get_uncertainty_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-integral_indices sphx-glr-backref-type-py-function"><span class="n">get_uncertainty_contributions</span></a><span class="p">(</span><span class="n">application_files</span><span class="p">,</span> <span class="n">experiment_files</span><span class="p">)</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;applications&#39;</span><span class="p">:</span> <span class="p">[</span> <span class="n">application_file</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">application_file</span> <span class="ow">in</span> <span class="n">application_files</span> <span class="p">],</span>
+    <span class="s1">&#39;experiments&#39;</span><span class="p">:</span> <span class="p">[</span> <span class="n">experiment_file</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">experiment_file</span> <span class="ow">in</span> <span class="n">experiment_files</span> <span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="changing-the-diagonal-plot-type">
+<h2>Changing the Diagonal Plot Type<a class="headerlink" href="#changing-the-diagonal-plot-type" title="Link to this heading"></a></h2>
+<p>On the diagonals, where the application and experiment are the same, the plot is a pie chart of contributions to the
+nuclear-data indcued uncertainty, as shown in <a class="reference internal" href="../visualizing_contributions.html#sphx-glr-auto-examples-visualizing-contributions-py"><span class="std std-ref">Visualizing Contributions</span></a>. However, other
+types of plots, such as static bar plots can be used instead. This is done by specifying the <code class="docutils literal notranslate"><span class="pre">diagonal_type</span></code> in
+the <a class="reference internal" href="../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" title="tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions()</span></code></a> function. Note that any plot type
+available in <a class="reference internal" href="../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.viz.contribution_plot" title="tsunami_ip_utils.viz.viz.contribution_plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.viz.contribution_plot()</span></code></a> can be used.</p>
+<section id="static-pie-chart-diagonals">
+<h3>Static Pie Chart Diagonals<a class="headerlink" href="#static-pie-chart-diagonals" title="Link to this heading"></a></h3>
+<p>For a static pie chart, the <code class="docutils literal notranslate"><span class="pre">diagonal_type</span></code> should be set to <code class="docutils literal notranslate"><span class="pre">'pie'</span></code></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" title="tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-viz-plot_utils sphx-glr-backref-type-py-function"><span class="n">generate_plot_objects_array_from_contributions</span></a><span class="p">(</span>
+    <span class="n">contributions_nuclide</span><span class="p">,</span>
+    <span class="s1">&#39;(Δk/k)^2&#39;</span><span class="p">,</span>
+    <span class="n">diagonal_type</span><span class="o">=</span><span class="s1">&#39;pie&#39;</span>
+<span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.matrix_plot" title="tsunami_ip_utils.viz.matrix_plot" class="sphx-glr-backref-module-tsunami_ip_utils-viz sphx-glr-backref-type-py-module"><span class="n">matrix_plot</span></a><span class="p">(</span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;interactive&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="zoomControls">
+    <button type="button" onclick="zoom(1, this)">- Zoom Out</button>
+    <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
+</div>
+<div class="iframe_container">
+    <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_a3c3ae31-c965-44c8-9760-3656685cfebc.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+</div>
+<script>
+    function zoom(direction, element) {
+        // Find the closest parent container that includes both the buttons and the iframe
+        const zoomContainer = element.closest('.zoomControls');
+        const iframeContainer = zoomContainer.nextElementSibling;
+        const iframe = iframeContainer.querySelector('.myiframe');
+
+        // Initialize or retrieve the current scale
+        let currentScale = parseFloat($(iframe).data('scale')) || 0.5;
+        let originalWidth = parseFloat($(iframe).data('originalWidth')) || $(iframe).width();
+        let originalHeight = parseFloat($(iframe).data('originalHeight')) || $(iframe).height();
+
+        if (direction === 1) {
+            currentScale /= 1.1;
+        } else {
+            currentScale *= 1.1;
+        }
+
+        let scaledWidth = originalWidth / currentScale;
+        let scaledHeight = originalHeight / currentScale;
+
+        // Store the updated scale
+        $(iframe).data('scale', currentScale);
+
+        // Apply the new scale as a CSS transform
+        $(iframe).css('transform', `scale(${currentScale})`);
+        $(iframe).css('width', `${scaledWidth}px`);
+        $(iframe).css('height', `${scaledHeight}px`);
+    }
+
+    function applyInitialScale() {
+        document.querySelectorAll('.myiframe').forEach(iframe => {
+            let initialScale = 0.5;
+            let originalWidth = $(iframe).width();
+            let originalHeight = $(iframe).height();
+
+            $(iframe).data('scale', initialScale);
+            $(iframe).data('originalWidth', originalWidth);
+            $(iframe).data('originalHeight', originalHeight);
+
+            let scaledWidth = originalWidth / initialScale;
+            let scaledHeight = originalHeight / initialScale;
+
+            iframe.style.width = `${scaledWidth}px`;
+            iframe.style.height = `${scaledHeight}px`;
+            iframe.style.transform = 'scale(0.5)'; // Apply a neutral scale since size is already adjusted
+            iframe.style.transformOrigin = '0 0'; // Transform from top left corner
+        });
+    }
+
+    window.onload = function() {
+        // Apply initial scale to all iframes when the page loads
+        applyInitialScale();
+    };
+</script></section>
+<section id="static-bar-chart-diagonals">
+<h3>Static Bar Chart Diagonals<a class="headerlink" href="#static-bar-chart-diagonals" title="Link to this heading"></a></h3>
+<p>For a static pie chart, the <code class="docutils literal notranslate"><span class="pre">diagonal_type</span></code> should be set to <code class="docutils literal notranslate"><span class="pre">'bar'</span></code></p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" title="tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-viz-plot_utils sphx-glr-backref-type-py-function"><span class="n">generate_plot_objects_array_from_contributions</span></a><span class="p">(</span>
+    <span class="n">contributions_nuclide</span><span class="p">,</span>
+    <span class="s1">&#39;(Δk/k)^2&#39;</span><span class="p">,</span>
+    <span class="n">diagonal_type</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span>
+<span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.matrix_plot" title="tsunami_ip_utils.viz.matrix_plot" class="sphx-glr-backref-module-tsunami_ip_utils-viz sphx-glr-backref-type-py-module"><span class="n">matrix_plot</span></a><span class="p">(</span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;interactive&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="zoomControls">
+    <button type="button" onclick="zoom(1, this)">- Zoom Out</button>
+    <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
+</div>
+<div class="iframe_container">
+    <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_47444f02-a58b-420e-86d2-8d697c774576.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+</div>
+<script>
+    function zoom(direction, element) {
+        // Find the closest parent container that includes both the buttons and the iframe
+        const zoomContainer = element.closest('.zoomControls');
+        const iframeContainer = zoomContainer.nextElementSibling;
+        const iframe = iframeContainer.querySelector('.myiframe');
+
+        // Initialize or retrieve the current scale
+        let currentScale = parseFloat($(iframe).data('scale')) || 0.5;
+        let originalWidth = parseFloat($(iframe).data('originalWidth')) || $(iframe).width();
+        let originalHeight = parseFloat($(iframe).data('originalHeight')) || $(iframe).height();
+
+        if (direction === 1) {
+            currentScale /= 1.1;
+        } else {
+            currentScale *= 1.1;
+        }
+
+        let scaledWidth = originalWidth / currentScale;
+        let scaledHeight = originalHeight / currentScale;
+
+        // Store the updated scale
+        $(iframe).data('scale', currentScale);
+
+        // Apply the new scale as a CSS transform
+        $(iframe).css('transform', `scale(${currentScale})`);
+        $(iframe).css('width', `${scaledWidth}px`);
+        $(iframe).css('height', `${scaledHeight}px`);
+    }
+
+    function applyInitialScale() {
+        document.querySelectorAll('.myiframe').forEach(iframe => {
+            let initialScale = 0.5;
+            let originalWidth = $(iframe).width();
+            let originalHeight = $(iframe).height();
+
+            $(iframe).data('scale', initialScale);
+            $(iframe).data('originalWidth', originalWidth);
+            $(iframe).data('originalHeight', originalHeight);
+
+            let scaledWidth = originalWidth / initialScale;
+            let scaledHeight = originalHeight / initialScale;
+
+            iframe.style.width = `${scaledWidth}px`;
+            iframe.style.height = `${scaledHeight}px`;
+            iframe.style.transform = 'scale(0.5)'; // Apply a neutral scale since size is already adjusted
+            iframe.style.transformOrigin = '0 0'; // Transform from top left corner
+        });
+    }
+
+    window.onload = function() {
+        // Apply initial scale to all iframes when the page loads
+        applyInitialScale();
+    };
+</script><p>If a plot type for which a variant with an interactive legend exists (e.g. <code class="docutils literal notranslate"><span class="pre">'interactive_pie'</span></code>) is used, the interactive
+legend can be turned off by setting the <code class="docutils literal notranslate"><span class="pre">interactive_contribution_legend</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">False</span></code>. These plots can also
+be saved to an image</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" title="tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-viz-plot_utils sphx-glr-backref-type-py-function"><span class="n">generate_plot_objects_array_from_contributions</span></a><span class="p">(</span>
+    <span class="n">contributions_nuclide</span><span class="p">,</span>
+    <span class="s1">&#39;(Δk/k)^2&#39;</span><span class="p">,</span>
+    <span class="n">diagonal_type</span><span class="o">=</span><span class="s1">&#39;interactive_pie&#39;</span><span class="p">,</span> <span class="c1"># This is the default, but it is shown here for clarity</span>
+    <span class="n">interactive_contribution_legend</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.matrix_plot" title="tsunami_ip_utils.viz.matrix_plot" class="sphx-glr-backref-module-tsunami_ip_utils-viz sphx-glr-backref-type-py-module"><span class="n">matrix_plot</span></a><span class="p">(</span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;interactive&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="zoomControls">
+    <button type="button" onclick="zoom(1, this)">- Zoom Out</button>
+    <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
+</div>
+<div class="iframe_container">
+    <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_d436ed3d-4eb4-4244-8472-1074f8652af8.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+</div>
+<script>
+    function zoom(direction, element) {
+        // Find the closest parent container that includes both the buttons and the iframe
+        const zoomContainer = element.closest('.zoomControls');
+        const iframeContainer = zoomContainer.nextElementSibling;
+        const iframe = iframeContainer.querySelector('.myiframe');
+
+        // Initialize or retrieve the current scale
+        let currentScale = parseFloat($(iframe).data('scale')) || 0.5;
+        let originalWidth = parseFloat($(iframe).data('originalWidth')) || $(iframe).width();
+        let originalHeight = parseFloat($(iframe).data('originalHeight')) || $(iframe).height();
+
+        if (direction === 1) {
+            currentScale /= 1.1;
+        } else {
+            currentScale *= 1.1;
+        }
+
+        let scaledWidth = originalWidth / currentScale;
+        let scaledHeight = originalHeight / currentScale;
+
+        // Store the updated scale
+        $(iframe).data('scale', currentScale);
+
+        // Apply the new scale as a CSS transform
+        $(iframe).css('transform', `scale(${currentScale})`);
+        $(iframe).css('width', `${scaledWidth}px`);
+        $(iframe).css('height', `${scaledHeight}px`);
+    }
+
+    function applyInitialScale() {
+        document.querySelectorAll('.myiframe').forEach(iframe => {
+            let initialScale = 0.5;
+            let originalWidth = $(iframe).width();
+            let originalHeight = $(iframe).height();
+
+            $(iframe).data('scale', initialScale);
+            $(iframe).data('originalWidth', originalWidth);
+            $(iframe).data('originalHeight', originalHeight);
+
+            let scaledWidth = originalWidth / initialScale;
+            let scaledHeight = originalHeight / initialScale;
+
+            iframe.style.width = `${scaledWidth}px`;
+            iframe.style.height = `${scaledHeight}px`;
+            iframe.style.transform = 'scale(0.5)'; // Apply a neutral scale since size is already adjusted
+            iframe.style.transformOrigin = '0 0'; // Transform from top left corner
+        });
+    }
+
+    window.onload = function() {
+        // Apply initial scale to all iframes when the page loads
+        applyInitialScale();
+    };
+</script></section>
+</section>
+<section id="changing-the-off-diagonal-plot-type">
+<h2>Changing the Off-Diagonal Plot Type<a class="headerlink" href="#changing-the-off-diagonal-plot-type" title="Link to this heading"></a></h2>
+<p>The off-diagonal plots can also be changed to a different type. By default, the off-diagonal plots are interactive scatter
+plots with an interactive legend, but they can just as easily be changed to a static matplotlib scatter plots</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" title="tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions" class="sphx-glr-backref-module-tsunami_ip_utils-viz-plot_utils sphx-glr-backref-type-py-function"><span class="n">generate_plot_objects_array_from_contributions</span></a><span class="p">(</span>
+    <span class="n">contributions_nuclide</span><span class="p">,</span>
+    <span class="s1">&#39;$(</span><span class="se">\\</span><span class="s1">Delta k/k)^2$&#39;</span><span class="p">,</span> <span class="c1"># Since all plots are matplotlib plots, pylatex formatting can be used to make the labels look nice</span>
+    <span class="n">off_diagonal_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span>
+    <span class="n">diagonal_type</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.matrix_plot" title="tsunami_ip_utils.viz.matrix_plot" class="sphx-glr-backref-module-tsunami_ip_utils-viz sphx-glr-backref-type-py-module"><span class="n">matrix_plot</span></a><span class="p">(</span><a href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plot_objects_array_nuclide</span></a><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;interactive&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">to_image</span><span class="p">(</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a> <span class="o">/</span> <span class="s1">&#39;_static&#39;</span> <span class="o">/</span> <span class="s1">&#39;matrix_bar_diagonal.png&#39;</span><span class="p">)</span>
+
+<span class="c1"># sphinx_gallery_thumbnail_path = &#39;../../examples/_static/matrix_bar_diagonal.png&#39;</span>
+</pre></div>
+</div>
+<div class="zoomControls">
+    <button type="button" onclick="zoom(1, this)">- Zoom Out</button>
+    <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
+</div>
+<div class="iframe_container">
+    <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_ed10f9a3-142a-48a8-b28c-b25983624337.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+</div>
+<script>
+    function zoom(direction, element) {
+        // Find the closest parent container that includes both the buttons and the iframe
+        const zoomContainer = element.closest('.zoomControls');
+        const iframeContainer = zoomContainer.nextElementSibling;
+        const iframe = iframeContainer.querySelector('.myiframe');
+
+        // Initialize or retrieve the current scale
+        let currentScale = parseFloat($(iframe).data('scale')) || 0.5;
+        let originalWidth = parseFloat($(iframe).data('originalWidth')) || $(iframe).width();
+        let originalHeight = parseFloat($(iframe).data('originalHeight')) || $(iframe).height();
+
+        if (direction === 1) {
+            currentScale /= 1.1;
+        } else {
+            currentScale *= 1.1;
+        }
+
+        let scaledWidth = originalWidth / currentScale;
+        let scaledHeight = originalHeight / currentScale;
+
+        // Store the updated scale
+        $(iframe).data('scale', currentScale);
+
+        // Apply the new scale as a CSS transform
+        $(iframe).css('transform', `scale(${currentScale})`);
+        $(iframe).css('width', `${scaledWidth}px`);
+        $(iframe).css('height', `${scaledHeight}px`);
+    }
+
+    function applyInitialScale() {
+        document.querySelectorAll('.myiframe').forEach(iframe => {
+            let initialScale = 0.5;
+            let originalWidth = $(iframe).width();
+            let originalHeight = $(iframe).height();
+
+            $(iframe).data('scale', initialScale);
+            $(iframe).data('originalWidth', originalWidth);
+            $(iframe).data('originalHeight', originalHeight);
+
+            let scaledWidth = originalWidth / initialScale;
+            let scaledHeight = originalHeight / initialScale;
+
+            iframe.style.width = `${scaledWidth}px`;
+            iframe.style.height = `${scaledHeight}px`;
+            iframe.style.transform = 'scale(0.5)'; // Apply a neutral scale since size is already adjusted
+            iframe.style.transformOrigin = '0 0'; // Transform from top left corner
+        });
+    }
+
+    window.onload = function() {
+        // Apply initial scale to all iframes when the page loads
+        applyInitialScale();
+    };
+</script><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 32.816 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-matrix-plot-changing-plot-defaults-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/a703214a09cf5021cadcc3e4f522fbce/changing_plot_defaults.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">changing_plot_defaults.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/f6765bb6e3be702b9d6d41246c96811b/changing_plot_defaults.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">changing_plot_defaults.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/81787a393afd91cfe561558f0f394205/changing_plot_defaults.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">changing_plot_defaults.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="matrix_of_contribution_plots.html" class="btn btn-neutral float-left" title="Matrix of Contribution Correlation Plots" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../report/index.html" class="btn btn-neutral float-right" title="Investigation of Correlation Methods for use in Criticality Safety" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+
+
+.. _sphx_glr_auto_examples_matrix_plot:
+
+Matrix Plots
+------------
+
+These examples demonstrate the use of the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function to generate a matrix of plots. 
+This is useful for comparing multiple applications and experiments in a single figure.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Matrices With a Different Set of Applications and Experiments">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_different_applications_and_experiments_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_different_applications_and_experiments.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Matrices With a Different Set of Applications and Experiments</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Matrix of Perturbation Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_matrix_of_perturbation_plots_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_perturbation_plots.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Matrix of Perturbation Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Non-Square Matrix Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_nonsquare_plot_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_nonsquare_plot.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Non-Square Matrix Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Matrix of Contribution Correlation Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_matrix_of_contribution_plots_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_contribution_plots.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Matrix of Contribution Correlation Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Changing Plot Defaults">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_changing_plot_defaults_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_changing_plot_defaults.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Changing Plot Defaults</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/matrix_plot/different_applications_and_experiments
+   /auto_examples/matrix_plot/matrix_of_perturbation_plots
+   /auto_examples/matrix_plot/nonsquare_plot
+   /auto_examples/matrix_plot/matrix_of_contribution_plots
+   /auto_examples/matrix_plot/changing_plot_defaults
+

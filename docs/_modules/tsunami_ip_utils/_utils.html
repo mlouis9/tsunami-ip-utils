@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils._utils &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils._utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils._utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">ufloat</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.readers</span> <span class="kn">import</span> <span class="n">read_integral_indices</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<div class="viewcode-block" id="_isotope_reaction_list_to_nested_dict">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils._utils._isotope_reaction_list_to_nested_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">_isotope_reaction_list_to_nested_dict</span><span class="p">(</span><span class="n">isotope_reaction_list</span><span class="p">,</span> <span class="n">field_of_interest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of</span>
+<span class="sd">    interest, e.g. an sdf profile or a contribution) to a nested dictionary</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - isotope_reaction_list: list of dict, list of dictionaries containing isotope-reaction pairs and some other key</span>
+<span class="sd">    - field_of_interest: str, the key in the dictionary that represents the value of interest</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    - nested_dict: dict, nested dictionary containing the isotope-reaction pairs and the value of interest&quot;&quot;&quot;</span>
+
+    <span class="n">isotope_reaction_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">get_atomic_number</span><span class="p">(</span><span class="n">isotope</span><span class="p">):</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">isotope</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">matches</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Return -1 if no atomic number is found, these isotopes will be sorted last</span>
+                                                  <span class="c1"># Should only be applicable to carbon in ENDF 7.1</span>
+    
+    <span class="c1"># Sort isotopes by atomic number so plots will have similar colors across different calls</span>
+    <span class="n">all_isotopes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">isotope_reaction</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">isotope_reaction</span> <span class="ow">in</span> <span class="n">isotope_reaction_list</span><span class="p">]))</span>
+    <span class="n">all_isotopes</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">get_atomic_number</span><span class="p">)</span>
+    <span class="n">isotope_reaction_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">isotope</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">all_isotopes</span> <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">isotope_reaction</span> <span class="ow">in</span> <span class="n">isotope_reaction_list</span><span class="p">:</span>
+        <span class="n">isotope</span> <span class="o">=</span> <span class="n">isotope_reaction</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="n">isotope_reaction</span><span class="p">[</span><span class="s1">&#39;reaction_type&#39;</span><span class="p">]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">isotope_reaction</span><span class="p">[</span><span class="n">field_of_interest</span><span class="p">]</span>
+
+        <span class="n">isotope_reaction_dict</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">return</span> <span class="n">isotope_reaction_dict</span></div>
+
+
+<div class="viewcode-block" id="_filter_redundant_reactions">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils._utils._filter_redundant_reactions">[docs]</a>
+<span class="k">def</span> <span class="nf">_filter_redundant_reactions</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">redundant_reactions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;chi&#39;</span><span class="p">,</span> <span class="s1">&#39;capture&#39;</span><span class="p">,</span> <span class="s1">&#39;nubar&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filters out redundant reactions from a nested isotope-reaction dictionary</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - data_dict: dict, nested dictionary containing isotope-reaction pairs</span>
+<span class="sd">    - redundant_reactions: list of str, list of reactions to filter out&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span> <span class="n">isotope</span><span class="p">:</span> <span class="p">{</span> <span class="n">reaction</span><span class="p">:</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">]</span> <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> \
+                        <span class="k">if</span> <span class="n">reaction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">redundant_reactions</span> <span class="p">}</span> <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">data_dict</span> <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="_filter_by_nuclie_reaction_dict">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils._utils._filter_by_nuclie_reaction_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">_filter_by_nuclie_reaction_dict</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">nuclide_reactions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filters out isotopes that are not in the nuclide_reactions dictionary</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - data_dict: dict, nested dictionary containing isotope-reaction pairs</span>
+<span class="sd">    - nuclide_reactions: dict, dictionary containing isotopes and their reactions&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">nuclide</span><span class="p">:</span> <span class="p">{</span><span class="n">reaction</span><span class="p">:</span> <span class="n">xs</span> <span class="k">for</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">xs</span> <span class="ow">in</span> <span class="n">reactions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">nuclide_reactions</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]}</span> \
+                        <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="n">nuclide_reactions</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
+
+
+
+<div class="viewcode-block" id="_parse_ufloats">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils._utils._parse_ufloats">[docs]</a>
+<span class="k">def</span> <span class="nf">_parse_ufloats</span><span class="p">(</span><span class="n">array_of_strings</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parses a 2D array of strings into a 2D array of ufloats, assuming zero uncertainty if &#39;+/-&#39; is not found. &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">to_ufloat</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+/-&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">parts</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">ufloat</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">to_ufloat</span><span class="p">)(</span><span class="n">array_of_strings</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_convert_paths">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils._utils._convert_paths">[docs]</a>
+<span class="k">def</span> <span class="nf">_convert_paths</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to ensure that any list argument passed to the decorated function,</span>
+<span class="sd">    which contains strings, has those strings converted to pathlib.Path objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">new_args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c1"># Convert all string items in the list to Path objects</span>
+                <span class="n">new_arg</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">]</span>
+                <span class="n">new_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_arg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        
+        <span class="n">new_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">v</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span>
+                      <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">new_args</span><span class="p">,</span> <span class="o">**</span><span class="n">new_kwargs</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<div class="viewcode-block" id="_run_and_read_TSUNAMI_IP">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils._utils._run_and_read_TSUNAMI_IP">[docs]</a>
+<span class="nd">@_convert_paths</span>
+<span class="k">def</span> <span class="nf">_run_and_read_TSUNAMI_IP</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> 
+                            <span class="n">experiment_filenames</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> <span class="n">coverx_library</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runs TSUNAMI-IP and reads the output file using the :func:`tsunami_ip_utils.readers.read_integral_indices` function.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_filenames</span>
+<span class="sd">        List of paths to the application SDF files.</span>
+<span class="sd">    experiment_filenames</span>
+<span class="sd">        List of paths to the experiment SDF files.</span>
+<span class="sd">    coverx</span>
+<span class="sd">        The coverx library to use for TSUNAMI-IP.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Integral matrices for each integral index type. The shape of the matrices are ``(num_applications, num_experiments)``. </span>
+<span class="sd">        Keys are ``&#39;c_k&#39;``, ``&#39;E_total&#39;``, ``&#39;E_fission&#39;``, ``&#39;E_capture&#39;``, and ``&#39;E_scatter&#39;``.&quot;&quot;&quot;</span>
+    
+    <span class="n">current_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">template_filename</span> <span class="o">=</span> <span class="n">current_dir</span> <span class="o">/</span> <span class="s1">&#39;input_files&#39;</span> <span class="o">/</span> <span class="s1">&#39;tsunami_ip_base_input.inp&#39;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="c1"># Convert filenames to strings</span>
+    <span class="n">application_filenames</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">application_filenames</span><span class="p">]</span>
+    <span class="n">experiment_filenames</span>  <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">experiment_filenames</span><span class="p">]</span>
+    
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c1"># Create the input file</span>
+        <span class="n">input_file</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+            <span class="n">application_filenames</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">),</span>
+            <span class="n">experiment_filenames</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">experiment_filenames</span><span class="p">),</span>
+            <span class="n">coverx_library</span><span class="o">=</span><span class="n">coverx_library</span>
+        <span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="n">input_filename</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># Run the TSUNAMI-IP calculation</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="p">[</span><span class="s1">&#39;scalerte&#39;</span><span class="p">,</span> <span class="n">input_filename</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span> <span class="n">Path</span><span class="p">(</span> <span class="n">input_filename</span> <span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="c1"># Read the output file</span>
+    <span class="n">output_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">input_filename</span><span class="si">}</span><span class="s2">.out&quot;</span>
+    <span class="n">tsunami_ip_output</span> <span class="o">=</span> <span class="n">read_integral_indices</span><span class="p">(</span><span class="n">output_filename</span><span class="p">)</span>
+
+    <span class="c1"># Clean up the temporary files</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">input_filename</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output_filename</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tsunami_ip_output</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

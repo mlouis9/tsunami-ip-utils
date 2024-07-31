@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.viz.scatter_plot &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.viz.scatter_plot</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.viz.scatter_plot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Tools for creating interactive and static scatter plots with error bars, linear regression lines, and correlation coefficient</span>
+<span class="sd">calculations.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">._base_plotter</span> <span class="kn">import</span> <span class="n">_Plotter</span>
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+<span class="kn">from</span> <span class="nn">plotly.subplots</span> <span class="kn">import</span> <span class="n">make_subplots</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+<span class="kn">import</span> <span class="nn">dash</span>
+<span class="kn">from</span> <span class="nn">dash</span> <span class="kn">import</span> <span class="n">dcc</span><span class="p">,</span> <span class="n">html</span>
+<span class="kn">from</span> <span class="nn">dash.dependencies</span> <span class="kn">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Output</span><span class="p">,</span> <span class="n">State</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">_find_free_port</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+<span class="kn">from</span> <span class="nn">pyparsing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">ufloat</span>
+<span class="kn">import</span> <span class="nn">tsunami_ip_utils</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.axes</span> <span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">plotly.io</span> <span class="k">as</span> <span class="nn">pio</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.plot_utils</span> <span class="kn">import</span> <span class="n">_capture_html_as_image</span>
+
+<span class="k">def</span> <span class="nf">_replace_spearman_and_pearson</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_pearson</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">new_spearman</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful</span>
+<span class="sd">    for updating the correlation statistics in a scatter plot annotation interactively after the plot has been created.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    text</span>
+<span class="sd">        The text (scatter plot annotation) containing the Spearman and Pearson values to be updated. It is expected that the</span>
+<span class="sd">        text contains the Spearman and Pearson values in the format ``&quot;Spearman: &lt;b&gt;0.123456&lt;/b&gt; Pearson: &lt;b&gt;0.123456&lt;/b&gt;&quot;``.</span>
+<span class="sd">    new_pearson</span>
+<span class="sd">        The new Pearson correlation coefficient value to replace the old value in the text.</span>
+<span class="sd">    new_spearman</span>
+<span class="sd">        The new Spearman rank correlation coefficient value to replace the old value in the text.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        The updated text with the new Spearman and Pearson values.&quot;&quot;&quot;</span>
+    
+    <span class="n">new_pearson</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">new_pearson</span><span class="si">:</span><span class="s2">1.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">new_spearman</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">new_spearman</span><span class="si">:</span><span class="s2">1.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Replace Pearson value using regex</span>
+    <span class="n">pearson_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(Pearson: &lt;b&gt;)[0-9.]+(&lt;/b&gt;)&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pearson_pattern</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\g&lt;1&gt;&quot;</span> <span class="o">+</span> <span class="n">new_pearson</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;\2&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="c1"># Replace Spearman value using regex</span>
+    <span class="n">spearman_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(Spearman: &lt;b&gt;)[0-9.]+(&lt;/b&gt;)&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">spearman_pattern</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\g&lt;1&gt;&quot;</span> <span class="o">+</span> <span class="n">new_spearman</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;\2&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">def</span> <span class="nf">_update_percent_difference</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reference_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the percent difference in the given text with the new percent difference calculated using the new Pearson</span>
+<span class="sd">    correlation coefficient value. This is useful for updating the percent difference in a scatter plot annotation interactively</span>
+<span class="sd">    after the plot has been created. This is only valid for scatter plots generated by </span>
+<span class="sd">    :func:`tsunami_ip_utils.comparisons.correlation_comparison` or other plots that have the percent difference in the annotation.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    text</span>
+<span class="sd">        The text (scatter plot annotation) containing the percent difference to be updated. It is expected that the text</span>
+<span class="sd">        contains the percent difference in the format ``&quot;Percent Difference: &lt;b&gt;0.123456&lt;/b&gt;%&quot;`` and the TSUNAMI-IP c_k value</span>
+<span class="sd">        in the format ``&quot;TSUNAMI-IP c_k: &lt;b&gt;0.123456+/-0.123456&lt;/b&gt;&quot;``.</span>
+<span class="sd">    reference_value</span>
+<span class="sd">        The reference value to calculate the percent difference from. This is typically the (updated) Pearson correlation </span>
+<span class="sd">        coefficient.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        - updated_text</span>
+<span class="sd">            The updated text with the new percent difference value.</span>
+<span class="sd">        - percent_difference</span>
+<span class="sd">            The new percent difference value with uncertainty.&quot;&quot;&quot;</span>
+    <span class="c1"># Regex to find the TSUNAMI-IP c_k value</span>
+    <span class="n">ck_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;TSUNAMI-IP c_k: &lt;b&gt;([\d\.]+)\+/-([\d\.]+)&lt;/b&gt;&quot;</span>
+    <span class="c1"># Find the TSUNAMI-IP c_k value in the text</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">ck_pattern</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;TSUNAMI-IP c_k value not found in the text&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Parse the nominal value and the uncertainty</span>
+    <span class="n">nominal_value</span><span class="p">,</span> <span class="n">uncertainty</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="n">tsunami_ck</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">nominal_value</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">uncertainty</span><span class="p">))</span>
+    
+    <span class="c1"># Calculate the percent difference</span>
+    <span class="k">if</span> <span class="n">reference_value</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">reference_value</span><span class="p">):</span>
+        <span class="n">percent_difference</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">percent_difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">tsunami_ck</span> <span class="o">-</span> <span class="n">reference_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">reference_value</span> <span class="o">*</span> <span class="mi">100</span>
+    
+    <span class="c1"># Format the new percent difference with uncertainty</span>
+    <span class="n">new_percent_diff_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&lt;b&gt;</span><span class="si">{</span><span class="n">percent_difference</span><span class="o">.</span><span class="n">nominal_value</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">+/-</span><span class="si">{</span><span class="n">percent_difference</span><span class="o">.</span><span class="n">std_dev</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&lt;/b&gt;%&quot;</span>
+    
+    <span class="c1"># Regex to replace the Percent Difference in the text</span>
+    <span class="c1"># Escaping special characters used in the regex pattern</span>
+    <span class="n">updated_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Percent Difference: &lt;b&gt;[\d\.\+\-/]+&lt;/b&gt;+%&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Percent Difference: </span><span class="si">{</span><span class="n">new_percent_diff_text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">updated_text</span><span class="p">,</span> <span class="n">percent_difference</span>
+
+<div class="viewcode-block" id="EnhancedPlotlyFigure">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure">[docs]</a>
+<span class="k">class</span> <span class="nc">EnhancedPlotlyFigure</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class wraps a plotly express figure object (intended for a scatter plot) and adds additional attributes for the</span>
+<span class="sd">    summary statistics and linear regression data. This class is intended to be used with the :class:`.InteractiveScatterPlotter`</span>
+<span class="sd">    class.&quot;&quot;&quot;</span>
+    <span class="n">statistics</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dictionary containing the Pearson and Spearman correlation coefficients.&quot;&quot;&quot;</span>
+    <span class="n">regression</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A dictionary containing the slope and intercept of the linear regression line.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="EnhancedPlotlyFigure.__init__">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an EnhancedPlotlyFigure object from a Plotly Express figure object.</span>
+<span class="sd">        </span>
+<span class="sd">        Intended Use</span>
+<span class="sd">        ============</span>
+<span class="sd">        This class should be initialized from a plotly expres Figure object via:</span>
+<span class="sd">        </span>
+<span class="sd">        .. code-block:: python</span>
+<span class="sd">            </span>
+<span class="sd">            fig = px.scatter(...)</span>
+<span class="sd">            fig = EnhancedPlotlyFigure(fig.to_dict())</span>
+<span class="sd">            </span>
+<span class="sd">        Additional ``statistics`` and ``regression`` attributions can be added to this &quot;enhanced&quot; figure via</span>
+<span class="sd">        </span>
+<span class="sd">        .. code-block:: python</span>
+<span class="sd">        </span>
+<span class="sd">            fig.statistics = {</span>
+<span class="sd">                &#39;pearson&#39;: 0.123456,</span>
+<span class="sd">                &#39;spearman&#39;: 0.123456</span>
+<span class="sd">            }</span>
+<span class="sd">            fig.regression = {</span>
+<span class="sd">                &#39;slope&#39;: 0.123456,</span>
+<span class="sd">                &#39;intercept&#39;: 0.123456</span>
+<span class="sd">            }</span>
+<span class="sd">        </span>
+<span class="sd">        unlike a regular Plotly Express figure object, which will throw an error if you try to add these attributes directly.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Directly set the attributes using object&#39;s __setattr__ to bypass Plotly&#39;s checks</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;statistics&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;regression&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the attribute of the object. This method is overridden to allow setting the ``&#39;statistics&#39;`` and ``&#39;regression&#39;``</span>
+<span class="sd">        attributes directly without raising an error. All other attributes are set using the super class&#39;s __setattr__ method.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;statistics&#39;</span><span class="p">,</span> <span class="s1">&#39;regression&#39;</span><span class="p">]:</span>
+            <span class="c1"># Handle custom attributes internally</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Use the super class&#39;s __setattr__ for all other attributes</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_ScatterPlot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">_ScatterPlot</span><span class="p">(</span><span class="n">_Plotter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class exists to add some additional functionality for calculating regressions and summary statistics that&#39;s</span>
+<span class="sd">    common to all types of scatter plots, interactive or otherwise&quot;&quot;&quot;</span>
+    <span class="n">_regression</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A named tuple (``scipy.stats`` ``Linregress`` object) containing the slope and intercept of the linear regression line</span>
+<span class="sd">    as attributes ``slope`` and ``intercept`` respectively.&quot;&quot;&quot;</span>
+    <span class="n">_pearson</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Pearson correlation coefficient.&quot;&quot;&quot;</span>
+    <span class="n">_spearman</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Spearman rank correlation coefficient.&quot;&quot;&quot;</span>
+    <span class="n">_summary_stats_text</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A string containing the summary statistics for the scatter plot.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_get_summary_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the Pearson correlation coefficient, Spearman rank correlation coefficient, and linear regression</span>
+<span class="sd">        parameters for the given x and y datasets. The linear regression parameters are the slope and intercept of the</span>
+<span class="sd">        regression line. The Pearson and Spearman coefficients are also stored in the class instance as &#39;pearson&#39; and</span>
+<span class="sd">        &#39;spearman&#39; respectively. The slope and intercept are stored as &#39;slope&#39; and &#39;intercept&#39; respectively. The linear</span>
+<span class="sd">        regression is stored as &#39;regression&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x</span>
+<span class="sd">            The x values of the scatter plot.</span>
+<span class="sd">        y</span>
+<span class="sd">            The y values of the scatter plot.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_regression</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">linregress</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pearson</span>    <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">statistic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spearman</span>   <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">spearmanr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">statistic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span>      <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regression</span><span class="o">.</span><span class="n">slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_intercept</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regression</span><span class="o">.</span><span class="n">intercept</span>
+
+        <span class="c1"># If the figure has been plotted (and is an enhanced plot which supports adding this metadata), add the regression </span>
+        <span class="c1"># and correlation statistics to the figure</span>
+        <span class="n">is_enhanced_fig</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;fig&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;fig&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_enhanced_fig</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">statistics</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;pearson&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pearson</span><span class="p">,</span>
+                <span class="s1">&#39;spearman&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spearman</span>
+            <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">regression</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;slope&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span><span class="p">,</span>
+                <span class="s1">&#39;intercept&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercept</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="c1"># Now create the summary statistics text for figure annotation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span> <span class="o">==</span> <span class="s1">&#39;plotly&#39;</span><span class="p">:</span>
+            <span class="n">pearson_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Pearson: &lt;b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_pearson</span><span class="si">:</span><span class="s2">1.6f</span><span class="si">}</span><span class="s2">&lt;/b&gt;&quot;</span>
+            <span class="n">spearman_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Spearman: &lt;b&gt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_spearman</span><span class="si">:</span><span class="s2">1.6f</span><span class="si">}</span><span class="s2">&lt;/b&gt;&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span> <span class="o">==</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">:</span>
+            <span class="n">pearson_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Pearson: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_pearson</span><span class="si">:</span><span class="s2">1.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">spearman_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Spearman: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_spearman</span><span class="si">:</span><span class="s2">1.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s2">&quot;Unknown plot type, cannot format summary statistics text&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_summary_stats_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pearson_text</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">spearman_text</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="_ScatterPlotter">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter">[docs]</a>
+<span class="k">class</span> <span class="nc">_ScatterPlotter</span><span class="p">(</span><span class="n">_ScatterPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for creating static scatter plots with error bars, linear regression lines, and correlation coefficient</span>
+<span class="sd">    calculations.&quot;&quot;&quot;</span>
+    <span class="n">_nested</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether the contributions are nested or not. This is unused in this class.&quot;&quot;&quot;</span>
+    <span class="n">_index_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the integral index (whose contributions) being plotted. This is used only for the title of the plot.&quot;&quot;&quot;</span>
+    <span class="n">_plot_redundant</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether to plot redundant reactions or not. This is unused in this class.&quot;&quot;&quot;</span>
+    <span class="n">_plot_type</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="_ScatterPlotter.__init__">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nested</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">plot_redundant</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a ScatterPlotter object with the given integral index name, nested status, and plot redundant reactions</span>
+<span class="sd">        status. The nested and plot_redundant arguments are unused in this class.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        integral_index_name</span>
+<span class="sd">            The name of the integral index (whose contributions) being plotted.</span>
+<span class="sd">        nested</span>
+<span class="sd">            Whether the contributions are nested or not.</span>
+<span class="sd">        plot_redundant</span>
+<span class="sd">            Whether to plot redundant reactions or not.</span>
+<span class="sd">        kwargs</span>
+<span class="sd">            Additional keyword arguments. These are unused in this class.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nested</span> <span class="o">=</span> <span class="n">nested</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span> <span class="o">=</span> <span class="n">integral_index_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redundant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span> <span class="o">=</span> <span class="s1">&#39;matplotlib&#39;</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contribution_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ufloat</span><span class="p">],</span> <span class="n">isotopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">reactions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a static scatter plot with error bars, linear regression line, and correlation coefficient calculations.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contribution_pairs</span>
+<span class="sd">            A list of pairs of contributions to the integral index from the application and experiment.</span>
+<span class="sd">        isotopes</span>
+<span class="sd">            The list of isotopes represented by each contribution pair. This has the same length and it ordered the same</span>
+<span class="sd">            as the contribution_pairs.</span>
+<span class="sd">        reactions</span>
+<span class="sd">            The list of reactions represented by each contribution pair. This has the same length and it ordered the same</span>
+<span class="sd">            as the contribution_pairs. </span>
+<span class="sd">        </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The set of isotopes and reactions is only necessary for creating labels in interactive plots (e.g. those made by </span>
+<span class="sd">        :class:`.InteractiveScatterPlotter`), but is included here for consistency.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="c1"># Extract the x and y values from the contribution pairs</span>
+        <span class="n">application_points</span>        <span class="o">=</span> <span class="p">[</span> <span class="n">contribution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contribution_pairs</span> <span class="p">]</span>
+        <span class="n">application_uncertainties</span> <span class="o">=</span> <span class="p">[</span> <span class="n">contribution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">s</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contribution_pairs</span> <span class="p">]</span>
+        <span class="n">experiment_points</span>         <span class="o">=</span> <span class="p">[</span> <span class="n">contribution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contribution_pairs</span> <span class="p">]</span>
+        <span class="n">experiment_uncertainties</span>  <span class="o">=</span> <span class="p">[</span> <span class="n">contribution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">s</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contribution_pairs</span> <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">application_points</span><span class="p">,</span> <span class="n">experiment_points</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">application_uncertainties</span><span class="p">,</span> \
+                               <span class="n">yerr</span><span class="o">=</span><span class="n">experiment_uncertainties</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="c1"># Linear regression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_summary_statistics</span><span class="p">(</span><span class="n">application_points</span><span class="p">,</span> <span class="n">experiment_points</span><span class="p">)</span>
+
+        <span class="c1"># Plot the regression line</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">application_points</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">application_points</span><span class="p">),</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercept</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Linear fit&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_stats_text</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">Axes</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axs</span>
+        
+    <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title_text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Experiment </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s2"> Contribution&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Application </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s2"> Contribution&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="load_interactive_scatter_plot">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.load_interactive_scatter_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">load_interactive_scatter_plot</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">InteractiveScatterLegend</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Loads an interactive scatter plot (with interactive legend) from a saved state file. This function is purely for </span>
+<span class="sd">    convenience and is a wrapper of the :meth:`.InteractiveScatterLegend.load_state` method</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        The filename of the saved state file to load the interactive scatter plot from.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A reseralized instance of the interactive scatter plot that can be plotted with :meth:`InteractiveScatterLegend.show()`.&quot;&quot;&quot;</span>
+    
+    <span class="k">return</span> <span class="n">InteractiveScatterLegend</span><span class="o">.</span><span class="n">load_state</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_InteractiveScatterPlotter">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter">[docs]</a>
+<span class="k">class</span> <span class="nc">_InteractiveScatterPlotter</span><span class="p">(</span><span class="n">_ScatterPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for creating `interactive` scatter plots with error bars, linear regression lines, and correlation coefficient</span>
+<span class="sd">    calculations.&quot;&quot;&quot;</span>
+    <span class="n">_interactive_legend</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether to include an interactive legend in the plot. This is used to toggle the visibility of the traces in the plot</span>
+<span class="sd">    and interactively recalculate the regression and summary statistics.&quot;&quot;&quot;</span>
+    <span class="n">_nested</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether the contributions are nested or not. This is unused in this class.&quot;&quot;&quot;</span>
+    <span class="n">_index_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the integral index (whose contributions) being plotted. This is used only for the title of the plot.&quot;&quot;&quot;</span>
+    <span class="n">_plot_redundant</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether to plot redundant reactions or not. This is unused in this class.&quot;&quot;&quot;</span>
+    <span class="n">_plot_type</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="_InteractiveScatterPlotter.__init__">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nested</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">plot_redundant</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an ``InteractiveScatterPlotter`` object with the given options.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        integral_index_name</span>
+<span class="sd">            The name of the integral index (whose contributions) being plotted.</span>
+<span class="sd">        nested</span>
+<span class="sd">            Whether the contributions are nested or not.</span>
+<span class="sd">        plot_redundant</span>
+<span class="sd">            Whether to plot redundant reactions or not.</span>
+<span class="sd">        kwargs</span>
+<span class="sd">            Additional keyword arguments.</span>
+
+<span class="sd">            - interactive_legend (bool)</span>
+<span class="sd">                Whether to include an interactive legend in the plot. Default is ``False``.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;interactive_legend&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interactive_legend</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;interactive_legend&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interactive_legend</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nested</span> <span class="o">=</span> <span class="n">nested</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span> <span class="o">=</span> <span class="n">integral_index_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redundant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span> <span class="o">=</span> <span class="s1">&#39;plotly&#39;</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contribution_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ufloat</span><span class="p">],</span> <span class="n">isotopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">reactions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an interactive scatter plot with error bars, linear regression line, and correlation coefficient calculations.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contribution_pairs</span>
+<span class="sd">            A list of pairs of contributions to the integral index from the application and experiment.</span>
+<span class="sd">        isotopes</span>
+<span class="sd">            The list of isotopes represented by each contribution pair. This has the same length and it ordered the same</span>
+<span class="sd">            as the ``contribution_pairs``.</span>
+<span class="sd">        reactions</span>
+<span class="sd">            The list of reactions represented by each contribution pair. This has the same length and it ordered the same</span>
+<span class="sd">            as the ``contribution_pairs``.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">()</span>
+
+        <span class="c1"># Extract isotope and reaction pairs from the given list of isotopes and reactions</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_scatter_data</span><span class="p">(</span><span class="n">contribution_pairs</span><span class="p">,</span> <span class="n">isotopes</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span>
+
+        <span class="n">hover_data_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Isotope&#39;</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># Always include Isotope</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="s1">&#39;Reaction&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">hover_data_dict</span><span class="p">[</span><span class="s1">&#39;Reaction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Include Reaction only if it exists</span>
+
+        <span class="c1"># Create scatter plot with error bars using Plotly Express</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> 
+            <span class="n">x</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Application </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">,</span> 
+            <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Experiment </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">,</span>
+            <span class="n">error_x</span><span class="o">=</span><span class="s1">&#39;Application Uncertainty&#39;</span><span class="p">,</span> 
+            <span class="n">error_y</span><span class="o">=</span><span class="s1">&#39;Experiment Uncertainty&#39;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;Isotope&#39;</span><span class="p">,</span>
+            <span class="n">labels</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;Isotope&quot;</span>
+            <span class="p">},</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">hover_data</span><span class="o">=</span><span class="n">hover_data_dict</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Wrap the plotly express figure in a MetadataPlotly object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_regression_and_stats</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Now style the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interactive_legend</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">InteractiveScatterLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_regression_and_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the linear regression line and correlation statistics to the plot. This method is called after the plot has been</span>
+<span class="sd">        created. This method can also update a comparison with a TSUNAMI-IP calculated :math:`c_k` value if it exists in the</span>
+<span class="sd">        annotation.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df</span>
+<span class="sd">            The DataFrame containing the data for the scatter plot. This DataFrame should contain the columns ``&#39;Application</span>
+<span class="sd">            &lt;integral_index_name&gt; Contribution&#39;`` and ``&#39;Experiment &lt;integral_index_name&gt; Contribution&#39;``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the linear regression and correlation statistics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_summary_statistics</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Application </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">],</span> \
+                                    <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Experiment </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Prepare data for the regression line</span>
+        <span class="n">x_reg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Application </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> 
+                            <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Application </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">y_reg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">*</span> <span class="n">x_reg</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercept</span>
+
+        <span class="c1"># Convert self.fig.data to a list for mutability</span>
+        <span class="n">current_traces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Remove existing regression line if it exists</span>
+        <span class="n">traces_to_keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">trace</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">current_traces</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">trace</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Regression Line&#39;</span><span class="p">)]</span>
+
+        <span class="c1"># Set the modified list of traces back to the figure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">traces_to_keep</span><span class="p">)</span>
+
+        <span class="c1"># Add new linear regression to the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_reg</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_reg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> 
+                                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Regression Line y=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_slope</span><span class="si">:</span><span class="s1">1.4E</span><span class="si">}</span><span class="s1">x + </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_intercept</span><span class="si">:</span><span class="s1">1.4E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Remove existing annotation if it exists</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="s1">&#39;layout&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="s1">&#39;annotations&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Get the text of the old annotation</span>
+                <span class="n">old_annotation_text</span> <span class="o">=</span> \
+                    <span class="p">[</span><span class="n">ann</span> <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span> <span class="k">if</span> <span class="n">ann</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Pearson&#39;</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">annotation_text</span> <span class="o">=</span> <span class="n">_replace_spearman_and_pearson</span><span class="p">(</span><span class="n">old_annotation_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pearson</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spearman</span><span class="p">)</span>
+                <span class="n">bordercolor</span> <span class="o">=</span> <span class="s1">&#39;#444&#39;</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="p">[</span><span class="n">ann</span> <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">ann</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Pearson&#39;</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="s2">&quot;TSUNAMI-IP&quot;</span> <span class="ow">in</span> <span class="n">annotation_text</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">annotation_text</span><span class="p">,</span> <span class="n">percent_difference</span> <span class="o">=</span> <span class="n">_update_percent_difference</span><span class="p">(</span><span class="n">annotation_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pearson</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error updating percent difference: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">percent_difference</span><span class="o">.</span><span class="n">nominal_value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+                        <span class="n">bordercolor</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bordercolor</span> <span class="o">=</span> <span class="s1">&#39;#444&#39;</span>
+                <span class="n">annotation_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_stats_text</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bordercolor</span> <span class="o">=</span> <span class="s1">&#39;#444&#39;</span>
+            <span class="n">annotation_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summary_stats_text</span>
+
+        <span class="c1"># Add correlation statistics to the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="s2">&quot;paper&quot;</span><span class="p">,</span> 
+            <span class="n">y</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">yref</span><span class="o">=</span><span class="s2">&quot;paper&quot;</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">annotation_text</span><span class="p">,</span>
+            <span class="n">bordercolor</span><span class="o">=</span><span class="n">bordercolor</span><span class="p">,</span>
+            <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">12</span><span class="p">),</span>
+            <span class="n">align</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> 
+            <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_scatter_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contribution_pairs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ufloat</span><span class="p">],</span> <span class="n">isotopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">reactions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a DataFrame from the given contribution pairs, isotopes, and reactions. This DataFrame is used to create the</span>
+<span class="sd">        interactive scatter plot.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contribution_pairs</span>
+<span class="sd">            A list of pairs of contributions to the integral index from the application and experiment.</span>
+<span class="sd">        isotopes</span>
+<span class="sd">            The list of isotopes represented by each contribution pair. This has the same length and it ordered the same</span>
+<span class="sd">            as the ``contribution_pairs``.</span>
+<span class="sd">        reactions</span>
+<span class="sd">            The list of reactions represented by each contribution pair. This has the same length and it ordered the same</span>
+<span class="sd">            as the ``contribution_pairs``.&quot;&quot;&quot;</span>
+        
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sa">f</span><span class="s1">&#39;Application </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">cp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">cp</span> <span class="ow">in</span> <span class="n">contribution_pairs</span><span class="p">],</span>
+            <span class="sa">f</span><span class="s1">&#39;Experiment </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">cp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">cp</span> <span class="ow">in</span> <span class="n">contribution_pairs</span><span class="p">],</span>
+            <span class="s1">&#39;Application Uncertainty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">cp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">s</span> <span class="k">for</span> <span class="n">cp</span> <span class="ow">in</span> <span class="n">contribution_pairs</span><span class="p">],</span>
+            <span class="s1">&#39;Experiment Uncertainty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">cp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">s</span> <span class="k">for</span> <span class="n">cp</span> <span class="ow">in</span> <span class="n">contribution_pairs</span><span class="p">],</span>
+            <span class="s1">&#39;Isotope&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Add nuclides and reactions (if they exist) to the data dictionary</span>
+        <span class="k">if</span> <span class="n">reactions</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">isotopes</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Isotope&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isotope</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Reaction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">isotopes</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Isotope&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isotope</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Reaction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+        <span class="c1"># Now filter out (0,0) points, which don&#39;t contribute to either the application or the experiment, these are</span>
+        <span class="c1"># usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set</span>
+        <span class="c1"># of reactions only</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span> <span class="n">key</span><span class="p">:</span> <span class="p">[</span><span class="n">val</span> <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Application </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">],</span> \
+                    <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Experiment </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> Contribution&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">app</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">exp</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span> <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Transfer annotations</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="s1">&#39;layout&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="s1">&#39;annotations&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span><span class="p">:</span>
+                <span class="c1"># Adjust annotation references to new subplot</span>
+                <span class="n">new_ann</span> <span class="o">=</span> <span class="n">ann</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">xref</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;x</span><span class="si">{</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">yref</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;y</span><span class="si">{</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span><span class="n">new_ann</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">fig</span>
+
+    <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
+    
+    <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="n">title_text</span><span class="p">,</span> <span class="n">title_x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># &#39;title_x=0.5&#39; centers the title</span></div>
+
+
+
+<div class="viewcode-block" id="_InteractivePerturbationScatterPlotter">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter">[docs]</a>
+<span class="k">class</span> <span class="nc">_InteractivePerturbationScatterPlotter</span><span class="p">(</span><span class="n">_ScatterPlot</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for creating an interactive scatter plot using the nuclear data sampling method (where perturbed cross section</span>
+<span class="sd">    libraries are used to calculate sample points on the scatter plot).&quot;&quot;&quot;</span>
+    <span class="n">_plot_type</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="_InteractivePerturbationScatterPlotter.__init__">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_type</span> <span class="o">=</span> <span class="s1">&#39;plotly&#39;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">ufloat</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an interactive perturbation scatter plot with error bars, linear regression line, and correlation coefficient.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        points</span>
+<span class="sd">            A list of perturbation points, each computed from sampled perturbed cross section libraries. These points are generated</span>
+<span class="sd">            using the :func:`tsunami_ip_utils.perturbations.generate_points` function.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">()</span>
+
+        <span class="c1"># Extract isotope and reaction pairs from the given list of isotopes and reactions</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s1">&#39;Application&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span>
+            <span class="s1">&#39;Experiment&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span>
+            <span class="s1">&#39;Application Uncertainty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">s</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span>
+            <span class="s1">&#39;Experiment Uncertainty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">s</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">]</span>
+        <span class="p">})</span>
+
+        <span class="c1"># Create scatter plot with error bars using Plotly Express</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> 
+            <span class="n">x</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Application&#39;</span><span class="p">,</span> 
+            <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Experiment&#39;</span><span class="p">,</span>
+            <span class="n">error_x</span><span class="o">=</span><span class="s1">&#39;Application Uncertainty&#39;</span><span class="p">,</span> 
+            <span class="n">error_y</span><span class="o">=</span><span class="s1">&#39;Experiment Uncertainty&#39;</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Correlation Plot&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Wrap the plotly express figure in a MetadataPlotly object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_regression_and_stats</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Now style the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_add_regression_and_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the linear regression line and correlation statistics to the plot. This method is called after the plot has been</span>
+<span class="sd">        created.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df</span>
+<span class="sd">            The DataFrame containing the data for the scatter plot. This DataFrame should contain the columns ``&#39;Application&#39;``</span>
+<span class="sd">            and ``&#39;Experiment&#39;``.&quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the linear regression and correlation statistics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_summary_statistics</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Application&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Experiment&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Prepare data for the regression line</span>
+        <span class="n">x_reg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Application&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;Application&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">y_reg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slope</span> <span class="o">*</span> <span class="n">x_reg</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intercept</span>
+
+        <span class="c1"># Convert self.fig.data to a list for mutability</span>
+        <span class="n">current_traces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Remove existing regression line if it exists</span>
+        <span class="n">traces_to_keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">trace</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">current_traces</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">trace</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Regression Line&#39;</span><span class="p">)]</span>
+
+        <span class="c1"># Set the modified list of traces back to the figure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">traces_to_keep</span><span class="p">)</span>
+
+        <span class="c1"># Add new linear regression to the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_reg</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_reg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> 
+                                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Regression Line y=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_slope</span><span class="si">:</span><span class="s1">1.4E</span><span class="si">}</span><span class="s1">x + </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_intercept</span><span class="si">:</span><span class="s1">1.4E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Add correlation statistics to the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">xref</span><span class="o">=</span><span class="s2">&quot;paper&quot;</span><span class="p">,</span> 
+            <span class="n">y</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">yref</span><span class="o">=</span><span class="s2">&quot;paper&quot;</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_summary_stats_text</span><span class="p">,</span>
+            <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">12</span><span class="p">),</span>
+            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> 
+            <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">fig</span>
+
+    <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
+    
+    <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="InteractiveScatterLegend">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend">[docs]</a>
+<span class="k">class</span> <span class="nc">InteractiveScatterLegend</span><span class="p">(</span><span class="n">_InteractiveScatterPlotter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An implementation of an interactive legend (that automatically updates the regression and summary statistics following</span>
+<span class="sd">    the exclusion of certain data in the scatter plot) for an interactive (Plotly) scatter plot.&quot;&quot;&quot;</span>
+    <span class="n">fig</span><span class="p">:</span> <span class="n">EnhancedPlotlyFigure</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Plotly figure object containing the interactive scatter plot.&quot;&quot;&quot;</span>
+    <span class="n">_interactive_scatter_plot</span><span class="p">:</span> <span class="n">_InteractiveScatterPlotter</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The interactive scatter plot object that the interactive legend is associated with.&quot;&quot;&quot;</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The DataFrame containing the data for the scatter plot.&quot;&quot;&quot;</span>
+    <span class="n">_excluded_isotopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A list of isotopes that have been excluded from the scatter plot.&quot;&quot;&quot;</span>
+    <span class="n">_app</span><span class="p">:</span> <span class="n">dash</span><span class="o">.</span><span class="n">Dash</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Dash application object for the interactive legend.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="InteractiveScatterLegend.__init__">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interactive_scatter_plot</span><span class="p">:</span> <span class="n">_InteractiveScatterPlotter</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interactive_scatter_plot</span> <span class="o">=</span> <span class="n">interactive_scatter_plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">interactive_scatter_plot</span><span class="o">.</span><span class="n">fig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span> <span class="o">=</span> <span class="n">interactive_scatter_plot</span><span class="o">.</span><span class="n">_index_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Keep track of excluded isotopes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span> <span class="o">=</span> <span class="n">dash</span><span class="o">.</span><span class="n">Dash</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">([</span>
+            <span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;interactive-scatter&#39;</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="s1">&#39;100vh&#39;</span><span class="p">})</span>
+        <span class="p">],</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;margin&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_callbacks</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_setup_callbacks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Dash callbacks for the interactive legend.&quot;&quot;&quot;</span>
+        <span class="nd">@self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
+            <span class="n">Output</span><span class="p">(</span><span class="s1">&#39;interactive-scatter&#39;</span><span class="p">,</span> <span class="s1">&#39;figure&#39;</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="s1">&#39;interactive-scatter&#39;</span><span class="p">,</span> <span class="s1">&#39;restyleData&#39;</span><span class="p">),</span>
+            <span class="n">State</span><span class="p">(</span><span class="s1">&#39;interactive-scatter&#39;</span><span class="p">,</span> <span class="s1">&#39;figure&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">update_figure_on_legend_click</span><span class="p">(</span><span class="n">restyleData</span><span class="p">,</span> <span class="n">current_figure_state</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">restyleData</span> <span class="ow">and</span> <span class="s1">&#39;visible&#39;</span> <span class="ow">in</span> <span class="n">restyleData</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">current_fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">current_figure_state</span><span class="p">)</span>
+
+                <span class="c1"># Get the index of the clicked trace</span>
+                <span class="n">clicked_trace_index</span> <span class="o">=</span> <span class="n">restyleData</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># Get the name of the clicked trace</span>
+                <span class="n">clicked_trace_name</span> <span class="o">=</span> <span class="n">current_fig</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">clicked_trace_index</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+
+                <span class="c1"># Update excluded isotopes based on the clicked trace</span>
+                <span class="k">if</span> <span class="n">restyleData</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;visible&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;legendonly&#39;</span> <span class="ow">and</span> <span class="n">clicked_trace_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clicked_trace_name</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">restyleData</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;visible&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">clicked_trace_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">clicked_trace_name</span><span class="p">)</span>
+
+                <span class="c1"># Update DataFrame based on excluded isotopes</span>
+                <span class="n">updated_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">updated_df</span> <span class="o">=</span> <span class="n">updated_df</span><span class="p">[</span><span class="o">~</span><span class="n">updated_df</span><span class="p">[</span><span class="s1">&#39;Isotope&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="p">)]</span>
+
+                <span class="c1"># Recalculate the regression and summary statistics</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_regression_and_stats</span><span class="p">(</span><span class="n">updated_df</span><span class="p">)</span>
+
+                <span class="c1"># Update trace visibility based on excluded isotopes</span>
+                <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="p">:</span>
+                        <span class="n">trace</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="s1">&#39;legendonly&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">trace</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
+
+            <span class="k">return</span> <span class="n">dash</span><span class="o">.</span><span class="n">no_update</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/shutdown&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+        <span class="k">def</span> <span class="nf">shutdown</span><span class="p">():</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">)</span>  <span class="c1"># Send the SIGINT signal to the current process</span>
+            <span class="k">return</span> <span class="s1">&#39;Server shutting down...&#39;</span>
+
+<div class="viewcode-block" id="InteractiveScatterLegend.show">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend.show">[docs]</a>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display the interactive scatter plot with the interactive legend in a web browser.&quot;&quot;&quot;</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">_find_free_port</span><span class="p">()</span>
+        <span class="c1"># Function to open the browser</span>
+        <span class="k">def</span> <span class="nf">open_browser</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;WERKZEUG_RUN_MAIN&quot;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Now running at http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+                <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Silence the Flask development server logging</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="c1"># sys.stdout = log</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">log</span>
+
+        <span class="c1"># Disable Flask development server warning</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;FLASK_ENV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;development&#39;</span>
+
+        <span class="c1"># JavaScript code to detect when the tab or window is closed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">index_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">        &lt;!DOCTYPE html&gt;</span>
+<span class="s1">        &lt;html&gt;</span>
+<span class="s1">            &lt;head&gt;</span>
+<span class="s1">                {%metas%}</span>
+<span class="s1">                &lt;title&gt;{%title%}&lt;/title&gt;</span>
+<span class="s1">                {</span><span class="si">%f</span><span class="s1">avicon%}</span>
+<span class="s1">                {</span><span class="si">%c</span><span class="s1">ss%}</span>
+<span class="s1">            &lt;/head&gt;</span>
+<span class="s1">            &lt;body style=&quot;margin: 0;&quot;&gt;</span>
+<span class="s1">                {</span><span class="si">%a</span><span class="s1">pp_entry%}</span>
+<span class="s1">                &lt;footer&gt;</span>
+<span class="s1">                    {</span><span class="si">%c</span><span class="s1">onfig%}</span>
+<span class="s1">                    {</span><span class="si">%s</span><span class="s1">cripts%}</span>
+<span class="s1">                    &lt;script type=&quot;text/javascript&quot;&gt;</span>
+<span class="s1">                        window.addEventListener(&quot;beforeunload&quot;, function (e) {</span>
+<span class="s1">                            var xhr = new XMLHttpRequest();</span>
+<span class="s1">                            xhr.open(&quot;POST&quot;, &quot;/shutdown&quot;, false);</span>
+<span class="s1">                            xhr.send();</span>
+<span class="s1">                        });</span>
+<span class="s1">                    &lt;/script&gt;</span>
+<span class="s1">                    {</span><span class="si">%r</span><span class="s1">enderer%}</span>
+<span class="s1">                &lt;/footer&gt;</span>
+<span class="s1">            &lt;/body&gt;</span>
+<span class="s1">        &lt;/html&gt;</span>
+<span class="s1">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Timer to open the browser shortly after the server starts</span>
+        <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">open_browser</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">run_server</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InteractiveScatterLegend.save_state">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend.save_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the current state of the interactive scatter plot to a file. This method saves the state of the interactive</span>
+<span class="sd">        scatter plot as a dictionary containing the figure, DataFrame, excluded isotopes, index name, and nested status. This</span>
+<span class="sd">        can be later reserialized by the :meth:`InteractiveScatterLegend.load_state` method, or the</span>
+<span class="sd">        :func:`load_interactive_scatter_plot` function.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            The filename to save the state to. If not provided, the state dictionary is returned instead of being saved to a </span>
+<span class="sd">            file.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            * If ``filename`` is not provided, the state dictionary is returned. </span>
+<span class="sd">            * Otherwise, ``None`` is returned.&quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;fig&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+            <span class="s1">&#39;excluded_isotopes&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="p">,</span>
+            <span class="s1">&#39;index_name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="p">,</span>
+            <span class="s1">&#39;nested&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interactive_scatter_plot</span><span class="o">.</span><span class="n">_nested</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InteractiveScatterLegend.load_state">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend.load_state">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load_state</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span>
+                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractiveScatterLegend</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a saved state of an interactive scatter plot from a file. This method loads the state of the interactive scatter</span>
+<span class="sd">        plot from a dictionary containing the figure, DataFrame, excluded isotopes, index name, and nested status. This can be</span>
+<span class="sd">        reserialized by the :meth:`InteractiveScatterLegend.load_state` method, or the :func:`load_interactive_scatter_plot`</span>
+<span class="sd">        function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            The filename of the saved state file to load the interactive scatter plot from.</span>
+<span class="sd">        data_dict</span>
+<span class="sd">            A dictionary containing the saved state of the interactive scatter plot. This is an alternative to providing the</span>
+<span class="sd">            filename.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            An instance of the interactive scatter plot that can be plotted with :meth:`InteractiveScatterLegend.show()`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either a filename or a data dictionary must be provided&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">data_dict</span>
+
+        <span class="c1"># Recreate the _InteractiveScatterPlotter instance from the saved state</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;fig&#39;</span><span class="p">])</span>
+        <span class="n">index_name</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;index_name&#39;</span><span class="p">]</span>
+        <span class="n">nested</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;nested&#39;</span><span class="p">]</span>
+        <span class="n">interactive_scatter_plot</span> <span class="o">=</span> <span class="n">_InteractiveScatterPlotter</span><span class="p">(</span><span class="n">index_name</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span>
+        <span class="n">interactive_scatter_plot</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+
+        <span class="c1"># Recreate the InteractiveScatterLegend instance from the saved state</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">interactive_scatter_plot</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]))</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">_excluded_isotopes</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;excluded_isotopes&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Update trace visibility based on excluded isotopes</span>
+        <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">_excluded_isotopes</span><span class="p">:</span>
+                <span class="n">trace</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="s1">&#39;legendonly&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">trace</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="n">instance</span></div>
+
+
+<div class="viewcode-block" id="InteractiveScatterLegend.write_html">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend.write_html">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the current state of the interactive scatter plot to an HTML file. This method saves the current state of the</span>
+<span class="sd">        interactive scatter plot to an HTML file that can be viewed in a web browser.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            The filename to save the interactive scatter plot to.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Since the legend interactivity is implemented via python, saving the plot as HTML will only save the current state of</span>
+<span class="sd">        the plot. The interactivity will not be preserved in the saved HTML file.&quot;&quot;&quot;</span>
+        
+        <span class="c1"># Utilize Plotly&#39;s write_html to save the current state of the figure</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pio</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="n">full_html</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="InteractiveScatterLegend.to_image">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend.to_image">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the initial state of the interactive plot to an image file. This function saves the plot as an </span>
+<span class="sd">        image by using selenium webdriver.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            Name of the image file to save the matrix plot to. The file extension should be ``&#39;.png&#39;``, ``.jpg``, etc.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">html_filename</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.html&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">html_filename</span><span class="p">)</span>
+        <span class="n">_capture_html_as_image</span><span class="p">(</span><span class="n">html_filename</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">html_filename</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

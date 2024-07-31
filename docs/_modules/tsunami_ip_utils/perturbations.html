@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.perturbations &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.perturbations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.perturbations</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module is used for generating cross section perturbations and combining them with the sensitivity profiles for a given application</span>
+<span class="sd">experiment pair to generate a similarity scatter plot&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.readers</span> <span class="kn">import</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">,</span> <span class="n">read_region_integrated_h5_sdf</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils._utils</span> <span class="kn">import</span> <span class="n">_convert_paths</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.xs</span> <span class="kn">import</span> <span class="n">read_multigroup_xs</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils._utils</span> <span class="kn">import</span> <span class="n">_filter_by_nuclie_reaction_dict</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tqdm.contrib.concurrent</span> <span class="kn">import</span> <span class="n">process_map</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.config</span> <span class="kn">import</span> <span class="n">cache_dir</span>
+
+<span class="c1"># Number of xs perturbation samples available in SCALE</span>
+<span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">NUM_SAMPLES</span>
+
+<span class="k">def</span> <span class="nf">_generate_and_read_perturbed_library</span><span class="p">(</span><span class="n">base_library</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">perturbation_factors</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">sample_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
+                                         <span class="n">all_nuclide_reactions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates and reads perturbed multigroup cross section libraries.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_library</span>
+<span class="sd">        Path to the base cross section library.</span>
+<span class="sd">    perturbation_factors</span>
+<span class="sd">        Path to the perturbation factors directory (corresponding to the base library).</span>
+<span class="sd">    sample_number</span>
+<span class="sd">        The sample number to use for generating the perturbed library. Must be from 1 - ``NUM_SAMPLES``, where </span>
+<span class="sd">        ``NUM_SAMPLES`` = :globalparam:`NUM_SAMPLES` is the number of perturbation factor samples provided in </span>
+<span class="sd">        the user&#39;s current version of SCALE. (``0`` :math:`\\leq` ``sample_number`` :math:`\\leq` :globalparam:`NUM_SAMPLES`)</span>
+<span class="sd">    all_nuclide_reactions</span>
+<span class="sd">        A dictionary containing the nuclide reactions that are read from the perturbed library.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A dictionary containing the perturbed cross section libraries for each nuclide reaction.&quot;&quot;&quot;</span>
+    <span class="c1"># Read the SCALE input template</span>
+    <span class="n">current_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="n">template_filename</span> <span class="o">=</span> <span class="n">current_dir</span> <span class="o">/</span> <span class="s1">&#39;input_files&#39;</span> <span class="o">/</span> <span class="s1">&#39;generate_perturbed_library.inp&#39;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="c1"># Open a temporary file to store the output file</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+        <span class="n">output_file_path</span> <span class="o">=</span> <span class="n">output_file</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># -----------------------------------------</span>
+    <span class="c1"># Substitute the input file template values</span>
+    <span class="c1"># -----------------------------------------</span>
+    <span class="c1"># Convert the paths to strings if not already strings</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">perturbation_factors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">perturbation_factors</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">perturbation_factors</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">base_library</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_library</span><span class="p">)</span>
+    
+    <span class="n">input_file</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+        <span class="n">base_library</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">base_library</span><span class="p">),</span>
+        <span class="n">perturbation_factors</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span> <span class="n">perturbation_factors</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;Sample</span><span class="si">{</span><span class="n">sample_number</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span>
+        <span class="n">sample_number</span><span class="o">=</span><span class="n">sample_number</span><span class="p">,</span>
+        <span class="n">output</span><span class="o">=</span><span class="n">output_file_path</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Open a temporary file to store the input file, then one to store the output file</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_temp_file</span><span class="p">:</span>
+        <span class="n">input_temp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="n">input_temp_file_path</span> <span class="o">=</span> <span class="n">input_temp_file</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># Run the input file with scalerte</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;scalerte&#39;</span><span class="p">,</span> <span class="n">input_temp_file_path</span><span class="p">]</span>
+
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="c1"># Now delete the input file</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">input_temp_file_path</span><span class="p">)</span>
+
+    <span class="c1"># Read the perturbed library</span>
+    <span class="n">perturbed_xs</span> <span class="o">=</span> <span class="n">read_multigroup_xs</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">output_file_path</span><span class="p">),</span> <span class="n">all_nuclide_reactions</span><span class="p">)</span>
+
+    <span class="c1"># Now delete the output file</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output_file_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">perturbed_xs</span>
+
+<div class="viewcode-block" id="generate_points">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.perturbations.generate_points">[docs]</a>
+<span class="nd">@_convert_paths</span>
+<span class="k">def</span> <span class="nf">generate_points</span><span class="p">(</span><span class="n">application_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> <span class="n">experiment_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> 
+                    <span class="n">base_library</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">perturbation_factors</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">num_perturbations</span><span class="p">:</span> <span class="nb">int</span>
+                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span> <span class="n">List</span><span class="p">[</span> <span class="n">Tuple</span><span class="p">[</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span> <span class="p">]</span> <span class="p">],</span> 
+                               <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span> <span class="n">List</span><span class="p">[</span> <span class="n">Tuple</span><span class="p">[</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span> <span class="p">]</span> <span class="p">]</span> <span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates points for a similarity scatter plot using the nuclear data sampling method.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_path</span>
+<span class="sd">        Path(s) to the application sensitivity profile.</span>
+<span class="sd">    experiment_path</span>
+<span class="sd">        Path(s) to the experiment sensitivity profile.</span>
+<span class="sd">    base_library</span>
+<span class="sd">        Path to the base cross section library.</span>
+<span class="sd">    perturbation_factors</span>
+<span class="sd">        Path to the perturbation factors directory.</span>
+<span class="sd">    num_perturbations</span>
+<span class="sd">        Number of perturbation points to generate.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A list of points for the similarity scatter plot.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----    </span>
+<span class="sd">    * This function will automatically cache the base cross section library and the perturbed cross section libraries in the </span>
+<span class="sd">      user&#39;s home directory under the ``.tsunami_ip_utils_cache`` directory if not already cached. Caching is recommended if</span>
+<span class="sd">      perturbation points are to be generated multiple times, because the I/O overhead of dumping and reading the base and</span>
+<span class="sd">      perturbed cross section libraries can be significant.</span>
+
+<span class="sd">    * This function can also generate a matrix of points for a given set of experiment and applications for making a matrix plot</span>
+<span class="sd">      done by passing a list of paths for the application and experiment sensitivity profiles.</span>
+<span class="sd">        </span>
+<span class="sd">    Theory</span>
+<span class="sd">    ======</span>
+<span class="sd">    The nuclear data sampling method</span>
+<span class="sd">    involves randomly sampling cross section libraries using the AMPX tool ``clarolplus`` to calculate a perturbed cross section</span>
+<span class="sd">    library :math:`\\Delta \\boldsymbol{\\sigma}_n = \\overline{\\boldsymbol{\\sigma}} - \\boldsymbol{\\sigma}_n`, where</span>
+<span class="sd">    :math:`\\boldsymbol{\\sigma}_n` is the :math:`n` th randomly sampled cross section library, and </span>
+<span class="sd">    :math:`\\overline{\\boldsymbol{\\sigma}}` is the base cross section library, consisting of the mean values of all of the </span>
+<span class="sd">    cross sections (e.g. the SCALE 252-group ENDF-V7.1 library). This perturbed cross section library (a vector consisting </span>
+<span class="sd">    of the nuclide-reaction-group-wise perturbations to the cross sections) is dotted with the sensitivity vector for the </span>
+<span class="sd">    application: :math:`x_n = \\boldsymbol{S}_A \\cdot \\Delta \\boldsymbol{\\sigma}`, and the experiment</span>
+<span class="sd">    :math:`y_n = \\boldsymbol{S}_A \\cdot \\Delta \\boldsymbol{\\sigma}`, and the resulting points :math:`(x_n, y_n)` are</span>
+<span class="sd">    plotted on a scatter plot whose Pearson correlation coefficient is meant to correspond to the :math:`c_k` value computed</span>
+<span class="sd">    by TSUNAMI-IP.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert the paths to strings if not already strings</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">application_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">application_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">application_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">experiment_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">base_library</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_library</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">perturbation_factors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">perturbation_factors</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">perturbation_factors</span><span class="p">)</span>
+    
+    <span class="c1"># Check if the application and experiment paths are lists (vectorization)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">application_path</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">points_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">application_path</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">),</span> <span class="n">num_perturbations</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">application</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">application_path</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span> <span class="c1"># Skip upper right triangle of the matrix (since it&#39;s symmetric)</span>
+                    <span class="k">continue</span>
+
+                <span class="n">points_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">generate_points</span><span class="p">(</span>
+                    <span class="n">application</span><span class="p">,</span> 
+                    <span class="n">experiment</span><span class="p">,</span> 
+                    <span class="n">base_library</span><span class="p">,</span> 
+                    <span class="n">perturbation_factors</span><span class="p">,</span> 
+                    <span class="n">num_perturbations</span>
+                <span class="p">)</span>
+        <span class="c1"># Now popupate the upper right triangle of the matrix with the transpose of the lower left triangle</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">application</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">application_path</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="n">points_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">points_array</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">points_array</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">application_path</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both application and experiment paths must be lists or neither.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Read the sdfs for the application and experiment</span>
+    <span class="k">if</span> <span class="n">application_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.sdf&#39;</span><span class="p">:</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="n">application_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert_to_dict</span><span class="p">(</span><span class="s1">&#39;numbers&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sdf_data</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="p">{</span> <span class="n">nuclide_name</span><span class="p">:</span> <span class="p">{</span> <span class="n">reaction_name</span><span class="p">:</span> <span class="n">reaction</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> <span class="p">}</span> \
+                       <span class="k">for</span> <span class="n">nuclide_name</span><span class="p">,</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                       <span class="k">for</span> <span class="n">reaction_name</span><span class="p">,</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">nuclide</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">}</span>
+    <span class="k">elif</span> <span class="n">application_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.h5&#39;</span><span class="p">:</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="n">read_region_integrated_h5_sdf</span><span class="p">(</span><span class="n">application_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The application path must be either an sdf or h5 file.&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">experiment_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.sdf&#39;</span><span class="p">:</span>
+        <span class="n">experiment</span>  <span class="o">=</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">)</span><span class="o">.</span><span class="n">convert_to_dict</span><span class="p">(</span><span class="s1">&#39;numbers&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sdf_data</span>
+        <span class="n">experiment</span> <span class="o">=</span> <span class="p">{</span> <span class="n">nuclide_name</span><span class="p">:</span> <span class="p">{</span> <span class="n">reaction_name</span><span class="p">:</span> <span class="n">reaction</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> <span class="p">}</span> \
+                      <span class="k">for</span> <span class="n">nuclide_name</span><span class="p">,</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                      <span class="k">for</span> <span class="n">reaction_name</span><span class="p">,</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">nuclide</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">}</span>
+    <span class="k">elif</span> <span class="n">experiment_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.h5&#39;</span><span class="p">:</span>
+        <span class="n">experiment</span> <span class="o">=</span> <span class="n">read_region_integrated_h5_sdf</span><span class="p">(</span><span class="n">experiment_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The experiment path must be either an sdf or h5 file.&quot;</span><span class="p">)</span>
+    
+
+    <span class="c1"># Filter out redundant reactions, which will introduce bias into the similarity scatter plot</span>
+    <span class="c1"># Absorption, or &quot;capture&quot; as it&#39;s referred to in SCALE and total</span>
+    <span class="c1"># redundant_reactions = [&#39;101&#39;, &#39;1&#39;] </span>
+    <span class="c1"># application = filter_redundant_reactions(application, redundant_reactions=redundant_reactions)</span>
+    <span class="c1"># experiment  = filter_redundant_reactions(experiment,  redundant_reactions=redundant_reactions)</span>
+
+    <span class="c1"># Create a nuclide reaction dict for the application and experiment</span>
+    <span class="n">application_nuclide_reactions</span> <span class="o">=</span> <span class="p">{</span><span class="n">nuclide</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">reactions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">experiment_nuclide_reactions</span>  <span class="o">=</span> <span class="p">{</span><span class="n">nuclide</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">reactions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># Take the union of the nuclide reactions for the application and experiment</span>
+    <span class="n">all_nuclide_reactions</span> <span class="o">=</span> <span class="n">application_nuclide_reactions</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">all_nuclide_reactions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">experiment_nuclide_reactions</span><span class="p">)</span>
+
+    <span class="c1"># Make a directory to store all cached cross section libraries if it doesn&#39;t already exist</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+
+    <span class="c1"># Make a directory to store the cached perturbed multigroup libraries if it doesn&#39;t already exist</span>
+    <span class="n">library_name</span> <span class="o">=</span> <span class="n">base_library</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># Get the base multigroup cross sections for each nuclide reaction and the list of all available nuclide reactions for</span>
+    <span class="c1"># caching the sampled perturbed cross sections</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;cached_</span><span class="si">{</span><span class="n">library_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">base_xs</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span> <span class="o">=</span> <span class="n">read_multigroup_xs</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="n">all_nuclide_reactions</span><span class="p">,</span> \
+                                                                <span class="n">return_available_nuclide_reactions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Now read all cross sections and cache the base cross section library</span>
+        <span class="n">base_xs</span> <span class="o">=</span> <span class="n">read_multigroup_xs</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;cached_</span><span class="si">{</span><span class="n">library_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">base_xs</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;cached_</span><span class="si">{</span><span class="n">library_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">base_xs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># Get available nuclide reactions</span>
+        <span class="n">available_nuclide_reactions</span> <span class="o">=</span> <span class="p">{</span> <span class="n">nuclide</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span> <span class="n">reactions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">)</span> <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">base_xs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">}</span>
+
+        <span class="c1"># Filter out the desired nuclide reactions</span>
+        <span class="n">base_xs</span> <span class="o">=</span> <span class="n">_filter_by_nuclie_reaction_dict</span><span class="p">(</span><span class="n">base_xs</span><span class="p">,</span> <span class="n">all_nuclide_reactions</span><span class="p">)</span>
+
+    <span class="n">perturbed_cache</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;cached_</span><span class="si">{</span><span class="n">library_name</span><span class="si">}</span><span class="s1">_perturbations&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">perturbed_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">perturbed_cache</span><span class="p">)</span>
+
+    <span class="c1"># --------------------------------</span>
+    <span class="c1"># Main loop for generating points</span>
+    <span class="c1"># --------------------------------</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_perturbations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Generating perturbation points&quot;</span><span class="p">):</span>
+        <span class="c1"># Cache the perturbed cross section libraries if not already cached</span>
+        <span class="n">perturbed_xs_cache</span> <span class="o">=</span> <span class="n">perturbed_cache</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;perturbed_xs_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">perturbed_xs_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">perturbed_xs</span> <span class="o">=</span> <span class="n">_generate_and_read_perturbed_library</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> \
+                                                               <span class="n">available_nuclide_reactions</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">perturbed_xs_cache</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">perturbed_xs</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">perturbed_xs_cache</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">perturbed_xs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># Now filter out the desired nuclide reactions</span>
+        <span class="n">perturbed_xs</span> <span class="o">=</span> <span class="n">_filter_by_nuclie_reaction_dict</span><span class="p">(</span><span class="n">perturbed_xs</span><span class="p">,</span> <span class="n">all_nuclide_reactions</span><span class="p">)</span>
+
+        <span class="c1"># ----------------------------------------------</span>
+        <span class="c1"># Compute S ⋅ Δσ for application and experiment</span>
+        <span class="c1"># ----------------------------------------------</span>
+        <span class="n">running_total_application</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">running_total_experiment</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">all_nuclide_reactions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">:</span>
+                <span class="c1"># First compute the cross section delta, then multiply by the sensitivity profile</span>
+                <span class="n">delta_xs</span> <span class="o">=</span> <span class="n">perturbed_xs</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">]</span> <span class="o">-</span> <span class="n">base_xs</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">application</span> <span class="ow">and</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">]:</span>
+                    <span class="n">running_total_application</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">],</span> <span class="n">delta_xs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">experiment</span> <span class="ow">and</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">]:</span>
+                    <span class="n">running_total_experiment</span>  <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">],</span> <span class="n">delta_xs</span><span class="p">)</span>
+
+        <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">running_total_application</span><span class="p">,</span> <span class="n">running_total_experiment</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">points</span></div>
+
+        
+
+<span class="k">def</span> <span class="nf">_cache_perturbed_library</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Caches a single perturbed cross section library.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    args</span>
+<span class="sd">        A tuple containing all necessary components to perform the caching of a </span>
+<span class="sd">        perturbed library.</span>
+<span class="sd">        </span>
+<span class="sd">        - i (int):</span>
+<span class="sd">            The sample number to use for generating the perturbed library.</span>
+<span class="sd">        - base_library (str | Path):</span>
+<span class="sd">            Path to the base cross section library.</span>
+<span class="sd">        - perturbation_factors (str | Path):</span>
+<span class="sd">            Path to the cross section perturbation factors (used to generate the perturbed libraries).</span>
+<span class="sd">        - sample_number (int):</span>
+<span class="sd">            The sample number to use for generating the perturbed library. Must be from 1 - ``NUM_SAMPLES``, where ``NUM_SAMPLES``</span>
+<span class="sd">            is the number of perturbation factor samples provided in the user&#39;s current version of SCALE. </span>
+<span class="sd">            (0 :math:`\\leq` ``sample_number`` :math:`\\leq` ``NUM_SAMPLES``)</span>
+<span class="sd">        - available_nuclide_reactions (Dict[str, List[str]]):</span>
+<span class="sd">            A dictionary containing the nuclide reactions that are read from the perturbed library.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        The time taken to cache the perturbed library.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">i</span><span class="p">,</span> <span class="n">base_library</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">,</span> <span class="n">sample_number</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span><span class="p">,</span> <span class="n">perturbed_cache</span> <span class="o">=</span> <span class="n">args</span>
+    <span class="n">perturbed_xs_cache</span> <span class="o">=</span> <span class="n">perturbed_cache</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;perturbed_xs_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">perturbed_xs_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">perturbed_xs</span> <span class="o">=</span> <span class="n">_generate_and_read_perturbed_library</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">,</span> <span class="n">sample_number</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">perturbed_xs_cache</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">perturbed_xs</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="cache_all_libraries">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.perturbations.cache_all_libraries">[docs]</a>
+<span class="k">def</span> <span class="nf">cache_all_libraries</span><span class="p">(</span><span class="n">base_library</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">reset_cache</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">num_cores</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Caches the base and perturbed cross section libraries for a given base library and perturbed library paths.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_library</span>
+<span class="sd">        Path to the base cross section library.</span>
+<span class="sd">    perturbation_factors</span>
+<span class="sd">        Path to the cross section perturbation factors (used to generate the perturbed libraries).</span>
+<span class="sd">    reset_cache</span>
+<span class="sd">        Whether to reset the cache or not (default is ``False``).</span>
+<span class="sd">    num_cores</span>
+<span class="sd">        The number of cores to use for caching the perturbed libraries in parallel (default is half the number of cores </span>
+<span class="sd">        available).</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        This function does not return a value and has no return type.</span>
+<span class="sd">        </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    * This function will cache the base cross section library and the perturbed cross section libraries in the user&#39;s home</span>
+<span class="sd">      directory under the ``.tsunami_ip_utils_cache`` directory. If the user wishes to reset the cache, they can do so by</span>
+<span class="sd">      setting the ``reset_cache`` parameter to ``True`` in the :func:`cache_all_libraries` function.</span>
+<span class="sd">    * The caches can be `very` large, so make sure that sufficient space is available. For example, caching SCALE&#39;s 252-group</span>
+<span class="sd">      ENDF-v7.1 library and all of the perturbed libraries currently available in SCALE (1000 samples) requires 48 GB of space,</span>
+<span class="sd">      and for ENDF-v8.0, it requires 76 GB of space.</span>
+<span class="sd">    * The time taken to cache the libraries can be significant (~5 hours on 6 cores, but this is hardware dependent), but when </span>
+<span class="sd">      caching the libraries a progress bar will be displayed with a time estimate.</span>
+<span class="sd">    * Note, if using ``num_cores`` greater than half the number of cores available on your system, you may experience excessive</span>
+<span class="sd">      memory usage, so proceed with caution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read the base library, use an arbitrary nuclide reaction dict just to get the available reactions</span>
+    <span class="n">all_nuclide_reactions</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;92235&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;18&#39;</span><span class="p">]</span> <span class="p">}</span> <span class="c1"># u-235 fission</span>
+
+    <span class="c1"># Make a directory to store all cached cross section libraries if it doesn&#39;t already exist</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">reset_cache</span><span class="p">:</span>
+        <span class="c1"># Remove all cached cross section libraries</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_perturbations&#39;</span><span class="p">):</span> <span class="c1"># A perturbed library directory</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="n">f</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="n">f</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="c1"># Cache base library if not already cached (requires reading twice)</span>
+    <span class="n">library_name</span> <span class="o">=</span> <span class="n">base_library</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">base_library_cache</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;cached_</span><span class="si">{</span><span class="n">library_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reading base library... &quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">base_library_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span> <span class="o">=</span> <span class="n">read_multigroup_xs</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="n">all_nuclide_reactions</span><span class="p">,</span> \
+                                                                <span class="n">return_available_nuclide_reactions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Caching base library... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">base_xs</span> <span class="o">=</span> <span class="n">read_multigroup_xs</span><span class="p">(</span><span class="n">base_library</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span> <span class="n">base_library_cache</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">base_xs</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Done in </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;cached_</span><span class="si">{</span><span class="n">library_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">base_xs</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># Get available nuclide reactions</span>
+        <span class="n">available_nuclide_reactions</span> <span class="o">=</span> <span class="p">{</span> <span class="n">nuclide</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span> <span class="n">reactions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">)</span> <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">base_xs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">}</span>
+        
+    
+    <span class="c1"># Make a directory to store the cached perturbed multigroup libraries if it doesn&#39;t already exist</span>
+    <span class="n">perturbed_cache</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;cached_</span><span class="si">{</span><span class="n">library_name</span><span class="si">}</span><span class="s1">_perturbations&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">perturbed_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">perturbed_cache</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------</span>
+    <span class="c1"># Main loop for caching perturbed libraries</span>
+    <span class="c1"># ------------------------------------------</span>
+
+    <span class="c1"># Create a pool of worker processes</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">num_cores</span><span class="p">)</span>
+
+    <span class="c1"># Create a list of arguments for each perturbed library</span>
+    <span class="n">args_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">base_library</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span><span class="p">,</span> <span class="n">perturbed_cache</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">NUM_SAMPLES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="c1"># Use the pool to cache the perturbed libraries in parallel with a progress bar</span>
+    <span class="n">process_map</span><span class="p">(</span><span class="n">_cache_perturbed_library</span><span class="p">,</span> <span class="n">args_list</span><span class="p">,</span> <span class="n">max_workers</span><span class="o">=</span><span class="n">num_cores</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Caching perturbed libraries&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Close the pool</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

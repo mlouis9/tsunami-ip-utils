@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.comparisons &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.comparisons</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.comparisons</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Tools for generating comparisons between TSUNAMI-IP calculated integral parameters (e.g. :math:`c_k`, :math:`E`) and calculated</span>
+<span class="sd">values using correlation methods with either cross section sampling or uncertainty contributions.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.readers</span> <span class="kn">import</span> <span class="n">read_integral_indices</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.integral_indices</span> <span class="kn">import</span> <span class="n">calculate_E</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">unumpy</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">df</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.perturbations</span> <span class="kn">import</span> <span class="n">generate_points</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.scatter_plot</span> <span class="kn">import</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">,</span> <span class="n">InteractiveScatterLegend</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.plot_utils</span> <span class="kn">import</span> <span class="n">generate_plot_objects_array_from_perturbations</span><span class="p">,</span> <span class="n">generate_plot_objects_array_from_contributions</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.integral_indices</span> <span class="kn">import</span> <span class="n">get_uncertainty_contributions</span><span class="p">,</span> <span class="n">calculate_E_contributions</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz</span> <span class="kn">import</span> <span class="n">matrix_plot</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils._utils</span> <span class="kn">import</span> <span class="n">_run_and_read_TSUNAMI_IP</span><span class="p">,</span> <span class="n">_convert_paths</span>
+
+<div class="viewcode-block" id="E_calculation_comparison">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.comparisons.E_calculation_comparison">[docs]</a>
+<span class="k">def</span> <span class="nf">E_calculation_comparison</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> 
+                             <span class="n">experiment_filenames</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> <span class="n">coverx_library</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;252groupcov7.1&quot;</span><span class="p">,</span> 
+                             <span class="n">tsunami_ip_output_filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that compares the calculated similarity parameter E with the TSUNAMI-IP output for each application with each</span>
+<span class="sd">    experiment. The comparison is done for the nominal values and the uncertainties of the E values. In addition, the</span>
+<span class="sd">    difference between manually calculated uncertainties and automatically calculated uncertainties (i.e. via the uncertainties</span>
+<span class="sd">    package) is also calculated. The results are returned as a pandas DataFrame.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_filenames</span>
+<span class="sd">        Paths to the application sdf files.</span>
+<span class="sd">    experiment_filenames</span>
+<span class="sd">        Paths to the experiment sdf files.</span>
+<span class="sd">    coverx</span>
+<span class="sd">        The coverx library to use for TSUNAMI-IP. Default is ``&#39;252groupcov7.1&#39;``.</span>
+<span class="sd">    tsunami_ip_output_filename</span>
+<span class="sd">        Optional path to the TSUNAMI-IP output file, if not specified, the function will run TSUNAMI-IP to calculate the</span>
+<span class="sd">        E values using the template file :ref:`MG_reader.inp`.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Dictionary of pandas DataFrames for each type of E index. The keys are ``&#39;total&#39;``, ``&#39;fission&#39;``, ``&#39;capture&#39;``, </span>
+<span class="sd">        and ``&#39;scatter&#39;``. The DataFrames contain the calculated E values, the manual uncertainties, the TSUNAMI-IP values, </span>
+<span class="sd">        the relative difference in the mean, and the relative difference in the manually computed uncertainty. The DataFrames </span>
+<span class="sd">        are indexed by the experiment number and the columns are a MultiIndex with the application number as the main index </span>
+<span class="sd">        and the attributes as the subindex.</span>
+<span class="sd">        </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Each of the results dataframes in the dictionary can easily be written to excel using the pandas ``to_excel`` method.&quot;&quot;&quot;</span>
+    
+    <span class="c1"># First perform the manual calculations for each type of E index</span>
+    <span class="n">E_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="s1">&#39;fission&#39;</span><span class="p">,</span> <span class="s1">&#39;capture&#39;</span><span class="p">,</span> <span class="s1">&#39;scatter&#39;</span><span class="p">]</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">E_type</span> <span class="ow">in</span> <span class="n">E_types</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;total_manual&#39;</span><span class="p">,</span> <span class="s1">&#39;fission_manual&#39;</span><span class="p">,</span> <span class="s1">&#39;capture_manual&#39;</span><span class="p">,</span> <span class="s1">&#39;scatter_manual&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="s1">&#39;manual&#39;</span> <span class="ow">in</span> <span class="n">E_type</span><span class="p">:</span> <span class="c1"># Manual uncertainty propagation</span>
+            <span class="k">if</span> <span class="n">E_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_manual&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;total&#39;</span><span class="p">:</span>
+                <span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_E</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">,</span> <span class="n">reaction_type</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">uncertainties</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">E_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_manual&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span>
+                <span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_E</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">,</span> <span class="n">reaction_type</span><span class="o">=</span><span class="s1">&#39;elastic&#39;</span><span class="p">,</span> <span class="n">uncertainties</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_E</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">,</span> <span class="n">reaction_type</span><span class="o">=</span><span class="n">E_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_manual&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">uncertainties</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># Automatic uncertainty propagation</span>
+            <span class="k">if</span> <span class="n">E_type</span> <span class="o">==</span> <span class="s1">&#39;total&#39;</span><span class="p">:</span>
+                <span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_E</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">,</span> <span class="n">reaction_type</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">E_type</span> <span class="o">==</span> <span class="s1">&#39;scatter&#39;</span><span class="p">:</span>
+                <span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_E</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">,</span> <span class="n">reaction_type</span><span class="o">=</span><span class="s1">&#39;elastic&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_E</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">,</span> <span class="n">reaction_type</span><span class="o">=</span><span class="n">E_type</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done with calculations&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Now read the tsunami_ip output if given, and calculate it if not</span>
+    <span class="k">if</span> <span class="n">tsunami_ip_output_filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tsunami_ip_output</span> <span class="o">=</span> <span class="n">read_integral_indices</span><span class="p">(</span><span class="n">tsunami_ip_output_filename</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tsunami_ip_output</span> <span class="o">=</span> <span class="n">_run_and_read_TSUNAMI_IP</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">,</span> <span class="n">experiment_filenames</span><span class="p">,</span> <span class="n">coverx_library</span><span class="p">)</span>
+
+    <span class="c1"># Compare the nominal values</span>
+    <span class="n">E_diff</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">E_type</span> <span class="ow">in</span> <span class="n">E_types</span><span class="p">:</span>
+        <span class="n">E_diff</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">])</span> <span class="o">-</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">tsunami_ip_output</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;E_</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]))</span> \
+                            <span class="o">/</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">tsunami_ip_output</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;E_</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Compare the calculated (manual) uncertainty with the TSUNAMI-IP uncertainty</span>
+    <span class="n">E_diff_unc</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">E_type</span> <span class="ow">in</span> <span class="n">E_types</span><span class="p">:</span>
+        <span class="n">E_diff_unc</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">std_devs</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="n">E_type</span> <span class="o">+</span> <span class="s1">&#39;_manual&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">std_devs</span><span class="p">(</span><span class="n">tsunami_ip_output</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;E_</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span> <span class="p">)</span> \
+                                <span class="o">/</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">std_devs</span><span class="p">(</span><span class="n">tsunami_ip_output</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;E_</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+
+    <span class="c1"># -----------------------------------------</span>
+    <span class="c1"># Format the results as a pandas DataFrame</span>
+    <span class="c1"># -----------------------------------------</span>
+
+    <span class="c1"># Create a MultiIndex for columns</span>
+    <span class="n">num_experiments</span><span class="p">,</span> <span class="n">num_applications</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">])</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_product</span><span class="p">([</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_applications</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>  <span class="c1"># Main column indices</span>
+        <span class="p">[</span><span class="s1">&#39;Calculated&#39;</span><span class="p">,</span> <span class="s1">&#39;Manual Uncertainty&#39;</span><span class="p">,</span> <span class="s1">&#39;TSUNAMI-IP&#39;</span><span class="p">,</span> <span class="s1">&#39;Relative Difference in Mean&#39;</span><span class="p">,</span> <span class="s1">&#39;Relative Difference in Manual Uncertainty&#39;</span><span class="p">]</span>  <span class="c1"># Subcolumns</span>
+    <span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Application Number&#39;</span><span class="p">,</span> <span class="s1">&#39;Attribute&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Initialize DataFrame</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating pandas dataframes&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create a pandas DataFrame for each type of E index</span>
+    <span class="k">for</span> <span class="n">E_type</span> <span class="ow">in</span> <span class="n">E_types</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_experiments</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Experiment Number&#39;</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+
+        <span class="c1"># Populate DataFrame</span>
+        <span class="k">for</span> <span class="n">application_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_applications</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">experiment_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_experiments</span><span class="p">):</span>
+                <span class="c1"># Now write the data to the DataFrame</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Calculated&#39;</span><span class="p">)]</span> <span class="o">=</span> \
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">n</span><span class="si">:</span><span class="s2">1.3E</span><span class="si">}</span><span class="s2">+/-</span><span class="si">{</span><span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="si">:</span><span class="s2">1.2E</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Manual Uncertainty&#39;</span><span class="p">)]</span> <span class="o">=</span> \
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">E</span><span class="p">[</span><span class="n">E_type</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;_manual&#39;</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="si">:</span><span class="s2">1.2E</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;TSUNAMI-IP&#39;</span><span class="p">)]</span> <span class="o">=</span> \
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tsunami_ip_output</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;E_</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">n</span><span class="si">:</span><span class="s2">1.3E</span><span class="si">}</span><span class="s2">+/-</span><span class="si">{</span><span class="n">tsunami_ip_output</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;E_</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="si">:</span><span class="s2">1.2E</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Relative Difference in Mean&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">E_diff</span><span class="p">[</span><span class="n">E_type</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="si">:</span><span class="s2">1.4E</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Relative Difference in Manual Uncertainty&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">E_diff_unc</span><span class="p">[</span><span class="n">E_type</span><span class="p">][</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="si">:</span><span class="s2">1.4E</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<span class="k">def</span> <span class="nf">_update_annotation</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">,</span> <span class="n">integral_index</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span>
+                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">EnhancedPlotlyFigure</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update the annotation on the plot to include the TSUNAMI-IP c_k value and the percent difference from the</span>
+<span class="sd">    Pearson correlation coefficient. If the percent difference is greater than 5%, the annotation will be colored red.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fig</span>
+<span class="sd">        The plotly figure object.</span>
+<span class="sd">    integral_index</span>
+<span class="sd">        The TSUNAMI-IP integral_index value.</span>
+<span class="sd">    index_name</span>
+<span class="sd">        The name of the integral index.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * fig</span>
+<span class="sd">            The plotly figure object with the updated annotation.</span>
+<span class="sd">        * calculated_value</span>
+<span class="sd">            The calculated value of the integral index.</span>
+<span class="sd">        * percent_difference</span>
+<span class="sd">            The percent difference between the TSUNAMI-IP integral_index value and the Pearson correlation coefficient.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fig_has_annotations</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">EnhancedPlotlyFigure</span><span class="p">)</span>  <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">InteractiveScatterLegend</span><span class="p">)</span>
+    <span class="k">if</span>  <span class="ow">not</span> <span class="n">fig_has_annotations</span><span class="p">:</span>
+        <span class="c1"># On the diagonal are usually the contributions in a pie plot, and the calculated c_k is 1.0</span>
+        <span class="n">calculated_value</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">percent_difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">integral_index</span> <span class="o">-</span> <span class="n">calculated_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">integral_index</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">calculated_value</span><span class="p">,</span> <span class="n">percent_difference</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">InteractiveScatterLegend</span><span class="p">):</span>
+        <span class="c1"># The figure is actually stored under the &#39;fig&#39; attribute</span>
+        <span class="n">summary_stats_annotation</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">calculated_value</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="s1">&#39;pearson&#39;</span><span class="p">]</span>
+        <span class="n">percent_difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">integral_index</span> <span class="o">-</span> <span class="n">calculated_value</span><span class="p">)</span><span class="o">/</span><span class="n">integral_index</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">summary_stats_annotation</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&lt;br&gt;TSUNAMI-IP </span><span class="si">{</span><span class="n">index_name</span><span class="si">}</span><span class="s2">: &lt;b&gt;</span><span class="si">{</span><span class="n">integral_index</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;br&gt;Percent Difference: &lt;b&gt;</span><span class="si">{</span><span class="n">percent_difference</span><span class="si">}</span><span class="s2">&lt;/b&gt;%&quot;</span>
+        
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">percent_difference</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">summary_stats_annotation</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bordercolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span>  <span class="n">calculated_value</span><span class="p">,</span> <span class="n">percent_difference</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">summary_stats_annotation</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">annotations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">calculated_value</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">statistics</span><span class="p">[</span><span class="s1">&#39;pearson&#39;</span><span class="p">]</span>
+        <span class="n">percent_difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">integral_index</span> <span class="o">-</span> <span class="n">calculated_value</span><span class="p">)</span><span class="o">/</span><span class="n">integral_index</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="n">summary_stats_annotation</span><span class="o">.</span><span class="n">text</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;&lt;br&gt;TSUNAMI-IP </span><span class="si">{</span><span class="n">index_name</span><span class="si">}</span><span class="s2">: &lt;b&gt;</span><span class="si">{</span><span class="n">integral_index</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;br&gt;Percent Difference: &lt;b&gt;</span><span class="si">{</span><span class="n">percent_difference</span><span class="si">}</span><span class="s2">&lt;/b&gt;%&quot;</span>
+        
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">percent_difference</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">summary_stats_annotation</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bordercolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span>  <span class="n">calculated_value</span><span class="p">,</span> <span class="n">percent_difference</span>
+
+<span class="k">def</span> <span class="nf">_process_pair</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">application_file</span><span class="p">,</span> <span class="n">experiment_file</span><span class="p">,</span> <span class="n">base_library</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">,</span> <span class="n">num_perturbations</span><span class="p">,</span> <span class="n">integral_value</span> <span class="o">=</span> <span class="n">args</span>
+    <span class="n">points_array</span> <span class="o">=</span> <span class="n">generate_points</span><span class="p">(</span>
+        <span class="n">application_file</span><span class="p">,</span> 
+        <span class="n">experiment_file</span><span class="p">,</span> 
+        <span class="n">base_library</span><span class="o">=</span><span class="n">base_library</span><span class="p">,</span> 
+        <span class="n">perturbation_factors</span><span class="o">=</span><span class="n">perturbation_factors</span><span class="p">,</span> 
+        <span class="n">num_perturbations</span><span class="o">=</span><span class="n">num_perturbations</span>
+    <span class="p">)</span>
+    <span class="n">x_points</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">([</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">points_array</span> <span class="p">])</span>
+    <span class="n">y_points</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">([</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">points_array</span> <span class="p">])</span>
+
+    <span class="c1"># Calculate the Pearson correlation coefficient</span>
+    <span class="n">calculated_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">x_points</span><span class="p">,</span> <span class="n">y_points</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">percent_difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">integral_value</span> <span class="o">-</span> <span class="n">calculated_value</span><span class="p">)</span> <span class="o">/</span> <span class="n">integral_value</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">return</span> <span class="n">calculated_value</span><span class="p">,</span> <span class="n">percent_difference</span>
+
+<div class="viewcode-block" id="correlation_comparison">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.comparisons.correlation_comparison">[docs]</a>
+<span class="nd">@_convert_paths</span>
+<span class="k">def</span> <span class="nf">correlation_comparison</span><span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">:</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                           <span class="n">application_files</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> 
+                           <span class="n">experiment_files</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                           <span class="n">base_library</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                           <span class="n">perturbation_factors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                           <span class="n">num_perturbations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_plot</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                           <span class="n">num_cores</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">2</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that compares the calculated similarity parameter :math:`c_k` (calculated using the cross section sampling method) </span>
+<span class="sd">    with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs</span>
+<span class="sd">    must correspond with those in hte TSUNAMI-IP input file.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    * If the chosen method is &#39;perturbation&#39;, the matrix plot can become extremely memory intensive, so it is recommended</span>
+<span class="sd">      to set ``make_plot=False`` (if only the matrix of comparisons is desired) and/or to use ``num_cores=1`` or a small</span>
+<span class="sd">      number of perturbations to avoid memory issues.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    integral_index_matrix:</span>
+<span class="sd">        The matrix representing the given integral index. Expected shape is ``(num_applications, num_experiments)``.</span>
+<span class="sd">    integral_index_name:</span>
+<span class="sd">        The name of the integral index (used for selecting the method for the plot). Allowed values of ``&#39;c_k&#39;``, ``&#39;E&#39;``.</span>
+<span class="sd">    application_files</span>
+<span class="sd">        Paths to the input files for the application (required by the chosen method, either TSUNAMI ``.out`` files or </span>
+<span class="sd">        TSUNAMI ``.sdf`` files).</span>
+<span class="sd">    experiment_files</span>
+<span class="sd">        Paths to the input files for the experiment (required by the chosen method, either TSUNAMI ``.out`` files or </span>
+<span class="sd">        TSUNAMI ``.sdf`` files).</span>
+<span class="sd">    method</span>
+<span class="sd">        The method for visualizing the given integral index. Allowed values of ``&#39;perturbation&#39;``, </span>
+<span class="sd">        ``&#39;uncertainty_contributions_nuclide&#39;``, ``&#39;uncertainty_contributions_nuclide_reaction&#39;``, </span>
+<span class="sd">        ``&#39;E_contributions_nuclide&#39;``, ``&#39;E_contributions_nuclide_reaction&#39;``, ``&#39;c_k_contributions&#39;``. </span>
+<span class="sd">    base_library</span>
+<span class="sd">        Path to the base library</span>
+<span class="sd">    perturbation_factors</span>
+<span class="sd">        Path to the perturbation factors.</span>
+<span class="sd">    num_perturbations</span>
+<span class="sd">        Number of perturbations to generate.</span>
+<span class="sd">    make_plot</span>
+<span class="sd">        Whether to generate the matrix plot. Default is ``True``.</span>
+<span class="sd">    num_cores</span>
+<span class="sd">        If ``make_plot`` is ``False``, the number of cores to use for multiprocessing. Default is two less than the number</span>
+<span class="sd">        of available cores.  </span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * comparisons</span>
+<span class="sd">            A pandas DataFrame containing the calculated integral index values, the TSUNAMI-IP values, and the percent</span>
+<span class="sd">            difference between the two values.</span>
+<span class="sd">        * matrix_plot</span>
+<span class="sd">            The matrix plot object containing the integral index values and the percent difference.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ===================================</span>
+    <span class="c1"># Perform checks on input parameters</span>
+    <span class="c1"># ===================================</span>
+
+    <span class="c1"># Check for consistent dimensions of the integral index matrix</span>
+    <span class="n">num_applications</span><span class="p">,</span> <span class="n">num_experiments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_applications</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">application_files</span><span class="p">)</span> <span class="ow">or</span> <span class="n">num_experiments</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiment_files</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The dimensions of the integral index matrix do not match the number of applications and experiments.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check for missing input parameters or inconsistent method</span>
+    <span class="n">missing_perturbation_parameters</span> <span class="o">=</span> <span class="nb">any</span><span class="p">([</span><span class="n">base_library</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">perturbation_factors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span>
+                                             <span class="n">num_perturbations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;perturbation&#39;</span> <span class="ow">and</span> <span class="n">missing_perturbation_parameters</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The method is &#39;perturbation&#39;, and some of the required additional parameters are missing.&quot;</span><span class="p">)</span>
+
+    <span class="n">method_for_calculating_c_k</span> <span class="o">=</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;uncertainty_contributions_nuclide&#39;</span><span class="p">,</span> <span class="s1">&#39;uncertainty_contributions_nuclide_reaction&#39;</span><span class="p">,</span>
+                                                <span class="s1">&#39;perturbation&#39;</span><span class="p">,</span> <span class="s1">&#39;c_k_contributions&#39;</span><span class="p">]</span>
+    <span class="n">method_for_calculating_E</span> <span class="o">=</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;E_contributions_nuclide&#39;</span><span class="p">,</span> <span class="s1">&#39;E_contributions_nuclide_reaction&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">integral_index_name</span> <span class="o">==</span> <span class="s1">&#39;c_k&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">method_for_calculating_c_k</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The integral index name is &#39;c_k&#39;, but a method for calculating c_k was not selected, instead&quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;the method selected was </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">. Please select a method for calculating c_k.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">integral_index_name</span> <span class="o">==</span> <span class="s1">&#39;E&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">method_for_calculating_E</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The integral index name is &#39;E&#39;, but the method selected was not &#39;E_contributions&#39;. Please&quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;the method selected was </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">. Please select a method for calculating E.&quot;</span><span class="p">)</span>
+
+
+    <span class="c1"># ===================================</span>
+    <span class="c1"># Generate plots for the matrix plot</span>
+    <span class="c1"># ===================================</span>
+    <span class="k">match</span> <span class="n">method</span><span class="p">:</span>
+        <span class="k">case</span> <span class="s1">&#39;perturbation&#39;</span><span class="p">:</span>
+            <span class="c1"># This is the most memory intensive method, so instead of storing the entire points array, if make_plot is False,</span>
+            <span class="c1"># we will just calculate the Pearson correlation coefficient from the points themselves, and only store the</span>
+            <span class="c1"># results array.</span>
+            <span class="k">if</span> <span class="n">make_plot</span><span class="p">:</span>
+                <span class="n">points_array</span> <span class="o">=</span> <span class="n">generate_points</span><span class="p">(</span><span class="n">application_files</span><span class="p">,</span> <span class="n">experiment_files</span><span class="p">,</span> <span class="n">base_library</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">,</span> 
+                                               <span class="n">num_perturbations</span><span class="p">)</span>
+                <span class="n">plot_objects_array</span> <span class="o">=</span> <span class="n">generate_plot_objects_array_from_perturbations</span><span class="p">(</span><span class="n">points_array</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">num_applications</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">application_files</span><span class="p">)</span>
+                <span class="n">num_experiments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiment_files</span><span class="p">)</span>
+                
+                <span class="c1"># Prepare arguments for multiprocessing</span>
+                <span class="n">tasks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">application_files</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">experiment_files</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">base_library</span><span class="p">,</span> <span class="n">perturbation_factors</span><span class="p">,</span> <span class="n">num_perturbations</span><span class="p">,</span> <span class="n">integral_index_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_applications</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_experiments</span><span class="p">)]</span>
+                
+                <span class="c1"># Use multiprocessing to process data</span>
+                <span class="k">with</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">num_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+                    <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_process_pair</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)</span>
+                
+                <span class="c1"># Reshape the results into matrices</span>
+                <span class="n">calculated_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_applications</span><span class="p">,</span> <span class="n">num_experiments</span><span class="p">)</span>
+                <span class="n">percent_differences</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_applications</span><span class="p">,</span> <span class="n">num_experiments</span><span class="p">)</span>
+                
+
+        <span class="k">case</span> <span class="s1">&#39;uncertainty_contributions_nuclide&#39;</span><span class="p">:</span>
+            <span class="n">contributions_nuclide</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_uncertainty_contributions</span><span class="p">(</span><span class="n">application_files</span><span class="p">,</span> <span class="n">experiment_files</span><span class="p">)</span>
+            <span class="n">plot_objects_array</span> <span class="o">=</span> <span class="n">generate_plot_objects_array_from_contributions</span><span class="p">(</span><span class="n">contributions_nuclide</span><span class="p">,</span> <span class="s1">&#39;%Δk/k&#39;</span><span class="p">)</span> \
+                                    <span class="k">if</span> <span class="n">make_plot</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">case</span> <span class="s1">&#39;uncertainty_contributions_nuclide_reaction&#39;</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">contributions_nuclide_reaction</span> <span class="o">=</span> <span class="n">get_uncertainty_contributions</span><span class="p">(</span><span class="n">application_files</span><span class="p">,</span> <span class="n">experiment_files</span><span class="p">)</span>
+            <span class="n">plot_objects_array</span> <span class="o">=</span> <span class="n">generate_plot_objects_array_from_contributions</span><span class="p">(</span><span class="n">contributions_nuclide_reaction</span><span class="p">,</span> <span class="s1">&#39;%Δk/k&#39;</span><span class="p">)</span> \
+                                    <span class="k">if</span> <span class="n">make_plot</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">case</span> <span class="s1">&#39;E_contributions_nuclide&#39;</span><span class="p">:</span>
+            <span class="n">contributions_nuclide</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span>  <span class="n">calculate_E_contributions</span><span class="p">(</span><span class="n">application_files</span><span class="p">,</span> <span class="n">experiment_files</span><span class="p">)</span>
+            <span class="n">plot_objects_array</span> <span class="o">=</span> <span class="n">generate_plot_objects_array_from_contributions</span><span class="p">(</span><span class="n">contributions_nuclide</span><span class="p">,</span> 
+                                                                                <span class="n">integral_index_name</span><span class="p">)</span> \
+                                    <span class="k">if</span> <span class="n">make_plot</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">case</span> <span class="s1">&#39;E_contributions_nuclide_reaction&#39;</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">contributions_nuclide_reaction</span> <span class="o">=</span>  <span class="n">calculate_E_contributions</span><span class="p">(</span><span class="n">application_files</span><span class="p">,</span> <span class="n">experiment_files</span><span class="p">)</span>
+            <span class="n">plot_objects_array</span> <span class="o">=</span> <span class="n">generate_plot_objects_array_from_contributions</span><span class="p">(</span><span class="n">contributions_nuclide_reaction</span><span class="p">,</span> 
+                                                                                <span class="n">integral_index_name</span><span class="p">)</span> \
+                                    <span class="k">if</span> <span class="n">make_plot</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">case</span> <span class="s1">&#39;c_k_contributions&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The method &#39;c_k_contributions&#39; is not yet implemented.&quot;</span><span class="p">)</span>
+            <span class="c1"># plot_objects_array = generate_plot_objects_from_array_contributions(integral_index_matrix, )</span>
+
+    <span class="c1"># ==============================</span>
+    <span class="c1"># Update plots with annotations</span>
+    <span class="c1"># ==============================</span>
+    <span class="k">if</span> <span class="n">make_plot</span><span class="p">:</span>
+        <span class="n">percent_differences</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">)</span>
+        <span class="n">calculated_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plot_objects_array</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">plot_object</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                <span class="n">updated_plot_object</span><span class="p">,</span> <span class="n">calculated_value</span><span class="p">,</span> <span class="n">percent_difference</span> <span class="o">=</span> \
+                    <span class="n">_update_annotation</span><span class="p">(</span><span class="n">plot_object</span><span class="p">,</span> <span class="n">integral_index_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">integral_index_name</span><span class="p">)</span>
+                <span class="n">calculated_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculated_value</span>
+                <span class="n">percent_differences</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">percent_difference</span>
+                <span class="n">plot_objects_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">updated_plot_object</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;perturbation&#39;</span><span class="p">:</span>
+        <span class="n">percent_differences</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">)</span>
+        <span class="n">calculated_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">)</span>
+        <span class="c1"># Just calculate pearson correlation coefficient from the points themselves</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_experiments</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_applications</span><span class="p">):</span>
+                <span class="n">x_points</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">points_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">y_points</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">points_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">calculated_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">x_points</span><span class="p">,</span> <span class="n">y_points</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">percent_differences</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">calculated_values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span><span class="o">/</span><span class="n">integral_index_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="c1"># ===================================</span>
+    <span class="c1"># Create dataframes with comparisons</span>
+    <span class="c1"># ===================================</span>
+    <span class="n">num_applications</span><span class="p">,</span> <span class="n">num_experiments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">integral_index_matrix</span><span class="p">)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_product</span><span class="p">([</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_applications</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>  <span class="c1"># Main column indices</span>
+        <span class="p">[</span><span class="s1">&#39;Calculated&#39;</span><span class="p">,</span> <span class="s1">&#39;TSUNAMI-IP&#39;</span><span class="p">,</span> <span class="s1">&#39;Percent Difference&#39;</span><span class="p">]</span>  <span class="c1"># Subcolumns</span>
+    <span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Application Number&#39;</span><span class="p">,</span> <span class="s1">&#39;Attribute&#39;</span><span class="p">])</span>
+
+    <span class="n">comparisons</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_experiments</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Experiment Number&#39;</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+    <span class="c1"># Populate DataFrame</span>
+    <span class="k">for</span> <span class="n">application_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_applications</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">experiment_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_experiments</span><span class="p">):</span>
+            <span class="c1"># Now write the data to the DataFrame</span>
+            <span class="n">comparisons</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Calculated&#39;</span><span class="p">)]</span> <span class="o">=</span> \
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">calculated_values</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="si">:</span><span class="s2">1.3E</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">comparisons</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;TSUNAMI-IP&#39;</span><span class="p">)]</span> <span class="o">=</span> \
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">integral_index_matrix</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">n</span><span class="si">:</span><span class="s2">1.3E</span><span class="si">}</span><span class="s2">+/-</span><span class="si">{</span><span class="n">integral_index_matrix</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="si">:</span><span class="s2">1.2E</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">comparisons</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">experiment_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">application_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Percent Difference&#39;</span><span class="p">)]</span> <span class="o">=</span> \
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">percent_differences</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">n</span><span class="si">:</span><span class="s2">2.2f</span><span class="si">}</span><span class="s2">+/-</span><span class="si">{</span><span class="n">percent_differences</span><span class="p">[</span><span class="n">experiment_index</span><span class="p">,</span><span class="w"> </span><span class="n">application_index</span><span class="p">]</span><span class="o">.</span><span class="n">s</span><span class="si">:</span><span class="s2">1.2E</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="c1"># ===================</span>
+    <span class="c1"># Create matrix plot</span>
+    <span class="c1"># ===================</span>
+    <span class="k">if</span> <span class="n">make_plot</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">matrix_plot</span><span class="p">(</span><span class="n">plot_objects_array</span><span class="p">,</span> <span class="s1">&#39;interactive&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">comparisons</span><span class="p">,</span> <span class="n">fig</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">comparisons</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.xs &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.xs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.xs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This module contains the functions necessary for processing the binary SCALE multigroup cross section libraries</span>
+<span class="sd">(using the AMPX tools: charmin and tabasco) into python friendly dictionaries of numpy arrays.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyparsing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="k">def</span> <span class="nf">_parse_nuclide_reaction</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">energy_boundaries</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads a multigroup cross section ``.txt`` file produced by the extractor function and returns the energy-dependent </span>
+<span class="sd">    cross sections as a numpy array.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        The filename of the cross section file</span>
+<span class="sd">    energy_boundaries</span>
+<span class="sd">        If True, the energies at which the cross sections are defined are returned as well</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * If ``energy_boundaries`` is ``False``, a numpy array of cross sections</span>
+<span class="sd">        * If ``energy_boundaries`` is ``True``, a numpy array of cross sections and a numpy array of energy boundaries&quot;&quot;&quot;</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1"># ---------------------------</span>
+    <span class="c1"># Define grammar for parsing</span>
+    <span class="c1"># ---------------------------</span>
+
+    <span class="n">xs_data_line</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span><span class="p">)</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">LineEnd</span><span class="p">())</span>
+
+    <span class="c1"># Note that the output is formatted such that the same cross section value is printed for both energy boundaries of the </span>
+    <span class="c1"># group to avoid duplicating the cross section data, skip every other data line</span>
+    <span class="n">xs_parser</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">xs_data_line</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">xs_data_line</span><span class="p">))</span>
+
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xs_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">asList</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">energy_boundaries</span><span class="p">:</span>
+        <span class="c1"># Define a parser that reads the energy boundaries of the groups</span>
+        <span class="n">energy_data_line</span> <span class="o">=</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">())</span>
+        <span class="n">energy_parser</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">energy_data_line</span><span class="p">)</span>
+        <span class="n">energy_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">energy_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">asList</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">xs</span><span class="p">,</span> <span class="n">energy_boundaries</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">xs</span>
+
+<span class="k">def</span> <span class="nf">_parse_reactions_from_nuclide</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads a set of reactions (given by the list of reaction mt&#39;s) from a dump of all reactions for a single nuclide from</span>
+<span class="sd">    a SCALE library. Note this function requires that the dump included headers</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        The filename of the dump file.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments:</span>
+
+<span class="sd">        - reaction_mts (List[str])</span>
+<span class="sd">            The list of reaction MTs to read (**required** kwarg).</span>
+<span class="sd">        - energy_boundaries (bool)</span>
+<span class="sd">            If ``True``, the energies at which the cross sections are defined are returned as well (optional kwarg).</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A dictionary containing the cross sections for each reaction MT&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="s1">&#39;reaction_mts&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing required keyword argument: reaction_mts&quot;</span><span class="p">)</span>
+    
+    <span class="n">reaction_mts</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;reaction_mts&#39;</span><span class="p">]</span>
+    <span class="n">energy_boundaries</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;energy_boundaries&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">energy_boundaries</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Energy boundaries are not yet supported for this function&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1"># ===========================</span>
+    <span class="c1"># Define grammar for parsing</span>
+    <span class="c1"># ===========================</span>
+
+    <span class="n">zaid</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">reaction_mt</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">fido_field</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span> <span class="o">+</span> <span class="s1">&#39;$&#39;</span><span class="p">)</span>
+    <span class="n">fido_subfield</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span> <span class="o">+</span> <span class="s1">&#39;#&#39;</span><span class="p">)</span>
+
+    <span class="c1"># -------------------------------</span>
+    <span class="c1"># Define the header line by line</span>
+    <span class="c1"># -------------------------------</span>
+    <span class="n">subfield_end</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span>
+    <span class="n">other_subfield_end</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span>
+
+    <span class="c1"># Define a field bundle</span>
+    <span class="n">bundle_line1</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">fido_field</span><span class="p">)</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">zaid</span><span class="p">)</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">))</span> <span class="o">+</span> <span class="n">reaction_mt</span>
+    <span class="n">bundle_line2</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">OneOrMore</span><span class="p">(</span><span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)))</span>
+    <span class="n">bundle_line3</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">fido_subfield</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphanums</span><span class="p">)</span> <span class="o">+</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">fnumber</span><span class="p">)</span> <span class="o">+</span> <span class="n">other_subfield_end</span><span class="p">)</span>
+    <span class="n">field_bundle</span> <span class="o">=</span> <span class="n">bundle_line1</span> <span class="o">+</span> <span class="n">bundle_line2</span> <span class="o">+</span> <span class="n">bundle_line3</span>
+    
+    <span class="n">misc_field</span> <span class="o">=</span> <span class="n">fido_field</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">field_bundle</span><span class="p">)</span> <span class="o">+</span> \
+             <span class="n">field_bundle</span> <span class="o">+</span>\
+             <span class="n">Suppress</span><span class="p">(</span><span class="n">Optional</span><span class="p">(</span><span class="n">field_bundle</span><span class="p">))</span> <span class="o">+</span> \
+             <span class="n">Suppress</span><span class="p">(</span><span class="n">misc_field</span><span class="p">)</span> <span class="o">+</span> \
+             <span class="n">Suppress</span><span class="p">(</span><span class="n">fido_subfield</span><span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------</span>
+    <span class="c1"># Define the cross section data line by line</span>
+    <span class="c1"># -------------------------------------------</span>
+    <span class="n">xs_data_line</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span><span class="p">)</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">LineEnd</span><span class="p">())</span>
+
+    <span class="c1"># -------------------------------------------</span>
+    <span class="c1"># Now define the total parser for a reaction</span>
+    <span class="c1"># -------------------------------------------</span>
+    <span class="n">reaction_parser</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span><span class="n">OneOrMore</span><span class="p">(</span><span class="n">xs_data_line</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">xs_data_line</span><span class="p">)))</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">subfield_end</span><span class="p">)</span>
+
+    <span class="c1">#--------------------------------</span>
+    <span class="c1"># Parse the data and postprocess</span>
+    <span class="c1">#--------------------------------</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">reaction_parser</span><span class="o">.</span><span class="n">searchString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="p">{</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">parsed_data</span> <span class="p">}</span>
+    <span class="n">all_mts</span> <span class="o">=</span> <span class="n">parsed_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="p">{</span> <span class="n">mt</span><span class="p">:</span> <span class="n">data</span> <span class="k">for</span> <span class="n">mt</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">parsed_data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">mt</span> <span class="ow">in</span> <span class="n">reaction_mts</span> <span class="p">}</span>
+    <span class="k">if</span> <span class="n">parsed_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">reaction_mts</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not all reaction MTs were found in the data. Missing MTs: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">reaction_mts</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">parsed_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">. &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;This nuclide has the available MTs: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">all_mts</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parsed_data</span>
+
+<span class="k">def</span> <span class="nf">_parse_from_total_library</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
+                              <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse selected nuclide-reactions from an entire cross section library dump.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        Path to the file containing the library dump.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments:</span>
+<span class="sd">        </span>
+<span class="sd">        - nuclide_reaction_dict (dict)</span>
+<span class="sd">            A dictionary mapping nuclides to a list of reaction MTs to read (**required** kwarg).</span>
+<span class="sd">        - return_available_nuclide_reactions (bool)</span>
+<span class="sd">            If ``True``, the available nuclide reactions (i.e. all of the nuclide reactions for which data exists in the</span>
+<span class="sd">            given multigroup librari) are returned as well (optional kwarg).</span>
+<span class="sd">        - energy_boundaries (bool)</span>
+<span class="sd">            If ``True``, the energies at which the cross sections are defined are returned as well (optional kwarg).</span>
+<span class="sd">            </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * If ``return_available_nuclide_reactions`` is ``False``, a doubly nested dictionary containing the cross sections for each</span>
+<span class="sd">          nuclide-reaction pair. Keyed first by nuclide, then by reaction.</span>
+<span class="sd">        * If ``return_available_nuclide_reactions`` is ``True``, a tuple containing the above dictionary and a dictionary containing</span>
+<span class="sd">          all available nuclide reactions.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;nuclide_reaction_dict&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing required keyword argument: nuclide_reaction_dict&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;return_available_nuclide_reactions&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">return_available_nuclide_reactions</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;return_available_nuclide_reactions&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_available_nuclide_reactions</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">nuclide_reaction_dict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;nuclide_reaction_dict&#39;</span><span class="p">]</span>
+    <span class="n">energy_boundaries</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;energy_boundaries&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">energy_boundaries</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Energy boundaries are not yet supported for this function&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1"># ===========================</span>
+    <span class="c1"># Define regex patterns</span>
+    <span class="c1"># ===========================</span>
+
+    <span class="n">header_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;2\$\$\s+(\d+)\s+\d+\s+(\d+).*?(?=2##)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    <span class="n">xs_data_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;4##\s*((?:\s*[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?\s+[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?\s*\n)+)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="c1"># ===========================</span>
+    <span class="c1"># Parse the data</span>
+    <span class="c1"># ===========================</span>
+
+    <span class="n">parsed_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">all_nuclide_reactions</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">header_pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">nuclide</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">header_end</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+
+        <span class="c1"># Now record all available nuclide reactions</span>
+        <span class="k">if</span> <span class="n">nuclide</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_nuclide_reactions</span><span class="p">:</span>
+            <span class="n">all_nuclide_reactions</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="n">duplicate_reaction</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">reaction</span> <span class="o">!=</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_nuclide_reactions</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]:</span>
+                <span class="n">duplicate_reaction</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># Not sure why these occur</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_nuclide_reactions</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+        <span class="c1"># Check if the nuclide and reaction are in the nuclide_reaction_dict</span>
+        <span class="n">nuclide_reaction_is_requested</span> <span class="o">=</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="n">nuclide_reaction_dict</span> <span class="ow">and</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">nuclide_reaction_dict</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">nuclide_reaction_is_requested</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">duplicate_reaction</span><span class="p">:</span>
+            <span class="n">xs_data_match</span> <span class="o">=</span> <span class="n">xs_data_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">header_end</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xs_data_match</span><span class="p">:</span>
+                <span class="n">xs_data_text</span> <span class="o">=</span> <span class="n">xs_data_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">xs_data_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">xs_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[::</span><span class="mi">2</span><span class="p">]]</span>  <span class="c1"># Extract second column and skip every other row</span>
+                <span class="k">if</span> <span class="n">nuclide</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parsed_data_dict</span><span class="p">:</span>
+                    <span class="n">parsed_data_dict</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">parsed_data_dict</span><span class="p">[</span><span class="n">nuclide</span><span class="p">][</span><span class="n">reaction</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xs_data</span><span class="p">)</span>
+
+    <span class="c1"># ========================================</span>
+    <span class="c1"># Check for missing nuclides and reactions</span>
+    <span class="c1"># ========================================</span>
+
+    <span class="n">nuclides_not_found</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nuclide_reaction_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">parsed_data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">reactions_not_found</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">nuclide_reaction_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Skip the nuclides that aren&#39;t found</span>
+        <span class="k">if</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="n">nuclides_not_found</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reaction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parsed_data_dict</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">nuclide</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reactions_not_found</span><span class="p">:</span>
+                    <span class="n">reactions_not_found</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">reactions_not_found</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nuclides_not_found</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">reactions_not_found</span> <span class="o">!=</span> <span class="p">{}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not all requested reactions were found in the data. Missing reactions: </span><span class="si">{</span><span class="n">reactions_not_found</span><span class="si">}</span><span class="s2">. &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;And missing nuclides: </span><span class="si">{</span><span class="n">nuclides_not_found</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="n">return_available_nuclide_reactions</span><span class="p">:</span>
+        <span class="c1"># Remove the nuclide &#39;0&#39; from the list of available nuclides if it exists</span>
+        <span class="n">all_nuclide_reactions</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parsed_data_dict</span><span class="p">,</span> <span class="n">all_nuclide_reactions</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parsed_data_dict</span>
+
+<span class="k">def</span> <span class="nf">_read_nuclide_reaction_from_multigroup_library</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">nuclide_zaid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reaction_mt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                                                   <span class="n">parsing_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span><span class="o">=</span><span class="n">_parse_nuclide_reaction</span><span class="p">,</span> 
+                                                   <span class="n">plot_option</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;plot&#39;</span><span class="p">,</span> <span class="n">energy_boundaries</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uses SCALE to dump a binary multigroup library to a text file, and then calls the specified parsing function on the </span>
+<span class="sd">    output file.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    multigroup_library_path</span>
+<span class="sd">        The path to the SCALE multigroup library file.</span>
+<span class="sd">    nuclide_zaid</span>
+<span class="sd">        The ZAID of the nuclide.</span>
+<span class="sd">    reaction_mt</span>
+<span class="sd">        The reaction MT to read.</span>
+<span class="sd">    parsing_function</span>
+<span class="sd">        The function to call on the output file. This function takes the filename of the output file as its first argument, and</span>
+<span class="sd">        whether or not energy boundaries should be returned as its second argument. Additional keyword arguments can be passed</span>
+<span class="sd">        to the parsing function using the kwargs argument.</span>
+<span class="sd">    plot_option</span>
+<span class="sd">        The plot option to use when running the MG reader. For example ``&#39;plot&#39;`` or ``&#39;fido&#39;``.</span>
+<span class="sd">    energy_boundaries</span>
+<span class="sd">        If True, the energies at which the cross sections are defined are returned as well.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        An output that is the result of the parsing function&quot;&quot;&quot;</span>
+    <span class="c1"># Get the directory of the current file</span>
+    <span class="n">current_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+
+    <span class="c1"># Construct the path to the input file</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">current_dir</span> <span class="o">/</span> <span class="s1">&#39;input_files&#39;</span> <span class="o">/</span> <span class="s1">&#39;MG_reader.inp&#39;</span>
+
+    <span class="c1"># Create a tempfile for storing the output file of the MG reader dump.</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+        <span class="n">output_file_path</span> <span class="o">=</span> <span class="n">output_file</span><span class="o">.</span><span class="n">name</span>
+    
+    <span class="c1"># Read the MG reader input template file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        
+    <span class="c1"># Substitute the input file template variables</span>
+    <span class="n">input_file</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span>
+        <span class="n">nuclide_zaid</span><span class="o">=</span><span class="n">nuclide_zaid</span><span class="p">,</span> 
+        <span class="n">reaction_mt</span><span class="o">=</span><span class="n">reaction_mt</span><span class="p">,</span> 
+        <span class="n">multigroup_library_path</span><span class="o">=</span><span class="n">multigroup_library_path</span><span class="p">,</span>
+        <span class="n">output_file_path</span><span class="o">=</span><span class="n">output_file_path</span><span class="p">,</span>
+        <span class="n">plot_option</span><span class="o">=</span><span class="n">plot_option</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Write the input file to another tempfile</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_temp_file</span><span class="p">:</span>
+        <span class="n">input_temp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="n">input_temp_file_path</span> <span class="o">=</span> <span class="n">input_temp_file</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># Run the executable</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;scalerte&#39;</span><span class="p">,</span> <span class="n">input_temp_file_path</span><span class="p">]</span>
+
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+    <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="c1"># Now delete the input file</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">input_temp_file_path</span><span class="p">)</span>
+
+    <span class="c1"># Read the output file</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">parsing_function</span><span class="p">(</span><span class="n">output_file_path</span><span class="p">,</span> <span class="n">energy_boundaries</span><span class="o">=</span><span class="n">energy_boundaries</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Now delete the output file</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output_file_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span>
+
+<span class="k">def</span> <span class="nf">_read_reactions_from_nuclide</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">nuclide_zaid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reaction_mts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+                                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    multigroup_library_path</span>
+<span class="sd">        The path to the SCALE multigroup library file.</span>
+<span class="sd">    nuclide_zaid</span>
+<span class="sd">        The ZAID of the nuclide.</span>
+<span class="sd">    reaction_mts</span>
+<span class="sd">        The list of reaction MTs to read.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        A dictionary containing the cross sections for each reaction MT&quot;&quot;&quot;</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">_read_nuclide_reaction_from_multigroup_library</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">,</span> <span class="n">nuclide_zaid</span><span class="p">,</span> <span class="n">reaction_mt</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> \
+                                                           <span class="n">parsing_function</span><span class="o">=</span><span class="n">_parse_reactions_from_nuclide</span><span class="p">,</span> \
+                                                            <span class="n">reaction_mts</span><span class="o">=</span><span class="n">reaction_mts</span><span class="p">,</span> <span class="n">plot_option</span><span class="o">=</span><span class="s1">&#39;fido&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span>
+
+<div class="viewcode-block" id="read_multigroup_xs">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs">[docs]</a>
+<span class="k">def</span> <span class="nf">read_multigroup_xs</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">nuclide_zaid_reaction_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> 
+                       <span class="n">num_processes</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span> <span class="n">return_available_nuclide_reactions</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
+                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    multigroup_library_path</span>
+<span class="sd">        The path to the SCALE multigroup library file.</span>
+<span class="sd">    nuclide_zaid_reaction_dict</span>
+<span class="sd">        A dictionary mapping nuclide ZAIDs to a list of reaction MTs to read.</span>
+<span class="sd">    num_processes</span>
+<span class="sd">        The number of processes to use for reading the library. If None, the number of processes is set to the number of cores.</span>
+<span class="sd">    return_available_nuclide_reactions</span>
+<span class="sd">        If True, the available nuclide reactions (i.e. all of the nuclide reactions for which data exists in the given </span>
+<span class="sd">        multigroup library) are returned as well.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * If ``return_available_nuclide_reactions`` is ``False``, a dictionary containing the cross sections (as numpy arrays) </span>
+<span class="sd">          for each nuclide-reaction pair. Keyed first by nuclide, then by reaction.</span>
+<span class="sd">        * If ``return_available_nuclide_reactions`` is ``True``, a tuple containing the above dictionary and a </span>
+<span class="sd">          dictionary containing all available nuclide reactions is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">NUCLIDE_THRESHOLD</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1"># Number of nuclides after which the large method is more performant and hence is used</span>
+    <span class="n">CORE_THRESHOLD</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># The large method is more performant if the number of cores is smaller than this number</span>
+
+    <span class="n">num_nuclides</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">nuclide_zaid_reaction_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="n">use_small_method</span> <span class="o">=</span> <span class="p">(</span> <span class="n">num_nuclides</span> <span class="o">&lt;</span> <span class="n">NUCLIDE_THRESHOLD</span> <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span> <span class="n">num_processes</span> <span class="o">&gt;=</span> <span class="n">CORE_THRESHOLD</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_small_method</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">return_available_nuclide_reactions</span><span class="p">:</span> <span class="c1"># This method is slow but works for small amounts of nuclide reactions or a large amount of cores</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">num_processes</span><span class="p">)</span>
+
+        <span class="c1"># Create a partial function with the common arguments</span>
+        <span class="n">read_reactions_partial</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_read_reactions_from_nuclide</span><span class="p">,</span> <span class="n">multigroup_library_path</span><span class="p">)</span>
+
+        <span class="c1"># Distribute the function calls among the processes</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">read_reactions_partial</span><span class="p">,</span> <span class="n">nuclide_zaid_reaction_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="c1"># Close the pool and wait for the processes to finish</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="c1"># Convert the results to a dictionary</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">nuclide_zaid_reaction_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">results</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># This method is faster (as in there&#39;s less scale run overhead) but requires the entire library to be read and is serial</span>
+        <span class="c1"># If the user wants the available nuclide reactions, then we need to create a partial function which adds the appropriate</span>
+        <span class="c1"># keyword argument to the parsing function</span>
+        <span class="k">if</span> <span class="n">return_available_nuclide_reactions</span><span class="p">:</span>
+            <span class="n">parse_function</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_parse_from_total_library</span><span class="p">,</span> <span class="n">return_available_nuclide_reactions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parse_function</span> <span class="o">=</span> <span class="n">_parse_from_total_library</span>
+        
+        <span class="n">output</span> <span class="o">=</span> <span class="n">_read_nuclide_reaction_from_multigroup_library</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">,</span> <span class="n">nuclide_zaid</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="n">reaction_mt</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> \
+                                                        <span class="n">parsing_function</span><span class="o">=</span><span class="n">parse_function</span><span class="p">,</span> \
+                                                        <span class="n">nuclide_reaction_dict</span><span class="o">=</span><span class="n">nuclide_zaid_reaction_dict</span><span class="p">,</span> <span class="n">plot_option</span><span class="o">=</span><span class="s1">&#39;fido&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+    
+<div class="viewcode-block" id="perturb_multigroup_xs_dump">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.xs.perturb_multigroup_xs_dump">[docs]</a>
+<span class="k">def</span> <span class="nf">perturb_multigroup_xs_dump</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>  <span class="n">max_perturb_factor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="n">output_file</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perturb the cross section data in a SCALE multigroup cross section library fido text dump file. This is useful for generating</span>
+<span class="sd">    examples for testing the SCALE reader functions which do not violate export control.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        The filename of the fido text dump file.</span>
+<span class="sd">    max_perturb_factor</span>
+<span class="sd">        The maximum percentage by which to perturb the cross sections. Cross sections are perturbed by a random factor between</span>
+<span class="sd">        ``1 - max_perturb_factor`` and ``1 + max_perturb_factor``.</span>
+<span class="sd">    overwrite</span>
+<span class="sd">        Whether or not to overwrite the file with the perturbed data.</span>
+<span class="sd">    output_file</span>
+<span class="sd">        An output file to write the perturbed data to.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * If ``True``, the file is overwritten with the perturbed data and nothing is returned.</span>
+<span class="sd">        * If ``False``, the perturbed data is returned as a list of strings, which can be written to a file via</span>
+<span class="sd">          ``with open(&#39;filename.txt&#39;, &#39;w&#39;) as f: f.writelines(perturbed_data)``.</span>
+<span class="sd">          </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - This only applies to `fido` dumps of SCALE multigroup cross section libraries.</span>
+<span class="sd">    - Fido dumps of SCALE multigroup cross section libraries can be generated using &quot;&quot;&quot;</span>
+    <span class="c1"># First read the multigroup xs library text dump</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">input_file</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+    <span class="c1"># Perturb the data</span>
+    <span class="n">reading_data</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">perturbed_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">input_file</span><span class="p">:</span>
+        <span class="c1"># Identify the start of the data with the correct fido delimiters</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39; 4## &#39;</span><span class="p">):</span>
+            <span class="n">reading_data</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">last_energy</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">newline</span> <span class="o">=</span> <span class="n">line</span>
+            <span class="n">perturbed_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newline</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">reading_data</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39; t&#39;</span><span class="p">):</span>
+            <span class="n">reading_data</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Now perturb the data</span>
+        <span class="k">if</span> <span class="n">reading_data</span><span class="p">:</span>
+            <span class="n">energy</span><span class="p">,</span> <span class="n">xs</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">energy</span> <span class="o">==</span> <span class="n">last_energy</span><span class="p">:</span>
+                <span class="c1"># If the energy is the same as the last energy, keep the (perturbed) xs the same</span>
+                <span class="n">newline</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;        </span><span class="si">{</span><span class="n">energy</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">last_xs</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">last_xs</span> <span class="o">=</span> <span class="n">last_xs</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">perturbation_factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">max_perturb_factor</span><span class="p">,</span> <span class="n">max_perturb_factor</span><span class="p">)</span>
+                <span class="n">newline</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;        </span><span class="si">{</span><span class="n">energy</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">perturbation_factor</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">last_xs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span> <span class="o">*</span> <span class="n">perturbation_factor</span>
+            <span class="n">last_energy</span> <span class="o">=</span> <span class="n">energy</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newline</span> <span class="o">=</span> <span class="n">line</span>
+
+        <span class="n">perturbed_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newline</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">perturbed_data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">perturbed_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">perturbed_data</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

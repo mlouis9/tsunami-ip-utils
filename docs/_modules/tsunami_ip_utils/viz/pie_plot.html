@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.viz.pie_plot &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.viz.pie_plot</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.viz.pie_plot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Tools for creating pie charts of contributions to integral indices.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+<span class="kn">from</span> <span class="nn">._base_plotter</span> <span class="kn">import</span> <span class="n">_Plotter</span>
+<span class="kn">from</span> <span class="nn">plotly.subplots</span> <span class="kn">import</span> <span class="n">make_subplots</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template_string</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">.plot_utils</span> <span class="kn">import</span> <span class="n">_find_free_port</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">ufloat</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.axes</span> <span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">import</span> <span class="nn">plotly</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.viz.plot_utils</span> <span class="kn">import</span> <span class="n">_capture_html_as_image</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;hatch.linewidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>
+
+<div class="viewcode-block" id="_PiePlotter">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter">[docs]</a>
+<span class="k">class</span> <span class="nc">_PiePlotter</span><span class="p">(</span><span class="n">_Plotter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for creating static pie charts of contributions to integral indices.&quot;&quot;&quot;</span>
+    <span class="n">_index_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the integral index whose contributions are being plotted (e.g. ``&#39;E&#39;`` or ``&#39;c_k&#39;``).&quot;&quot;&quot;</span>
+    <span class="n">_plot_redundant</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether to plot redundant/irrelevant reactions in the pie chart.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="_PiePlotter.__init__">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">,</span> <span class="n">plot_redudant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a pie chart of the contributions to the given integral index.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        integral_index_name</span>
+<span class="sd">            The name of the integral index whose contributions are to be plotted.</span>
+<span class="sd">        plot_redundant</span>
+<span class="sd">            Wether to include redundant/irrelevant reactions in the plot. NOTE: this only applies to nested plots, and</span>
+<span class="sd">            only affects the plot title; it is expected that the provided data is consistent with the flag.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        * Redundant reactions are defined as those which are derived from other reactions, e.g. &#39;total&#39; and &#39;capture&#39; reactions</span>
+<span class="sd">          in SCALE.</span>
+<span class="sd">        * Irrelevant reactions are defined as those which are not directly cross sections (but rather other nuclear data </span>
+<span class="sd">          parameters), e.g. &#39;chi&#39; in SCALE.</span>
+<span class="sd">        * A flag for including/excluding redundant/irrelevant reactions was provided since, if the user is expecting the</span>
+<span class="sd">          the contributions to add up nicely, then the redundant reactions should be excluded, and if only cross sections are</span>
+<span class="sd">          being considered, then the irrelevant reactions should be excluded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span> <span class="o">=</span> <span class="n">integral_index_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redudant</span></div>
+
+    
+    <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]]],</span> <span class="n">nested</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a pie chart of the given contributions to the integral index.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contributions</span>
+<span class="sd">            * If ``nested`` is ``False``, then this should be a dictionary of the form ``{nuclide: contribution}``, where </span>
+<span class="sd">              contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index.</span>
+<span class="sd">            * If ``nested`` is ``True``, then this should be a dictionary of the form ``{nuclide: {reaction: contribution}}``,</span>
+<span class="sd">              where contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index </span>
+<span class="sd">              through the given reaction.</span>
+<span class="sd">        nested</span>
+<span class="sd">            Wether the contributions are on a reaction-wise basis or not.&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nested</span> <span class="o">=</span> <span class="n">nested</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_textprops</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">rotation_mode</span> <span class="o">=</span> <span class="s1">&#39;anchor&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nested</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nested_pie_chart</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pie_chart</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">Axes</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span>
+
+    <span class="k">def</span> <span class="nf">_nested_pie_chart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pie chart of the contributions to the integral index on a nuclide-reaction-wise basis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contributions</span>
+<span class="sd">            A dictionary of the form ``{nuclide: {reaction: contribution}}``, where contribution is a ``ufloat`` object</span>
+<span class="sd">            representing the contribution of the nuclide to the integral index through the given reaction.&quot;&quot;&quot;</span>
+        
+        <span class="k">def</span> <span class="nf">blend_colors</span><span class="p">(</span><span class="n">color1</span><span class="p">,</span> <span class="n">color2</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">c1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">c2</span> <span class="k">for</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">color1</span><span class="p">,</span> <span class="n">color2</span> <span class="p">)</span> <span class="p">]</span> <span class="p">)</span>
+        
+        <span class="c1"># Create a nested ring chart</span>
+        <span class="n">nuclide_colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;rainbow&#39;</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+        <span class="n">nuclide_colors</span> <span class="o">=</span> <span class="p">[</span> <span class="n">blend_colors</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.8</span><span class="p">)</span> <span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">nuclide_colors</span> <span class="p">]</span>
+
+        <span class="n">nuclide_totals</span> <span class="o">=</span> <span class="p">{</span> <span class="n">nuclide</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contributions</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> \
+                        <span class="k">for</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="n">contributions</span> <span class="p">}</span>
+        
+        <span class="c1"># Sort nuclides by absolute magnitude of their total contributions</span>
+        <span class="n">nuclide_labels</span><span class="p">,</span> <span class="n">nuclide_totals_sorted</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">nuclide_totals</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+        <span class="c1"># Now, deal with negative values</span>
+
+        <span class="n">nuclides_with_opposite_sign_contributions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">contribution_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">contribution</span><span class="p">[</span><span class="n">reaction</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">contribution</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">contribution_values</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">contribution_values</span><span class="p">)):</span>
+                <span class="n">nuclides_with_opposite_sign_contributions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+            
+        <span class="c1"># For nuclides with opposite sign contributions, we distinguish the positive and negative contributions</span>
+        <span class="c1"># by coloring some of the inner ring a lighter color to indicate the negative contributions in the outer ring</span>
+        <span class="n">wedge_widths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nuclide_totals_sorted</span><span class="p">)</span>
+        <span class="n">inner_wedge_hatches</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">wedge_widths</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nuclides_with_opposite_sign_contributions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="n">nuclides_with_opposite_sign_contributions</span><span class="p">:</span>
+                <span class="c1"># First, determine the fraction of the contributions that are opposite (in sign) to the total</span>
+                <span class="n">total_sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">nuclide_totals</span><span class="p">[</span><span class="n">nuclide</span><span class="p">])</span>
+                
+                <span class="c1"># Now, we want to plot the &quot;lost&quot; wedge width in white, i.e. the width lost from cancellations between the</span>
+                <span class="c1"># positive and negative contributions. This will be colored a lighter color. The absolute sum of the</span>
+                <span class="c1"># contributions represents the wedge width if there were no cancellations, so the total wedge width</span>
+                <span class="c1"># minus the absolute sum of the contributions is &quot;lost&quot; wedge width.</span>
+
+                <span class="n">absolute_sum_of_contributions</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contributions</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+                
+                <span class="c1"># NOTE the sign function is needed to handle the case when the nuclide total is negative</span>
+                <span class="n">lost_wedge_width</span> <span class="o">=</span> <span class="n">absolute_sum_of_contributions</span> <span class="o">-</span> <span class="n">total_sign</span> <span class="o">*</span> <span class="n">nuclide_totals</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span>
+
+                <span class="c1"># Now, insert the lost wedge width into the wedge widths list right after the nuclide</span>
+                <span class="n">nuclide_index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nuclide_labels</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+                <span class="n">wedge_widths</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">nuclide_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lost_wedge_width</span><span class="p">)</span>
+                <span class="n">nuclide_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nuclide_labels</span><span class="p">)</span>
+                <span class="n">nuclide_labels</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">nuclide_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                
+                <span class="c1"># The color of the lost wedge width will be a blend of the nuclide color and white</span>
+                <span class="n">white_color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">opacity</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">blended_color</span> <span class="o">=</span> <span class="n">blend_colors</span><span class="p">(</span><span class="n">white_color</span><span class="p">,</span> <span class="n">nuclide_colors</span><span class="p">[</span><span class="n">nuclide_index</span><span class="p">],</span> <span class="n">opacity</span><span class="p">)</span>
+                <span class="n">nuclide_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">nuclide_colors</span><span class="p">,</span> <span class="n">nuclide_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">blended_color</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                
+                <span class="c1"># Add hatches to the negative total sum wedge</span>
+                <span class="k">if</span> <span class="n">nuclide_totals</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">inner_wedge_hatches</span><span class="p">[</span><span class="n">nuclide_index</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;//&#39;</span>
+
+        <span class="c1"># Now make everything positive for the pie chart</span>
+        <span class="n">wedge_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">wedge_widths</span><span class="p">)</span>
+
+        <span class="c1"># Plot the inner ring for nuclide totals</span>
+        <span class="n">inner_ring</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span><span class="o">.</span><span class="n">pie</span><span class="p">(</span><span class="n">wedge_widths</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">nuclide_labels</span><span class="p">,</span> \
+                                <span class="n">colors</span><span class="o">=</span><span class="n">nuclide_colors</span><span class="p">,</span> <span class="n">labeldistance</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">textprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">},</span> \
+                                    <span class="n">rotatelabels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wedgeprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Add hatches to the negative total sum wedges</span>
+        <span class="k">for</span> <span class="n">wedge</span><span class="p">,</span> <span class="n">hatch</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inner_ring</span><span class="p">,</span> <span class="n">inner_wedge_hatches</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">hatch</span><span class="p">:</span>
+                <span class="n">wedge</span><span class="o">.</span><span class="n">set_hatch</span><span class="p">(</span><span class="n">hatch</span><span class="p">)</span>
+
+        <span class="c1"># Plot the outer ring for reaction-specific contributions</span>
+        <span class="n">outer_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">outer_colors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">outer_sizes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">outer_hatches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nuclide_colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;rainbow&#39;</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+        <span class="n">nuclide_colors</span> <span class="o">=</span> <span class="p">[</span> <span class="n">blend_colors</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.8</span><span class="p">)</span> <span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">nuclide_colors</span> <span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">nuclide</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="p">[</span> <span class="n">nuclide_label</span> <span class="k">for</span> <span class="n">nuclide_label</span> <span class="ow">in</span> <span class="n">nuclide_labels</span> <span class="k">if</span> <span class="n">nuclide_label</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="p">]</span> <span class="p">):</span>
+            <span class="n">blended_color</span> <span class="o">=</span> <span class="n">blend_colors</span><span class="p">(</span><span class="n">nuclide_colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.8</span><span class="p">)</span>
+            
+            <span class="c1"># Sort reactions by absolute magnitude of their contributions</span>
+            <span class="n">reactions</span> <span class="o">=</span> <span class="n">contributions</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span>
+            <span class="n">sorted_reactions</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">reactions</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">reaction</span><span class="p">,</span> <span class="n">contribution</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_reactions</span><span class="p">):</span>
+                <span class="n">outer_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                
+                <span class="n">outer_colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">blended_color</span><span class="p">)</span>
+                <span class="n">outer_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+                
+                <span class="k">if</span> <span class="n">contribution</span><span class="o">.</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">outer_hatches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;//&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">outer_hatches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">outer_ring</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span><span class="o">.</span><span class="n">pie</span><span class="p">(</span><span class="n">outer_sizes</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">outer_labels</span><span class="p">,</span> <span class="n">labeldistance</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">outer_colors</span><span class="p">,</span> \
+                <span class="n">textprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">},</span> <span class="n">startangle</span><span class="o">=</span><span class="n">inner_ring</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">theta1</span><span class="p">,</span> <span class="n">counterclock</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
+                    <span class="n">rotatelabels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">wedgeprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Add hatches to the negative contribution wedges</span>
+        <span class="k">for</span> <span class="n">wedge</span><span class="p">,</span> <span class="n">hatch</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">outer_ring</span><span class="p">,</span> <span class="n">outer_hatches</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">hatch</span><span class="p">:</span>
+                <span class="n">wedge</span><span class="o">.</span><span class="n">set_hatch</span><span class="p">(</span><span class="n">hatch</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_pie_chart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pie chart of the contributions to the integral index on a nuclide-wise basis.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contributions</span>
+<span class="sd">            A dictionary of the form ``{nuclide: contribution}``, where contribution is a ``ufloat`` object representing the</span>
+<span class="sd">            contribution of the nuclide to the integral index.&quot;&quot;&quot;</span>
+        <span class="n">labels</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+        
+        <span class="c1"># Determining hatching patterns: empty string for positive, cross-hatch for negative</span>
+        <span class="n">hatches</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;//&#39;</span> <span class="k">if</span> <span class="n">contributions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+
+        <span class="c1"># Creating the pie chart  </span>
+        <span class="n">wedges</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span><span class="o">.</span><span class="n">pie</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">startangle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">rotatelabels</span> <span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">textprops</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_textprops</span><span class="p">)</span>
+
+        <span class="c1"># Applying hatching patterns to the wedges</span>
+        <span class="k">for</span> <span class="n">wedge</span><span class="p">,</span> <span class="n">hatch</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wedges</span><span class="p">,</span> <span class="n">hatches</span><span class="p">):</span>
+            <span class="n">wedge</span><span class="o">.</span><span class="n">set_hatch</span><span class="p">(</span><span class="n">hatch</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nested</span><span class="p">:</span>
+            <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> (including redundant/irrelvant reactions)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title_text</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span> <span class="c1"># Pad set to avoid overlap with labels</span></div>
+
+
+<div class="viewcode-block" id="_InteractivePiePlotter">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter">[docs]</a>
+<span class="k">class</span> <span class="nc">_InteractivePiePlotter</span><span class="p">(</span><span class="n">_Plotter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for creating interactive pie charts of contributions to integral indices.&quot;&quot;&quot;</span>
+    <span class="n">_index_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the integral index whose contributions are being plotted (e.g. ``&#39;E&#39;`` or ``&#39;c_k&#39;``).&quot;&quot;&quot;</span>
+    <span class="n">_plot_redundant</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether to plot redundant/irrelevant reactions in the pie chart.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="_InteractivePiePlotter.__init__">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_redundant</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a pie chart of the contributions to the given integral index.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        integral_index_name</span>
+<span class="sd">            The name of the integral index whose contributions are to be plotted.</span>
+<span class="sd">        plot_redundant</span>
+<span class="sd">            Wether to include redundant/irrelevant reactions in the plot. NOTE: this only applies to nested plots, and</span>
+<span class="sd">            only affects the plot title; it is expected that the provided data is consistent with the flag.</span>
+<span class="sd">        kwargs</span>
+<span class="sd">            Additional keyword arguments to control the behavior of the interactive legend.</span>
+
+<span class="sd">            - interactive_legend (bool)</span>
+<span class="sd">                Wether to include an interactive legend in the plot. Default is ``True``.</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        * Redundant reactions are defined as those which are derived from other reactions, e.g. &#39;total&#39; and &#39;capture&#39; reactions</span>
+<span class="sd">          in SCALE.</span>
+<span class="sd">        * Irrelevant reactions are defined as those which are not directly cross sections (but rather other nuclear data </span>
+<span class="sd">          parameters), e.g. &#39;chi&#39; in SCALE.</span>
+<span class="sd">        * A flag for including/excluding redundant/irrelevant reactions was provided since, if the user is expecting the</span>
+<span class="sd">          the contributions to add up nicely, then the redundant reactions should be excluded, and if only cross sections are</span>
+<span class="sd">          being considered, then the irrelevant reactions should be excluded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if the user wants an interactive legend</span>
+        <span class="k">if</span> <span class="s1">&#39;interactive_legend&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interactive_legend</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;interactive_legend&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interactive_legend</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span> <span class="o">=</span> <span class="n">integral_index_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redundant</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]]],</span> <span class="n">nested</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an interactive pie chart of the given contributions to the integral index.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contributions</span>
+<span class="sd">            * If ``nested`` is ``False``, then this should be a dictionary of the form ``{nuclide: contribution}``, where </span>
+<span class="sd">              contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index.</span>
+<span class="sd">            * If ``nested`` is ``True``, then this should be a dictionary of the form ``{nuclide: {reaction: contribution}}``,</span>
+<span class="sd">              where contribution is a ``ufloat`` object representing the contribution of the nuclide to the integral index </span>
+<span class="sd">              through the given reaction.</span>
+<span class="sd">        nested</span>
+<span class="sd">            Wether the contributions are on a reaction-wise basis or not.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">()</span>
+
+        <span class="c1"># Prepare data for the sunburst chart</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nested</span> <span class="o">=</span> <span class="n">nested</span>
+        <span class="k">if</span> <span class="n">nested</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_nested_sunburst_data</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_sunburst_data</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
+        
+        <span class="c1"># Create a sunburst chart</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">sunburst</span><span class="p">(</span>
+            <span class="n">data_frame</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="s1">&#39;labels&#39;</span><span class="p">,</span>
+            <span class="n">parents</span><span class="o">=</span><span class="s1">&#39;parents&#39;</span><span class="p">,</span>
+            <span class="n">ids</span><span class="o">=</span><span class="s1">&#39;ids&#39;</span><span class="p">,</span>
+            <span class="n">values</span><span class="o">=</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">,</span>
+            <span class="n">custom_data</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="s1">&#39;uncertainties&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Update hovertemplate with correct syntax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span>
+            <span class="n">hovertemplate</span><span class="o">=</span><span class="p">(</span>
+                <span class="s2">&quot;&lt;b&gt;%</span><span class="si">{label}</span><span class="s2">&lt;/b&gt;&lt;br&gt;&quot;</span>
+                <span class="s2">&quot;Value: %</span><span class="si">{customdata[0]:1.4E}</span><span class="s2"> +/- %</span><span class="si">{customdata[1]:1.4E}</span><span class="s2">&quot;</span>  <span class="c1"># Corrected format specifiers</span>
+                <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span>  <span class="c1"># This hides the trace info</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Now style the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">autosize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Removes fixed width</span>
+            <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Removes fixed height</span>
+            <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive_legend</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">InteractivePieLegend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+
+
+    
+    <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive_legend</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Interactive legends are not supported when adding to a subplot&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">fig</span>
+
+    <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">plotly</span><span class="o">.</span><span class="n">graph_objs</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">InteractivePieLegend</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
+
+    <span class="k">def</span> <span class="nf">_create_sunburst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pandas dataframe for a (not nested) sunburst chart of contributions.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contributions</span>
+<span class="sd">            A dictionary of the form ``{nuclide: contribution}``, where contribution is a ``ufloat`` object representing the</span>
+<span class="sd">            contribution of the nuclide to the integral index.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            The dataframe for creating the sunburst chart.&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;uncertainties&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;normalized_values&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;nuclide&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="n">abs_sum_of_nuclide_totals</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="nb">abs</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">nuclide_total</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Caclulate the nuclide total, and the positive and negative contributions</span>
+            <span class="n">norm_nuclide_total</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">nuclide_total</span><span class="p">)</span> <span class="o">/</span> <span class="n">abs_sum_of_nuclide_totals</span>
+
+            <span class="c1"># Add the nuclide as a parent</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide_total</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;uncertainties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide_total</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">norm_nuclide_total</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_nested_sunburst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pandas dataframe for a nested sunburst chart of contributions.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        contributions</span>
+<span class="sd">            A dictionary of the form ``{nuclide: {reaction: contribution}}``, where contribution is a ``ufloat`` object</span>
+<span class="sd">            representing the contribution of the nuclide to the integral index through the given reaction.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            The dataframe for creating the sunburst chart.&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="p">[],</span> 
+            <span class="s1">&#39;uncertainties&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;normalized_values&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;nuclide&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="n">abs_sum_of_nuclide_totals</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">reactions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> \
+                                    <span class="k">for</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">nuclide</span><span class="p">,</span> <span class="n">reactions</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Caclulate the nuclide total, and the positive and negative contributions</span>
+            <span class="n">nuclide_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">contribution</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">reactions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">abs_sum_of_nuclide_totals</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">norm_nuclide_total</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">nuclide_total</span><span class="p">)</span> <span class="o">/</span> <span class="n">abs_sum_of_nuclide_totals</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">norm_nuclide_total</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">positive_contributions</span> <span class="o">=</span> <span class="p">{</span> <span class="n">reaction</span><span class="p">:</span> <span class="n">contribution</span> <span class="k">for</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">reactions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                                      <span class="k">if</span> <span class="n">contribution</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">}</span>
+            <span class="n">negative_contributions</span> <span class="o">=</span> <span class="p">{</span> <span class="n">reaction</span><span class="p">:</span> <span class="n">contribution</span> <span class="k">for</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">reactions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> \
+                                      <span class="k">if</span> <span class="n">contribution</span><span class="o">.</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">}</span>
+            <span class="n">positive_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">contribution</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">positive_contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">negative_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">contribution</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">negative_contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="c1"># Add the nuclide as a parent</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide_total</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;uncertainties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide_total</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">norm_nuclide_total</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+    
+            <span class="c1"># --------------------------------------------------------</span>
+            <span class="c1"># Add the positive and negative contributions as children</span>
+            <span class="c1"># --------------------------------------------------------</span>
+
+            <span class="c1"># Normalize the contributions by the absolute value of the nuclide total </span>
+            <span class="n">absolute_sum</span> <span class="o">=</span> <span class="n">positive_total</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">negative_total</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">absolute_sum</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">normalization_factor</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">norm_nuclide_total</span><span class="p">)</span> <span class="o">/</span> <span class="n">absolute_sum</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">normalization_factor</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Positive contributions</span>
+            <span class="k">if</span> <span class="n">positive_total</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">norm_positive_total</span> <span class="o">=</span> <span class="n">positive_total</span> <span class="o">*</span> <span class="n">normalization_factor</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Positive&#39;</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nuclide</span><span class="si">}</span><span class="s2">-Positive&quot;</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">positive_total</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;uncertainties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">positive_total</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">norm_positive_total</span><span class="o">.</span><span class="n">n</span> <span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">norm_positive_total</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Negative contributions</span>
+            <span class="k">if</span> <span class="n">negative_total</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">norm_negative_total</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">negative_total</span><span class="p">)</span> <span class="o">*</span> <span class="n">normalization_factor</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Negative&#39;</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nuclide</span><span class="si">}</span><span class="s2">-Negative&quot;</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">negative_total</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;uncertainties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">negative_total</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">norm_negative_total</span><span class="o">.</span><span class="n">n</span> <span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">norm_negative_total</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># -------------------------------</span>
+            <span class="c1"># Add the reaction contributions</span>
+            <span class="c1"># -------------------------------</span>
+            <span class="c1"># NOTE: Plotly express apparently has issues dealing with small numbers, so unless the contribution is</span>
+            <span class="c1"># multiplied by a sufficiently large scale factor, the data won&#39;t be displayed correctly</span>
+            <span class="n">scale_factor</span> <span class="o">=</span> <span class="mi">10000</span>
+            <span class="k">for</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">positive_contributions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># Now normalize contributions so they sum to the &quot;normalized_positive_total</span>
+                <span class="k">if</span> <span class="n">positive_total</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">normalization_factor</span> <span class="o">=</span> <span class="n">norm_positive_total</span> <span class="o">/</span> <span class="n">positive_total</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">normalization_factor</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">norm_reaction_contribution</span> <span class="o">=</span> <span class="n">contribution</span><span class="o">.</span><span class="n">n</span> <span class="o">*</span> <span class="n">normalization_factor</span>
+                
+                <span class="k">if</span> <span class="n">contribution</span><span class="o">.</span><span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nuclide</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">reaction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nuclide</span><span class="si">}</span><span class="s2">-Positive&quot;</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;uncertainties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale_factor</span><span class="o">*</span><span class="n">norm_reaction_contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">negative_contributions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># Now normalize contributions so they sum to the &quot;normalized_negative_total&quot;</span>
+                <span class="n">normalization_factor</span> <span class="o">=</span> <span class="n">norm_negative_total</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">negative_total</span><span class="p">)</span>
+                <span class="n">norm_reaction_contribution</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">normalization_factor</span>
+
+                <span class="k">if</span> <span class="n">contribution</span><span class="o">.</span><span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nuclide</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">reaction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nuclide</span><span class="si">}</span><span class="s2">-Negative&quot;</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;uncertainties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contribution</span><span class="o">.</span><span class="n">s</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale_factor</span><span class="o">*</span><span class="n">norm_reaction_contribution</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nested</span><span class="p">:</span>
+            <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> (including redundant/irrelvant reactions)&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="n">title_text</span><span class="p">,</span> <span class="n">title_x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># &#39;title_x=0.5&#39; centers the title</span></div>
+
+
+
+<div class="viewcode-block" id="InteractivePieLegend">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend">[docs]</a>
+<span class="k">class</span> <span class="nc">InteractivePieLegend</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for creating an interactive legend for a sunburst chart.&quot;&quot;&quot;</span>
+    <span class="n">fig</span><span class="p">:</span> <span class="n">plotly</span><span class="o">.</span><span class="n">graph_objs</span><span class="o">.</span><span class="n">Figure</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The sunburst chart for which the interactive legend is being created.&quot;&quot;&quot;</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The dataframe used to create the sunburst chart.&quot;&quot;&quot;</span>
+    <span class="n">_app</span><span class="p">:</span> <span class="n">Flask</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Flask webapp that will display the interactive legend.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="InteractivePieLegend.__init__">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">:</span> <span class="n">plotly</span><span class="o">.</span><span class="n">graph_objs</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a flask webapp that will display an interactive legend for the sunburst chart.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fig</span>
+<span class="sd">            The sunburst chart for which the interactive legend is being created.</span>
+<span class="sd">        df</span>
+<span class="sd">            The dataframe used to create the sunburst chart.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/shutdown&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+        <span class="k">def</span> <span class="nf">shutdown</span><span class="p">():</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Function to shutdown the server&quot;&quot;&quot;</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">)</span>  <span class="c1"># Send the SIGINT signal to the current process</span>
+            <span class="k">return</span> <span class="s1">&#39;Server shutting down...&#39;</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">show_sunburst</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Function to display the sunburst chart with an interactive legend</span>
+<span class="sd">            </span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">                The HTML content for the sunburst chart with the interactive legend.&quot;&quot;&quot;</span>
+            <span class="c1"># Extract root nodes (nodes without parents)</span>
+            <span class="n">root_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Generate a unique ID for the container</span>
+            <span class="n">container_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;container-</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="c1"># Generate legend HTML with a title</span>
+            <span class="n">legend_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&lt;div id=&quot;</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s1">-legend&quot; style=&quot;border: 2px solid black; padding: 10px;&quot;&gt;&lt;h3 style=&quot;margin-top: 0; text-align: center;&quot;&gt;Legend&lt;/h3&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">root_nodes</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">legend_html</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;&lt;div class=&quot;</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s1">-legend-item&quot; style=&quot;cursor: pointer; margin-bottom: 5px;&quot; data-target=&quot;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;ids&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;&gt;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;ids&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="si">:</span><span class="s1">1.4E</span><span class="si">}</span><span class="s1">&lt;/div&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">legend_html</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/div&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+            <span class="c1"># JavaScript for interactivity and shutdown</span>
+            <span class="n">script_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            &lt;script&gt;</span>
+<span class="s2">            window.addEventListener(&#39;beforeunload&#39;, (event) =&gt; </span><span class="se">{{</span>
+<span class="s2">                navigator.sendBeacon(&#39;/shutdown&#39;);</span>
+<span class="s2">            </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">            document.addEventListener(&#39;DOMContentLoaded&#39;, function () </span><span class="se">{{</span>
+<span class="s2">                const legendItems = document.querySelectorAll(&#39;.</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">-legend-item&#39;);</span>
+<span class="s2">                legendItems.forEach(item =&gt; </span><span class="se">{{</span>
+<span class="s2">                    item.addEventListener(&#39;mouseenter&#39;, function() </span><span class="se">{{</span>
+<span class="s2">                        const target = this.getAttribute(&#39;data-target&#39;);</span>
+<span class="s2">                        const paths = document.querySelectorAll(&#39;path.surface&#39;);</span>
+<span class="s2">                        paths.forEach(path =&gt; </span><span class="se">{{</span>
+<span class="s2">                            const labelText = path.nextElementSibling ? path.nextElementSibling.textContent : &quot;&quot;;</span>
+<span class="s2">                            if (labelText.includes(target)) </span><span class="se">{{</span>
+<span class="s2">                                path.style.opacity = 0.5; // Highlight by changing opacity</span>
+<span class="s2">                            </span><span class="se">}}</span>
+<span class="s2">                        </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">                    </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">                    item.addEventListener(&#39;mouseleave&#39;, function() </span><span class="se">{{</span>
+<span class="s2">                        const paths = document.querySelectorAll(&#39;path.surface&#39;);</span>
+<span class="s2">                        paths.forEach(path =&gt; </span><span class="se">{{</span>
+<span class="s2">                            path.style.opacity = 1; // Reset opacity</span>
+<span class="s2">                        </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">                    </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">                    item.addEventListener(&#39;click&#39;, function() </span><span class="se">{{</span>
+<span class="s2">                        const target = this.getAttribute(&#39;data-target&#39;);</span>
+<span class="s2">                        const paths = document.querySelectorAll(&#39;path.surface&#39;);</span>
+<span class="s2">                        paths.forEach(path =&gt; </span><span class="se">{{</span>
+<span class="s2">                            const labelText = path.nextElementSibling ? path.nextElementSibling.textContent : &quot;&quot;;</span>
+<span class="s2">                            if (labelText.includes(target)) </span><span class="se">{{</span>
+<span class="s2">                                path.dispatchEvent(new MouseEvent(&#39;click&#39;, </span><span class="se">{{</span><span class="s2"> &#39;view&#39;: window, &#39;bubbles&#39;: true, &#39;cancelable&#39;: true </span><span class="se">}}</span><span class="s2">));</span>
+<span class="s2">                            </span><span class="se">}}</span>
+<span class="s2">                        </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">                    </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">                </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">                // Force Redraw/Reflow</span>
+<span class="s2">                setTimeout(() =&gt; </span><span class="se">{{</span>
+<span class="s2">                    window.dispatchEvent(new Event(&#39;resize&#39;));</span>
+<span class="s2">                </span><span class="se">}}</span><span class="s2">, 100); // Delay may be adjusted based on actual rendering time</span>
+<span class="s2">            </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">            &lt;/script&gt;</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+
+            <span class="c1"># Save the chart with interactivity and layout adjustments</span>
+            <span class="n">fig_html</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">full_html</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">include_plotlyjs</span><span class="o">=</span><span class="s1">&#39;cdn&#39;</span><span class="p">)</span>
+            <span class="n">full_html</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            &lt;!DOCTYPE html&gt;</span>
+<span class="s2">            &lt;html&gt;</span>
+<span class="s2">            &lt;head&gt;</span>
+<span class="s2">            &lt;title&gt;Interactive Sunburst Chart&lt;/title&gt;</span>
+<span class="s2">            &lt;style&gt;</span>
+<span class="s2">                #</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2"> </span><span class="se">{{</span>
+<span class="s2">                    display: flex;</span>
+<span class="s2">                    flex-direction: row; /* Align children horizontally */</span>
+<span class="s2">                    height: 100%;</span>
+<span class="s2">                    width: 100%; /* Ensure the container takes full width */</span>
+<span class="s2">                    margin: 0;</span>
+<span class="s2">                    font-family: Arial, sans-serif;</span>
+<span class="s2">                </span><span class="se">}}</span>
+<span class="s2">                #</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2"> &gt; div </span><span class="se">{{</span>
+<span class="s2">                    display: flex;</span>
+<span class="s2">                    justify-content: space-between; /* Space out the chart and legend */</span>
+<span class="s2">                    align-items: flex-start; /* Align items at the start of the cross axis */</span>
+<span class="s2">                    width: 100%;</span>
+<span class="s2">                    overflow: hidden; /* Hide overflow to prevent breaking layout */</span>
+<span class="s2">                </span><span class="se">}}</span>
+<span class="s2">                #</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">-chart </span><span class="se">{{</span>
+<span class="s2">                    flex: 1 1 70%; /* Allow chart to grow and shrink but base at 70% width */</span>
+<span class="s2">                    padding: 10px;</span>
+<span class="s2">                </span><span class="se">}}</span>
+<span class="s2">                #</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">-legend </span><span class="se">{{</span>
+<span class="s2">                    flex: 0 1 30%; /* Start with 30% width but allow shrinking */</span>
+<span class="s2">                    padding: 5px;</span>
+<span class="s2">                    max-height: calc(100vh - 20px); /* Limit height to viewport height minus some margin */</span>
+<span class="s2">                    overflow: auto; /* Scroll internally if content overflows */</span>
+<span class="s2">                </span><span class="se">}}</span>
+<span class="s2">            &lt;/style&gt;</span>
+<span class="s2">            &lt;/head&gt;</span>
+<span class="s2">            &lt;body&gt;</span>
+<span class="s2">            &lt;div id=&quot;</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">&quot;&gt;</span>
+<span class="s2">                &lt;div&gt;</span>
+<span class="s2">                    &lt;div id=&quot;</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">-chart&quot;&gt;</span><span class="si">{</span><span class="n">fig_html</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
+<span class="s2">                    &lt;div id=&quot;</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">-legend&quot;&gt;</span><span class="si">{</span><span class="n">legend_html</span><span class="si">}</span><span class="s2">&lt;/div&gt;</span>
+<span class="s2">                &lt;/div&gt;</span>
+<span class="s2">            &lt;/div&gt;</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">script_html</span><span class="si">}</span>
+<span class="s2">            &lt;/body&gt;</span>
+<span class="s2">            &lt;/html&gt;</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="n">render_template_string</span><span class="p">(</span><span class="n">full_html</span><span class="p">)</span></div>
+
+        
+    <span class="k">def</span> <span class="nf">_open_browser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Open the browser to display the interactive sunburst chart</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        port</span>
+<span class="sd">            The port at which the Flask server is running.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Now running at http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+        <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InteractivePieLegend.show">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.show">[docs]</a>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">open_browser</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the Flask server and open the browser to display the interactive sunburst chart</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        open_browser</span>
+<span class="sd">            Whether to open the browser automatically to display the chart.</span>
+<span class="sd">        silent</span>
+<span class="sd">            Whether to suppress Flask&#39;s startup and runtime messages.&quot;&quot;&quot;</span>
+        <span class="c1"># Suppress Flask&#39;s startup and runtime messages by redirecting them to dev null</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">silent</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">log</span>
+
+        <span class="n">port</span> <span class="o">=</span> <span class="n">_find_free_port</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">generating_docs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">open_browser</span><span class="p">:</span>
+                <span class="n">threading</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_browser</span><span class="p">(</span><span class="n">port</span><span class="p">))</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InteractivePieLegend.serve">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.serve">[docs]</a>
+    <span class="k">def</span> <span class="nf">serve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the Flask server to display the interactive sunburst chart without a browser tab.&quot;&quot;&quot;</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">_find_free_port</span><span class="p">()</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="c1"># sys.stdout = log</span>
+        <span class="c1"># sys.stderr = log</span>
+
+        <span class="c1"># Run the Flask application in a separate thread</span>
+        <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Now running at http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># This ensures thread exits when main program exits</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="InteractivePieLegend.write_html">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.write_html">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the HTML content of the interactive sunburst chart to a file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            The path of the file to which the HTML content will be written. If not provided, the content will be returned.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            If ``filename`` is not provided, the HTML content of the interactive sunburst chart.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">html_content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">html_content</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html_content</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InteractivePieLegend.save_state">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.save_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
+                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">plotly</span><span class="o">.</span><span class="n">graph_objs</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the figure (with interactive legend) as a pickle that can be deserialized for plotting later with full</span>
+<span class="sd">        interactivity.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            Path to the file to store the pickle of the plot object (should have a ``.pkl`` extension).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            If ``filename`` is not provided, a dictionary containing the figure and dataframe used to create the plot. This</span>
+<span class="sd">            data can be used to researialize the plot later.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This data can be loaded later using the :meth:`load_state` method.&quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;fig&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InteractivePieLegend.load_state">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.load_state">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load_state</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InteractivePieLegend</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Researilize an :class:`InteractivePieLegend` plot from a pickle file or a data dictionary (produced by </span>
+<span class="sd">        :meth:`save_state`).</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            Path to the file containing the pickle of the plot object.</span>
+<span class="sd">        data_dict</span>
+<span class="sd">            A dictionary containing the figure and dataframe used to create the plot.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            A new instance of the :class:`InteractivePieLegend` class with the same state as the original instance whose data</span>
+<span class="sd">            was provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">data_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either a filename or a data dictionary must be provided&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">data_dict</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;fig&#39;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instance</span></div>
+
+    
+<div class="viewcode-block" id="InteractivePieLegend.to_image">
+<a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.to_image">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the initial state of the interactive plot to an image file. This function saves the plot as an </span>
+<span class="sd">        image by using selenium webdriver.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            Name of the image file to save the matrix plot to. The file extension should be ``&#39;.png&#39;``, ``.jpg``, etc.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">html_filename</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.html&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">html_filename</span><span class="p">)</span>
+        <span class="n">_capture_html_as_image</span><span class="p">(</span><span class="n">html_filename</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">html_filename</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

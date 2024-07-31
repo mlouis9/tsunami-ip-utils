@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.readers &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.readers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.readers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pyparsing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">unumpy</span><span class="p">,</span> <span class="n">ufloat</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">ParserElement</span><span class="o">.</span><span class="n">enablePackrat</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SdfReader">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.SdfReader">[docs]</a>
+<span class="k">class</span> <span class="nc">SdfReader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for reading TSUNAMI-B Sentitivity Data Files (SDFs, i.e. ``.sdf`` files produced by TSUNAMI-3D monte carlo</span>
+<span class="sd">    transport simulations).</span>
+<span class="sd">    </span>
+<span class="sd">    The format for TSUNAMI-B SDF files is given `here &lt;https://scale-manual.ornl.gov/tsunami-ip-appAB.html#format-of-tsunami-b-</span>
+<span class="sd">    sensitivity-data-file&gt;`_.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The SDF reader currently does not support TSUNAMI-A formatted SDF files (produced by deterministic transport simulations).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">energy_boundaries</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Boundaries for the energy groups&quot;&quot;&quot;</span>
+
+    <span class="n">sdf_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List of dictionaries containing the sensitivity profiles and other derived/descriptive data. The dictionary</span>
+<span class="sd">            keys are given by ``SDF_DATA_NAMES`` = :globalparam:`SDF_DATA_NAMES`.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SdfReader.__init__">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.SdfReader.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a TSUNAMI-B SDF reader object from the given filename</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename</span>
+<span class="sd">            Path to the sdf file.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_boundaries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_sdf</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+        
+    <span class="k">def</span> <span class="nf">_read_sdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the SDF file and returns a dictionary of nuclide-reaction pairs and energy-dependent</span>
+<span class="sd">        sensitivities (with uncertainties)</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Filename</span>
+<span class="sd">            Path to the sdf file.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        energy_boundaries</span>
+<span class="sd">            Energy boundaries for the energy groups.</span>
+<span class="sd">        sdf_data</span>
+<span class="sd">            List of dictionaries containing the sensitivity profiles and other derived/descriptive data. The dictionary</span>
+<span class="sd">            keys are given by ``SDF_DATA_NAMES`` = :globalparam:`SDF_DATA_NAMES`.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="c1"># ========================</span>
+        <span class="c1"># Get sensitivity profiles</span>
+        <span class="c1"># ========================</span>
+
+        <span class="c1"># Get number of energy groups</span>
+        <span class="n">unused_lines</span> <span class="o">=</span> <span class="n">SkipTo</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="s2">&quot;number of neutron groups&quot;</span><span class="p">)</span>
+        <span class="n">num_groups_parser</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">unused_lines</span><span class="p">)</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="s2">&quot;number of neutron groups&quot;</span><span class="p">)</span>
+        <span class="n">num_groups</span> <span class="o">=</span> <span class="n">num_groups_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">data_line</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">OneOrMore</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span><span class="p">))</span>
+        <span class="n">data_block</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">data_line</span><span class="p">)</span>
+
+        <span class="n">unused_lines</span> <span class="o">=</span> <span class="n">SkipTo</span><span class="p">(</span><span class="s2">&quot;energy boundaries:&quot;</span><span class="p">)</span>
+        <span class="n">energy_boundaries</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">unused_lines</span> <span class="o">+</span> <span class="s2">&quot;energy boundaries:&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">data_block</span>
+        <span class="n">energy_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">energy_boundaries</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># ------------------</span>
+        <span class="c1"># SDF profile parser</span>
+        <span class="c1"># ------------------</span>
+        <span class="n">atomic_number</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> 
+        <span class="n">isotope_name</span> <span class="o">=</span> <span class="n">Combine</span><span class="p">(</span><span class="n">element</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">atomic_number</span><span class="p">)</span>
+
+        <span class="c1"># Grammar for sdf header</span>
+        <span class="n">reaction_type</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s1">&#39;,</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">zaid</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">reaction_mt</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="c1"># Lines of the sdf header</span>
+        <span class="n">sdf_header_first_line</span> <span class="o">=</span> <span class="n">isotope_name</span> <span class="o">+</span> <span class="n">reaction_type</span> <span class="o">+</span> <span class="n">zaid</span> <span class="o">+</span> <span class="n">reaction_mt</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">LineEnd</span><span class="p">())</span>
+        <span class="n">sdf_header_second_line</span> <span class="o">=</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">signed_integer</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">signed_integer</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">LineEnd</span><span class="p">())</span>
+        <span class="n">sdf_header_third_line</span> <span class="o">=</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">signed_integer</span> <span class="o">+</span> \
+                                    <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">signed_integer</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span>
+        
+        <span class="c1"># This line contains the total energy integrated sensitivity data for the given profile, along with uncertainties, etc.</span>
+        <span class="n">sdf_data_first_line</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span><span class="p">)</span> <span class="o">+</span> \
+                              <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span><span class="p">)</span> <span class="o">+</span> \
+                              <span class="n">Suppress</span><span class="p">(</span><span class="n">LineEnd</span><span class="p">())</span>
+        
+        <span class="c1"># The total sdf header</span>
+        <span class="n">sdf_header</span> <span class="o">=</span> <span class="n">sdf_header_first_line</span> <span class="o">+</span> <span class="n">sdf_header_second_line</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">sdf_header_third_line</span><span class="p">)</span>
+
+        <span class="c1"># SDF profile data</span>
+        <span class="n">sdf_data_block</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">data_line</span><span class="p">)</span>
+        <span class="n">sdf_data</span> <span class="o">=</span> <span class="n">sdf_header</span> <span class="o">+</span> <span class="n">sdf_data_first_line</span> <span class="o">+</span> <span class="n">sdf_data_block</span>
+        <span class="n">sdf_data</span> <span class="o">=</span> <span class="n">sdf_data</span><span class="o">.</span><span class="n">searchString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Now break the data blocks into two parts: the first part is the sensitivities and the second is the uncertainties</span>
+        <span class="c1"># NOTE: The sensitivities are read from largest to smallest energy group, so we need to reverse the order for them</span>
+        <span class="c1"># to correspond to the cross section values</span>
+        <span class="n">sdf_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">match</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="n">num_groups</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">num_groups</span><span class="p">:])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">sdf_data</span><span class="p">]</span>
+
+        <span class="c1"># -------------------------------------------------</span>
+        <span class="c1"># Now parse each result into a readable dictionary</span>
+        <span class="c1"># -------------------------------------------------</span>
+
+        <span class="c1"># NOTE: sum_opposite_sign_groupwise_sensitivities refers to the groupwise sensitivities with opposite sign to the</span>
+        <span class="c1"># integrated sensitivity coefficient</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">SDF_DATA_NAMES</span>
+        <span class="n">sdf_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">match</span><span class="p">))</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">sdf_data</span><span class="p">]</span>
+
+        <span class="c1"># Convert the sensitivities and uncertainties to uncertainties.ufloat objects</span>
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">sdf_data</span><span class="p">:</span>
+            <span class="k">match</span><span class="p">[</span><span class="s2">&quot;sensitivities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">],</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;uncertainties&#39;</span><span class="p">])</span>
+            <span class="k">match</span><span class="p">[</span><span class="s2">&quot;energy_integrated_sensitivity&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">ufloat</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="s1">&#39;energy_integrated_sensitivity&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;energy_integrated_sensitivity&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">match</span><span class="p">[</span><span class="s2">&quot;sum_opposite_sign_groupwise_sensitivities&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">ufloat</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="s1">&#39;sum_opposite_sign_groupwise_sensitivities&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;sum_opposite_sign_groupwise_sensitivities&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">match</span><span class="p">[</span><span class="s2">&quot;uncertainties&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">energy_boundaries</span><span class="p">,</span> <span class="n">sdf_data</span></div>
+
+        
+<div class="viewcode-block" id="RegionIntegratedSdfReader">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.RegionIntegratedSdfReader">[docs]</a>
+<span class="k">class</span> <span class="nc">RegionIntegratedSdfReader</span><span class="p">(</span><span class="n">SdfReader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads region integrated TSUNAMI-B sensitivity data files produced by TSUNAMI-3D. Useful when the spatial dependence of </span>
+<span class="sd">    sensitivty is not important.&quot;&quot;&quot;</span>
+
+    <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Path to the sdf file.&quot;&quot;&quot;</span>
+    
+    <span class="n">sdf_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collection of region integrated sdf profiles. Only includes SDF profiles with ``zone_number == 0`` and ``zone_volume == 0`` </span>
+<span class="sd">    This can either be a list or a twice-nested dictionary (keyed by first by </span>
+<span class="sd">    nuclide and then reaction type) of dictionaries keyed by ``SDF_DATA_NAMES`` = :globalparam:`SDF_DATA_NAMES`.&quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="RegionIntegratedSdfReader.__init__">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.RegionIntegratedSdfReader.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a TSUNAMI-B region integrated SDF reader object from the given filename</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename:</span>
+<span class="sd">            Path to the sdf file.</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; reader = RegionIntegratedSdfReader(&#39;tests/example_files/sphere_model_1.sdf&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; reader.sdf_data[0]</span>
+<span class="sd">        {&#39;isotope&#39;: &#39;u-234&#39;, &#39;reaction_type&#39;: &#39;total&#39;, &#39;zaid&#39;: &#39;92234&#39;, &#39;reaction_mt&#39;: &#39;1&#39;, &#39;zone_number&#39;: 0, &#39;zone_volume&#39;: 0, &#39;energy_integrated_sensitivity&#39;: 0.008984201+/-0.0002456359, &#39;abs_sum_groupwise_sensitivities&#39;: 0.009319556, &#39;sum_opposite_sign_groupwise_sensitivities&#39;: -0.0001676775+/-4.959921e-05, &#39;sensitivities&#39;: array([0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -4.393147e-10+/-4.39204e-10, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -1.0871e-09+/-1.086821e-09, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, -8.666447e-10+/-8.664239e-10, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, -2.021382e-09+/-2.020862e-09, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -2.351273e-11+/-2.350687e-11, 1.707797e-08+/-1.707371e-08,</span>
+<span class="sd">               -7.172835e-10+/-7.171047e-10, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -1.89505e-09+/-1.894573e-09, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, -5.624288e-09+/-5.622858e-09,</span>
+<span class="sd">               -1.859026e-09+/-1.858552e-09, -3.250635e-12+/-3.249808e-12,</span>
+<span class="sd">               -5.068914e-09+/-5.067634e-09, -4.871941e-09+/-4.87071e-09, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, -6.871712e-09+/-4.952527e-09,</span>
+<span class="sd">               -1.545212e-09+/-1.544828e-09, -6.40573e-10+/-6.404087e-10, 0.0+/-0,</span>
+<span class="sd">               -4.935283e-09+/-2.901975e-09, -1.843172e-08+/-1.251576e-08,</span>
+<span class="sd">               -6.71445e-09+/-6.71273e-09, -1.388548e-07+/-4.274043e-08,</span>
+<span class="sd">               -4.241146e-08+/-1.762258e-08, -2.999543e-08+/-2.998778e-08,</span>
+<span class="sd">               -1.520626e-07+/-5.006299e-07, -3.266883e-07+/-1.449028e-07,</span>
+<span class="sd">               7.846369e-07+/-8.803142e-07, -1.519928e-07+/-1.07218e-07,</span>
+<span class="sd">               -4.081559e-07+/-1.873273e-07, -3.434015e-08+/-1.027987e-06,</span>
+<span class="sd">               -2.516069e-07+/-1.73851e-07, -8.333603e-07+/-2.853665e-07,</span>
+<span class="sd">               1.439084e-06+/-1.77756e-06, -2.836471e-06+/-6.774013e-07,</span>
+<span class="sd">               -7.692097e-07+/-2.280938e-07, -3.207971e-06+/-5.799841e-06,</span>
+<span class="sd">               -8.805729e-06+/-3.719169e-06, -3.810922e-06+/-3.29137e-06,</span>
+<span class="sd">               -1.671083e-05+/-5.398771e-06, -8.131938e-06+/-8.703075e-06,</span>
+<span class="sd">               -1.213469e-05+/-6.712768e-06, 2.241294e-05+/-1.816346e-05,</span>
+<span class="sd">               -3.46584e-05+/-2.47274e-05, -2.504294e-05+/-1.322211e-05,</span>
+<span class="sd">               2.988232e-06+/-9.999848e-06, 9.248787e-06+/-2.051111e-05,</span>
+<span class="sd">               8.657588e-06+/-2.534945e-05, -9.951473e-06+/-9.817888e-06,</span>
+<span class="sd">               3.696361e-06+/-2.029254e-05, 8.702776e-06+/-1.343905e-05,</span>
+<span class="sd">               1.237458e-05+/-3.052268e-05, 9.421495e-05+/-4.640119e-05,</span>
+<span class="sd">               -3.918389e-05+/-3.697521e-05, 0.0001051884+/-6.277818e-05,</span>
+<span class="sd">               0.0001998479+/-6.489579e-05, 0.0001497279+/-5.563772e-05,</span>
+<span class="sd">               0.0001947749+/-5.449071e-05, 7.17222e-05+/-2.914425e-05,</span>
+<span class="sd">               0.000134732+/-2.9629e-05, 0.0001109158+/-3.34169e-05,</span>
+<span class="sd">               0.0001089335+/-2.818967e-05, 0.0003405998+/-4.422492e-05,</span>
+<span class="sd">               0.0001581347+/-2.790862e-05, 0.0001519637+/-2.893234e-05,</span>
+<span class="sd">               0.0002925294+/-4.266703e-05, 3.390917e-05+/-1.328072e-05,</span>
+<span class="sd">               0.0003311925+/-4.068107e-05, 0.0003964351+/-3.973347e-05,</span>
+<span class="sd">               0.0002032989+/-2.820316e-05, 4.749484e-05+/-1.391542e-05,</span>
+<span class="sd">               7.308714e-05+/-1.919152e-05, 8.477883e-05+/-1.880586e-05,</span>
+<span class="sd">               0.0003783144+/-3.910496e-05, 0.0002999691+/-3.663134e-05,</span>
+<span class="sd">               0.0002810895+/-3.531906e-05, 0.0001691159+/-2.466477e-05,</span>
+<span class="sd">               0.0001964518+/-2.750338e-05, 0.0001036065+/-1.975991e-05,</span>
+<span class="sd">               7.118574e-05+/-1.79444e-05, 0.0003142769+/-3.554042e-05,</span>
+<span class="sd">               0.0006935364+/-5.715178e-05, 0.0008185451+/-5.864059e-05,</span>
+<span class="sd">               0.0001756991+/-2.74122e-05, 0.0005926753+/-4.821636e-05,</span>
+<span class="sd">               0.001032059+/-6.463625e-05, 0.0001732703+/-2.667443e-05,</span>
+<span class="sd">               0.0003230355+/-3.82033e-05, 0.0001058208+/-2.194266e-05,</span>
+<span class="sd">               4.386201e-05+/-1.377494e-05, 2.231817e-05+/-7.640867e-06,</span>
+<span class="sd">               3.150126e-06+/-3.827818e-06, 9.240951e-08+/-1.080839e-07, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0], dtype=object)}</span>
+<span class="sd">        &gt;&gt;&gt; reader.energy_boundaries</span>
+<span class="sd">        array([2.000e+07, 1.733e+07, 1.568e+07, 1.455e+07, 1.384e+07, 1.284e+07,</span>
+<span class="sd">               1.000e+07, 8.187e+06, 6.434e+06, 4.800e+06, 4.304e+06, 3.000e+06,</span>
+<span class="sd">               2.479e+06, 2.354e+06, 1.850e+06, 1.500e+06, 1.400e+06, 1.356e+06,</span>
+<span class="sd">               1.317e+06, 1.250e+06, 1.200e+06, 1.100e+06, 1.010e+06, 9.200e+05,</span>
+<span class="sd">               9.000e+05, 8.750e+05, 8.611e+05, 8.200e+05, 7.500e+05, 6.790e+05,</span>
+<span class="sd">               6.700e+05, 6.000e+05, 5.730e+05, 5.500e+05, 4.920e+05, 4.700e+05,</span>
+<span class="sd">               4.400e+05, 4.200e+05, 4.000e+05, 3.300e+05, 2.700e+05, 2.000e+05,</span>
+<span class="sd">               1.490e+05, 1.283e+05, 1.000e+05, 8.500e+04, 8.200e+04, 7.500e+04,</span>
+<span class="sd">               7.300e+04, 6.000e+04, 5.200e+04, 5.000e+04, 4.500e+04, 3.000e+04,</span>
+<span class="sd">               2.000e+04, 1.700e+04, 1.300e+04, 9.500e+03, 8.030e+03, 5.700e+03,</span>
+<span class="sd">               3.900e+03, 3.740e+03, 3.000e+03, 2.500e+03, 2.250e+03, 2.200e+03,</span>
+<span class="sd">               1.800e+03, 1.550e+03, 1.500e+03, 1.150e+03, 9.500e+02, 6.830e+02,</span>
+<span class="sd">               6.700e+02, 5.500e+02, 3.050e+02, 2.850e+02, 2.400e+02, 2.200e+02,</span>
+<span class="sd">               2.095e+02, 2.074e+02, 2.020e+02, 1.930e+02, 1.915e+02, 1.885e+02,</span>
+<span class="sd">               1.877e+02, 1.800e+02, 1.700e+02, 1.430e+02, 1.220e+02, 1.190e+02,</span>
+<span class="sd">               1.175e+02, 1.160e+02, 1.130e+02, 1.080e+02, 1.050e+02, 1.012e+02,</span>
+<span class="sd">               9.700e+01, 9.000e+01, 8.170e+01, 8.000e+01, 7.600e+01, 7.200e+01,</span>
+<span class="sd">               6.750e+01, 6.500e+01, 6.300e+01, 6.100e+01, 5.800e+01, 5.340e+01,</span>
+<span class="sd">               5.060e+01, 4.830e+01, 4.520e+01, 4.400e+01, 4.240e+01, 4.100e+01,</span>
+<span class="sd">               3.960e+01, 3.910e+01, 3.800e+01, 3.763e+01, 3.727e+01, 3.713e+01,</span>
+<span class="sd">               3.700e+01, 3.600e+01, 3.550e+01, 3.500e+01, 3.375e+01, 3.325e+01,</span>
+<span class="sd">               3.175e+01, 3.125e+01, 3.000e+01, 2.750e+01, 2.500e+01, 2.250e+01,</span>
+<span class="sd">               2.175e+01, 2.120e+01, 2.050e+01, 2.000e+01, 1.940e+01, 1.850e+01,</span>
+<span class="sd">               1.700e+01, 1.600e+01, 1.440e+01, 1.290e+01, 1.190e+01, 1.150e+01,</span>
+<span class="sd">               1.000e+01, 9.100e+00, 8.100e+00, 7.150e+00, 7.000e+00, 6.875e+00,</span>
+<span class="sd">               6.750e+00, 6.500e+00, 6.250e+00, 6.000e+00, 5.400e+00, 5.000e+00,</span>
+<span class="sd">               4.700e+00, 4.100e+00, 3.730e+00, 3.500e+00, 3.200e+00, 3.100e+00,</span>
+<span class="sd">               3.000e+00, 2.970e+00, 2.870e+00, 2.770e+00, 2.670e+00, 2.570e+00,</span>
+<span class="sd">               2.470e+00, 2.380e+00, 2.300e+00, 2.210e+00, 2.120e+00, 2.000e+00,</span>
+<span class="sd">               1.940e+00, 1.860e+00, 1.770e+00, 1.680e+00, 1.590e+00, 1.500e+00,</span>
+<span class="sd">               1.450e+00, 1.400e+00, 1.350e+00, 1.300e+00, 1.250e+00, 1.225e+00,</span>
+<span class="sd">               1.200e+00, 1.175e+00, 1.150e+00, 1.140e+00, 1.130e+00, 1.120e+00,</span>
+<span class="sd">               1.110e+00, 1.100e+00, 1.090e+00, 1.080e+00, 1.070e+00, 1.060e+00,</span>
+<span class="sd">               1.050e+00, 1.040e+00, 1.030e+00, 1.020e+00, 1.010e+00, 1.000e+00,</span>
+<span class="sd">               9.750e-01, 9.500e-01, 9.250e-01, 9.000e-01, 8.500e-01, 8.000e-01,</span>
+<span class="sd">               7.500e-01, 7.000e-01, 6.500e-01, 6.250e-01, 6.000e-01, 5.500e-01,</span>
+<span class="sd">               5.000e-01, 4.500e-01, 4.000e-01, 3.750e-01, 3.500e-01, 3.250e-01,</span>
+<span class="sd">               3.000e-01, 2.750e-01, 2.500e-01, 2.250e-01, 2.000e-01, 1.750e-01,</span>
+<span class="sd">               1.500e-01, 1.250e-01, 1.000e-01, 9.000e-02, 8.000e-02, 7.000e-02,</span>
+<span class="sd">               6.000e-02, 5.000e-02, 4.000e-02, 3.000e-02, 2.530e-02, 1.000e-02,</span>
+<span class="sd">               7.500e-03, 5.000e-03, 4.000e-03, 3.000e-03, 2.500e-03, 2.000e-03,</span>
+<span class="sd">               1.500e-03, 1.200e-03, 1.000e-03, 7.500e-04, 5.000e-04, 1.000e-04,</span>
+<span class="sd">               1.000e-05])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        
+        <span class="c1"># Now only return the region integrated sdf profiles</span>
+        <span class="c1"># i.e. those with zone number and zone volume both equal to 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span> <span class="o">=</span> <span class="p">[</span> <span class="n">match</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span> <span class="k">if</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;zone_number&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;zone_volume&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">]</span></div>
+
+    
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;tsunami_ip_utils.readers.RegionIntegratedSdfReader object from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+
+<div class="viewcode-block" id="RegionIntegratedSdfReader.convert_to_dict">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.RegionIntegratedSdfReader.convert_to_dict">[docs]</a>
+    <span class="k">def</span> <span class="nf">convert_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;names&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts the sdf data into a dictionary keyed by nuclide-reaction pair or by ZAID and reaction MT.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key</span>
+<span class="sd">            The key to use for the dictionary. Default is ``&#39;names&#39;`` which uses the isotope name and reaction type.</span>
+<span class="sd">            If ``&#39;numbers&#39;`` is supplied instead then the ZAID and reaction MT are used.</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; reader = RegionIntegratedSdfReader(&#39;tests/example_files/sphere_model_1.sdf&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; reader.convert_to_dict()</span>
+<span class="sd">        &lt;tsunami_ip_utils.readers.RegionIntegratedSdfReader object from tests/example_files/sphere_model_1.sdf&gt;</span>
+<span class="sd">        &gt;&gt;&gt; reader.sdf_data.keys()</span>
+<span class="sd">        dict_keys([&#39;u-234&#39;, &#39;u-235&#39;, &#39;u-238&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; reader.sdf_data[&#39;u-234&#39;].keys()</span>
+<span class="sd">        dict_keys([&#39;total&#39;, &#39;elastic&#39;, &quot;n,n&#39;&quot;, &#39;n,2n&#39;, &#39;fission&#39;, &#39;capture&#39;, &#39;n,gamma&#39;, &#39;chi&#39;, &#39;nubar&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; reader.sdf_data[&#39;u-234&#39;][&#39;total&#39;]</span>
+<span class="sd">        {&#39;isotope&#39;: &#39;u-234&#39;, &#39;reaction_type&#39;: &#39;total&#39;, &#39;zaid&#39;: &#39;92234&#39;, &#39;reaction_mt&#39;: &#39;1&#39;, &#39;zone_number&#39;: 0, &#39;zone_volume&#39;: 0, &#39;energy_integrated_sensitivity&#39;: 0.008984201+/-0.0002456359, &#39;abs_sum_groupwise_sensitivities&#39;: 0.009319556, &#39;sum_opposite_sign_groupwise_sensitivities&#39;: -0.0001676775+/-4.959921e-05, &#39;sensitivities&#39;: array([0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -4.393147e-10+/-4.39204e-10, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -1.0871e-09+/-1.086821e-09, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, -8.666447e-10+/-8.664239e-10, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, -2.021382e-09+/-2.020862e-09, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -2.351273e-11+/-2.350687e-11, 1.707797e-08+/-1.707371e-08,</span>
+<span class="sd">               -7.172835e-10+/-7.171047e-10, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               -1.89505e-09+/-1.894573e-09, 0.0+/-0, 0.0+/-0, 0.0+/-0, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, -5.624288e-09+/-5.622858e-09,</span>
+<span class="sd">               -1.859026e-09+/-1.858552e-09, -3.250635e-12+/-3.249808e-12,</span>
+<span class="sd">               -5.068914e-09+/-5.067634e-09, -4.871941e-09+/-4.87071e-09, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, -6.871712e-09+/-4.952527e-09,</span>
+<span class="sd">               -1.545212e-09+/-1.544828e-09, -6.40573e-10+/-6.404087e-10, 0.0+/-0,</span>
+<span class="sd">               -4.935283e-09+/-2.901975e-09, -1.843172e-08+/-1.251576e-08,</span>
+<span class="sd">               -6.71445e-09+/-6.71273e-09, -1.388548e-07+/-4.274043e-08,</span>
+<span class="sd">               -4.241146e-08+/-1.762258e-08, -2.999543e-08+/-2.998778e-08,</span>
+<span class="sd">               -1.520626e-07+/-5.006299e-07, -3.266883e-07+/-1.449028e-07,</span>
+<span class="sd">               7.846369e-07+/-8.803142e-07, -1.519928e-07+/-1.07218e-07,</span>
+<span class="sd">               -4.081559e-07+/-1.873273e-07, -3.434015e-08+/-1.027987e-06,</span>
+<span class="sd">               -2.516069e-07+/-1.73851e-07, -8.333603e-07+/-2.853665e-07,</span>
+<span class="sd">               1.439084e-06+/-1.77756e-06, -2.836471e-06+/-6.774013e-07,</span>
+<span class="sd">               -7.692097e-07+/-2.280938e-07, -3.207971e-06+/-5.799841e-06,</span>
+<span class="sd">               -8.805729e-06+/-3.719169e-06, -3.810922e-06+/-3.29137e-06,</span>
+<span class="sd">               -1.671083e-05+/-5.398771e-06, -8.131938e-06+/-8.703075e-06,</span>
+<span class="sd">               -1.213469e-05+/-6.712768e-06, 2.241294e-05+/-1.816346e-05,</span>
+<span class="sd">               -3.46584e-05+/-2.47274e-05, -2.504294e-05+/-1.322211e-05,</span>
+<span class="sd">               2.988232e-06+/-9.999848e-06, 9.248787e-06+/-2.051111e-05,</span>
+<span class="sd">               8.657588e-06+/-2.534945e-05, -9.951473e-06+/-9.817888e-06,</span>
+<span class="sd">               3.696361e-06+/-2.029254e-05, 8.702776e-06+/-1.343905e-05,</span>
+<span class="sd">               1.237458e-05+/-3.052268e-05, 9.421495e-05+/-4.640119e-05,</span>
+<span class="sd">               -3.918389e-05+/-3.697521e-05, 0.0001051884+/-6.277818e-05,</span>
+<span class="sd">               0.0001998479+/-6.489579e-05, 0.0001497279+/-5.563772e-05,</span>
+<span class="sd">               0.0001947749+/-5.449071e-05, 7.17222e-05+/-2.914425e-05,</span>
+<span class="sd">               0.000134732+/-2.9629e-05, 0.0001109158+/-3.34169e-05,</span>
+<span class="sd">               0.0001089335+/-2.818967e-05, 0.0003405998+/-4.422492e-05,</span>
+<span class="sd">               0.0001581347+/-2.790862e-05, 0.0001519637+/-2.893234e-05,</span>
+<span class="sd">               0.0002925294+/-4.266703e-05, 3.390917e-05+/-1.328072e-05,</span>
+<span class="sd">               0.0003311925+/-4.068107e-05, 0.0003964351+/-3.973347e-05,</span>
+<span class="sd">               0.0002032989+/-2.820316e-05, 4.749484e-05+/-1.391542e-05,</span>
+<span class="sd">               7.308714e-05+/-1.919152e-05, 8.477883e-05+/-1.880586e-05,</span>
+<span class="sd">               0.0003783144+/-3.910496e-05, 0.0002999691+/-3.663134e-05,</span>
+<span class="sd">               0.0002810895+/-3.531906e-05, 0.0001691159+/-2.466477e-05,</span>
+<span class="sd">               0.0001964518+/-2.750338e-05, 0.0001036065+/-1.975991e-05,</span>
+<span class="sd">               7.118574e-05+/-1.79444e-05, 0.0003142769+/-3.554042e-05,</span>
+<span class="sd">               0.0006935364+/-5.715178e-05, 0.0008185451+/-5.864059e-05,</span>
+<span class="sd">               0.0001756991+/-2.74122e-05, 0.0005926753+/-4.821636e-05,</span>
+<span class="sd">               0.001032059+/-6.463625e-05, 0.0001732703+/-2.667443e-05,</span>
+<span class="sd">               0.0003230355+/-3.82033e-05, 0.0001058208+/-2.194266e-05,</span>
+<span class="sd">               4.386201e-05+/-1.377494e-05, 2.231817e-05+/-7.640867e-06,</span>
+<span class="sd">               3.150126e-06+/-3.827818e-06, 9.240951e-08+/-1.080839e-07, 0.0+/-0,</span>
+<span class="sd">               0.0+/-0, 0.0+/-0], dtype=object)}&quot;&quot;&quot;</span>
+        <span class="c1"># Since data is region and mixture integrated we can assume that there is only one entry for each nuclide-reaction pair</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        
+        <span class="n">sdf_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;names&#39;</span><span class="p">:</span>
+                <span class="n">nuclide</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]</span>
+                <span class="n">reaction_type</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;reaction_type&#39;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;numbers&#39;</span><span class="p">:</span>
+                <span class="n">nuclide</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;zaid&#39;</span><span class="p">]</span>
+                <span class="n">reaction_type</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="s1">&#39;reaction_mt&#39;</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">nuclide</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sdf_data_dict</span><span class="p">:</span>
+                <span class="n">sdf_data_dict</span><span class="p">[</span><span class="n">nuclide</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">sdf_data_dict</span><span class="p">[</span><span class="n">nuclide</span><span class="p">][</span><span class="n">reaction_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span> <span class="o">=</span> <span class="n">sdf_data_dict</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    
+<div class="viewcode-block" id="RegionIntegratedSdfReader.get_sensitivity_profiles">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.RegionIntegratedSdfReader.get_sensitivity_profiles">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_sensitivity_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reaction_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the sensitivity profiles for each nuclide-reaction pair in a list in the order they appear in the ``sdf_data``.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        reaction_type</span>
+<span class="sd">            The type of reaction to consider. Default is &#39;all&#39; which considers all reactions.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            List of sensitivity profiles for each nuclide-reaction pair.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method is useful for generating sensitivity profiles for each nuclide-reaction pair for a given system for e.g. computing</span>
+<span class="sd">        :math:`E` or :math:`C_k` via :math:`C_k = \\boldsymbol{S}_A^T \\boldsymbol{C}_{\\alpha, \\alpha} \\boldsymbol{S}_B`.</span>
+<span class="sd">        However, it is important to note that the sensitivity vectors obtained this way are ordered according to the order</span>
+<span class="sd">        in which the nuclide-reaction pairs appear in the sdf file.</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; reader = RegionIntegratedSdfReader(&#39;tests/example_files/sphere_model_1.sdf&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; first_sensitivity_profile = reader.get_sensitivity_profiles()[0]</span>
+<span class="sd">        &gt;&gt;&gt; first_sensitivity_profile[200:]</span>
+<span class="sd">        array([-2.504294e-05+/-1.322211e-05, 2.988232e-06+/-9.999848e-06,</span>
+<span class="sd">               9.248787e-06+/-2.051111e-05, 8.657588e-06+/-2.534945e-05,</span>
+<span class="sd">               -9.951473e-06+/-9.817888e-06, 3.696361e-06+/-2.029254e-05,</span>
+<span class="sd">               8.702776e-06+/-1.343905e-05, 1.237458e-05+/-3.052268e-05,</span>
+<span class="sd">               9.421495e-05+/-4.640119e-05, -3.918389e-05+/-3.697521e-05,</span>
+<span class="sd">               0.0001051884+/-6.277818e-05, 0.0001998479+/-6.489579e-05,</span>
+<span class="sd">               0.0001497279+/-5.563772e-05, 0.0001947749+/-5.449071e-05,</span>
+<span class="sd">               7.17222e-05+/-2.914425e-05, 0.000134732+/-2.9629e-05,</span>
+<span class="sd">               0.0001109158+/-3.34169e-05, 0.0001089335+/-2.818967e-05,</span>
+<span class="sd">               0.0003405998+/-4.422492e-05, 0.0001581347+/-2.790862e-05,</span>
+<span class="sd">               0.0001519637+/-2.893234e-05, 0.0002925294+/-4.266703e-05,</span>
+<span class="sd">               3.390917e-05+/-1.328072e-05, 0.0003311925+/-4.068107e-05,</span>
+<span class="sd">               0.0003964351+/-3.973347e-05, 0.0002032989+/-2.820316e-05,</span>
+<span class="sd">               4.749484e-05+/-1.391542e-05, 7.308714e-05+/-1.919152e-05,</span>
+<span class="sd">               8.477883e-05+/-1.880586e-05, 0.0003783144+/-3.910496e-05,</span>
+<span class="sd">               0.0002999691+/-3.663134e-05, 0.0002810895+/-3.531906e-05,</span>
+<span class="sd">               0.0001691159+/-2.466477e-05, 0.0001964518+/-2.750338e-05,</span>
+<span class="sd">               0.0001036065+/-1.975991e-05, 7.118574e-05+/-1.79444e-05,</span>
+<span class="sd">               0.0003142769+/-3.554042e-05, 0.0006935364+/-5.715178e-05,</span>
+<span class="sd">               0.0008185451+/-5.864059e-05, 0.0001756991+/-2.74122e-05,</span>
+<span class="sd">               0.0005926753+/-4.821636e-05, 0.001032059+/-6.463625e-05,</span>
+<span class="sd">               0.0001732703+/-2.667443e-05, 0.0003230355+/-3.82033e-05,</span>
+<span class="sd">               0.0001058208+/-2.194266e-05, 4.386201e-05+/-1.377494e-05,</span>
+<span class="sd">               2.231817e-05+/-7.640867e-06, 3.150126e-06+/-3.827818e-06,</span>
+<span class="sd">               9.240951e-08+/-1.080839e-07, 0.0+/-0, 0.0+/-0, 0.0+/-0],</span>
+<span class="sd">              dtype=object)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reaction_type</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">sdf_data</span> <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">sdf_data</span> \
+                        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;reaction_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">reaction_type</span> <span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reaction_type</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span> <span class="n">reaction</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">isotope</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span> <span class="n">reaction</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">isotope</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> \
+                         <span class="k">if</span> <span class="n">reaction</span><span class="p">[</span><span class="s1">&#39;reaction_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">reaction_type</span> <span class="p">]</span>     
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data type for sdf_data. How did that happen?&quot;</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="read_covariance_matrix">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.read_covariance_matrix">[docs]</a>
+<span class="k">def</span> <span class="nf">read_covariance_matrix</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="k">def</span> <span class="nf">_read_ck_contributions</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<div class="viewcode-block" id="read_uncertainty_contributions_out">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.read_uncertainty_contributions_out">[docs]</a>
+<span class="k">def</span> <span class="nf">read_uncertainty_contributions_out</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads the output file from TSUNAMI-3D and returns the uncertainty contributions for each nuclide-reaction</span>
+<span class="sd">    covariance.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        Path to the TSUNAMI-3D output file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * isotope_totals</span>
+<span class="sd">            List of dictionaries with keys: ``&#39;isotope&#39;`` and ``&#39;contribution&#39;``.</span>
+<span class="sd">        * isotope_reaction</span>
+<span class="sd">            List of dictionaries with keys: ``&#39;isotope&#39;``, ``&#39;reaction_type&#39;`` and ``&#39;contribution&#39;``.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1"># ----------------------------------------------------</span>
+    <span class="c1"># Define the formattting that precedes the data table</span>
+    <span class="c1"># ----------------------------------------------------</span>
+    <span class="n">table_identifier</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;contributions to uncertainty in k-eff (</span><span class="si">% d</span><span class="s2">elta-k/k) by individual energy covariance matrices:&quot;</span><span class="p">)</span>
+    <span class="n">skipped_lines</span> <span class="o">=</span> <span class="n">SkipTo</span><span class="p">(</span><span class="n">table_identifier</span><span class="p">)</span>
+    <span class="n">pre_header</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;covariance matrix&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;nuclide-reaction&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;with&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;nuclide-reaction&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">% d</span><span class="s2">elta-k/k due to this matrix&quot;</span><span class="p">)</span>
+    <span class="n">dash_separator</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">OneOrMore</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">))</span>
+
+    <span class="c1"># ----------------------</span>
+    <span class="c1"># Define the data lines</span>
+    <span class="c1"># ----------------------</span>
+
+    <span class="c1"># Define the grammar for the nuclide-reaction pair</span>
+    <span class="n">atomic_number</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> 
+    <span class="n">isotope_name</span> <span class="o">=</span> <span class="n">Combine</span><span class="p">(</span><span class="n">element</span> <span class="o">+</span> <span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">atomic_number</span><span class="p">))</span> <span class="c1"># To handle the case of carbon in ENDF-7.1 libraries</span>
+    <span class="n">reaction_type</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s1">&#39;,</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">data_line</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">isotope_name</span> <span class="o">+</span> <span class="n">reaction_type</span> <span class="o">+</span> <span class="n">isotope_name</span> <span class="o">+</span> <span class="n">reaction_type</span> <span class="o">+</span> \
+                <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;+/-&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">LineEnd</span><span class="p">()))</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">data_line</span><span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------</span>
+    <span class="c1"># Define the total parser and parse the data</span>
+    <span class="c1"># -------------------------------------------</span>
+    <span class="n">data_parser</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">skipped_lines</span><span class="p">)</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">table_identifier</span><span class="p">)</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">pre_header</span><span class="p">)</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="n">Suppress</span><span class="p">(</span><span class="n">dash_separator</span><span class="p">)</span> <span class="o">+</span> <span class="n">data_block</span>
+
+    <span class="c1"># -------------------------------------------------------------------------------</span>
+    <span class="c1"># Now convert the data into isotope wise and isotope-reaction wise contributions</span>
+    <span class="c1"># -------------------------------------------------------------------------------</span>
+    <span class="n">isotope_reaction</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">data_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">isotope_reaction</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;isotope&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;reaction_type&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">match</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;contribution&#39;</span><span class="p">:</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">match</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+        <span class="p">})</span>
+
+    <span class="c1"># Now calculate nuclide totals by summing the contributions for each nuclide via total = sqrt((pos)^2 - (neg)^2)</span>
+    <span class="n">isotope_totals</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">isotope_reaction</span><span class="p">:</span>
+        <span class="c1"># First add up squared sums of all reaction-wise contributions</span>
+        <span class="n">isotope</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]</span>
+        <span class="n">contribution</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">isotope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">isotope_totals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">isotope_totals</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">contribution</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">isotope_totals</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">isotope_totals</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        
+    <span class="c1"># Now take square root of all contributions</span>
+    <span class="k">for</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">total</span> <span class="ow">in</span> <span class="n">isotope_totals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">isotope_totals</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span><span class="o">**</span><span class="mf">0.5</span>
+
+    <span class="c1"># Now convert into a list of dictionaries</span>
+    <span class="n">isotope_totals</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span><span class="s1">&#39;isotope&#39;</span><span class="p">:</span> <span class="n">isotope</span><span class="p">,</span> <span class="s1">&#39;contribution&#39;</span><span class="p">:</span> <span class="n">total</span><span class="p">}</span> <span class="k">for</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">total</span> <span class="ow">in</span> <span class="n">isotope_totals</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">isotope_totals</span><span class="p">,</span> <span class="n">isotope_reaction</span></div>
+
+
+<div class="viewcode-block" id="read_uncertainty_contributions_sdf">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.read_uncertainty_contributions_sdf">[docs]</a>
+<span class="k">def</span> <span class="nf">read_uncertainty_contributions_sdf</span><span class="p">(</span><span class="n">filenames</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads the uncertainty contributions from a list of TSUNAMI-B SDF files and returns the contributions for each nuclide-</span>
+<span class="sd">    reaction covariance by first running a TSUNAMI-IP calculation to generate the extended uncertainty edit.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filenames</span>
+<span class="sd">        List of paths to the SDF files.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * isotope_totals</span>
+<span class="sd">            List of nuclide-wise contributions. The outer list corresponds to the different SDF files, and has length: ``len(filenames)``.</span>
+<span class="sd">            The inner list contains dictionaries with keys: ``&#39;isotope&#39;`` and ``&#39;contribution&#39;``.</span>
+<span class="sd">        * isotope_reaction</span>
+<span class="sd">            List of nuclide-reaction-wise contributions. The outer list corresponds to the different SDF files, and has length: </span>
+<span class="sd">            ``len(filenames)``. The inner list contains dictionaries with keys: ``&#39;isotope&#39;``, ``&#39;reaction_type&#39;`` and ``&#39;contribution&#39;``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; filenames = [Path(&#39;tests/example_files/sphere_model_1.sdf&#39;), Path(&#39;tests/example_files/sphere_model_2.sdf&#39;)]</span>
+<span class="sd">    &gt;&gt;&gt; isotope_totals, isotope_reaction = read_uncertainty_contributions_sdf(filenames)</span>
+<span class="sd">    &gt;&gt;&gt; isotope_totals[0][0]</span>
+<span class="sd">    {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;contribution&#39;: 1.1547475051845695+/-0.000896155210593727}</span>
+<span class="sd">    &gt;&gt;&gt; isotope_reaction[0][0]</span>
+<span class="sd">    {&#39;isotope&#39;: &#39;u-235 - u-235&#39;, &#39;reaction_type&#39;: &#39;n,gamma - n,gamma&#39;, &#39;contribution&#39;: 1.0304+/-0.00094372}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ===============================</span>
+    <span class="c1"># Generate the Uncertainty Edits</span>
+    <span class="c1"># ===============================</span>
+
+    <span class="c1"># First generate the extended uncertainty edits</span>
+    <span class="n">current_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">current_dir</span> <span class="o">/</span> <span class="s2">&quot;input_files&quot;</span> <span class="o">/</span> <span class="s2">&quot;tsunami_ip_uncertainty_contributions.inp&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">tsunami_ip_template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="c1"># Generate a string containing a list of all filenames</span>
+    <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="p">]</span>
+
+    <span class="c1"># Now template the input file</span>
+    <span class="n">tsunami_ip_input</span> <span class="o">=</span> <span class="n">tsunami_ip_template</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span>
+        <span class="n">filenames</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filenames</span><span class="p">),</span>
+        <span class="n">first_file</span><span class="o">=</span><span class="n">filenames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Now write the template file to a temporary file and run it</span>
+    <span class="k">with</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tsunami_ip_input</span><span class="p">)</span>
+        <span class="n">input_filename</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># Run the TSUNAMI-IP calculation</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="p">[</span><span class="s1">&#39;scalerte&#39;</span><span class="p">,</span> <span class="n">input_filename</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span> <span class="n">Path</span><span class="p">(</span> <span class="n">input_filename</span> <span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+    <span class="c1"># ========================</span>
+    <span class="c1"># Process the Output File</span>
+    <span class="c1"># ========================</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">input_filename</span><span class="si">}</span><span class="s2">.out&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    
+    <span class="c1"># ----------------------------------------------------</span>
+    <span class="c1"># Define the formattting that precedes the data table</span>
+    <span class="c1"># ----------------------------------------------------</span>
+    <span class="n">table_identifier</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;contributions to uncertainty in keff ( </span><span class="si">% d</span><span class="s2">k/k ) by individual energy covariance matrices:&quot;</span><span class="p">)</span>
+    <span class="n">pre_header</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;covariance matrix&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;nuclide-reaction&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;with&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;nuclide-reaction&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">% d</span><span class="s2">elta-k/k due to this matrix&quot;</span><span class="p">)</span>
+    <span class="n">dash_separator</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">OneOrMore</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">))</span>
+
+    <span class="c1"># ----------------------</span>
+    <span class="c1"># Define the data lines</span>
+    <span class="c1"># ----------------------</span>
+
+    <span class="c1"># Define the grammar for the nuclide-reaction pair</span>
+    <span class="n">atomic_number</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> 
+    <span class="n">isotope_name</span> <span class="o">=</span> <span class="n">Combine</span><span class="p">(</span><span class="n">element</span> <span class="o">+</span> <span class="n">Optional</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">atomic_number</span><span class="p">))</span> <span class="c1"># To handle the case of carbon in ENDF-7.1 libraries</span>
+    <span class="n">reaction_type</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s1">&#39;,</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">data_line</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">isotope_name</span> <span class="o">+</span> <span class="n">reaction_type</span> <span class="o">+</span> <span class="n">isotope_name</span> <span class="o">+</span> <span class="n">reaction_type</span> <span class="o">+</span> \
+                <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;+/-&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">LineEnd</span><span class="p">()))</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">data_line</span><span class="p">)</span>
+
+    <span class="c1"># -------------------------------------------</span>
+    <span class="c1"># Define the total parser and parse the data</span>
+    <span class="c1"># -------------------------------------------</span>
+    <span class="n">data_parser</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">table_identifier</span><span class="p">)</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">pre_header</span><span class="p">)</span> <span class="o">+</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="n">Suppress</span><span class="p">(</span><span class="n">dash_separator</span><span class="p">)</span> <span class="o">+</span> <span class="n">data_block</span>
+
+    <span class="c1"># -------------------------------------------------------------------------------</span>
+    <span class="c1"># Now convert the data into isotope wise and isotope-reaction wise contributions</span>
+    <span class="c1"># -------------------------------------------------------------------------------</span>
+    <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">data_parser</span><span class="o">.</span><span class="n">searchString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">num_sdfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parsed_data</span><span class="p">)</span>
+    <span class="n">isotope_reaction</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sdfs</span><span class="p">)</span> <span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parsed_data</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">data_element</span> <span class="ow">in</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">isotope_reaction</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;isotope&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">data_element</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">data_element</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;reaction_type&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">data_element</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">data_element</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;contribution&#39;</span><span class="p">:</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">data_element</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">data_element</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+            <span class="p">})</span>
+
+    <span class="c1"># Now calculate nuclide totals by summing the contributions for each nuclide via total = sqrt((pos)^2 - (neg)^2)</span>
+    <span class="n">isotope_totals</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sdfs</span><span class="p">)</span> <span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">application</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">isotope_reaction</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">application</span><span class="p">:</span>
+            <span class="c1"># First add up squared sums of all reaction-wise contributions</span>
+            <span class="n">isotope</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]</span>
+            <span class="n">contribution</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">isotope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">contribution</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">isotope</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">isotope</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span> <span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        
+        <span class="c1"># Now take square root of all contributions</span>
+        <span class="k">for</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">total</span> <span class="ow">in</span> <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span><span class="o">**</span><span class="mf">0.5</span> <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">total</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="c1"># Allow for negative isotope totals</span>
+
+        <span class="c1"># Now convert into a list of dictionaries</span>
+        <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span><span class="s1">&#39;isotope&#39;</span><span class="p">:</span> <span class="n">isotope</span><span class="p">,</span> <span class="s1">&#39;contribution&#39;</span><span class="p">:</span> <span class="n">total</span><span class="p">}</span> <span class="k">for</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">total</span> <span class="ow">in</span> <span class="n">isotope_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">]</span>
+
+    <span class="c1"># Remove the temporary input and output files</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">input_filename</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">input_filename</span><span class="si">}</span><span class="s2">.out&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">isotope_totals</span><span class="p">,</span> <span class="n">isotope_reaction</span></div>
+
+
+<div class="viewcode-block" id="read_integral_indices">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.read_integral_indices">[docs]</a>
+<span class="k">def</span> <span class="nf">read_integral_indices</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads the output file from TSUNAMI-IP and returns the integral values for each application.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        Path to the TSUNAMI-IP output file.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Integral matrices for each integral index type. The shape of the matrices are ``(num_applications, num_experiments)``. </span>
+<span class="sd">        Keys are ``&#39;c_k&#39;``, ``&#39;E_total&#39;``, ``&#39;E_fission&#39;``, ``&#39;E_capture&#39;``, and ``&#39;E_scatter&#39;``.</span>
+<span class="sd">        </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Currently, this function and only reads :math:`c_k`, :math:`E_{\\text{total}}`, </span>
+<span class="sd">    :math:`E_{\\text{fission}}`, :math:`E_{\\text{capture}}`, and :math:`E_{\\text{scatter}}`. If any of these are missing</span>
+<span class="sd">    from the output file, the function will raise an error. To ensure these are present, please include at least</span>
+<span class="sd">    </span>
+<span class="sd">    ::</span>
+
+<span class="sd">        read parameters</span>
+<span class="sd">            e c </span>
+<span class="sd">            prtparts</span>
+<span class="sd">            values</span>
+<span class="sd">        end parameters</span>
+
+<span class="sd">    in the TSUNAMI-IP input file.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; filename = Path(&#39;tests/example_files/tsunami_ip.out&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; integral_indices = read_integral_indices(filename)</span>
+<span class="sd">    &gt;&gt;&gt; integral_indices[&#39;c_k&#39;]</span>
+<span class="sd">    array([[1.0+/-0.0024, 0.9986+/-0.0024, 0.9941+/-0.0025, 0.9892+/-0.0025,</span>
+<span class="sd">            0.9729+/-0.0026, 0.9701+/-0.0026, 0.9582+/-0.0026,</span>
+<span class="sd">            0.9032+/-0.0009, 0.896+/-0.0008, 0.8902+/-0.0008,</span>
+<span class="sd">            0.8883+/-0.0007, 0.8353+/-0.0008],</span>
+<span class="sd">           [0.9986+/-0.0024, 1.0+/-0.0025, 0.9976+/-0.0025, 0.9939+/-0.0026,</span>
+<span class="sd">            0.9798+/-0.0026, 0.9772+/-0.0026, 0.9663+/-0.0026,</span>
+<span class="sd">            0.9036+/-0.0009, 0.898+/-0.0008, 0.8939+/-0.0008,</span>
+<span class="sd">            0.8924+/-0.0007, 0.8347+/-0.0008],</span>
+<span class="sd">           [0.9941+/-0.0025, 0.9976+/-0.0025, 1.0+/-0.0026, 0.9991+/-0.0026,</span>
+<span class="sd">            0.9909+/-0.0025, 0.9891+/-0.0026, 0.9811+/-0.0026,</span>
+<span class="sd">            0.9192+/-0.0008, 0.9145+/-0.0008, 0.9115+/-0.0008,</span>
+<span class="sd">            0.9102+/-0.0007, 0.8491+/-0.0008],</span>
+<span class="sd">           [0.9892+/-0.0025, 0.9939+/-0.0026, 0.9991+/-0.0026, 1.0+/-0.0025,</span>
+<span class="sd">            0.9956+/-0.0025, 0.9943+/-0.0025, 0.9882+/-0.0025,</span>
+<span class="sd">            0.927+/-0.0008, 0.9229+/-0.0008, 0.9204+/-0.0007,</span>
+<span class="sd">            0.9192+/-0.0007, 0.8564+/-0.0008],</span>
+<span class="sd">           [0.9729+/-0.0026, 0.9798+/-0.0026, 0.9909+/-0.0025,</span>
+<span class="sd">            0.9956+/-0.0025, 1.0+/-0.0024, 0.9998+/-0.0024, 0.9981+/-0.0024,</span>
+<span class="sd">            0.9428+/-0.0008, 0.9397+/-0.0008, 0.9386+/-0.0007,</span>
+<span class="sd">            0.9374+/-0.0007, 0.871+/-0.0008],</span>
+<span class="sd">           [0.9701+/-0.0026, 0.9772+/-0.0026, 0.9891+/-0.0026,</span>
+<span class="sd">            0.9943+/-0.0025, 0.9998+/-0.0024, 1.0+/-0.0024, 0.9988+/-0.0024,</span>
+<span class="sd">            0.9437+/-0.0008, 0.9406+/-0.0008, 0.9396+/-0.0007,</span>
+<span class="sd">            0.9385+/-0.0007, 0.8717+/-0.0008],</span>
+<span class="sd">           [0.9582+/-0.0026, 0.9663+/-0.0026, 0.9811+/-0.0026,</span>
+<span class="sd">            0.9882+/-0.0025, 0.9981+/-0.0024, 0.9988+/-0.0024, 1.0+/-0.0024,</span>
+<span class="sd">            0.9482+/-0.0008, 0.9455+/-0.0008, 0.945+/-0.0007,</span>
+<span class="sd">            0.9439+/-0.0007, 0.8761+/-0.0008],</span>
+<span class="sd">           [0.9032+/-0.001, 0.9036+/-0.001, 0.9192+/-0.001, 0.927+/-0.001,</span>
+<span class="sd">            0.9428+/-0.0009, 0.9437+/-0.0009, 0.9482+/-0.0009, 1.0+/-0.001,</span>
+<span class="sd">            0.9988+/-0.0009, 0.996+/-0.0009, 0.9945+/-0.0009,</span>
+<span class="sd">            0.9226+/-0.0008],</span>
+<span class="sd">           [0.896+/-0.001, 0.898+/-0.001, 0.9145+/-0.0009, 0.9229+/-0.0009,</span>
+<span class="sd">            0.9397+/-0.0009, 0.9406+/-0.0009, 0.9455+/-0.0009,</span>
+<span class="sd">            0.9988+/-0.0009, 1.0+/-0.0009, 0.999+/-0.0009, 0.9982+/-0.0008,</span>
+<span class="sd">            0.92+/-0.0008],</span>
+<span class="sd">           [0.8902+/-0.0009, 0.8939+/-0.0009, 0.9115+/-0.0009,</span>
+<span class="sd">            0.9204+/-0.0009, 0.9386+/-0.0008, 0.9396+/-0.0008,</span>
+<span class="sd">            0.945+/-0.0008, 0.996+/-0.0009, 0.999+/-0.0009, 1.0+/-0.0008,</span>
+<span class="sd">            0.9998+/-0.0008, 0.9169+/-0.0008],</span>
+<span class="sd">           [0.8883+/-0.0009, 0.8924+/-0.0009, 0.9102+/-0.0009,</span>
+<span class="sd">            0.9192+/-0.0009, 0.9374+/-0.0008, 0.9385+/-0.0008,</span>
+<span class="sd">            0.9439+/-0.0008, 0.9945+/-0.0009, 0.9982+/-0.0008,</span>
+<span class="sd">            0.9998+/-0.0008, 1.0+/-0.0008, 0.9157+/-0.0008],</span>
+<span class="sd">           [0.8353+/-0.001, 0.8347+/-0.001, 0.8491+/-0.001, 0.8564+/-0.0009,</span>
+<span class="sd">            0.871+/-0.0009, 0.8717+/-0.0009, 0.8761+/-0.0009,</span>
+<span class="sd">            0.9226+/-0.0008, 0.92+/-0.0007, 0.9169+/-0.0007, 0.9157+/-0.0007,</span>
+<span class="sd">            1.0+/-0.0011]], dtype=object)</span>
+<span class="sd">    &gt;&gt;&gt; application_1_with_experiment_2_ck = integral_indices[&#39;c_k&#39;][0, 1]</span>
+<span class="sd">    &gt;&gt;&gt; application_1_with_experiment_2_ck</span>
+<span class="sd">    0.9986+/-0.0024&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1"># Define the Integral Values parser</span>
+    <span class="n">dashed_line</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;Integral Values for Application&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span> <span class="o">+</span> <span class="n">dashed_line</span>
+    <span class="n">table_header</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;Experiment&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;Type&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;s.d.&quot;</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="n">Opt</span><span class="p">(</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;xsec unc %&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;s.d.&quot;</span><span class="p">)</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;c(k)&quot;</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;s.d.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;s.d.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;E(fis)&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;s.d.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;E(cap)&quot;</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;s.d.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;E(sct)&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;s.d.&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span> <span class="o">+</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">dashed_line</span><span class="p">)</span>
+    
+    <span class="c1"># Define characters allowed in a filename (all printables except space)</span>
+    <span class="n">non_space_printables</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">printables</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">sci_num</span> <span class="o">=</span> <span class="n">pyparsing_common</span><span class="o">.</span><span class="n">sci_real</span>
+    <span class="n">space_as_zero</span> <span class="o">=</span> <span class="n">White</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># Parsing nine spaces as zero</span>
+    <span class="n">value_or_space</span> <span class="o">=</span> <span class="n">MatchFirst</span><span class="p">([</span> <span class="n">space_as_zero</span><span class="p">,</span> <span class="n">sci_num</span> <span class="p">])</span>
+
+    <span class="n">numbers_without_keff_uncertainty</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> \
+                                       <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span>
+    <span class="n">numbers_with_keff_uncertainty</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> \
+                                    <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> \
+                                    <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span> <span class="o">+</span> <span class="n">Group</span><span class="p">(</span> <span class="n">sci_num</span> <span class="o">+</span> <span class="n">value_or_space</span> <span class="p">)</span>
+
+    <span class="n">data_line</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">Suppress</span><span class="p">(</span><span class="n">pyparsing_common</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">non_space_printables</span><span class="p">)</span> <span class="o">+</span> <span class="n">Opt</span><span class="p">(</span><span class="n">Literal</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="p">))</span> <span class="o">+</span> \
+                               <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="p">))</span> <span class="o">+</span> \
+                        <span class="n">MatchFirst</span><span class="p">([</span><span class="n">numbers_with_keff_uncertainty</span><span class="p">,</span> <span class="n">numbers_without_keff_uncertainty</span><span class="p">]))</span>
+    
+    <span class="n">data_block</span> <span class="o">=</span> <span class="n">OneOrMore</span><span class="p">(</span><span class="n">data_line</span><span class="p">)</span>
+    <span class="n">integral_values</span> <span class="o">=</span> <span class="n">Suppress</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="n">table_header</span><span class="p">)</span> <span class="o">+</span> <span class="n">data_block</span>
+    <span class="n">parsed_integral_values</span> <span class="o">=</span> <span class="n">integral_values</span><span class="o">.</span><span class="n">searchString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Parse the integral value tables into a uarray</span>
+    <span class="n">num_applications</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parsed_integral_values</span><span class="p">)</span>
+    <span class="n">num_experiments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parsed_integral_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1"># First row seems to be a repeat, i.e. in the output it&#39;s &quot;experiment 0&quot;</span>
+    
+    <span class="n">integral_matrices</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">integral_matrix</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">umatrix</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">num_experiments</span><span class="p">,</span> <span class="n">num_applications</span><span class="p">)</span> <span class="p">),</span> 
+                                      <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">num_experiments</span><span class="p">,</span> <span class="n">num_applications</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+    
+    <span class="c1"># Initialize the integral matrices</span>
+    <span class="n">C_k</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">integral_matrix</span><span class="p">)</span>
+    <span class="n">E_total</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">integral_matrix</span><span class="p">)</span>
+    <span class="n">E_fission</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">integral_matrix</span><span class="p">)</span>
+    <span class="n">E_capture</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">integral_matrix</span><span class="p">)</span>
+    <span class="n">E_scatter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">integral_matrix</span><span class="p">)</span>
+
+    <span class="c1"># Now populate the integral matrices from the parsed output</span>
+    <span class="k">for</span> <span class="n">match_index</span><span class="p">,</span> <span class="n">match</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parsed_integral_values</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row_index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">C_k</span><span class="p">[</span><span class="n">row_index</span><span class="p">,</span> <span class="n">match_index</span><span class="p">]</span>       <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">E_total</span><span class="p">[</span><span class="n">row_index</span><span class="p">,</span> <span class="n">match_index</span><span class="p">]</span>   <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">E_fission</span><span class="p">[</span><span class="n">row_index</span><span class="p">,</span> <span class="n">match_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">E_capture</span><span class="p">[</span><span class="n">row_index</span><span class="p">,</span> <span class="n">match_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">E_scatter</span><span class="p">[</span><span class="n">row_index</span><span class="p">,</span> <span class="n">match_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">integral_matrices</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;c_k&quot;</span><span class="p">:</span>       <span class="n">C_k</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>
+        <span class="s2">&quot;E_total&quot;</span><span class="p">:</span>   <span class="n">E_total</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>
+        <span class="s2">&quot;E_fission&quot;</span><span class="p">:</span> <span class="n">E_fission</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>
+        <span class="s2">&quot;E_capture&quot;</span><span class="p">:</span> <span class="n">E_capture</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span>
+        <span class="s2">&quot;E_scatter&quot;</span><span class="p">:</span> <span class="n">E_scatter</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">integral_matrices</span></div>
+
+
+<div class="viewcode-block" id="read_region_integrated_h5_sdf">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.read_region_integrated_h5_sdf">[docs]</a>
+<span class="k">def</span> <span class="nf">read_region_integrated_h5_sdf</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads all region integrated SDFs from a HDF5 (``.h5``) formatted TSUNAMI-B sdf file and returns a dictionary of </span>
+<span class="sd">    the data</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename</span>
+<span class="sd">        Path to the .h5 SDF file (e.g. ``my_model.sdf.h5``)</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Dictionary of the region integrated SDF data. The dictionary is twice-nested, and keyed first by nuclide, then by</span>
+<span class="sd">        reaction type. The values are the sensitivity profiles with uncertainties.</span>
+<span class="sd">        </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``.h5`` formatted SDF files can be generated using the SCALE utility </span>
+<span class="sd">    `tao &lt;https://scale-manual.ornl.gov/tsunami-ip-appAB.html#format-of-hdf5-based-sensitivity-data-file&gt;`_. Tao can convert a</span>
+<span class="sd">    single ``.sdf`` file to a ``.h5`` file using the command:</span>
+<span class="sd">    </span>
+<span class="sd">    ::</span>
+<span class="sd">    </span>
+<span class="sd">        tao convert filename.sdf</span>
+<span class="sd">        </span>
+<span class="sd">    or convert all ``.sdf`` files in a directory using:</span>
+<span class="sd">    </span>
+<span class="sd">    ::</span>
+<span class="sd">    </span>
+<span class="sd">        tao convert *.sdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c1"># Get the region integrated sdf&#39;s, i.e. where unit=0</span>
+        <span class="n">region_integrated_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">][:]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mts</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;mt&#39;</span><span class="p">][</span><span class="n">region_integrated_indices</span><span class="p">]</span>
+        <span class="n">zaids</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;nuclide_id&#39;</span><span class="p">][</span><span class="n">region_integrated_indices</span><span class="p">]</span>
+        <span class="n">sensitivities</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;profile_values&#39;</span><span class="p">][</span><span class="n">region_integrated_indices</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">uncertainties</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;profile_sigmas&#39;</span><span class="p">][</span><span class="n">region_integrated_indices</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># Now convert the data into a dictionary</span>
+        <span class="n">unique_zaids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">zaids</span><span class="p">)</span>
+        <span class="n">sdf_data</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">zaid</span><span class="p">):</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">zaid</span> <span class="ow">in</span> <span class="n">unique_zaids</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">region_integrated_indices</span><span class="p">:</span>
+            <span class="n">sdf_data</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">zaids</span><span class="p">[</span><span class="n">index</span><span class="p">])][</span><span class="nb">str</span><span class="p">(</span><span class="n">mts</span><span class="p">[</span><span class="n">index</span><span class="p">])]</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span><span class="n">sensitivities</span><span class="p">[</span><span class="n">index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">uncertainties</span><span class="p">[</span><span class="n">index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">sdf_data</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

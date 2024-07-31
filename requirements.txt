@@ -1,0 +1,16 @@
+plotly~=5.22.0
+matplotlib
+pandas
+uncertainties
+scipy
+flask
+dash
+h5py
+tqdm
+pyyaml
+selenium
+webdriver-manager
+IPython
+pyprojroot
+kaleido
+openpyxl

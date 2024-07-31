@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCALE Multigroup Cross Section Reader &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files" href="compare_E.html" />
+    <link rel="prev" title="SDF Readers" href="sdf_readers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../paths.html">Paths</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="caching_cross_sections.html">Cache Base and Perturbed Cross Section Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sdf_readers.html">SDF Readers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SCALE Multigroup Cross Section Reader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-disclaimer">A Disclaimer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reading-multigroup-cross-sections">Reading Multigroup Cross Sections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caching-a-multigroup-cross-section-library">Caching a Multigroup Cross Section Library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-future-improvement">A Future Improvement</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="compare_E.html">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualizing_contributions.html">Visualizing Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertainty_contributions.html">Uncertainty Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation_plot/index.html">Correlation Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_plot/index.html">Matrix Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">SCALE Multigroup Cross Section Reader</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/multigroup_xs_reader.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-multigroup-xs-reader-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="scale-multigroup-cross-section-reader">
+<span id="sphx-glr-auto-examples-multigroup-xs-reader-py"></span><h1>SCALE Multigroup Cross Section Reader<a class="headerlink" href="#scale-multigroup-cross-section-reader" title="Link to this heading"></a></h1>
+<p>This example demonstrates how to read SCALE multigroup cross section libraries. This functionality relies on AMPX modules
+for creating text dumps of COVERX formatted libraries. More details are given here: <a class="reference internal" href="../public_api/index.html#mg-reader-inp"><span class="std std-ref">Multigroup SCALE XS Library Reader</span></a>.</p>
+<section id="a-disclaimer">
+<h2>A Disclaimer<a class="headerlink" href="#a-disclaimer" title="Link to this heading"></a></h2>
+<p>The COVERX formatted cross section library referenced in this example <code class="docutils literal notranslate"><span class="pre">dummy_56_v7.1</span></code> was created with AMPX using ExSite
+and publicly available cross section data from <a class="reference external" href="https://www.nndc.bnl.gov/endf-b7.1/download.html">ENDF VII.1</a>.
+This library is <strong>NOT</strong> intended for use in simulations, and only contains a small subset of nuclides and reactions. This
+library is included purely for demonstration purposes, and when using functionality in this package that requires nuclear
+data, please use the provided SCALE libraries.</p>
+</section>
+<section id="reading-multigroup-cross-sections">
+<h2>Reading Multigroup Cross Sections<a class="headerlink" href="#reading-multigroup-cross-sections" title="Link to this heading"></a></h2>
+<p>The following code snippet demonstrates how to read a SCALE multigroup cross section library. The function
+<a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs" title="tsunami_ip_utils.xs.read_multigroup_xs"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.xs.read_multigroup_xs()</span></code></a> is used to read COVER formatted SCALE cross section libraries, and takes
+a <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a> object to the multigroup library, and a dictionary of nuclide-reaction pairs to read. The function
+returns a nested dictionary of <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> objects, where the outer dictionary keys are nuclides, and the inner
+dictionary keys are reactions. The values are the multigroup cross sections for the corresponding nuclide-reaction pair.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tsunami_ip_utils.xs</span> <span class="kn">import</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs" title="tsunami_ip_utils.xs.read_multigroup_xs" class="sphx-glr-backref-module-tsunami_ip_utils-xs sphx-glr-backref-type-py-function"><span class="n">read_multigroup_xs</span></a>
+<span class="kn">from</span> <span class="nn">paths</span> <span class="kn">import</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a>
+
+<span class="n">nuclide_reaction_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;92235&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">],</span> <span class="s1">&#39;5011&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;27&#39;</span><span class="p">],</span> <span class="s1">&#39;94239&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">]}</span>
+<a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">multigroup_library_path</span></a> <span class="o">=</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;dummy_56_v7.1&#39;</span>
+<span class="n">out</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs" title="tsunami_ip_utils.xs.read_multigroup_xs" class="sphx-glr-backref-module-tsunami_ip_utils-xs sphx-glr-backref-type-py-function"><span class="n">read_multigroup_xs</span></a><span class="p">(</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">multigroup_library_path</span></a><span class="p">,</span> <span class="n">nuclide_reaction_dict</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">&#39;92235&#39;</span><span class="p">][</span><span class="s1">&#39;1&#39;</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>56
+</pre></div>
+</div>
+<p>This function is parallel, and reads cross section libraries on multiple cores, which can be useful for large libraries.
+This function isn’t the most user-friendly, and requires the user to input a nuclide_reaction_dict in terms of nuclide
+ZAID and reaction MT numbers, but it is primarily used by the <a class="reference internal" href="../public_api/index.html#module-tsunami_ip_utils.perturbations" title="tsunami_ip_utils.perturbations"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tsunami_ip_utils.perturbations</span></code></a> module for
+reading cross sections for perturbation calculations.</p>
+</section>
+<section id="caching-a-multigroup-cross-section-library">
+<h2>Caching a Multigroup Cross Section Library<a class="headerlink" href="#caching-a-multigroup-cross-section-library" title="Link to this heading"></a></h2>
+<p>If working with python-based applications that deal with SCALE multigroup cross section data, it may be useful to cache the
+cross section libary in a convenient format for reading into python, like a <code class="docutils literal notranslate"><span class="pre">.pkl</span></code> file. To avoid having to manually supply
+the list of all nuclides and reactions in the multigroup library, the <a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs" title="tsunami_ip_utils.xs.read_multigroup_xs"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.xs.read_multigroup_xs()</span></code></a> function
+can be run with the <code class="docutils literal notranslate"><span class="pre">return_available_nuclide_reactions</span></code> flag set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. This will return a dictionary of all nuclides
+and reactions in the library, which can then be used to read the library and cache it.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">out</span><span class="p">,</span> <span class="n">available_nuclide_reactions</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs" title="tsunami_ip_utils.xs.read_multigroup_xs" class="sphx-glr-backref-module-tsunami_ip_utils-xs sphx-glr-backref-type-py-function"><span class="n">read_multigroup_xs</span></a><span class="p">(</span>
+    <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">multigroup_library_path</span></a><span class="p">,</span>
+    <span class="n">nuclide_reaction_dict</span><span class="p">,</span>
+    <span class="n">return_available_nuclide_reactions</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">available_nuclide_reactions</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;5011&#39;: [&#39;1099&#39;, &#39;3099&#39;, &#39;2&#39;, &#39;4&#39;, &#39;16&#39;, &#39;22&#39;, &#39;28&#39;, &#39;51&#39;, &#39;52&#39;, &#39;53&#39;, &#39;54&#39;, &#39;55&#39;, &#39;56&#39;, &#39;57&#39;, &#39;58&#39;, &#39;59&#39;, &#39;60&#39;, &#39;91&#39;, &#39;102&#39;, &#39;103&#39;, &#39;105&#39;, &#39;107&#39;, &#39;1&#39;, &#39;3002&#39;, &#39;3102&#39;, &#39;101&#39;, &#39;27&#39;, &#39;3&#39;, &#39;1007&#39;], &#39;92235&#39;: [&#39;1099&#39;, &#39;3099&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;16&#39;, &#39;17&#39;, &#39;18&#39;, &#39;1452&#39;, &#39;452&#39;, &#39;1456&#39;, &#39;456&#39;, &#39;1455&#39;, &#39;455&#39;, &#39;19&#39;, &#39;1419&#39;, &#39;4561&#39;, &#39;20&#39;, &#39;1420&#39;, &#39;4562&#39;, &#39;21&#39;, &#39;1421&#39;, &#39;4563&#39;, &#39;37&#39;, &#39;38&#39;, &#39;1438&#39;, &#39;4564&#39;, &#39;51&#39;, &#39;52&#39;, &#39;53&#39;, &#39;54&#39;, &#39;55&#39;, &#39;56&#39;, &#39;57&#39;, &#39;58&#39;, &#39;59&#39;, &#39;60&#39;, &#39;61&#39;, &#39;62&#39;, &#39;63&#39;, &#39;64&#39;, &#39;65&#39;, &#39;66&#39;, &#39;67&#39;, &#39;68&#39;, &#39;69&#39;, &#39;70&#39;, &#39;71&#39;, &#39;72&#39;, &#39;73&#39;, &#39;74&#39;, &#39;75&#39;, &#39;76&#39;, &#39;77&#39;, &#39;78&#39;, &#39;79&#39;, &#39;80&#39;, &#39;81&#39;, &#39;82&#39;, &#39;83&#39;, &#39;84&#39;, &#39;85&#39;, &#39;86&#39;, &#39;87&#39;, &#39;88&#39;, &#39;89&#39;, &#39;90&#39;, &#39;91&#39;, &#39;102&#39;, &#39;1&#39;, &#39;3002&#39;, &#39;3018&#39;, &#39;3102&#39;, &#39;101&#39;, &#39;27&#39;, &#39;1018&#39;, &#39;1056&#39;, &#39;1055&#39;, &#39;1019&#39;, &#39;1020&#39;, &#39;1021&#39;, &#39;1038&#39;, &#39;1007&#39;], &#39;94239&#39;: [&#39;1099&#39;, &#39;3099&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;16&#39;, &#39;17&#39;, &#39;18&#39;, &#39;1452&#39;, &#39;452&#39;, &#39;1456&#39;, &#39;456&#39;, &#39;1455&#39;, &#39;455&#39;, &#39;19&#39;, &#39;1419&#39;, &#39;4561&#39;, &#39;20&#39;, &#39;1420&#39;, &#39;4562&#39;, &#39;21&#39;, &#39;1421&#39;, &#39;4563&#39;, &#39;37&#39;, &#39;38&#39;, &#39;1438&#39;, &#39;4564&#39;, &#39;51&#39;, &#39;52&#39;, &#39;53&#39;, &#39;54&#39;, &#39;55&#39;, &#39;56&#39;, &#39;57&#39;, &#39;58&#39;, &#39;59&#39;, &#39;60&#39;, &#39;61&#39;, &#39;62&#39;, &#39;63&#39;, &#39;64&#39;, &#39;65&#39;, &#39;66&#39;, &#39;67&#39;, &#39;68&#39;, &#39;69&#39;, &#39;70&#39;, &#39;71&#39;, &#39;72&#39;, &#39;73&#39;, &#39;74&#39;, &#39;75&#39;, &#39;76&#39;, &#39;77&#39;, &#39;78&#39;, &#39;79&#39;, &#39;80&#39;, &#39;81&#39;, &#39;82&#39;, &#39;83&#39;, &#39;84&#39;, &#39;85&#39;, &#39;86&#39;, &#39;87&#39;, &#39;88&#39;, &#39;89&#39;, &#39;90&#39;, &#39;91&#39;, &#39;102&#39;, &#39;1&#39;, &#39;3002&#39;, &#39;3018&#39;, &#39;3102&#39;, &#39;101&#39;, &#39;27&#39;, &#39;1018&#39;, &#39;1056&#39;, &#39;1055&#39;, &#39;1019&#39;, &#39;1020&#39;, &#39;1021&#39;, &#39;1038&#39;, &#39;1007&#39;]}
+</pre></div>
+</div>
+<p>The list of all available nuclide reactions can then be supplied to the function to read the entire library.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs" title="tsunami_ip_utils.xs.read_multigroup_xs" class="sphx-glr-backref-module-tsunami_ip_utils-xs sphx-glr-backref-type-py-function"><span class="n">read_multigroup_xs</span></a><span class="p">(</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">multigroup_library_path</span></a><span class="p">,</span> <span class="n">available_nuclide_reactions</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And the cross sections can be easily cached</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;dummy_56_v7.1.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+<span class="c1"># Now compare the dump to the gold standard</span>
+<span class="kn">import</span> <span class="nn">filecmp</span>
+
+<span class="k">assert</span> <span class="n">filecmp</span><span class="o">.</span><span class="n">cmp</span><span class="p">(</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;dummy_56_v7.1.pkl&#39;</span><span class="p">,</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a> <span class="o">/</span> <span class="s1">&#39;gold&#39;</span> <span class="o">/</span> <span class="s1">&#39;dummy_56_v7.1.pkl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="a-future-improvement">
+<h2>A Future Improvement<a class="headerlink" href="#a-future-improvement" title="Link to this heading"></a></h2>
+<p>It is unfortunate that to cache a cross section library, the library must be read twice (the most consuming part is making
+the text dump again). This is a limitation of the current implementation, and may be improved in the future. To avoid this,
+the text dump just needs to be saved so that it can be read by the second function call. This could all be implemented by
+adding an additional flag to the <a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs" title="tsunami_ip_utils.xs.read_multigroup_xs"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.xs.read_multigroup_xs()</span></code></a> that does this under the hood.</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.805 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-multigroup-xs-reader-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/36e5ec966a657687a079ea89c4d412a2/multigroup_xs_reader.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">multigroup_xs_reader.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/7badea95849256cf4733aacf6f5acdbe/multigroup_xs_reader.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">multigroup_xs_reader.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/cc8d684e470581b533b17d7f1e74e0c7/multigroup_xs_reader.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">multigroup_xs_reader.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sdf_readers.html" class="btn btn-neutral float-left" title="SDF Readers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="compare_E.html" class="btn btn-neutral float-right" title="Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

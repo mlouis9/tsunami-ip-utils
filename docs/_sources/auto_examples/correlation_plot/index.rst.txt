@@ -1,0 +1,63 @@
+
+
+.. _sphx_glr_auto_examples_correlation_plot:
+
+Correlation Plots
+-----------------
+
+These examples demonstrate how to create correlation plots using the methods described in :ref:`the technical manual <sec-a-correlation-based-approach>`.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Contribution Correlation Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/correlation_plot/images/thumb/sphx_glr_contribution_correlation_plot_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_correlation_plot_contribution_correlation_plot.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Contribution Correlation Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to generate a perturbation correlation plot using the  tsunami_ip_utils.perturbations.generate_points ">
+
+.. only:: html
+
+  .. image:: /auto_examples/correlation_plot/images/thumb/sphx_glr_perturbation_correlation_plot_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_correlation_plot_perturbation_correlation_plot.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Perturbation Correlation Plots</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/correlation_plot/contribution_correlation_plot
+   /auto_examples/correlation_plot/perturbation_correlation_plot
+

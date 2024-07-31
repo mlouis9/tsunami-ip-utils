@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"TeX": {"extensions": ["AMSmath.js", "AMSsymbols.js"], "equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Visualizing Contributions" href="visualizing_contributions.html" />
+    <link rel="prev" title="SCALE Multigroup Cross Section Reader" href="multigroup_xs_reader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../paths.html">Paths</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="caching_cross_sections.html">Cache Base and Perturbed Cross Section Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sdf_readers.html">SDF Readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multigroup_xs_reader.html">SCALE Multigroup Cross Section Reader</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="visualizing_contributions.html">Visualizing Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uncertainty_contributions.html">Uncertainty Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation_plot/index.html">Correlation Plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_plot/index.html">Matrix Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/compare_E.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-compare-e-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="comparing-calculated-and-tsunami-ip-e-for-a-set-of-sdf-files">
+<span id="sphx-glr-auto-examples-compare-e-py"></span><h1>Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files<a class="headerlink" href="#comparing-calculated-and-tsunami-ip-e-for-a-set-of-sdf-files" title="Link to this heading"></a></h1>
+<p>This example demonstrates the use of <code class="docutils literal notranslate"><span class="pre">tsunami_ip_utils</span></code> for calculating the similarity index <span class="math notranslate nohighlight">\(E\)</span> for a set of TSUNAMI-IP
+SDF files and comparing to the TSUNAMI-IP calculated value. This example uses a set of 12 SDF files generated from the highly
+enriched uranium fast metal (HMF) series of critical experiments <a class="reference internal" href="#bess2019" id="id1"><span>[Bess2019]</span></a>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tsunami_ip_utils.comparisons</span> <span class="kn">import</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.comparisons.E_calculation_comparison" title="tsunami_ip_utils.comparisons.E_calculation_comparison" class="sphx-glr-backref-module-tsunami_ip_utils-comparisons sphx-glr-backref-type-py-function"><span class="n">E_calculation_comparison</span></a>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">paths</span> <span class="kn">import</span> <a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a>
+
+<span class="c1"># Create a list of application and experiment SDF files (same set of applications and experiments)</span>
+<span class="n">applications</span> <span class="o">=</span> <span class="p">[</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXAMPLES</span></a><span class="si">}</span><span class="s2">/data/example_sdfs/HMF/HEU-MET-FAST-003-00</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.sdf&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="p">]</span>
+<span class="n">experiments</span> <span class="o">=</span> <span class="n">applications</span>
+<span class="n">data</span> <span class="o">=</span> <a href="https://tsunami-ip-utils.readthedocs.io/en/latest/public_api/index.html#tsunami_ip_utils.comparisons.E_calculation_comparison" title="tsunami_ip_utils.comparisons.E_calculation_comparison" class="sphx-glr-backref-module-tsunami_ip_utils-comparisons sphx-glr-backref-type-py-function"><span class="n">E_calculation_comparison</span></a><span class="p">(</span><span class="n">applications</span><span class="p">,</span> <span class="n">experiments</span><span class="p">)</span>
+<span class="n">E_total_comparison</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Done with calculations
+Creating pandas dataframes
+</pre></div>
+</div>
+<p>The output is a pandas dataframe. The application is the first index, and can be accessed via passing the application
+number as an index. For example, to access the first application:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">E_total_comparison</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Attribute                    Calculated Manual Uncertainty  ... Relative Difference in Mean Relative Difference in Manual Uncertainty
+Experiment Number                                           ...
+1                  1.000E+00+/-1.71E-03           1.71E-03  ...                  3.3307E-15                                2.8798E-01
+2                  9.983E-01+/-1.72E-03           1.72E-03  ...                  2.8934E-04                                2.8323E-01
+
+[2 rows x 5 columns]
+</pre></div>
+</div>
+<p>From the output, you can see that each application has a few attributes that are calculated. The attributes are:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">E_total_comparison</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Index([&#39;Calculated&#39;, &#39;Manual Uncertainty&#39;, &#39;TSUNAMI-IP&#39;,
+       &#39;Relative Difference in Mean&#39;,
+       &#39;Relative Difference in Manual Uncertainty&#39;],
+      dtype=&#39;object&#39;, name=&#39;Attribute&#39;)
+</pre></div>
+</div>
+<p>To access, for example, the calculated E value, you can pass the appropriate key</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">E_total_comparison</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;Calculated&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Experiment Number
+1    1.000E+00+/-1.71E-03
+2    9.983E-01+/-1.72E-03
+Name: Calculated, dtype: object
+</pre></div>
+</div>
+<p>This gives the calculated E value for application 1 compared to all other experiments. To select a specific application
+experiement pair, you can pass the experiment number as the second index. For example, to access the calculated E value
+for application 1 compared to experiment 2:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">E_total_comparison</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;Calculated&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>9.983E-01+/-1.72E-03
+</pre></div>
+</div>
+<p>Now the pandas dataframe comparison for each of the <span class="math notranslate nohighlight">\(E\)</span> types (i.e. <span class="math notranslate nohighlight">\(E_{\text{total}}\)</span>, <span class="math notranslate nohighlight">\(E_{\text{fission}}\)</span>,
+<span class="math notranslate nohighlight">\(E_{\text{capture}}\)</span>, and <span class="math notranslate nohighlight">\(E_{\text{scatter}}\)</span>) can be written to an excel file. The gold standard data is also
+provided in the <code class="docutils literal notranslate"><span class="pre">gold</span></code> directory.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save output data as xlsx</span>
+<span class="k">for</span> <span class="n">E_type</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">E_type</span><span class="p">]</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s2">_comparison.xlsx&quot;</span><span class="p">)</span>
+
+<span class="c1"># Test that the calculated E comparison is the same as the gold standard</span>
+<span class="k">for</span> <span class="n">E_type</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="n">dumped_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s2">_comparison.xlsx&quot;</span>  <span class="p">)</span>
+    <span class="n">gold_data</span>   <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span> <span class="sa">f</span><span class="s2">&quot;gold/</span><span class="si">{</span><span class="n">E_type</span><span class="si">}</span><span class="s2">_comparison.xlsx&quot;</span> <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">dumped_data</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span> <span class="n">gold_data</span> <span class="p">)</span>
+</pre></div>
+</div>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="bess2019" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Bess2019</a><span class="fn-bracket">]</span></span>
+<p>J. Bess, “International handbook of evaluated criticality safety benchmark experiments (ICSBEP),”
+Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95) 3 (2019).</p>
+</div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 49.166 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-compare-e-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/e409bdc7ee4c1a072c0da93a583b3a69/compare_E.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">compare_E.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/3de9aef6f88d8fa884c6d2fbf604e69c/compare_E.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">compare_E.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/eda37e9f54d3ac78047cdd61cc70ad48/compare_E.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">compare_E.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="multigroup_xs_reader.html" class="btn btn-neutral float-left" title="SCALE Multigroup Cross Section Reader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="visualizing_contributions.html" class="btn btn-neutral float-right" title="Visualizing Contributions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

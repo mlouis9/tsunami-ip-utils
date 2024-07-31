@@ -1,0 +1,319 @@
+:orphan:
+
+Examples
+========
+
+This directory contains examples of how to use the ``tsunami_ip_utils`` package.
+
+:pseudoheader:`General Examples`
+
+Below is a gallery of general examples
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Cache Base and Perturbed Cross Section Libraries">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_caching_cross_sections_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_caching_cross_sections.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Cache Base and Perturbed Cross Section Libraries</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This demonstrates how to use the tools for reading TSUNAMI-B formatted Sensitivity Data Files (SDFs).">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_sdf_readers_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_sdf_readers.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">SDF Readers</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to read SCALE multigroup cross section libraries. This functionality relies on AMPX modules for creating text dumps of COVERX formatted libraries. More details are given here: mg_reader.inp. ">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_multigroup_xs_reader_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_multigroup_xs_reader.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">SCALE Multigroup Cross Section Reader</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the use of tsunami_ip_utils for calculating the similarity index E for a set of TSUNAMI-IP  SDF files and comparing to the TSUNAMI-IP calculated value. This example uses a set of 12 SDF files generated from the highly  enriched uranium fast metal (HMF) series of critical experiments [Bess2019]_.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_compare_E_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_compare_E.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Comparing Calculated and TSUNAMI-IP E for a Set of SDF Files</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example illustrates the use of the various tools for visualizing contributions to a TSUNAMI-IP integral index (such as E, or even contributions to (\Delta k/k)^2). This example shows the visualization of (\Delta k/k)^2 contributions, but the same tools can be used for visualizing contributions to E.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_visualizing_contributions_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_visualizing_contributions.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Visualizing Contributions</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Uncertainty Contributions">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_uncertainty_contributions_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_uncertainty_contributions.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Uncertainty Contributions</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/caching_cross_sections
+   /auto_examples/sdf_readers
+   /auto_examples/multigroup_xs_reader
+   /auto_examples/compare_E
+   /auto_examples/visualizing_contributions
+   /auto_examples/uncertainty_contributions
+
+:pseudoheader:`Correlation Plots`
+
+These examples demonstrate how to create correlation plots using the methods described in :ref:`the technical manual <sec-a-correlation-based-approach>`.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Contribution Correlation Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/correlation_plot/images/thumb/sphx_glr_contribution_correlation_plot_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_correlation_plot_contribution_correlation_plot.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Contribution Correlation Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to generate a perturbation correlation plot using the  tsunami_ip_utils.perturbations.generate_points ">
+
+.. only:: html
+
+  .. image:: /auto_examples/correlation_plot/images/thumb/sphx_glr_perturbation_correlation_plot_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_correlation_plot_perturbation_correlation_plot.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Perturbation Correlation Plots</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+:pseudoheader:`Matrix Plots`
+
+These examples demonstrate the use of the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function to generate a matrix of plots. 
+This is useful for comparing multiple applications and experiments in a single figure.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Matrices With a Different Set of Applications and Experiments">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_different_applications_and_experiments_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_different_applications_and_experiments.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Matrices With a Different Set of Applications and Experiments</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Matrix of Perturbation Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_matrix_of_perturbation_plots_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_perturbation_plots.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Matrix of Perturbation Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Non-Square Matrix Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_nonsquare_plot_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_nonsquare_plot.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Non-Square Matrix Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Matrix of Contribution Correlation Plots">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_matrix_of_contribution_plots_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_contribution_plots.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Matrix of Contribution Correlation Plots</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Changing Plot Defaults">
+
+.. only:: html
+
+  .. image:: /auto_examples/matrix_plot/images/thumb/sphx_glr_changing_plot_defaults_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_matrix_plot_changing_plot_defaults.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Changing Plot Defaults</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+   :includehidden:
+
+
+   /auto_examples/correlation_plot/index.rst
+   /auto_examples/matrix_plot/index.rst
+
+
+.. only:: html
+
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
+
+    .. container:: sphx-glr-download sphx-glr-download-python
+
+      :download:`Download all examples in Python source code: auto_examples_python.zip </auto_examples/auto_examples_python.zip>`
+
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download all examples in Jupyter notebooks: auto_examples_jupyter.zip </auto_examples/auto_examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

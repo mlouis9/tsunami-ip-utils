@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investigation of Correlation Methods for use in Criticality Safety &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"TeX": {"extensions": ["AMSmath.js", "AMSsymbols.js"], "equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Changing Plot Defaults" href="../auto_examples/matrix_plot/changing_plot_defaults.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Report</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#background">Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#important-similarity-indices">Important Similarity Indices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-sensitivity-based-similarity-index-e">The Sensitivity-Based Similarity Index: <span class="math notranslate nohighlight">\(E\)</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-uncertainty-based-similarity-index-c-k">The Uncertainty-Based Similarity Index: <span class="math notranslate nohighlight">\(c_k\)</span></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bias-estimation-and-acceptance-criteria">Bias Estimation and Acceptance Criteria</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#practical-issues-with-the-application-of-similarity-indices">Practical Issues with the Application of Similarity Indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-correlation-based-approach">A Correlation Based Approach</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-correlation-coefficient">The Correlation Coefficient</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pearsons-coefficient">Pearson’s Coefficient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spearmans-coefficient">Spearman’s Coefficient</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#correlating-the-sigma-k-contributions">Correlating the <span class="math notranslate nohighlight">\(\sigma_k\)</span> Contributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#defining-the-sigma-k-2-contributions">Defining the <span class="math notranslate nohighlight">\(\sigma_k^2\)</span> Contributions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#defining-the-sigma-k-contributions">Defining the <span class="math notranslate nohighlight">\(\sigma_k\)</span> Contributions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#results-and-implementation">Results and Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#isotope-wise">Isotope-Wise</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#isotope-reactionwise">Isotope-Reaction–Wise</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#consistent-random-variables">Consistent Random Variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#relation-to-the-bias">Relation to the Bias</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results">Results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#future-work">Future Work</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgments">Acknowledgments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#relevant-identities">Relevant Identities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#variance-of-an-arbitrary-linear-combination-of-random-variables">Variance of an Arbitrary Linear Combination of Random Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bilinearity-of-the-covariance">Bilinearity of the Covariance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shift-independence-of-variance">Shift Independence of Variance</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Investigation of Correlation Methods for use in Criticality Safety</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/report/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="investigation-of-correlation-methods-for-use-in-criticality-safety">
+<h1>Investigation of Correlation Methods for use in Criticality Safety<a class="headerlink" href="#investigation-of-correlation-methods-for-use-in-criticality-safety" title="Link to this heading"></a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Matthew Louis</p>
+</dd>
+<dt class="field-even">Author<span class="colon">:</span></dt>
+<dd class="field-even"><p>Alex Lang</p>
+</dd>
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Walid Metwally</p>
+</dd>
+</dl>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading"></a></h2>
+<p>In the field of criticality safety, computational methods are used for
+ensuring subcriticality for processes under normal and credible abnormal
+conditions. To ensure that these computational methods for ensuring
+operational safety are reliable, they must be rigorously validated
+against physical experiments. The American National Institute of
+Standards (ANSI) outlines the procedure for code validation for
+criticality safety in ANSI/ANS-8.1 <span id="id1">[<a class="reference internal" href="#id35" title="Douglas G Bowen and Nicholas W Brown. ANSI/ANS-8.1: Nuclear Criticality Safety in Operations with Fissile Material Outside Reactors. Transactions of the American Nuclear Society, 99:436–436, 2008.">BB08</a>]</span>.
+The standard requires that the computational bias for a particular
+application is well quantified by comparison with experiments within
+some <em>range of applicability</em>. The standard defines the range of
+applicability as “the limiting ranges of material compositions,
+geometric arrangements, neutron energy spectra, and other relevant
+parameters  e.g., heterogeneity, leakage, interaction, absorption, etc.
+within which the bias of a computational method is
+established” <span id="id2">[<a class="reference internal" href="#id35" title="Douglas G Bowen and Nicholas W Brown. ANSI/ANS-8.1: Nuclear Criticality Safety in Operations with Fissile Material Outside Reactors. Transactions of the American Nuclear Society, 99:436–436, 2008.">BB08</a>]</span> For systems that may lack
+applicable experiments entirely (e.g., UF<sub>6</sub> transportation
+cylinders <span id="id3">[<a class="reference internal" href="#id50" title="Ellen Marie Saylor, Alex Lang, William B. J. Marshall, and Robert Hall. Analysis of the 30B UF6 Container for Use with Increased Enrichment. 5 2021. URL: https://www.osti.gov/biblio/1797631, doi:10.2172/1797631.">SLMH21</a>]</span>), the standard allows for
+using trends in the bias to extend the experimental data to the
+application system.</p>
+<p>Historically, this bias trending has required expert judgement about
+which system characteristics should be used for defining similarity for
+the trending analysis (neutron spectrum, fuel enrichment, etc.). A key
+development was the introduction of quantitative similarity metrics
+based on system sensitivity and nuclear data–induced
+uncertainty <span id="id4">[<a class="reference internal" href="#id36" title="Bryan L Broadhead, Bradley T Rearden, CM Hopper, JJ Wagschal, and CV Parks. Sensitivity- and Uncertainty-Based Criticality Safety Validation Techniques. Nuclear Science and Engineering, 146(3):340–366, 2004.">BRH+04</a>]</span>. The conjecture
+is that systems will have similar biases if they have similar
+sensitivity/uncertainty profiles (on a nuclide-reaction group-wise
+level) because it is thought that the bias is primarily the result of
+uncertainties in the underlying nuclear data. These similarity indices
+can then be used with bias trending analysis tools like those provided
+by the SCALE code sequence VADER <span id="id5">[<a class="reference internal" href="#id38" title="Shane Hart and Justin Clarity. Creation of the VADER Code in SCALE. Technical Report, Oak Ridge National Laboratory (ORNL), Oak Ridge, TN (United States), 2022.">HC22</a>]</span> to
+provide a quantitative physics–based method for estimating computational
+bias that does not rely on expert judgement.</p>
+<section id="important-similarity-indices">
+<h3>Important Similarity Indices<a class="headerlink" href="#important-similarity-indices" title="Link to this heading"></a></h3>
+<p>Of the several similarity indices defined by Broadhead et al.,
+<span id="id6">[<a class="reference internal" href="#id36" title="Bryan L Broadhead, Bradley T Rearden, CM Hopper, JJ Wagschal, and CV Parks. Sensitivity- and Uncertainty-Based Criticality Safety Validation Techniques. Nuclear Science and Engineering, 146(3):340–366, 2004.">BRH+04</a>]</span> the two prominent indices
+available in SCALE are <span class="math notranslate nohighlight">\(E\)</span> and
+<span class="math notranslate nohighlight">\(c_k\)</span> <span id="id7">[<a class="reference internal" href="#id46" title="William Wieselquist and Robert Alexander Lefebvre. SCALE 6.3.1 User Manual. 2 2023. URL: https://www.osti.gov/biblio/1959594, doi:10.2172/1959594.">WL23</a>]</span>.</p>
+<section id="the-sensitivity-based-similarity-index-e">
+<h4>The Sensitivity-Based Similarity Index: <span class="math notranslate nohighlight">\(E\)</span><a class="headerlink" href="#the-sensitivity-based-similarity-index-e" title="Link to this heading"></a></h4>
+<p>The integral index <span class="math notranslate nohighlight">\(E\)</span> is defined solely in terms of the
+sensitivity profiles (i.e., the set of group-wise <span class="math notranslate nohighlight">\(k_{\text{eff}}\)</span>
+sensitivities for each nuclide-reaction pair), which may be calculated
+using standard methods like Contributon-Linked eigenvalue
+sensitivity/uncertainty estimation via Tracklength importance
+Characterization (CLUTCH), <span id="id8">[<a class="reference internal" href="#id39" title="Christopher Michael Perfetti. Advanced Monte Carlo methods for Eigenvalue Sensitivity Coefficient Calculations. PhD thesis, University of Michigan, 2012.">Per12</a>]</span>
+Iterated Fission
+Probability, <span id="id9">[<a class="reference internal" href="#id40" title="Henry Hurwitz. Note on a Theory of Danger Coefficients. General Electric Company, Knolls Atomic Power Laboratory, 1948.">Hur48</a>, <a class="reference internal" href="#id41" title="Brian C Kiedrowski. Adjoint Weighting for Continuous-Energy Monte Carlo Radiation Transport. 2009.">Kie09</a>]</span>
+direct perturbation, and others. Most of these methods are implemented
+in SCALE’s TSUNAMI-3D
+sequence <span id="id10">[<a class="reference internal" href="#id42" title="William J Marshall, Justin B Clarity, and Bradley T Rearden. A Review of TSUNAMI Applications. Transactions of the American Nuclear Society, 2020.">MCR20</a>, <a class="reference internal" href="#id43" title="Christopher M Perfetti and Bradley T Rearden. SCALE 6.2 Continuous-Energy TSUNAMI-3D Capabilities. Technical Report, Oak Ridge National Laboratory (ORNL), Oak Ridge, TN (United States), 2015.">PR15</a>]</span>. It
+was thought that if two systems are similar, their eigenvalue response
+to perturbations in input nuclear data, or their sensitivity profiles,
+should be similar. The integral index <span class="math notranslate nohighlight">\(E\)</span> was designed to automate
+the (often) manual comparisons of sensitivity profiles for <em>each</em>
+nuclide reaction. To compute an integral index, the sensitivity profiles
+of two arbitrary systems, A and B, are formed as vectors (where zero
+sensitivities are assigned to missing nuclides or reactions so that the
+vectors have compatible lengths) <span class="math notranslate nohighlight">\(\boldsymbol{S}_A\)</span> and
+<span class="math notranslate nohighlight">\(\boldsymbol{S}_B\)</span>, and their normalized vector dot product is
+taken to be the degree of similarity between system A and system B:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        E &amp;= \frac{\boldsymbol{S}_A\cdot \boldsymbol{S}_B}{\left\lVert\boldsymbol{S}_A\right\rVert\left\lVert\boldsymbol{S}_B\right\rVert}\nonumber.
+    \end{split}\]</div>
+<p><span class="math notranslate nohighlight">\(E\)</span> is not typically used when predicting bias, however, as it
+does not incorporate the nuclear data uncertainty. While shared
+sensitivity to nuclear data indicates an experiment may be applicable,
+it is not the best predictor of computational bias, which is driven by
+nuclear data induced uncertainty.</p>
+</section>
+<section id="the-uncertainty-based-similarity-index-c-k">
+<h4>The Uncertainty-Based Similarity Index: <span class="math notranslate nohighlight">\(c_k\)</span><a class="headerlink" href="#the-uncertainty-based-similarity-index-c-k" title="Link to this heading"></a></h4>
+<p>The most widely used similarity index in criticality safety is
+<span class="math notranslate nohighlight">\(c_k\)</span>. It represents the degree to which nuclear data–induced
+uncertainties in <span class="math notranslate nohighlight">\(k_{\text{eff}}\)</span> are correlated between two
+systems <span id="id11">[<a class="reference internal" href="#id36" title="Bryan L Broadhead, Bradley T Rearden, CM Hopper, JJ Wagschal, and CV Parks. Sensitivity- and Uncertainty-Based Criticality Safety Validation Techniques. Nuclear Science and Engineering, 146(3):340–366, 2004.">BRH+04</a>]</span>. The <span class="math notranslate nohighlight">\(c_k\)</span>
+similarity index between systems A and B is given by</p>
+<div class="math notranslate nohighlight" id="equation-eq-ck">
+<span class="eqno">(1)<a class="headerlink" href="#equation-eq-ck" title="Link to this equation"></a></span>\[\label{eq-ck}
+    \begin{split}
+        c_k &amp;= \frac{\boldsymbol{S}_A\boldsymbol{C}_{\alpha, \alpha}\boldsymbol{S}_B^T}{\sqrt{\left(\boldsymbol{S}_A\boldsymbol{C}_{\alpha, \alpha}\boldsymbol{S}_A^T\right)\left(\boldsymbol{S}_B\boldsymbol{C}_{\alpha, \alpha}\boldsymbol{S}_B^T\right)}},
+    \end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{S}_A\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{S}_B\)</span> are
+respectively the sensitivity (row) vectors each of length
+<span class="math notranslate nohighlight">\(M=G\times P\)</span>, where <span class="math notranslate nohighlight">\(P\)</span> represents the total number of
+(unique) nuclide reaction pairs in the system and application, <span class="math notranslate nohighlight">\(G\)</span>
+is the number of energy groups, and
+<span class="math notranslate nohighlight">\(\boldsymbol{C}_{\alpha, \alpha}\)</span> is the nuclear data covariance
+matrix (with shape <span class="math notranslate nohighlight">\(M\times M\)</span>) defined by</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        \left(\boldsymbol{C}_{\alpha,\alpha}\right)_{ij} &amp;= \text{Cov}\left(\sigma_i, \sigma_j\right)\nonumber
+    \end{split},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\sigma_i\)</span> represents a single group-wise cross section for
+a given nuclide-reaction pair and is the smallest unit of nuclear data
+in a multigroup library. The denominator serves as a normalization
+factor to ensure that if <span class="math notranslate nohighlight">\(\boldsymbol{S}_A=\boldsymbol{S}_B\)</span> when
+<span class="math notranslate nohighlight">\(c_k=1\)</span>, and if <span class="math notranslate nohighlight">\(\boldsymbol{S}_A=-\boldsymbol{S}_B\)</span>, then
+<span class="math notranslate nohighlight">\(c_k=-1\)</span>. This definition is aesthetically similar to that of
+Pearson’s correlation coefficient between two random variables <span class="math notranslate nohighlight">\(X\)</span>
+and <span class="math notranslate nohighlight">\(Y\)</span>, as in Eq. <a class="reference internal" href="#equation-eq-pearson">(2)</a>. The only
+caveat is that the nuclear data covariance matrices can sometimes be
+problematic <span id="id12">[<a class="reference internal" href="#id51" title="Don Mueller, Bradley T Rearden, and Daniel F Hollenbach. Application of the SCALE TSUNAMI Tools for the Validation of Criticality Safety Calculations Involving $^233$U. 2 2009. URL: https://www.osti.gov/biblio/950002, doi:10.2172/950002.">MRH09</a>]</span> and lead to nonphysical
+results unless certain heuristic rules are applied (i.e., those in the
+<span class="math notranslate nohighlight">\(\texttt{cov\_fix}\)</span> option) <span id="id13">[<a class="reference internal" href="#id46" title="William Wieselquist and Robert Alexander Lefebvre. SCALE 6.3.1 User Manual. 2 2023. URL: https://www.osti.gov/biblio/1959594, doi:10.2172/1959594.">WL23</a>]</span>.
+Furthermore there are concerns about the presence of unevaluated
+cross-section covariances and their impact on
+similarity <span id="id14">[<a class="reference internal" href="#id51" title="Don Mueller, Bradley T Rearden, and Daniel F Hollenbach. Application of the SCALE TSUNAMI Tools for the Validation of Criticality Safety Calculations Involving $^233$U. 2 2009. URL: https://www.osti.gov/biblio/950002, doi:10.2172/950002.">MRH09</a>]</span>.</p>
+</section>
+</section>
+<section id="bias-estimation-and-acceptance-criteria">
+<h3>Bias Estimation and Acceptance Criteria<a class="headerlink" href="#bias-estimation-and-acceptance-criteria" title="Link to this heading"></a></h3>
+<p>When estimating the computational bias using techniques like the
+Generalized Linear Least Squares method (GLLSM), or other bias
+estimation tools with similarity parameters like <span class="math notranslate nohighlight">\(c_k\)</span>, a cutoff
+is generally chosen for the similarity index below which experiments are
+not included in the bias estimation. From an intuitive perspective, it
+is unreasonable to expect that experiments that are very dissimilar to
+the application would provide a useful estimation of the bias, so a
+cutoff of some sort is necessary. For thermal systems, parametric
+studies have been performed over the cutoff, and the cutoffs that were
+found to minimize the bias error were
+identified <span id="id15">[<a class="reference internal" href="#id36" title="Bryan L Broadhead, Bradley T Rearden, CM Hopper, JJ Wagschal, and CV Parks. Sensitivity- and Uncertainty-Based Criticality Safety Validation Techniques. Nuclear Science and Engineering, 146(3):340–366, 2004.">BRH+04</a>]</span>. In addition, the
+number of experiments needed to obtain a given confidence in the
+estimated bias was also explored. From these considerations, a
+<span class="math notranslate nohighlight">\(c_k\)</span> cutoff of <span class="math notranslate nohighlight">\(0.9\)</span> was chosen as a general
+recommendation <span id="id16">[<a class="reference internal" href="#id36" title="Bryan L Broadhead, Bradley T Rearden, CM Hopper, JJ Wagschal, and CV Parks. Sensitivity- and Uncertainty-Based Criticality Safety Validation Techniques. Nuclear Science and Engineering, 146(3):340–366, 2004.">BRH+04</a>]</span> and is
+commonly used in regulatory
+guidance, <span id="id17">[<a class="reference internal" href="#id52" title="John M Scaglione, Don E Mueller, and John C Wagner. An Approach for Validating Actinide and Fission Product Burnup Credit Criticality Safety Analyses: Criticality (k$_eff$) Predictions. Nuclear Technology, 188(3):266–279, 2014.">SMW14</a>]</span> but lower <span class="math notranslate nohighlight">\(c_k\)</span>
+cutoffs can be used, although they require more experiments to achieve
+the same confidence in the estimated bias. These criteria are a general
+heuristic, and optimal <span class="math notranslate nohighlight">\(c_k\)</span> cutoffs depend on the physical
+parameters of the system and the chosen validation suite as well.</p>
+</section>
+</section>
+<section id="practical-issues-with-the-application-of-similarity-indices">
+<h2>Practical Issues with the Application of Similarity Indices<a class="headerlink" href="#practical-issues-with-the-application-of-similarity-indices" title="Link to this heading"></a></h2>
+<p>For many low-enriched, light water applications, the prescriptive
+<span class="math notranslate nohighlight">\(c_k\geq 0.9\)</span> is not prohibitive, and it allows the practitioner
+sufficient flexibility when selecting a suite of experiments for code
+validation. However, the recent interest in high-assay low-enriched
+uranium (HALEU) has required designing systems (mainly for
+transportation) for which there is a general lack of applicable
+experiments <span id="id18">[<a class="reference internal" href="#id37" title="Lisa Fassino, Mathieu N Dupont, Iyad Al-Qasir, William A Wieselquist, and William BJ Marshall. Current State of Benchmark Applicability for Commercial-Scale HALEU Fuel Transport. 2024. URL: https://www.nrc.gov/docs/ML2410/ML24107A030.pdf.">FDAQ+24</a>]</span>. For these
+applications, practitioners are required to make an estimation of the
+computational bias, despite having few or no experiments with
+<span class="math notranslate nohighlight">\(c_k\geq 0.9\)</span>. As discussed, there is a complex relationship
+between the <span class="math notranslate nohighlight">\(c_k\)</span> of included experiments, the number of included
+experiments, and the quality of the estimated computational bias, so it
+is not immediately clear how to select experiment suites in these cases.
+Can practitioners lower the <span class="math notranslate nohighlight">\(c_k\)</span> threshold to get more applicable
+experiments to achieve a better estimate of the bias, or would including
+dissimilar experiments provide a poor estimate of the bias and/or
+violate the assumptions of the bias trending method? Is the heuristic
+guidance for the <span class="math notranslate nohighlight">\(c_k\)</span> threshold even applicable in this case?</p>
+<p>To address these questions, a better understanding of how the underlying
+nuclear data influences the calculated <span class="math notranslate nohighlight">\(c_k\)</span> could be useful.
+Broadhead et al. provide a means for calculating the contributions to
+<span class="math notranslate nohighlight">\(c_k\)</span> on a nuclide- and reaction-specific basis, which can be
+helpful when determining which nuclides and reactions are driving
+similarity or dissimilarity. Examination of these contributions can be
+descriptive and can help inform experiment design because relevant
+dissimilar isotopes and reactions can be readily identified. As an
+exploratory effort, other ways of visually representing the
+contributions to <span class="math notranslate nohighlight">\(c_k\)</span> were explored.</p>
+</section>
+<section id="a-correlation-based-approach">
+<span id="sec-a-correlation-based-approach"></span><h2>A Correlation Based Approach<a class="headerlink" href="#a-correlation-based-approach" title="Link to this heading"></a></h2>
+<p>To aid in understanding the contributions of individual sensitivities
+and nuclear data uncertainties necessary in the computation of Eq.
+<a class="reference external" href="#eq-ck">[eq-ck]</a>, visualization tools can be used to graphically
+inspect the contributors to the integral value. This approach would
+allow practitioners to interpret the similarity between two systems as
+the degree to which they are correlated and would allow outliers to be
+easily identified. In addition, other traditional statistical measures
+of correlation could be used to asses similarity, such as the Spearman
+or Kendall rank correlation coefficient, which give different weights to
+various aspects of the constituent datasets, and they could also be
+useful as similarity indices, though these applications are not explored
+in this work.</p>
+<section id="the-correlation-coefficient">
+<h3>The Correlation Coefficient<a class="headerlink" href="#the-correlation-coefficient" title="Link to this heading"></a></h3>
+<section id="pearsons-coefficient">
+<h4>Pearson’s Coefficient<a class="headerlink" href="#pearsons-coefficient" title="Link to this heading"></a></h4>
+<p>The Pearson correlation coefficient between two random variables
+<span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> is given by</p>
+<div class="math notranslate nohighlight" id="equation-eq-pearson">
+<span class="eqno">(2)<a class="headerlink" href="#equation-eq-pearson" title="Link to this equation"></a></span>\[\label{eq-pearson}
+    \begin{split}
+        \rho_{X,Y} = \frac{\text{Cov}\left(X, Y\right)}{\sqrt{\text{Var}\left(X\right)\text{Var}\left(Y\right)}}
+    \end{split}.\]</div>
+<p>For a sample of a discrete number (<span class="math notranslate nohighlight">\(N\)</span>) of points
+<span class="math notranslate nohighlight">\((x_i,y_i)\)</span>, the sample Pearson correlation coefficient,
+<span class="math notranslate nohighlight">\(r_{xy}\)</span> may be computed using the sample variances/covariances
+using</p>
+<div class="math notranslate nohighlight" id="equation-eq-sample-pearson">
+<span class="eqno">(3)<a class="headerlink" href="#equation-eq-sample-pearson" title="Link to this equation"></a></span>\[\label{eq-sample-pearson}
+    \begin{split}
+        r_{xy} &amp;= \frac{\sum_{i=1}^N\left(x_i-\overline{x}\right)\left(y_i-\overline{y}\right)}{\sqrt{\left(\sum_{i=1}^N\left(x_i - \overline{x}\right)^2\right)\left(\sum_{i=1}^N\left(y_i - \overline{y}\right)^2\right)}}
+    \end{split},\]</div>
+<p>which was used in both the isotope-wise and isotope-reaction–wise
+calculations. Although common, this estimator often provides a biased
+estimate of the (population) correlation coefficient. The sampling
+distribution of this sample statistic is complicated, involving the
+gamma function and hypergeometric
+functions, <span id="id19">[<a class="reference internal" href="#id48" title="Harold Hotelling. The Impact of RA Fisher on Statistics. Journal of the American Statistical Association, 46(253):35–46, 1951.">Hot51</a>, <a class="reference internal" href="#id49" title="Harold Hotelling. New Light on the Correlation Coefficient and Its Transforms. Journal of the Royal Statistical Society. Series B (Methodological), 15(2):193–232, 1953.">Hot53</a>]</span> and
+it often results in skewed distributions that can be corrected for with
+sophisticated estimators <span id="id20">[<a class="reference internal" href="#id47" title="Timo Gnambs. A Brief Note on the Standard Error of the Pearson Correlation. Collabra: Psychology, 2023.">Gna23</a>]</span>. However,
+the effect of the bias is not significant with a large number of
+samples. This sampling distribution can also be used to derive an
+estimator for the standard deviation of the (estimated) Pearson
+correlation coefficient, <span class="math notranslate nohighlight">\(\sigma_r\)</span>, for which an approximate
+expression <span id="id21">[<a class="reference internal" href="#id47" title="Timo Gnambs. A Brief Note on the Standard Error of the Pearson Correlation. Collabra: Psychology, 2023.">Gna23</a>]</span> is given by</p>
+<div class="math notranslate nohighlight" id="equation-eq-pearson-stddev">
+<span class="eqno">(4)<a class="headerlink" href="#equation-eq-pearson-stddev" title="Link to this equation"></a></span>\[\label{eq-pearson-stddev}
+    \sigma_r\approx \frac{1-\rho^2}{\sqrt{N-3}}.\]</div>
+</section>
+<section id="spearmans-coefficient">
+<h4>Spearman’s Coefficient<a class="headerlink" href="#spearmans-coefficient" title="Link to this heading"></a></h4>
+<p>Spearman’s correlation coefficient is the Pearson correlation
+coefficient of the rank variables. Explicitly,</p>
+<div class="math notranslate nohighlight">
+\[r_s = \rho_{R(X), R(Y)} = \frac{\text{Cov}\left(R(X), R(Y)\right)}{\sqrt{\text{Var}\left(R(X)\right)\text{Var}\left(R(Y)\right)}}\nonumber.\]</div>
+<p>For a discrete sample, the data-points <span class="math notranslate nohighlight">\(x_i\)</span> and <span class="math notranslate nohighlight">\(y_i\)</span> are
+first ranked (i.e., sorted by magnitude), and then Eq.
+<a class="reference internal" href="#equation-eq-sample-pearson">(3)</a> is used to compute the
+sample Spearman correlation coefficient. This measure of correlation is
+nonparametric, and it assesses the presence of <em>any</em> relationship
+between two variables that can be expressed in terms of a monotonic
+function, whereas Pearson’s correlation coefficient only expresses
+linear relationships between the data. This measure of correlation is
+useful for measuring nonlinear relationships between data and/or for
+data with large outliers: it gives less weight than does Pearson’s
+coefficient because each outlier is limited to its rank.</p>
+</section>
+</section>
+<section id="correlating-the-sigma-k-contributions">
+<h3>Correlating the <span class="math notranslate nohighlight">\(\sigma_k\)</span> Contributions<a class="headerlink" href="#correlating-the-sigma-k-contributions" title="Link to this heading"></a></h3>
+<p>From a conceptual level, <span class="math notranslate nohighlight">\(c_k\)</span> is a measure of the degree to which
+the contributions to the nuclear data–induced uncertainty (on a
+nuclide-reaction and group-wise basis) between two systems are similar,
+so it was thought that the appropriate bivariate dataset (whose Pearson
+correlation coefficient would equal the corresponding <span class="math notranslate nohighlight">\(c_k\)</span>)
+should be the nuclide-reaction group-wise nuclear data uncertainty
+contributions. Because of the difficulty of extracting group-wise
+nuclear covariance data from AMPX
+libraries, <span id="id22">[<a class="reference internal" href="#id44" title="D Wiarda, ME Dunn, NM Greene, ML Williams, C Celik, and LM Petrie. AMPX-6: A Modular Code System for Processing ENDF/B. ORNL/TM-2016/43, 2016.">WDG+16</a>]</span> first nuclide-wise and then
+nuclide reaction– wise contributions were considered.</p>
+<section id="defining-the-sigma-k-2-contributions">
+<h4>Defining the <span class="math notranslate nohighlight">\(\sigma_k^2\)</span> Contributions<a class="headerlink" href="#defining-the-sigma-k-2-contributions" title="Link to this heading"></a></h4>
+<p>The total nuclear data–induced variance in the criticality eigenvalue
+<span class="math notranslate nohighlight">\(\sigma_k^2\)</span> for a system A is given by</p>
+<div class="math notranslate nohighlight" id="equation-eq-sigmaksq">
+<span class="eqno">(5)<a class="headerlink" href="#equation-eq-sigmaksq" title="Link to this equation"></a></span>\[\label{eq-sigmaksq}
+\begin{split}
+     \sigma_k^2 = \boldsymbol{S}_A \boldsymbol{C}_{\alpha,\alpha}\boldsymbol{S}_A^T\nonumber
+ \end{split}.\]</div>
+<p>The total nuclear data induced variance can be divided into
+contributions from each cross-section covariance via</p>
+<div class="math notranslate nohighlight" id="equation-eq-sigmaksq-nuclide-reaction">
+<span class="eqno">(6)<a class="headerlink" href="#equation-eq-sigmaksq-nuclide-reaction" title="Link to this equation"></a></span>\[\label{eq-sigmaksq-nuclide-reaction}
+    \begin{split}
+        \sigma_{k^{i,j}_{x,y}}^2 &amp;= \boldsymbol{S}_{k_{x}^{i}} \boldsymbol{C}_{\alpha_x^k,\alpha_y^j}\boldsymbol{S}_{k_y^j}^T
+    \end{split},\]</div>
+<p>where <span class="math notranslate nohighlight">\(i, j\)</span> are varied over all isotopes, and <span class="math notranslate nohighlight">\(x,y\)</span> are
+varied over all reactions. <span class="math notranslate nohighlight">\(\sigma_{k_{x,y}^{ij}}^2\)</span> is read as
+“the contribution to the variance in <span class="math notranslate nohighlight">\(k\)</span> due to the cross section
+covariance between <span class="math notranslate nohighlight">\(\alpha_x^i\)</span> and <span class="math notranslate nohighlight">\(\alpha_y^j\)</span> (i.e.,
+nuclide <span class="math notranslate nohighlight">\(i\)</span> reaction <span class="math notranslate nohighlight">\(x\)</span> and nuclide <span class="math notranslate nohighlight">\(j\)</span> reaction
+<span class="math notranslate nohighlight">\(y\)</span>.” These nuclide reaction–wise contributions to the nuclear
+data–induced variance in <span class="math notranslate nohighlight">\(k\)</span> can be summed to produce the total
+variance in <span class="math notranslate nohighlight">\(k\)</span>:</p>
+<div class="math notranslate nohighlight" id="equation-eq-variance-k-sum">
+<span class="eqno">(7)<a class="headerlink" href="#equation-eq-variance-k-sum" title="Link to this equation"></a></span>\[\label{eq-variance-k-sum}
+    \sigma_k^2 = \sum_{i,j,x,y}\sigma_{k^{i,j}_{x,y}}^2,\]</div>
+<p>where the number of cross-section covariances is <span class="math notranslate nohighlight">\(P^2\equiv N\)</span>.
+Now, because <span class="math notranslate nohighlight">\(\boldsymbol{C}_{\alpha,\alpha}\)</span> is positive
+semi-definite by virtue of being a correlation matrix, the quantity
+<span class="math notranslate nohighlight">\(\sigma_k^2 \geq 0\)</span>, as expected of a variance. In addition, the
+contribution to the nuclear data–induced variance from self-covariances
+(i.e., covariance between a nuclide reaction and itself) is also
+nonegative, because <span class="math notranslate nohighlight">\(\boldsymbol{C}_{\alpha_x^k, \alpha_x^k}\)</span> is a
+principle submatrix of <span class="math notranslate nohighlight">\(\boldsymbol{C}_{\alpha, \alpha}\)</span> and is
+therefore positive semi-definite, as well. This is not necessarily true
+for cross covariances, where <span class="math notranslate nohighlight">\(\alpha_x^k\neq \alpha_y^j\)</span>, so they
+may be and often are
+<em>negative</em> <span id="id23">[<a class="reference internal" href="#id53" title="BL Broadhead. Sensitivity and Uncertainty Analyses Applied to Criticality Safety Validation: Methods Development. US Nuclear Regulatory Commission, 1999.">Bro99</a>]</span>. Strictly
+speaking, because they are possibly negative, these contributions to the
+variance cannot be viewed as variances, even though they are denoted by
+<span class="math notranslate nohighlight">\(\sigma_{k_{x,y}^{i,j}}^2\)</span>. Instead, they are more akin to
+covariances, and they express anitcorrelations that tend to lower the
+overall nuclear data–induced variance.</p>
+</section>
+<section id="defining-the-sigma-k-contributions">
+<h4>Defining the <span class="math notranslate nohighlight">\(\sigma_k\)</span> Contributions<a class="headerlink" href="#defining-the-sigma-k-contributions" title="Link to this heading"></a></h4>
+<p>The total nuclear data–induced standard deviation in the criticality
+eigenvalue can be easily calculated by taking the square root of the
+variance:</p>
+<div class="math notranslate nohighlight" id="equation-eq-sigmak">
+<span class="eqno">(8)<a class="headerlink" href="#equation-eq-sigmak" title="Link to this equation"></a></span>\[\label{eq-sigmak}
+    \begin{split}
+        \sigma_k &amp;= \sqrt{\sigma_k^2} = \sqrt{\boldsymbol{S}_A \boldsymbol{C}_{\alpha,\alpha}\boldsymbol{S}_A^T}
+    \end{split}.\]</div>
+<p>Likewise, the contributions to the standard deviation can be calculated
+by taking the square root of the <span class="math notranslate nohighlight">\(\sigma_k^2\)</span> contributions:</p>
+<div class="math notranslate nohighlight" id="equation-eq-sigmak-nuclide-reaction">
+<span class="eqno">(9)<a class="headerlink" href="#equation-eq-sigmak-nuclide-reaction" title="Link to this equation"></a></span>\[\label{eq-sigmak-nuclide-reaction}
+    \begin{split}
+        \sigma_{k^{i,j}_{x,y}} &amp;= \sqrt{\boldsymbol{S}_{k_{x}^{i}} \boldsymbol{C}_{\alpha_x^k,\alpha_y^j}\boldsymbol{S}_{k_y^j}^T}
+    \end{split},\]</div>
+<p>and the total standard deviation can be produced using usual rules for
+combining standard deviations:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        \sigma_k &amp;= \sqrt{ \sum_{i,j,x,y}\sigma_{k^{i,j}_{x,y}}^2}\nonumber
+    \end{split}.\]</div>
+<p>However, because not all <span class="math notranslate nohighlight">\(\sigma_{k^{i,j}_{x,y}}^2\)</span> are guaranteed
+to be positive, some of the <span class="math notranslate nohighlight">\(\sigma_{k^{i,j}_{x,y}}\)</span>, may be
+<em>imaginary</em>. This is no issue for the above equation, because only the
+squares of these values are summed together to calculate
+<span class="math notranslate nohighlight">\(\sigma_k\)</span>. From a physical standpoint, like their squared
+counterparts, these negative contributions to the standard deviation
+represent anticorrelations in the nuclear data that tend to decrease the
+total nuclear data–induced standard deviation. Opting to express this,
+one could define the (formally) imaginary standard deviations to be
+<em>negative</em> and could define a new rule for combining contributions—let
+<span class="math notranslate nohighlight">\(C_+= \{(i,j,x,y)\ |\ \sigma_{i,j,x,y}\geq 0\}\)</span>,
+<span class="math notranslate nohighlight">\(C_-= \{(i,j,x,y)\ |\ \sigma_{i,j,x,y}&lt; 0\}\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        \sigma_k &amp;= \sqrt{\sum_{i,j,x,y\in C_+}\left(\sigma_{k^{i,j}_{x,y}}\right)^2 - \sum_{i,j,x,y\in C_+}\left(\sigma_{k^{i,j}_{x,y}}\right)^2}\nonumber
+    \end{split}\]</div>
+<p>This is the approach used in the SAMS sequence.</p>
+</section>
+</section>
+<section id="results-and-implementation">
+<h3>Results and Implementation<a class="headerlink" href="#results-and-implementation" title="Link to this heading"></a></h3>
+<p>In the interest of creating a tool that could be used by a practitioner
+and to act as a specification for a potential future implementation in
+the SCALE TSUNAMI-IP code, a fully fledged python module was created to
+implement the correlation methods briefly described above. The code is
+available <a class="reference external" href="https://github.com/mlouis9/tsunami_ip_utils">here</a>. The
+goal was to design a tool that could easily be used by a practitioner to
+examine the contributions to similarity indices, so an interactive
+plotting framework was chosen. Plotly is a python framework for easily
+creating interactive web-based apps and is often used for
+production-level scientific visualization
+workflows <span id="id24">[<a class="reference internal" href="#id45" title="Elias Dabbas. Interactive Dashboards and Data Apps with Plotly and Dash: Harness the Power of a Fully Fledged Frontend Web Framework in Python–No JavaScript Required. Packt Publishing Ltd, 2021.">Dab21</a>]</span>.</p>
+<section id="isotope-wise">
+<h4>Isotope-Wise<a class="headerlink" href="#isotope-wise" title="Link to this heading"></a></h4>
+<p>An example of the isotope-wise contribution plots is shown in
+<a class="reference internal" href="#fig-isotope-wise-hmf-example"><span class="std std-numref">Fig. 1</span></a>. In general, an imperfect
+correspondence with the calculated correlation coefficient and the
+TSUNAMI-IP <span class="math notranslate nohighlight">\(c_k\)</span> value was observed. A subset of experiments from
+the Verified, Archived Library of Inputs and Data (VALID) in the mixed
+U/Pu thermal compound (MCT) and the highly enriched uranium fast metal
+(HMF) series were analyzed; the results are shown in
+<a class="reference internal" href="#fig-isotope-wise-hmf-comparison"><span class="std std-numref">Fig. 2</span></a> and
+<a class="reference internal" href="#fig-isotope-wise-mct-comparison"><span class="std std-numref">Fig. 3</span></a>,
+indicating good agreement for cases with large <span class="math notranslate nohighlight">\(c_k\)</span>.</p>
+<figure class="align-default" id="fig-isotope-wise-hmf-example">
+<img alt="An isotope-wise Plotly correlation plot between an experiment and application taken from the HMF series of critical experiments" src="../_images/isotope_wise_HMF_example.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">An isotope-wise Plotly correlation plot between an experiment and
+application taken from the HMF series of critical experiments</span><a class="headerlink" href="#fig-isotope-wise-hmf-example" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="figures-container">
+    <div class="figure">
+        <img src="../_static/media/isotope_wise_HMF_calculated.png" alt="Calculated">
+        <figcaption>Calculated</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_wise_HMF_tsunami_ip.png" alt="TSUNAMI-IP">
+        <figcaption>TSUNAMI-IP</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_wise_HMF_percent_diff.png" alt="Percent Difference">
+        <figcaption>Percent Difference</figcaption>
+    </div>
+ </div><figure class="align-default" id="fig-isotope-wise-hmf-comparison">
+<img alt="../_images/transparent.jpg" src="../_images/transparent.jpg" />
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP <span class="math notranslate nohighlight">\(c_k\)</span> values for the HMF series of
+critical experiments <span id="id25">[<a class="reference internal" href="#id54" title="J Bess. International handbook of evaluated criticality safety benchmark experiments (icsbep). Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95), 2019.">Bes19</a>]</span></span><a class="headerlink" href="#fig-isotope-wise-hmf-comparison" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="figures-container">
+    <div class="figure">
+        <img src="../_static/media/isotope_wise_MCT_calculated.png" alt="Calculated">
+        <figcaption>Calculated</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_wise_MCT_tsunami_ip.png" alt="TSUNAMI-IP">
+        <figcaption>TSUNAMI-IP</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_wise_MCT_percent_diff.png" alt="Percent Difference">
+        <figcaption>Percent Difference</figcaption>
+    </div>
+ </div><figure class="align-default" id="fig-isotope-wise-mct-comparison">
+<img alt="../_images/transparent.jpg" src="../_images/transparent.jpg" />
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Isotope-wise comparison of calculated correlation coefficients and TSUNAMI-IP <span class="math notranslate nohighlight">\(c_k\)</span> values for the MCT series of
+critical experiments <span id="id26">[<a class="reference internal" href="#id54" title="J Bess. International handbook of evaluated criticality safety benchmark experiments (icsbep). Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95), 2019.">Bes19</a>]</span></span><a class="headerlink" href="#fig-isotope-wise-mct-comparison" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="isotope-reactionwise">
+<h4>Isotope-Reaction–Wise<a class="headerlink" href="#isotope-reactionwise" title="Link to this heading"></a></h4>
+<p>For reactions, the contribution correlation plots are as shown in
+<a class="reference internal" href="#fig-isotope-reaction-wise-hmf-example"><span class="std std-numref">Fig. 4</span></a>. Again, several test
+cases were analyzed, and the results showing the difference in the
+calculated and TSUNAMI-IP <span class="math notranslate nohighlight">\(c_k\)</span> values are shown in
+<a class="reference internal" href="#fig-isotope-reaction-wise-hmf-comparison"><span class="std std-numref">Fig. 5</span></a>
+and
+<a class="reference internal" href="#fig-isotope-reaction-wise-mct-comparison"><span class="std std-numref">Fig. 6</span></a>.
+The results show good agreement except for the HMF cases, in which the
+errors are as large as 20%, and are not generally correlated with
+smaller <span class="math notranslate nohighlight">\(c_k\)</span>.</p>
+<figure class="align-default" id="fig-isotope-reaction-wise-hmf-example">
+<img alt="A Reaction–wise Plotly correlation plot between an experiment and application taken from the HMF series of critical experiments" src="../_images/isotope_reaction_wise_HMF_example.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">A Reaction–wise Plotly correlation plot between an experiment and
+application taken from the HMF series of critical experiments</span><a class="headerlink" href="#fig-isotope-reaction-wise-hmf-example" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="figures-container">
+    <div class="figure">
+        <img src="../_static/media/isotope_reaction_wise_HMF_calculated.png" alt="Calculated">
+        <figcaption>Calculated</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_reaction_wise_HMF_tsunami_ip.png" alt="TSUNAMI-IP">
+        <figcaption>TSUNAMI-IP</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_reaction_wise_HMF_percent_diff.png" alt="Percent Difference">
+        <figcaption>Percent Difference</figcaption>
+    </div>
+ </div><figure class="align-default" id="fig-isotope-reaction-wise-hmf-comparison">
+<img alt="../_images/transparent.jpg" src="../_images/transparent.jpg" />
+<figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP <span class="math notranslate nohighlight">\(c_k\)</span> values for the HMF series of
+critical experiments <span id="id27">[<a class="reference internal" href="#id54" title="J Bess. International handbook of evaluated criticality safety benchmark experiments (icsbep). Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95), 2019.">Bes19</a>]</span></span><a class="headerlink" href="#fig-isotope-reaction-wise-hmf-comparison" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="figures-container">
+    <div class="figure">
+        <img src="../_static/media/isotope_reaction_wise_MCT_calculated.png" alt="Calculated">
+        <figcaption>Calculated</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_reaction_wise_MCT_tsunami_ip.png" alt="TSUNAMI-IP">
+        <figcaption>TSUNAMI-IP</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/isotope_reaction_wise_MCT_percent_diff.png" alt="Percent Difference">
+        <figcaption>Percent Difference</figcaption>
+    </div>
+ </div><figure class="align-default" id="fig-isotope-reaction-wise-mct-comparison">
+<img alt="../_images/transparent.jpg" src="../_images/transparent.jpg" />
+<figcaption>
+<p><span class="caption-number">Fig. 6 </span><span class="caption-text">Isotope-reaction-wise comparison of calculated correlation coefficients and TSUNAMI-IP <span class="math notranslate nohighlight">\(c_k\)</span> values for the MCT series of
+critical experiments <span id="id28">[<a class="reference internal" href="#id54" title="J Bess. International handbook of evaluated criticality safety benchmark experiments (icsbep). Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95), 2019.">Bes19</a>]</span></span><a class="headerlink" href="#fig-isotope-reaction-wise-mct-comparison" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+</section>
+<section id="consistent-random-variables">
+<h2>Consistent Random Variables<a class="headerlink" href="#consistent-random-variables" title="Link to this heading"></a></h2>
+<p>To find a method that better agrees with the calculated <span class="math notranslate nohighlight">\(c_k\)</span>
+value, a set of consistent random variables was selected with a
+correlation coefficient calculated with Eq.
+<a class="reference internal" href="#equation-eq-pearson">(2)</a>. One identified pair is given below:</p>
+<div class="math notranslate nohighlight" id="equation-eq-variable-definition">
+<span class="eqno">(10)<a class="headerlink" href="#equation-eq-variable-definition" title="Link to this equation"></a></span>\[\begin{split}\label{eq-variable-definition}
+    \begin{split}
+        X &amp;= \boldsymbol{S}_A\cdot \boldsymbol{\sigma}\equiv \sum_{i=1}^NS_{A,i}\sigma_i\\
+        Y &amp;= \boldsymbol{S}_B\cdot \boldsymbol{\sigma}\equiv \sum_{i=1}^NS_{B,i}\sigma_i,
+    \end{split}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{\sigma}\)</span> is a row vector of length <span class="math notranslate nohighlight">\(M\)</span>
+representing the underlying nuclear data <em>treated as a random variable</em>,
+and <span class="math notranslate nohighlight">\(\boldsymbol{S}_A\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{S}_B\)</span> are row
+vectors containing the nuclide reaction and group-wise sensitivities for
+systems <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>. Defining random variables in this way
+does not require Eq. <a class="reference internal" href="#equation-eq-sample-pearson">(3)</a>
+because the underlying random variables are known, and Eq.
+<a class="reference internal" href="#equation-eq-pearson">(2)</a> can be used instead. This way, the
+formula for the correlation coefficient does not explicitly depend on
+the sample size <span class="math notranslate nohighlight">\(N\)</span> as in the previous case. First note that</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+    \text{Var}\left(X\right) &amp;= \text{Var}\left(\sum_{i=1}^N S_{A,i} \sigma_i\right)\nonumber\\
+    &amp;= \sum_{i,j=1}^N S_{A,i} S_{A,j} \text{Cov}\left(\sigma_i, \sigma_j\right)\hspace{5mm}\text{by Eq.}~\eqref{eq-variance-linear-combination}
+\end{split}\end{split}\]</div>
+<p>Now, because <span class="math notranslate nohighlight">\(\sigma_i\)</span> and <span class="math notranslate nohighlight">\(\sigma_j\)</span> represent the
+group-wise cross section for a given nuclide reaction pair treated as a
+random variable, the following identification is possible:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        \left(\boldsymbol{C}_{\alpha,\alpha}\right)_{ij}&amp;= \text{Cov}\left(\sigma_i, \sigma_j\right)\nonumber
+    \end{split}.\]</div>
+<p>The above expression for <span class="math notranslate nohighlight">\(\text{Var}\left(X\right)\)</span> can be written
+more succinctly as a matrix vector product with the covariance matrix:
+<span class="math notranslate nohighlight">\(\boldsymbol{C}_{\alpha\alpha}\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        \sum_{i,j=1}^NS_{A,i}S_{A,j}\text{Cov}\left(\sigma_i, \sigma_j\right)&amp;= \boldsymbol{S}_A \boldsymbol{C}_{\alpha,\alpha}\boldsymbol{S}_A^T\nonumber
+    \end{split}\]</div>
+<p>Likewise,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        \text{Var}\left(Y\right) &amp;= \boldsymbol{S}_B \boldsymbol{C}_{\alpha,\alpha}\boldsymbol{S}_B^T\nonumber
+    \end{split},\]</div>
+<p>and</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+        \text{Cov}\left(X, Y\right) &amp;= \text{Cov}\left(\sum_{i=1}^NS_{A,i}\sigma_i, \sum_{i=1}^NS_{B,i}\sigma_i\right)\nonumber\\
+        &amp;= \sum_{i,j=1}^NS_{A,i}S_{B,j}\text{Cov}\left(\sigma_i, \sigma_j\right)\\
+        &amp;= \boldsymbol{S}_A \boldsymbol{C}_{\alpha,\alpha}\boldsymbol{S}_B^T.
+    \end{split}\end{split}\]</div>
+<p>Substituting the above expressions into Eq.
+<a class="reference internal" href="#equation-eq-pearson">(2)</a> gives</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+        \frac{\boldsymbol{S}_A\boldsymbol{C}_{\alpha, \alpha}\boldsymbol{S}_B^T}{\sqrt{\left(\boldsymbol{S}_A\boldsymbol{C}_{\alpha, \alpha}\boldsymbol{S}_A^T\right)\left(\boldsymbol{S}_B\boldsymbol{C}_{\alpha, \alpha}\boldsymbol{S}_B^T\right)}}&amp;\equiv c_k\nonumber
+    \end{split}.\]</div>
+<section id="relation-to-the-bias">
+<span id="sec-relation-to-the-bias"></span><h3>Relation to the Bias<a class="headerlink" href="#relation-to-the-bias" title="Link to this heading"></a></h3>
+<p>Note that the variance and covariance of a random variable are invariant
+to constant shifts, as shown in Eq.
+<a class="reference internal" href="#equation-eq-shift-property-variance">(13)</a>, so the
+following pairs of random variables have the same correlation
+coefficient:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+        X&amp;= \boldsymbol{S}_A\cdot \boldsymbol{\sigma} - \boldsymbol{S}_A\cdot \boldsymbol{\overline{\sigma}}\nonumber\\
+        &amp;= \boldsymbol{S}_A\cdot \left(\boldsymbol{\sigma} - \boldsymbol{\overline{\sigma}}\right)\\
+        &amp;= \boldsymbol{S}_A\cdot \boldsymbol{\Delta \sigma}\\
+        Y &amp;= \boldsymbol{S}_B\cdot \boldsymbol{\Delta \sigma},
+    \end{split}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol{\Delta \sigma}\)</span> is a vector containing the
+differences of the cross sections from their mean values (e.g., those
+reported in the multigroup library used by SCALE). In this form, it is
+more apparent that random variables <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> represent
+the perturbation in <span class="math notranslate nohighlight">\(k\)</span> as a result of random perturbations in the
+underlying cross-section data. That is, <span class="math notranslate nohighlight">\(X=\Delta k_A\)</span> and
+<span class="math notranslate nohighlight">\(Y=\Delta k_B\)</span>, if they are viewed as random variables. This can
+be taken further by adding the mean <span class="math notranslate nohighlight">\(k_{\text{eff}}\)</span> reported by a
+transport code using the mean cross sections to both <span class="math notranslate nohighlight">\(X\)</span> and
+<span class="math notranslate nohighlight">\(Y\)</span>, because it is simply a constant and does not change the
+correlation coefficient.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+        X&amp;= \overline{k}_A +\boldsymbol{S}_A\cdot \boldsymbol{\Delta \sigma}= \overline{k}_A + \Delta k_A\equiv k_{A,\text{calculated}}\nonumber\\
+        Y &amp;= \overline{k}_B + \boldsymbol{S}_B\cdot \boldsymbol{\Delta \sigma}= \overline{k}_B + \Delta k_B\equiv k_{B,\text{calculated}}.
+    \end{split}\end{split}\]</div>
+<p>In other words, the random variables <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> represent
+the <span class="math notranslate nohighlight">\(k_{\text{eff}}\)</span> of system <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> if they are
+treated as random variables (where the variation comes from variations
+in the underlying cross-section data). As a final step, assuming that
+for system <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>, a <em>true</em> <span class="math notranslate nohighlight">\(k_{\text{eff}}\)</span>
+value exists, it can be subtracted from <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> because,
+again, it is simply a constant:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+        X&amp;= k_{A,\text{calculated}} - k_{A,\text{expected}}\equiv \text{Bias}_A\nonumber\\
+        Y&amp;= k_{B,\text{calculated}} - k_{B,\text{expected}}\equiv \text{Bias}_B.
+    \end{split}\end{split}\]</div>
+<p>This interpretation makes it clear that the reported correlation
+coefficient <span class="math notranslate nohighlight">\(c_k\)</span> represents the correlation of the biases between
+the two systems if viewed as random variables. This should be expected
+because, if the underlying nuclear data change for a given nuclide
+reaction pair as caused by measurement uncertainty (represented by
+<span class="math notranslate nohighlight">\(\boldsymbol{\sigma}\)</span> being treated as a random variable), then it
+will induce similar changes in the bias of system <span class="math notranslate nohighlight">\(A\)</span> and system
+<span class="math notranslate nohighlight">\(B\)</span> if they are correlated (if they depend similarly on the
+cross-section uncertainties), but this will not occur if the cause is
+not measurement uncertainty.</p>
+</section>
+<section id="implementation">
+<h3>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h3>
+<p>To compute the correlation coefficient using the two random variables
+defined above, it is necessary to sample from them and then compute the
+sample Pearson correlation coefficient given in Eq.
+<a class="reference internal" href="#equation-eq-sample-pearson">(3)</a>. SCALE’s sampler utility
+has the capability to randomly sample cross sections consistent with a
+specified nuclear data and nuclear data covariance library. This utility
+reads a set of statically generated cross-section perturbation factors
+(1,000 samples total in SCALE 6.3
+libraries <span id="id29">[<a class="reference internal" href="#id46" title="William Wieselquist and Robert Alexander Lefebvre. SCALE 6.3.1 User Manual. 2 2023. URL: https://www.osti.gov/biblio/1959594, doi:10.2172/1959594.">WL23</a>]</span>) and generates a perturbed
+cross-section library which can then be read using standard AMPX
+processing utilities <span id="id30">[<a class="reference internal" href="#id46" title="William Wieselquist and Robert Alexander Lefebvre. SCALE 6.3.1 User Manual. 2 2023. URL: https://www.osti.gov/biblio/1959594, doi:10.2172/1959594.">WL23</a>]</span>. To avoid having to
+read and write perturbed cross-section libraries repeatedly for
+different experiment application pairs, all of the perturbed libraries
+were generated, read, and then cached as <code class="docutils literal notranslate"><span class="pre">.pkl</span></code> files. For a given
+experiment application pair, the sensitivity data files are read,
+<span class="math notranslate nohighlight">\(\boldsymbol{S}_A\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{S}_B\)</span> are generated, and
+then the dot product is taken with a (cached) sampled perturbed
+cross-section library to generate each point in the correlation plot, as
+shown in Eq. <a class="reference internal" href="#equation-eq-variable-definition">(10)</a>.</p>
+</section>
+<section id="results">
+<span id="manual-final-results"></span><h3>Results<a class="headerlink" href="#results" title="Link to this heading"></a></h3>
+<p>An example plot is presented in <a class="reference internal" href="#fig-perturbation-example"><span class="std std-numref">Fig. 7</span></a>,
+showing near-agreement between the calculated and TSUNAMI-IP values. As
+before, the errors were calculated for a set of experiments, and the
+results are shown in
+<a class="reference internal" href="#fig-perturbation-mct-comparison"><span class="std std-numref">Fig. 9</span></a>
+and
+<a class="reference internal" href="#fig-perturbation-hmf-comparison"><span class="std std-numref">Fig. 8</span></a>.
+Despite the clean theoretical derivation in the previous section, the
+errors are <em>very</em> large (for the MCT cases, as high as 100%). The
+calculated errors are much larger than the sample standard deviation
+calculated by Eq. <a class="reference internal" href="#equation-eq-pearson-stddev">(4)</a>. For
+<span class="math notranslate nohighlight">\(N=500\)</span> and <span class="math notranslate nohighlight">\(\rho=0.8\)</span> (smaller <span class="math notranslate nohighlight">\(\rho\)</span> implies larger
+uncertainty, so <span class="math notranslate nohighlight">\(\rho=0.8\)</span> is conservative),
+<span class="math notranslate nohighlight">\(\sigma_r\approx 0.016\)</span>, which implies a 2<span class="math notranslate nohighlight">\(\sigma\)</span> percent
+difference of <span class="math notranslate nohighlight">\(\sim 4\%\)</span>, which is much smaller than the observed
+errors.</p>
+<figure class="align-default" id="fig-perturbation-example">
+<img alt="A correlation plot generated using the variables defined in Eq. :eq:`eq-variable-definition` for a given experiment application pair from the HMF series of critical experiments" src="../_images/perturbation_HMF_example.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7 </span><span class="caption-text">A correlation plot generated using the variables defined in Eq.
+<a class="reference internal" href="#equation-eq-variable-definition">(10)</a> for a given
+experiment application pair from the HMF series of critical
+experiments</span><a class="headerlink" href="#fig-perturbation-example" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="figures-container">
+    <div class="figure">
+        <img src="../_static/media/perturbation_HMF_calculated.png" alt="Calculated">
+        <figcaption>Calculated</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/perturbation_HMF_tsunami_ip.png" alt="TSUNAMI-IP">
+        <figcaption>TSUNAMI-IP</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/perturbation_HMF_percent_diff.png" alt="Percent Difference">
+        <figcaption>Percent Difference</figcaption>
+    </div>
+ </div><figure class="align-default" id="fig-perturbation-hmf-comparison">
+<img alt="../_images/transparent.jpg" src="../_images/transparent.jpg" />
+<figcaption>
+<p><span class="caption-number">Fig. 8 </span><span class="caption-text">Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP
+<span class="math notranslate nohighlight">\(c_k`\)</span> values for the HMF series of critical experiments <span id="id31">[<a class="reference internal" href="#id54" title="J Bess. International handbook of evaluated criticality safety benchmark experiments (icsbep). Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95), 2019.">Bes19</a>]</span></span><a class="headerlink" href="#fig-perturbation-hmf-comparison" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="figures-container">
+    <div class="figure">
+        <img src="../_static/media/perturbation_MCT_calculated.png" alt="Calculated">
+        <figcaption>Calculated</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/perturbation_MCT_tsunami_ip.png" alt="TSUNAMI-IP">
+        <figcaption>TSUNAMI-IP</figcaption>
+    </div>
+    <div class="figure">
+        <img src="../_static/media/perturbation_MCT_percent_diff.png" alt="Percent Difference">
+        <figcaption>Percent Difference</figcaption>
+    </div>
+ </div><figure class="align-default" id="fig-perturbation-mct-comparison">
+<img alt="../_images/transparent.jpg" src="../_images/transparent.jpg" />
+<figcaption>
+<p><span class="caption-number">Fig. 9 </span><span class="caption-text">Comparison of calculated correlation coefficients using the nuclear data sampling method (with 500 points) and TSUNAMI-IP
+<span class="math notranslate nohighlight">\(c_k\)</span> values for the MCT series of critical experiments <span id="id32">[<a class="reference internal" href="#id54" title="J Bess. International handbook of evaluated criticality safety benchmark experiments (icsbep). Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95), 2019.">Bes19</a>]</span></span><a class="headerlink" href="#fig-perturbation-mct-comparison" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="future-work">
+<h2>Future Work<a class="headerlink" href="#future-work" title="Link to this heading"></a></h2>
+<p>The uncertainty contribution correlations shown in Section
+<a class="reference external" href="#sec-a-correlation-based-approach">3</a> may have better correspondence
+with the TSUNAMI-IP <span class="math notranslate nohighlight">\(c_k\)</span> if the full energy-dependent uncertainty
+contributions are used instead. When <span class="math notranslate nohighlight">\(c_k\)</span> is computed in
+TSUNAMI-IP, the full energy-dependent data are used, and in the energy
+integration, some data about system similarity are evidently lost. In
+general, a better mathematical understanding of the contribution
+correlations is required to understand its relation to <span class="math notranslate nohighlight">\(c_k\)</span>.</p>
+<p>In addition, the inconsistency with the nuclear data sampling method
+must be understood. It is possible that there is a subtle difference in
+how <span class="math notranslate nohighlight">\(c_k\)</span> is calculated in TSUNAMI-IP that’s causing the
+discrepancy. In any case, wildly different calculated correlations in
+cases like <a class="reference internal" href="#fig-perturbation-mct-bad-example"><span class="std std-numref">Fig. 10</span></a> need to be
+understood. In this case, not only is the correlation coefficient wrong
+in magnitude, but it is even wrong in direction. Also, the scales of the
+application and experiment are <em>very</em> different. If these values are
+truly to be interpreted as <span class="math notranslate nohighlight">\(\Delta k\)</span>s (as Section
+<a class="reference external" href="#sec-relation-to-the-bias">4.1</a> would suggest), then the values of
+<span class="math notranslate nohighlight">\(\pm 1\)</span> shown in <a class="reference internal" href="#fig-perturbation-mct-bad-example"><span class="std std-numref">Fig. 10</span></a>
+are concerningly large and inconsistent with the calculated nuclear
+data–induced uncertainty of <span class="math notranslate nohighlight">\(\sim 1-5\%\)</span>.(i.e., a <span class="math notranslate nohighlight">\(\Delta k\)</span>
+of <span class="math notranslate nohighlight">\(\pm 1\)</span> from nuclear data–induced uncertainty is several orders
+of magnitude larger than the reported standard deviation, which is
+impossibly unlikely). There may also be a discrepancy with how redundant
+reactions (e.g., “total” or “capture” in SCALE) are handled in
+TSUNAMI-IP. This idea could further be evaluated by explicitly computing
+<span class="math notranslate nohighlight">\(k_{\text{eff}}\)</span> for a system and application subject to randomly
+sampled cross sections using SCALE’s sampler
+routine <span id="id33">[<a class="reference internal" href="#id46" title="William Wieselquist and Robert Alexander Lefebvre. SCALE 6.3.1 User Manual. 2 2023. URL: https://www.osti.gov/biblio/1959594, doi:10.2172/1959594.">WL23</a>]</span>.</p>
+<figure class="align-default" id="fig-perturbation-mct-bad-example">
+<img alt="An MCT case with exceptionally large disagreement with the TSUNAMI-IP calculated :math:`c_k`" src="../_images/perturbation_MCT_bad_example.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 10 </span><span class="caption-text">An MCT case with exceptionally large disagreement with the TSUNAMI-IP
+calculated <span class="math notranslate nohighlight">\(c_k\)</span></span><a class="headerlink" href="#fig-perturbation-mct-bad-example" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>If these discrepancies can be better understood and/or eliminated, then
+these methods will provide a faithful (or at least heuristic)
+interpretation of <span class="math notranslate nohighlight">\(c_k\)</span> and may be the first step on the path to
+gaining a better understanding of which experiments are truly
+appropriate for code validation.</p>
+</section>
+<section id="acknowledgments">
+<h2>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Link to this heading"></a></h2>
+<p>This work was supported in part by the US Department of Energy, Office
+of Science, Office of Workforce Development for Teachers and Scientists
+(WDTS) under the Science Undergraduate Laboratory Internships Program
+(SULI).</p>
+<div class="docutils container" id="id34">
+<div role="list" class="citation-list">
+<div class="citation" id="id54" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Bes19<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id25">1</a>,<a role="doc-backlink" href="#id26">2</a>,<a role="doc-backlink" href="#id27">3</a>,<a role="doc-backlink" href="#id28">4</a>,<a role="doc-backlink" href="#id31">5</a>,<a role="doc-backlink" href="#id32">6</a>)</span>
+<p>J Bess. International handbook of evaluated criticality safety benchmark experiments (icsbep). <em>Organization for Economic Co-operation and Development-Nuclear Energy Agency Report NEA/NSC/DOC (95)</em>, 2019.</p>
+</div>
+<div class="citation" id="id35" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BB08<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>Douglas G Bowen and Nicholas W Brown. ANSI/ANS-8.1: Nuclear Criticality Safety in Operations with Fissile Material Outside Reactors. <em>Transactions of the American Nuclear Society</em>, 99:436–436, 2008.</p>
+</div>
+<div class="citation" id="id53" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id23">Bro99</a><span class="fn-bracket">]</span></span>
+<p>BL Broadhead. <em>Sensitivity and Uncertainty Analyses Applied to Criticality Safety Validation: Methods Development</em>. US Nuclear Regulatory Commission, 1999.</p>
+</div>
+<div class="citation" id="id36" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>BRH+04<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id4">1</a>,<a role="doc-backlink" href="#id6">2</a>,<a role="doc-backlink" href="#id11">3</a>,<a role="doc-backlink" href="#id15">4</a>,<a role="doc-backlink" href="#id16">5</a>)</span>
+<p>Bryan L Broadhead, Bradley T Rearden, CM Hopper, JJ Wagschal, and CV Parks. Sensitivity- and Uncertainty-Based Criticality Safety Validation Techniques. <em>Nuclear Science and Engineering</em>, 146(3):340–366, 2004.</p>
+</div>
+<div class="citation" id="id45" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id24">Dab21</a><span class="fn-bracket">]</span></span>
+<p>Elias Dabbas. <em>Interactive Dashboards and Data Apps with Plotly and Dash: Harness the Power of a Fully Fledged Frontend Web Framework in Python–No JavaScript Required</em>. Packt Publishing Ltd, 2021.</p>
+</div>
+<div class="citation" id="id37" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id18">FDAQ+24</a><span class="fn-bracket">]</span></span>
+<p>Lisa Fassino, Mathieu N Dupont, Iyad Al-Qasir, William A Wieselquist, and William BJ Marshall. Current State of Benchmark Applicability for Commercial-Scale HALEU Fuel Transport. 2024. URL: <a class="reference external" href="https://www.nrc.gov/docs/ML2410/ML24107A030.pdf">https://www.nrc.gov/docs/ML2410/ML24107A030.pdf</a>.</p>
+</div>
+<div class="citation" id="id47" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Gna23<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id20">1</a>,<a role="doc-backlink" href="#id21">2</a>)</span>
+<p>Timo Gnambs. A Brief Note on the Standard Error of the Pearson Correlation. <em>Collabra: Psychology</em>, 2023.</p>
+</div>
+<div class="citation" id="id38" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">HC22</a><span class="fn-bracket">]</span></span>
+<p>Shane Hart and Justin Clarity. Creation of the VADER Code in SCALE. Technical Report, Oak Ridge National Laboratory (ORNL), Oak Ridge, TN (United States), 2022.</p>
+</div>
+<div class="citation" id="id48" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">Hot51</a><span class="fn-bracket">]</span></span>
+<p>Harold Hotelling. The Impact of RA Fisher on Statistics. <em>Journal of the American Statistical Association</em>, 46(253):35–46, 1951.</p>
+</div>
+<div class="citation" id="id49" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">Hot53</a><span class="fn-bracket">]</span></span>
+<p>Harold Hotelling. New Light on the Correlation Coefficient and Its Transforms. <em>Journal of the Royal Statistical Society. Series B (Methodological)</em>, 15(2):193–232, 1953.</p>
+</div>
+<div class="citation" id="id40" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">Hur48</a><span class="fn-bracket">]</span></span>
+<p>Henry Hurwitz. <em>Note on a Theory of Danger Coefficients</em>. General Electric Company, Knolls Atomic Power Laboratory, 1948.</p>
+</div>
+<div class="citation" id="id41" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">Kie09</a><span class="fn-bracket">]</span></span>
+<p>Brian C Kiedrowski. <em>Adjoint Weighting for Continuous-Energy Monte Carlo Radiation Transport</em>. 2009.</p>
+</div>
+<div class="citation" id="id42" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">MCR20</a><span class="fn-bracket">]</span></span>
+<p>William J Marshall, Justin B Clarity, and Bradley T Rearden. A Review of TSUNAMI Applications. <em>Transactions of the American Nuclear Society</em>, 2020.</p>
+</div>
+<div class="citation" id="id51" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MRH09<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id12">1</a>,<a role="doc-backlink" href="#id14">2</a>)</span>
+<p>Don Mueller, Bradley T Rearden, and Daniel F Hollenbach. Application of the SCALE TSUNAMI Tools for the Validation of Criticality Safety Calculations Involving $^233$U. 2 2009. URL: <a class="reference external" href="https://www.osti.gov/biblio/950002">https://www.osti.gov/biblio/950002</a>, <a class="reference external" href="https://doi.org/10.2172/950002">doi:10.2172/950002</a>.</p>
+</div>
+<div class="citation" id="id43" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">PR15</a><span class="fn-bracket">]</span></span>
+<p>Christopher M Perfetti and Bradley T Rearden. SCALE 6.2 Continuous-Energy TSUNAMI-3D Capabilities. Technical Report, Oak Ridge National Laboratory (ORNL), Oak Ridge, TN (United States), 2015.</p>
+</div>
+<div class="citation" id="id39" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">Per12</a><span class="fn-bracket">]</span></span>
+<p>Christopher Michael Perfetti. <em>Advanced Monte Carlo methods for Eigenvalue Sensitivity Coefficient Calculations</em>. PhD thesis, University of Michigan, 2012.</p>
+</div>
+<div class="citation" id="id50" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">SLMH21</a><span class="fn-bracket">]</span></span>
+<p>Ellen Marie Saylor, Alex Lang, William B. J. Marshall, and Robert Hall. Analysis of the 30B UF6 Container for Use with Increased Enrichment. 5 2021. URL: <a class="reference external" href="https://www.osti.gov/biblio/1797631">https://www.osti.gov/biblio/1797631</a>, <a class="reference external" href="https://doi.org/10.2172/1797631">doi:10.2172/1797631</a>.</p>
+</div>
+<div class="citation" id="id52" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id17">SMW14</a><span class="fn-bracket">]</span></span>
+<p>John M Scaglione, Don E Mueller, and John C Wagner. An Approach for Validating Actinide and Fission Product Burnup Credit Criticality Safety Analyses: Criticality (k$_eff$) Predictions. <em>Nuclear Technology</em>, 188(3):266–279, 2014.</p>
+</div>
+<div class="citation" id="id44" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id22">WDG+16</a><span class="fn-bracket">]</span></span>
+<p>D Wiarda, ME Dunn, NM Greene, ML Williams, C Celik, and LM Petrie. AMPX-6: A Modular Code System for Processing ENDF/B. <em>ORNL/TM-2016/43</em>, 2016.</p>
+</div>
+<div class="citation" id="id46" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>WL23<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id7">1</a>,<a role="doc-backlink" href="#id13">2</a>,<a role="doc-backlink" href="#id29">3</a>,<a role="doc-backlink" href="#id30">4</a>,<a role="doc-backlink" href="#id33">5</a>)</span>
+<p>William Wieselquist and Robert Alexander Lefebvre. SCALE 6.3.1 User Manual. 2 2023. URL: <a class="reference external" href="https://www.osti.gov/biblio/1959594">https://www.osti.gov/biblio/1959594</a>, <a class="reference external" href="https://doi.org/10.2172/1959594">doi:10.2172/1959594</a>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="relevant-identities">
+<h2>Relevant Identities<a class="headerlink" href="#relevant-identities" title="Link to this heading"></a></h2>
+<section id="variance-of-an-arbitrary-linear-combination-of-random-variables">
+<h3>Variance of an Arbitrary Linear Combination of Random Variables<a class="headerlink" href="#variance-of-an-arbitrary-linear-combination-of-random-variables" title="Link to this heading"></a></h3>
+<div class="math notranslate nohighlight" id="equation-eq-variance-linear-combination">
+<span class="eqno">(11)<a class="headerlink" href="#equation-eq-variance-linear-combination" title="Link to this equation"></a></span>\[\begin{split}\label{eq-variance-linear-combination}
+    \begin{split}
+        \text{Var}\left(\sum_{i=1}^N a_iX_i\right)&amp;= \sum_{i=1}^N\sum_{j=1}^Na_ia_j\text{Cov}\left(X_i, X_j\right)\\
+        &amp;\equiv \sum_{i,j=1}^Na_ia_j\text{Cov}\left(X_i, X_j\right)\\
+        &amp;=\sum_{i=1}^Na_i^2\text{Cov}\left(X_i, X_i\right) + \sum_{i,j=1, i\neq j}^Na_ia_j\text{Cov}\left(X_i, X_j\right)\\
+        &amp;=\sum_{i=1}^Na_i^2\text{Var}\left(X_i\right) + \sum_{i,j=1, i\neq j}^Na_ia_j\text{Cov}\left(X_i, X_j\right),
+    \end{split}\end{split}\]</div>
+<p>which is the form often given in textbooks.</p>
+</section>
+<section id="bilinearity-of-the-covariance">
+<h3>Bilinearity of the Covariance<a class="headerlink" href="#bilinearity-of-the-covariance" title="Link to this heading"></a></h3>
+<p>The covariance is linear in one argument at a time:</p>
+<div class="math notranslate nohighlight" id="equation-eq-covariance-bilinearity">
+<span class="eqno">(12)<a class="headerlink" href="#equation-eq-covariance-bilinearity" title="Link to this equation"></a></span>\[\begin{split}\label{eq-covariance-bilinearity}
+    \begin{split}
+        \text{Cov}\left(\sum_ia_i X_i, Y\right) &amp;= \sum_i a_i \text{Cov}\left(X_i, Y\right)\nonumber\\
+        \text{Cov}\left(X, \sum_ib_iY_i\right) &amp;= \sum_i b_i \text{Cov}\left(X, Y_i\right)\\
+        \implies \text{Cov}\left(\sum_ia_i X_i, \sum_ib_iY_i\right)&amp;=\sum_ia_i\text{Cov}\left(X_i, \sum_ib_iY_i\right)\\
+        &amp;\hspace{5mm}\text{By bilinearity in the first argument}\\
+        &amp;=\sum_{i,j}a_ib_j\text{Cov}\left(X_i, Y_j\right)\\
+        &amp;\hspace{5mm}\text{By bilinearity in the second argument}
+    \end{split}\end{split}\]</div>
+</section>
+<section id="shift-independence-of-variance">
+<h3>Shift Independence of Variance<a class="headerlink" href="#shift-independence-of-variance" title="Link to this heading"></a></h3>
+<p>For a random variable <span class="math notranslate nohighlight">\(X\)</span>, the variance of a <em>shifted</em> random
+variable <span class="math notranslate nohighlight">\(Y=X-a\)</span> is the same:</p>
+<div class="math notranslate nohighlight" id="equation-eq-shift-property-variance">
+<span class="eqno">(13)<a class="headerlink" href="#equation-eq-shift-property-variance" title="Link to this equation"></a></span>\[\label{eq-shift-property-variance}
+    \text{Var}\left(X-a\right) = \text{Var}\left(X\right).\]</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../auto_examples/matrix_plot/changing_plot_defaults.html" class="btn btn-neutral float-left" title="Changing Plot Defaults" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Private API Documentation &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"TeX": {"extensions": ["AMSmath.js", "AMSsymbols.js"], "equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="tsunami_ip_utils.viz package" href="tsunami_ip_utils.viz.html" />
+    <link rel="prev" title="tsunami_ip_utils.viz package" href="../public_api/tsunami_ip_utils.viz.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../public_api/index.html">Public API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Private API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html">tsunami_ip_utils.viz package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils._error">tsunami_ip_utils._error module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._error._unit_vector_uncertainty_propagation"><code class="docutils literal notranslate"><span class="pre">_unit_vector_uncertainty_propagation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._error._dot_product_uncertainty_propagation"><code class="docutils literal notranslate"><span class="pre">_dot_product_uncertainty_propagation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils._utils">tsunami_ip_utils._utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._utils._isotope_reaction_list_to_nested_dict"><code class="docutils literal notranslate"><span class="pre">_isotope_reaction_list_to_nested_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._utils._filter_redundant_reactions"><code class="docutils literal notranslate"><span class="pre">_filter_redundant_reactions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._utils._filter_by_nuclie_reaction_dict"><code class="docutils literal notranslate"><span class="pre">_filter_by_nuclie_reaction_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._utils._parse_ufloats"><code class="docutils literal notranslate"><span class="pre">_parse_ufloats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._utils._convert_paths"><code class="docutils literal notranslate"><span class="pre">_convert_paths()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils._utils._run_and_read_TSUNAMI_IP"><code class="docutils literal notranslate"><span class="pre">_run_and_read_TSUNAMI_IP()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils.comparisons">tsunami_ip_utils.comparisons module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.comparisons._update_annotation"><code class="docutils literal notranslate"><span class="pre">_update_annotation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.comparisons._process_pair"><code class="docutils literal notranslate"><span class="pre">_process_pair()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils.config">tsunami_ip_utils.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils.integral_indices">tsunami_ip_utils.integral_indices module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.integral_indices._calculate_E_from_sensitivity_vecs"><code class="docutils literal notranslate"><span class="pre">_calculate_E_from_sensitivity_vecs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.integral_indices._create_sensitivity_vector"><code class="docutils literal notranslate"><span class="pre">_create_sensitivity_vector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.integral_indices._get_reaction_wise_E_contributions"><code class="docutils literal notranslate"><span class="pre">_get_reaction_wise_E_contributions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.integral_indices._add_missing_reactions_and_nuclides"><code class="docutils literal notranslate"><span class="pre">_add_missing_reactions_and_nuclides()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.integral_indices._get_nuclide_and_reaction_wise_E_contributions"><code class="docutils literal notranslate"><span class="pre">_get_nuclide_and_reaction_wise_E_contributions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils.perturbations">tsunami_ip_utils.perturbations module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.perturbations._generate_and_read_perturbed_library"><code class="docutils literal notranslate"><span class="pre">_generate_and_read_perturbed_library()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.perturbations._cache_perturbed_library"><code class="docutils literal notranslate"><span class="pre">_cache_perturbed_library()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils.readers">tsunami_ip_utils.readers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.readers.SdfReader"><code class="docutils literal notranslate"><span class="pre">SdfReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tsunami_ip_utils.readers.SdfReader._read_sdf"><code class="docutils literal notranslate"><span class="pre">SdfReader._read_sdf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.readers.RegionIntegratedSdfReader"><code class="docutils literal notranslate"><span class="pre">RegionIntegratedSdfReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tsunami_ip_utils.readers.RegionIntegratedSdfReader._read_sdf"><code class="docutils literal notranslate"><span class="pre">RegionIntegratedSdfReader._read_sdf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.readers._read_ck_contributions"><code class="docutils literal notranslate"><span class="pre">_read_ck_contributions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils.xs">tsunami_ip_utils.xs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.xs._parse_nuclide_reaction"><code class="docutils literal notranslate"><span class="pre">_parse_nuclide_reaction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.xs._parse_reactions_from_nuclide"><code class="docutils literal notranslate"><span class="pre">_parse_reactions_from_nuclide()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.xs._parse_from_total_library"><code class="docutils literal notranslate"><span class="pre">_parse_from_total_library()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.xs._read_nuclide_reaction_from_multigroup_library"><code class="docutils literal notranslate"><span class="pre">_read_nuclide_reaction_from_multigroup_library()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsunami_ip_utils.xs._read_reactions_from_nuclide"><code class="docutils literal notranslate"><span class="pre">_read_reactions_from_nuclide()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsunami_ip_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Private API Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/private_api/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="private-api-documentation">
+<span id="private-api"></span><h1>Private API Documentation<a class="headerlink" href="#private-api-documentation" title="Link to this heading"></a></h1>
+<p><strong>NOTE</strong>: This is the private API documentation for the <code class="docutils literal notranslate"><span class="pre">tsunami_ip_utils</span></code> package. This documentation is intended for developers who
+are working on the Tsunami IP Utils package itself. If you are a user of the <code class="docutils literal notranslate"><span class="pre">tsunami_ip_utils</span></code> package, you should refer to the
+<a class="reference internal" href="../public_api/index.html#public-api"><span class="std std-ref">Public API Documentation</span></a> instead.</p>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tsunami_ip_utils.viz.html">tsunami_ip_utils.viz package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz._bar_plot">tsunami_ip_utils.viz._bar_plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter"><code class="docutils literal notranslate"><span class="pre">_BarPlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._fig"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._fig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._axs"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._axs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._index_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._abc_impl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._barchart"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._barchart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._nested_barchart"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._nested_barchart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._bar_plot._BarPlotter._style"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._style()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz._base_plotter">tsunami_ip_utils.viz._base_plotter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter"><code class="docutils literal notranslate"><span class="pre">_Plotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_Plotter._create_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_Plotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_Plotter._get_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._style"><code class="docutils literal notranslate"><span class="pre">_Plotter._style()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_Plotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.matrix_plot">tsunami_ip_utils.viz.matrix_plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_app"><code class="docutils literal notranslate"><span class="pre">_create_app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_column_headers"><code class="docutils literal notranslate"><span class="pre">_create_column_headers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_row_label"><code class="docutils literal notranslate"><span class="pre">_create_row_label()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_plot_element"><code class="docutils literal notranslate"><span class="pre">_create_plot_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_update_figure_callback"><code class="docutils literal notranslate"><span class="pre">_create_update_figure_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._generate_layout"><code class="docutils literal notranslate"><span class="pre">_generate_layout()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._app"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot._app</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._plot_objects_array"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot._plot_objects_array</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._open_browser"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot._open_browser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._interactive_matrix_plot"><code class="docutils literal notranslate"><span class="pre">_interactive_matrix_plot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.pie_plot">tsunami_ip_utils.viz.pie_plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter"><code class="docutils literal notranslate"><span class="pre">_PiePlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._index_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._create_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._get_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._nested_pie_chart"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._nested_pie_chart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._pie_chart"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._pie_chart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._style"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._style()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._index_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._create_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._get_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_sunburst_data"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._create_sunburst_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_nested_sunburst_data"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._create_nested_sunburst_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._style"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._style()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend"><code class="docutils literal notranslate"><span class="pre">InteractivePieLegend</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._app"><code class="docutils literal notranslate"><span class="pre">InteractivePieLegend._app</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._open_browser"><code class="docutils literal notranslate"><span class="pre">InteractivePieLegend._open_browser()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.plot_utils">tsunami_ip_utils.viz.plot_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils._find_free_port"><code class="docutils literal notranslate"><span class="pre">_find_free_port()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils._determine_plot_type"><code class="docutils literal notranslate"><span class="pre">_determine_plot_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils._capture_html_as_image"><code class="docutils literal notranslate"><span class="pre">_capture_html_as_image()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.scatter_plot">tsunami_ip_utils.viz.scatter_plot module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._replace_spearman_and_pearson"><code class="docutils literal notranslate"><span class="pre">_replace_spearman_and_pearson()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._update_percent_difference"><code class="docutils literal notranslate"><span class="pre">_update_percent_difference()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure"><code class="docutils literal notranslate"><span class="pre">EnhancedPlotlyFigure</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._regression"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._regression</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._pearson"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._pearson</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._spearman"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._spearman</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._summary_stats_text"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._summary_stats_text</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._get_summary_statistics"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._get_summary_statistics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._abc_impl"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._nested"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._nested</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._index_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_type"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._plot_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._style"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._style()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._abc_impl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._interactive_legend"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._interactive_legend</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._nested"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._nested</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._index_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_type"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._plot_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_regression_and_stats"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._add_regression_and_stats()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_scatter_data"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._create_scatter_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._style"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._style()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._abc_impl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._plot_type"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._plot_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_regression_and_stats"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._add_regression_and_stats()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._style"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._style()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._abc_impl"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._abc_impl</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._interactive_scatter_plot"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._interactive_scatter_plot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._excluded_isotopes"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._excluded_isotopes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._app"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._app</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._setup_callbacks"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._setup_callbacks()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz.viz">tsunami_ip_utils.viz.viz module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tsunami_ip_utils.viz.html#module-tsunami_ip_utils.viz">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-tsunami_ip_utils._error">
+<span id="tsunami-ip-utils-error-module"></span><h2>tsunami_ip_utils._error module<a class="headerlink" href="#module-tsunami_ip_utils._error" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._error._unit_vector_uncertainty_propagation">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._error.</span></span><span class="sig-name descname"><span class="pre">_unit_vector_uncertainty_propagation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_error.html#_unit_vector_uncertainty_propagation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._error._unit_vector_uncertainty_propagation" title="Link to this definition"></a></dt>
+<dd><p>Performs error propagation for the components of a vector <span class="math notranslate nohighlight">\(\boldsymbol{v}\)</span> that is normalized to a unit vector
+via <span class="math notranslate nohighlight">\(\hat{\boldsymbol{v}} = \frac{\boldsymbol{v}}{\lVert\boldsymbol{v}\rVert}\)</span>. To calculate the uncertainty
+of <span class="math notranslate nohighlight">\(\hat{\boldsymbol{v}}\equiv \boldsymbol{u}\)</span>, recall from linear error propagation theory
+(see <a class="reference external" href="https://en.wikipedia.org/wiki/Propagation_of_uncertainty#Simplification">this</a> equation)</p>
+<div class="math notranslate nohighlight">
+\[\sigma_{u_i} = \sqrt{ \sum_j \left( \frac{\partial u_i}{\partial v_j} \sigma_{v_j}  \right)^2 }\]</div>
+<p>since</p>
+<div class="math notranslate nohighlight">
+\[u_i = \frac{v_i}{\sqrt{\sum_j v_j^2}}\]</div>
+<p>we have for <span class="math notranslate nohighlight">\(i=j\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{\partial u_i}{\partial v_j} &amp;=
+\frac{1}{\sqrt{\sum_j v_j^2}} - \frac{1}{2}\frac{v_i\cdot 2v_i}{\left(\sum_j v_j^2\right)^{\frac{3}{2}}}\\
+&amp;=\frac{1}{\lVert \boldsymbol{v}\rVert} - \frac{v_i^2}{\lVert \boldsymbol{v}\rVert^3}\\
+&amp;=\frac{\lVert \boldsymbol{v}\rVert^2 - v_i^2}{\lVert \boldsymbol{v}\rVert^3}\end{split}\]</div>
+<p>For <span class="math notranslate nohighlight">\(i\neq j\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial u_i}{\partial v_j} = -\frac{v_iv_j}{\lVert\boldsymbol{v}\rVert^3}\]</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_unit_vector_uncertainty_propagation</span><span class="p">(</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]))</span>
+<span class="go">array([0.03113499, 0.05150788, 0.03711537])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_unit_vector_uncertainty_propagation</span><span class="p">(</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]))</span>
+<span class="go">array([0., 0., 0.])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">_unit_vector_uncertainty_propagation</span><span class="p">(</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]))</span>
+<span class="go">array([0., 0., 0.])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vector</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uarray</span></code></span>) – The vector <span class="math notranslate nohighlight">\(\boldsymbol{v}\)</span> (with uncertainties) whose normalization the error propagation is
+calculated for.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Uncertainties of the unit vector components.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._error._dot_product_uncertainty_propagation">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._error.</span></span><span class="sig-name descname"><span class="pre">_dot_product_uncertainty_propagation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vect1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vect2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_error.html#_dot_product_uncertainty_propagation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._error._dot_product_uncertainty_propagation" title="Link to this definition"></a></dt>
+<dd><p>Calculates the uncertainty in the dot product of two vectors with uncertainties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vect1</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uarray</span></code></span>) – First vector in dot product.</p></li>
+<li><p><strong>vect2</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uarray</span></code></span>) – Second vector in dot product.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Uncertainty in the dot product of the two vectors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils._utils">
+<span id="tsunami-ip-utils-utils-module"></span><h2>tsunami_ip_utils._utils module<a class="headerlink" href="#module-tsunami_ip_utils._utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._utils._isotope_reaction_list_to_nested_dict">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._utils.</span></span><span class="sig-name descname"><span class="pre">_isotope_reaction_list_to_nested_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isotope_reaction_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_of_interest</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_utils.html#_isotope_reaction_list_to_nested_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._utils._isotope_reaction_list_to_nested_dict" title="Link to this definition"></a></dt>
+<dd><p>Converts a list of dictionaries containing isotope-reaction pairs (and some other key that represents a value of
+interest, e.g. an sdf profile or a contribution) to a nested dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>isotope_reaction_list</strong> (<em>-</em>)</p></li>
+<li><p><strong>field_of_interest</strong> (<em>-</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>- nested_dict</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict, nested dictionary containing the isotope-reaction pairs and the value of interest</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._utils._filter_redundant_reactions">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._utils.</span></span><span class="sig-name descname"><span class="pre">_filter_redundant_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redundant_reactions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['chi',</span> <span class="pre">'capture',</span> <span class="pre">'nubar',</span> <span class="pre">'total']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_utils.html#_filter_redundant_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._utils._filter_redundant_reactions" title="Link to this definition"></a></dt>
+<dd><p>Filters out redundant reactions from a nested isotope-reaction dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dict</strong> (<em>-</em>)</p></li>
+<li><p><strong>redundant_reactions</strong> (<em>-</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._utils._filter_by_nuclie_reaction_dict">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._utils.</span></span><span class="sig-name descname"><span class="pre">_filter_by_nuclie_reaction_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nuclide_reactions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_utils.html#_filter_by_nuclie_reaction_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._utils._filter_by_nuclie_reaction_dict" title="Link to this definition"></a></dt>
+<dd><p>Filters out isotopes that are not in the nuclide_reactions dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dict</strong> (<em>-</em>)</p></li>
+<li><p><strong>nuclide_reactions</strong> (<em>-</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._utils._parse_ufloats">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._utils.</span></span><span class="sig-name descname"><span class="pre">_parse_ufloats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_of_strings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_utils.html#_parse_ufloats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._utils._parse_ufloats" title="Link to this definition"></a></dt>
+<dd><p>Parses a 2D array of strings into a 2D array of ufloats, assuming zero uncertainty if ‘+/-’ is not found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._utils._convert_paths">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._utils.</span></span><span class="sig-name descname"><span class="pre">_convert_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_utils.html#_convert_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._utils._convert_paths" title="Link to this definition"></a></dt>
+<dd><p>Decorator to ensure that any list argument passed to the decorated function,
+which contains strings, has those strings converted to pathlib.Path objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils._utils._run_and_read_TSUNAMI_IP">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils._utils.</span></span><span class="sig-name descname"><span class="pre">_run_and_read_TSUNAMI_IP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application_filenames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_filenames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coverx_library</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/_utils.html#_run_and_read_TSUNAMI_IP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils._utils._run_and_read_TSUNAMI_IP" title="Link to this definition"></a></dt>
+<dd><p>Runs TSUNAMI-IP and reads the output file using the <a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.readers.read_integral_indices" title="tsunami_ip_utils.readers.read_integral_indices"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.readers.read_integral_indices()</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>application_filenames</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]]</span>) – List of paths to the application SDF files.</p></li>
+<li><p><strong>experiment_filenames</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]]</span>) – List of paths to the experiment SDF files.</p></li>
+<li><p><strong>coverx</strong> – The coverx library to use for TSUNAMI-IP.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Integral matrices for each integral index type. The shape of the matrices are <code class="docutils literal notranslate"><span class="pre">(num_applications,</span> <span class="pre">num_experiments)</span></code>.
+Keys are <code class="docutils literal notranslate"><span class="pre">'c_k'</span></code>, <code class="docutils literal notranslate"><span class="pre">'E_total'</span></code>, <code class="docutils literal notranslate"><span class="pre">'E_fission'</span></code>, <code class="docutils literal notranslate"><span class="pre">'E_capture'</span></code>, and <code class="docutils literal notranslate"><span class="pre">'E_scatter'</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.comparisons">
+<span id="tsunami-ip-utils-comparisons-module"></span><h2>tsunami_ip_utils.comparisons module<a class="headerlink" href="#module-tsunami_ip_utils.comparisons" title="Link to this heading"></a></h2>
+<p>Tools for generating comparisons between TSUNAMI-IP calculated integral parameters (e.g. <span class="math notranslate nohighlight">\(c_k\)</span>, <span class="math notranslate nohighlight">\(E\)</span>) and calculated
+values using correlation methods with either cross section sampling or uncertainty contributions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.comparisons._update_annotation">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.comparisons.</span></span><span class="sig-name descname"><span class="pre">_update_annotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integral_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/comparisons.html#_update_annotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.comparisons._update_annotation" title="Link to this definition"></a></dt>
+<dd><p>Update the annotation on the plot to include the TSUNAMI-IP c_k value and the percent difference from the
+Pearson correlation coefficient. If the percent difference is greater than 5%, the annotation will be colored red.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure" title="tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnhancedPlotlyFigure</span></code></a></span>) – The plotly figure object.</p></li>
+<li><p><strong>integral_index</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The TSUNAMI-IP integral_index value.</p></li>
+<li><p><strong>index_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The name of the integral index.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure" title="tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnhancedPlotlyFigure</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><dl class="simple">
+<dt>fig</dt><dd><p>The plotly figure object with the updated annotation.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>calculated_value</dt><dd><p>The calculated value of the integral index.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>percent_difference</dt><dd><p>The percent difference between the TSUNAMI-IP integral_index value and the Pearson correlation coefficient.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.comparisons._process_pair">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.comparisons.</span></span><span class="sig-name descname"><span class="pre">_process_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/comparisons.html#_process_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.comparisons._process_pair" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.config">
+<span id="tsunami-ip-utils-config-module"></span><h2>tsunami_ip_utils.config module<a class="headerlink" href="#module-tsunami_ip_utils.config" title="Link to this heading"></a></h2>
+<p>A package level configuration module.</p>
+</section>
+<section id="module-tsunami_ip_utils.integral_indices">
+<span id="tsunami-ip-utils-integral-indices-module"></span><h2>tsunami_ip_utils.integral_indices module<a class="headerlink" href="#module-tsunami_ip_utils.integral_indices" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.integral_indices._calculate_E_from_sensitivity_vecs">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.integral_indices.</span></span><span class="sig-name descname"><span class="pre">_calculate_E_from_sensitivity_vecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">application_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'automatic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">application_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/integral_indices.html#_calculate_E_from_sensitivity_vecs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.integral_indices._calculate_E_from_sensitivity_vecs" title="Link to this definition"></a></dt>
+<dd><p>Calculates the integral index: E given the sensitivity vectors for an application and an experiment. <strong>NOTE</strong>: the
+application and experiment filenames are used to break the correlation between the application and experiment vectors
+(that should not exist). This is because the vectors are only correlated if the application and experiment are the same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>application_vector</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uarray</span></code></span>) – Sensitivity vector for the application.</p></li>
+<li><p><strong>experiment_vector</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uarray</span></code></span>) – Sensitivity vector for the experiment.</p></li>
+<li><p><strong>application_filename</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – Filename of the application sdf file (only needed for automatic uncertianty propagation).</p></li>
+<li><p><strong>experiment_filename</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – Filename of the experiment sdf file (only needed for automatic uncertianty propagation).</p></li>
+<li><p><strong>uncertainties</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Type of error propagation to use. Default is ‘automatic’ which uses the uncertainties package.
+If set to ‘manual’, then manual error propagation is used which is generally faster</p></li>
+<li><p><strong>experiment_norm</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.Variable" title="(in uncertainties v1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – Norm of the experiment vector. If not provided, it is calculated. This is mainly used for
+calculating E contributions, where the denominator is not actually the norm of the application and experiment
+vectors.</p></li>
+<li><p><strong>application_norm</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.Variable" title="(in uncertainties v1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – Norm of the application vector. If not provided, it is calculated. This is mainly used for
+calculating E contributions, where the denominator is not actually the norm of the application and experiment
+vectors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.Variable" title="(in uncertainties v1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Similarity parameter between the application and the experiment</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.integral_indices._create_sensitivity_vector">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.integral_indices.</span></span><span class="sig-name descname"><span class="pre">_create_sensitivity_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdfs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/integral_indices.html#_create_sensitivity_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.integral_indices._create_sensitivity_vector" title="Link to this definition"></a></dt>
+<dd><p>Creates a senstivity vector from all of the sensitivity profiles from a specific application or experiment
+by concatenating them together.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sdfs</span> <span class="o">=</span> <span class="p">[</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span> <span class="p">),</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]</span> <span class="p">)</span> <span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_create_sensitivity_vector</span><span class="p">(</span><span class="n">sdfs</span><span class="p">)</span>
+<span class="go">array([1.0+/-0.1, 2.0+/-0.2, 3.0+/-0.3, 4.0+/-0.4, 5.0+/-0.5, 6.0+/-0.6],</span>
+<span class="go">      dtype=object)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>consideration.</strong> (<em>List</em><em> of </em><em>sensitivity profiles for each nuclide-reaction pair in</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">uarray</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sensitivities from all of the sensitivity profiles combined into a single vector of length
+<code class="docutils literal notranslate"><span class="pre">sum(</span> <span class="pre">[</span> <span class="pre">len(sdf_profile)</span> <span class="pre">for</span> <span class="pre">sdf_profile</span> <span class="pre">in</span> <span class="pre">sdfs</span> <span class="pre">]</span> <span class="pre">)</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.integral_indices._get_reaction_wise_E_contributions">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.integral_indices.</span></span><span class="sig-name descname"><span class="pre">_get_reaction_wise_E_contributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_reactions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">application_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_norm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/integral_indices.html#_get_reaction_wise_E_contributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.integral_indices._get_reaction_wise_E_contributions" title="Link to this definition"></a></dt>
+<dd><p>Calculate contributions to the similarity parameter E for each reaction type for a given isotope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>application</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – Dictionary of application sensitivity profiles.</p></li>
+<li><p><strong>experiment</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – Dictionary of experiment sensitivity profiles.</p></li>
+<li><p><strong>isotope</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Isotope to consider.</p></li>
+<li><p><strong>all_reactions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – List of all possible reaction types.</p></li>
+<li><p><strong>application_norm</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.Variable" title="(in uncertainties v1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – Norm of the application sensitivity vector.</p></li>
+<li><p><strong>experiment_norm</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://uncertainties.readthedocs.io/en/latest/tech_guide.html#uncertainties.Variable" title="(in uncertainties v1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – Norm of the experiment sensitivity vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of dictionaries containing the contribution to the similarity parameter E for each
+reaction type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.integral_indices._add_missing_reactions_and_nuclides">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.integral_indices.</span></span><span class="sig-name descname"><span class="pre">_add_missing_reactions_and_nuclides</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sdfs'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/integral_indices.html#_add_missing_reactions_and_nuclides"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.integral_indices._add_missing_reactions_and_nuclides" title="Link to this definition"></a></dt>
+<dd><p>Add missing reactions and nuclides to the application and experiment dictionaries with an sdf profile of all zeros.
+The set of all isotopes
+<strong>NOTE</strong>: since dictionaries are passed by reference, this function does not return anything, but modifies the
+application and experiment dictionaries in place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>application</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – Dictionary of application sensitivity profiles.</p></li>
+<li><p><strong>experiment</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – Dictionary of experiment sensitivity profiles.</p></li>
+<li><p><strong>all_isotopes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – List of all isotopes in the application and experiment dictionaries.</p></li>
+<li><p><strong>mode</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The mode to use for adding missing reactions and nuclides. Default is <code class="docutils literal notranslate"><span class="pre">'sdfs'</span></code> which adds sdf profiles to missing
+reactions and nuclides. If set to <code class="docutils literal notranslate"><span class="pre">'contribution'</span></code>, then the contributions to the similarity parameter E are set to zero
+for missing nuclides and reactions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set of all isotopes in the application and experiment dictionaries.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.integral_indices._get_nuclide_and_reaction_wise_E_contributions">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.integral_indices.</span></span><span class="sig-name descname"><span class="pre">_get_nuclide_and_reaction_wise_E_contributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">application</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/integral_indices.html#_get_nuclide_and_reaction_wise_E_contributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.integral_indices._get_nuclide_and_reaction_wise_E_contributions" title="Link to this definition"></a></dt>
+<dd><p>Calculate the contributions to the similarity parameter E for each nuclide and for each reaction type for a given
+application and experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>application</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.readers.RegionIntegratedSdfReader" title="tsunami_ip_utils.readers.RegionIntegratedSdfReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionIntegratedSdfReader</span></code></a></span>) – Contains application sensitivity profile dictionaries.</p></li>
+<li><p><strong>experiment</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.readers.RegionIntegratedSdfReader" title="tsunami_ip_utils.readers.RegionIntegratedSdfReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegionIntegratedSdfReader</span></code></a></span>) – Contains experiment sensitivity profile dictionaries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><dl class="simple">
+<dt>nuclide_wise_contributions</dt><dd><p>List of dictionaries containing the contribution to the similarity parameter E.
+for each nuclide</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>nuclide_reaction_wise_contributions</dt><dd><p>List of dictionaries containing the contribution to the similarity.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.perturbations">
+<span id="tsunami-ip-utils-perturbations-module"></span><h2>tsunami_ip_utils.perturbations module<a class="headerlink" href="#module-tsunami_ip_utils.perturbations" title="Link to this heading"></a></h2>
+<p>This module is used for generating cross section perturbations and combining them with the sensitivity profiles for a given application
+experiment pair to generate a similarity scatter plot</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.perturbations._generate_and_read_perturbed_library">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.perturbations.</span></span><span class="sig-name descname"><span class="pre">_generate_and_read_perturbed_library</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_library</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perturbation_factors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_nuclide_reactions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/perturbations.html#_generate_and_read_perturbed_library"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.perturbations._generate_and_read_perturbed_library" title="Link to this definition"></a></dt>
+<dd><p>Generates and reads perturbed multigroup cross section libraries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_library</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]</span>) – Path to the base cross section library.</p></li>
+<li><p><strong>perturbation_factors</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]</span>) – Path to the perturbation factors directory (corresponding to the base library).</p></li>
+<li><p><strong>sample_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The sample number to use for generating the perturbed library. Must be from 1 - <code class="docutils literal notranslate"><span class="pre">NUM_SAMPLES</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">NUM_SAMPLES</span></code> = <code class="docutils literal notranslate"><span class="pre">1000</span></code> is the number of perturbation factor samples provided in
+the user’s current version of SCALE. (<code class="docutils literal notranslate"><span class="pre">0</span></code> <span class="math notranslate nohighlight">\(\leq\)</span> <code class="docutils literal notranslate"><span class="pre">sample_number</span></code> <span class="math notranslate nohighlight">\(\leq\)</span> <code class="docutils literal notranslate"><span class="pre">1000</span></code>)</p></li>
+<li><p><strong>all_nuclide_reactions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – A dictionary containing the nuclide reactions that are read from the perturbed library.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the perturbed cross section libraries for each nuclide reaction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.perturbations._cache_perturbed_library">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.perturbations.</span></span><span class="sig-name descname"><span class="pre">_cache_perturbed_library</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/perturbations.html#_cache_perturbed_library"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.perturbations._cache_perturbed_library" title="Link to this definition"></a></dt>
+<dd><p>Caches a single perturbed cross section library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]], <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]</span>) – <p>A tuple containing all necessary components to perform the caching of a
+perturbed library.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>i (int):</dt><dd><p>The sample number to use for generating the perturbed library.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>base_library (str | Path):</dt><dd><p>Path to the base cross section library.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>perturbation_factors (str | Path):</dt><dd><p>Path to the cross section perturbation factors (used to generate the perturbed libraries).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>sample_number (int):</dt><dd><p>The sample number to use for generating the perturbed library. Must be from 1 - <code class="docutils literal notranslate"><span class="pre">NUM_SAMPLES</span></code>, where <code class="docutils literal notranslate"><span class="pre">NUM_SAMPLES</span></code>
+is the number of perturbation factor samples provided in the user’s current version of SCALE.
+(0 <span class="math notranslate nohighlight">\(\leq\)</span> <code class="docutils literal notranslate"><span class="pre">sample_number</span></code> <span class="math notranslate nohighlight">\(\leq\)</span> <code class="docutils literal notranslate"><span class="pre">NUM_SAMPLES</span></code>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>available_nuclide_reactions (Dict[str, List[str]]):</dt><dd><p>A dictionary containing the nuclide reactions that are read from the perturbed library.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The time taken to cache the perturbed library.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.readers">
+<span id="tsunami-ip-utils-readers-module"></span><h2>tsunami_ip_utils.readers module<a class="headerlink" href="#module-tsunami_ip_utils.readers" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.readers.SdfReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.readers.</span></span><span class="sig-name descname"><span class="pre">SdfReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/readers.html#SdfReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.readers.SdfReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for reading TSUNAMI-B Sentitivity Data Files (SDFs, i.e. <code class="docutils literal notranslate"><span class="pre">.sdf</span></code> files produced by TSUNAMI-3D monte carlo
+transport simulations).</p>
+<p>The format for TSUNAMI-B SDF files is given <a class="reference external" href="https://scale-manual.ornl.gov/tsunami-ip-appAB.html#format-of-tsunami-b-sensitivity-data-file">here</a>.</p>
+<p class="rubric">Notes</p>
+<p>The SDF reader currently does not support TSUNAMI-A formatted SDF files (produced by deterministic transport simulations).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.readers.SdfReader._read_sdf">
+<span class="sig-name descname"><span class="pre">_read_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/readers.html#SdfReader._read_sdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.readers.SdfReader._read_sdf" title="Link to this definition"></a></dt>
+<dd><p>Reads the SDF file and returns a dictionary of nuclide-reaction pairs and energy-dependent
+sensitivities (with uncertainties)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Filename</strong> – Path to the sdf file.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><em>energy_boundaries</em> – Energy boundaries for the energy groups.</p></li>
+<li><p><em>sdf_data</em> – List of dictionaries containing the sensitivity profiles and other derived/descriptive data. The dictionary
+keys are given by <code class="docutils literal notranslate"><span class="pre">SDF_DATA_NAMES</span></code> = <code class="docutils literal notranslate"><span class="pre">['isotope',</span> <span class="pre">'reaction_type',</span> <span class="pre">'zaid',</span> <span class="pre">'reaction_mt',</span> <span class="pre">'zone_number',</span> <span class="pre">'zone_volume',</span> <span class="pre">'energy_integrated_sensitivity',</span> <span class="pre">'abs_sum_groupwise_sensitivities',</span> <span class="pre">'sum_opposite_sign_groupwise_sensitivities',</span> <span class="pre">'sensitivities',</span> <span class="pre">'uncertainties']</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.readers.RegionIntegratedSdfReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.readers.</span></span><span class="sig-name descname"><span class="pre">RegionIntegratedSdfReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/readers.html#RegionIntegratedSdfReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.readers.RegionIntegratedSdfReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.readers.SdfReader" title="tsunami_ip_utils.readers.SdfReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SdfReader</span></code></a></p>
+<p>Reads region integrated TSUNAMI-B sensitivity data files produced by TSUNAMI-3D. Useful when the spatial dependence of
+sensitivty is not important.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.readers.RegionIntegratedSdfReader._read_sdf">
+<span class="sig-name descname"><span class="pre">_read_sdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tsunami_ip_utils.readers.RegionIntegratedSdfReader._read_sdf" title="Link to this definition"></a></dt>
+<dd><p>Reads the SDF file and returns a dictionary of nuclide-reaction pairs and energy-dependent
+sensitivities (with uncertainties)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Filename</strong> – Path to the sdf file.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><em>energy_boundaries</em> – Energy boundaries for the energy groups.</p></li>
+<li><p><em>sdf_data</em> – List of dictionaries containing the sensitivity profiles and other derived/descriptive data. The dictionary
+keys are given by <code class="docutils literal notranslate"><span class="pre">SDF_DATA_NAMES</span></code> = <code class="docutils literal notranslate"><span class="pre">['isotope',</span> <span class="pre">'reaction_type',</span> <span class="pre">'zaid',</span> <span class="pre">'reaction_mt',</span> <span class="pre">'zone_number',</span> <span class="pre">'zone_volume',</span> <span class="pre">'energy_integrated_sensitivity',</span> <span class="pre">'abs_sum_groupwise_sensitivities',</span> <span class="pre">'sum_opposite_sign_groupwise_sensitivities',</span> <span class="pre">'sensitivities',</span> <span class="pre">'uncertainties']</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.readers._read_ck_contributions">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.readers.</span></span><span class="sig-name descname"><span class="pre">_read_ck_contributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/readers.html#_read_ck_contributions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.readers._read_ck_contributions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.xs">
+<span id="tsunami-ip-utils-xs-module"></span><h2>tsunami_ip_utils.xs module<a class="headerlink" href="#module-tsunami_ip_utils.xs" title="Link to this heading"></a></h2>
+<p>This module contains the functions necessary for processing the binary SCALE multigroup cross section libraries
+(using the AMPX tools: charmin and tabasco) into python friendly dictionaries of numpy arrays.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.xs._parse_nuclide_reaction">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.xs.</span></span><span class="sig-name descname"><span class="pre">_parse_nuclide_reaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_boundaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/xs.html#_parse_nuclide_reaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.xs._parse_nuclide_reaction" title="Link to this definition"></a></dt>
+<dd><p>Reads a multigroup cross section <code class="docutils literal notranslate"><span class="pre">.txt</span></code> file produced by the extractor function and returns the energy-dependent
+cross sections as a numpy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]</span>) – The filename of the cross section file</p></li>
+<li><p><strong>energy_boundaries</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, the energies at which the cross sections are defined are returned as well</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">energy_boundaries</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>, a numpy array of cross sections</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">energy_boundaries</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, a numpy array of cross sections and a numpy array of energy boundaries</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.xs._parse_reactions_from_nuclide">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.xs.</span></span><span class="sig-name descname"><span class="pre">_parse_reactions_from_nuclide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/xs.html#_parse_reactions_from_nuclide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.xs._parse_reactions_from_nuclide" title="Link to this definition"></a></dt>
+<dd><p>Reads a set of reactions (given by the list of reaction mt’s) from a dump of all reactions for a single nuclide from
+a SCALE library. Note this function requires that the dump included headers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]</span>) – The filename of the dump file.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – <p>Additional keyword arguments:</p>
+<ul>
+<li><dl class="simple">
+<dt>reaction_mts (List[str])</dt><dd><p>The list of reaction MTs to read (<strong>required</strong> kwarg).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>energy_boundaries (bool)</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the energies at which the cross sections are defined are returned as well (optional kwarg).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the cross sections for each reaction MT</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.xs._parse_from_total_library">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.xs.</span></span><span class="sig-name descname"><span class="pre">_parse_from_total_library</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/xs.html#_parse_from_total_library"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.xs._parse_from_total_library" title="Link to this definition"></a></dt>
+<dd><p>Parse selected nuclide-reactions from an entire cross section library dump.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]</span>) – Path to the file containing the library dump.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></span>) – <p>Additional keyword arguments:</p>
+<ul>
+<li><dl class="simple">
+<dt>nuclide_reaction_dict (dict)</dt><dd><p>A dictionary mapping nuclides to a list of reaction MTs to read (<strong>required</strong> kwarg).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>return_available_nuclide_reactions (bool)</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the available nuclide reactions (i.e. all of the nuclide reactions for which data exists in the
+given multigroup librari) are returned as well (optional kwarg).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>energy_boundaries (bool)</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the energies at which the cross sections are defined are returned as well (optional kwarg).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_available_nuclide_reactions</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>, a doubly nested dictionary containing the cross sections for each
+nuclide-reaction pair. Keyed first by nuclide, then by reaction.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">return_available_nuclide_reactions</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, a tuple containing the above dictionary and a dictionary containing
+all available nuclide reactions.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.xs._read_nuclide_reaction_from_multigroup_library">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.xs.</span></span><span class="sig-name descname"><span class="pre">_read_nuclide_reaction_from_multigroup_library</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multigroup_library_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nuclide_zaid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reaction_mt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsing_function=&lt;function</span> <span class="pre">_parse_nuclide_reaction&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_option='plot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_boundaries=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/xs.html#_read_nuclide_reaction_from_multigroup_library"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.xs._read_nuclide_reaction_from_multigroup_library" title="Link to this definition"></a></dt>
+<dd><p>Uses SCALE to dump a binary multigroup library to a text file, and then calls the specified parsing function on the
+output file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multigroup_library_path</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – The path to the SCALE multigroup library file.</p></li>
+<li><p><strong>nuclide_zaid</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The ZAID of the nuclide.</p></li>
+<li><p><strong>reaction_mt</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The reaction MT to read.</p></li>
+<li><p><strong>parsing_function</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span>) – The function to call on the output file. This function takes the filename of the output file as its first argument, and
+whether or not energy boundaries should be returned as its second argument. Additional keyword arguments can be passed
+to the parsing function using the kwargs argument.</p></li>
+<li><p><strong>plot_option</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The plot option to use when running the MG reader. For example <code class="docutils literal notranslate"><span class="pre">'plot'</span></code> or <code class="docutils literal notranslate"><span class="pre">'fido'</span></code>.</p></li>
+<li><p><strong>energy_boundaries</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, the energies at which the cross sections are defined are returned as well.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An output that is the result of the parsing function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.xs._read_reactions_from_nuclide">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.xs.</span></span><span class="sig-name descname"><span class="pre">_read_reactions_from_nuclide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multigroup_library_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nuclide_zaid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reaction_mts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/xs.html#_read_reactions_from_nuclide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.xs._read_reactions_from_nuclide" title="Link to this definition"></a></dt>
+<dd><p>Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>multigroup_library_path</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – The path to the SCALE multigroup library file.</p></li>
+<li><p><strong>nuclide_zaid</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The ZAID of the nuclide.</p></li>
+<li><p><strong>reaction_mts</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of reaction MTs to read.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing the cross sections for each reaction MT</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-tsunami_ip_utils" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../public_api/tsunami_ip_utils.viz.html" class="btn btn-neutral float-left" title="tsunami_ip_utils.viz package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tsunami_ip_utils.viz.html" class="btn btn-neutral float-right" title="tsunami_ip_utils.viz package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

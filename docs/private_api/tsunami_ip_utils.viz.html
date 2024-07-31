@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.viz package &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"TeX": {"extensions": ["AMSmath.js", "AMSsymbols.js"], "equationNumbers": {"autoNumber": "AMS", "useLabelIds": true}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="paths module" href="../paths.html" />
+    <link rel="prev" title="Private API Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../public_api/index.html">Public API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Private API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">tsunami_ip_utils.viz package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz._bar_plot">tsunami_ip_utils.viz._bar_plot module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter"><code class="docutils literal notranslate"><span class="pre">_BarPlotter</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._fig"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._fig</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._axs"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._axs</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._index_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._abc_impl</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._barchart"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._barchart()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._nested_barchart"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._nested_barchart()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._style"><code class="docutils literal notranslate"><span class="pre">_BarPlotter._style()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz._base_plotter">tsunami_ip_utils.viz._base_plotter module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter"><code class="docutils literal notranslate"><span class="pre">_Plotter</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_Plotter._create_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_Plotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_Plotter._get_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter._style"><code class="docutils literal notranslate"><span class="pre">_Plotter._style()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_Plotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz.matrix_plot">tsunami_ip_utils.viz.matrix_plot module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot._create_app"><code class="docutils literal notranslate"><span class="pre">_create_app()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot._create_column_headers"><code class="docutils literal notranslate"><span class="pre">_create_column_headers()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot._create_row_label"><code class="docutils literal notranslate"><span class="pre">_create_row_label()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot._create_plot_element"><code class="docutils literal notranslate"><span class="pre">_create_plot_element()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot._create_update_figure_callback"><code class="docutils literal notranslate"><span class="pre">_create_update_figure_callback()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot._generate_layout"><code class="docutils literal notranslate"><span class="pre">_generate_layout()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._app"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot._app</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._plot_objects_array"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot._plot_objects_array</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._open_browser"><code class="docutils literal notranslate"><span class="pre">InteractiveMatrixPlot._open_browser()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.matrix_plot._interactive_matrix_plot"><code class="docutils literal notranslate"><span class="pre">_interactive_matrix_plot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz.pie_plot">tsunami_ip_utils.viz.pie_plot module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter"><code class="docutils literal notranslate"><span class="pre">_PiePlotter</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._index_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._create_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._get_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._nested_pie_chart"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._nested_pie_chart()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._pie_chart"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._pie_chart()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._style"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._style()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_PiePlotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._index_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._create_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._get_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_sunburst_data"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._create_sunburst_data()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_nested_sunburst_data"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._create_nested_sunburst_data()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._style"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._style()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_InteractivePiePlotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend"><code class="docutils literal notranslate"><span class="pre">InteractivePieLegend</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._app"><code class="docutils literal notranslate"><span class="pre">InteractivePieLegend._app</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._open_browser"><code class="docutils literal notranslate"><span class="pre">InteractivePieLegend._open_browser()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz.plot_utils">tsunami_ip_utils.viz.plot_utils module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.plot_utils._find_free_port"><code class="docutils literal notranslate"><span class="pre">_find_free_port()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.plot_utils._determine_plot_type"><code class="docutils literal notranslate"><span class="pre">_determine_plot_type()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.plot_utils._capture_html_as_image"><code class="docutils literal notranslate"><span class="pre">_capture_html_as_image()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz.scatter_plot">tsunami_ip_utils.viz.scatter_plot module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._replace_spearman_and_pearson"><code class="docutils literal notranslate"><span class="pre">_replace_spearman_and_pearson()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._update_percent_difference"><code class="docutils literal notranslate"><span class="pre">_update_percent_difference()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure"><code class="docutils literal notranslate"><span class="pre">EnhancedPlotlyFigure</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._regression"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._regression</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._pearson"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._pearson</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._spearman"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._spearman</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._summary_stats_text"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._summary_stats_text</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._get_summary_statistics"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._get_summary_statistics()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._abc_impl"><code class="docutils literal notranslate"><span class="pre">_ScatterPlot._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._nested"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._nested</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._index_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_type"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._plot_type</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._style"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._style()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_ScatterPlotter._abc_impl</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._abc_impl</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._interactive_legend"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._interactive_legend</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._nested"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._nested</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._index_name"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._index_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_redundant"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._plot_redundant</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_type"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._plot_type</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_regression_and_stats"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._add_regression_and_stats()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_scatter_data"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._create_scatter_data()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._style"><code class="docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter._style()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._abc_impl"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._abc_impl</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._plot_type"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._plot_type</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._create_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._create_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_regression_and_stats"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._add_regression_and_stats()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_to_subplot"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._add_to_subplot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._get_plot"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._get_plot()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._style"><code class="docutils literal notranslate"><span class="pre">_InteractivePerturbationScatterPlotter._style()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._abc_impl"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._abc_impl</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._interactive_scatter_plot"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._interactive_scatter_plot</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._excluded_isotopes"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._excluded_isotopes</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._app"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._app</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._setup_callbacks"><code class="docutils literal notranslate"><span class="pre">InteractiveScatterLegend._setup_callbacks()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz.viz">tsunami_ip_utils.viz.viz module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsunami_ip_utils.viz">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils._error">tsunami_ip_utils._error module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils._utils">tsunami_ip_utils._utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils.comparisons">tsunami_ip_utils.comparisons module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils.config">tsunami_ip_utils.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils.integral_indices">tsunami_ip_utils.integral_indices module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils.perturbations">tsunami_ip_utils.perturbations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils.readers">tsunami_ip_utils.readers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils.xs">tsunami_ip_utils.xs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-tsunami_ip_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Private API Documentation</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.viz package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/private_api/tsunami_ip_utils.viz.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tsunami-ip-utils-viz-package">
+<h1>tsunami_ip_utils.viz package<a class="headerlink" href="#tsunami-ip-utils-viz-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-tsunami_ip_utils.viz._bar_plot">
+<span id="tsunami-ip-utils-viz-bar-plot-module"></span><h2>tsunami_ip_utils.viz._bar_plot module<a class="headerlink" href="#module-tsunami_ip_utils.viz._bar_plot" title="Link to this heading"></a></h2>
+<p>Functionality related to matplotlib bar plots of contributions to integral indices.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz._bar_plot.</span></span><span class="sig-name descname"><span class="pre">_BarPlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integral_index_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_redundant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_bar_plot.html#_BarPlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter" title="tsunami_ip_utils.viz._base_plotter._Plotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Plotter</span></code></a></p>
+<p>Class for creating bar plots of contributions to integral indices on a nuclide-wise and nuclide-reaction-wise basis.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._fig">
+<span class="sig-name descname"><span class="pre">_fig</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._fig" title="Link to this definition"></a></dt>
+<dd><p>The figure object for the plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._axs">
+<span class="sig-name descname"><span class="pre">_axs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._axs" title="Link to this definition"></a></dt>
+<dd><p>The axes object for the plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._index_name">
+<span class="sig-name descname"><span class="pre">_index_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._index_name" title="Link to this definition"></a></dt>
+<dd><p>The name of the integral index being plotted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._create_plot">
+<span class="sig-name descname"><span class="pre">_create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_bar_plot.html#_BarPlotter._create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._create_plot" title="Link to this definition"></a></dt>
+<dd><p>Creates a bar plot of the given contributions to the integral index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]]]</span>) – <ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">nested</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then this should be a dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">contribution}</span></code>, where
+contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the contribution of the nuclide to the integral index.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">nested</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then this should be a dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">{reaction:</span> <span class="pre">contribution}}</span></code>,
+where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the contribution of the nuclide to the integral index
+through the given reaction.</p></li>
+</ul>
+</p></li>
+<li><p><strong>nested</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Wether the contributions are on a reaction-wise basis or not.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._get_plot">
+<span class="sig-name descname"><span class="pre">_get_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_bar_plot.html#_BarPlotter._get_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._get_plot" title="Link to this definition"></a></dt>
+<dd><p>Return the ‘plot’ object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._add_to_subplot">
+<span class="sig-name descname"><span class="pre">_add_to_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_bar_plot.html#_BarPlotter._add_to_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._add_to_subplot" title="Link to this definition"></a></dt>
+<dd><p>Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> – The figure to add the plot to.</p></li>
+<li><p><strong>position</strong> – The position of the subplot to add the plot to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The figure with the plot added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._barchart">
+<span class="sig-name descname"><span class="pre">_barchart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_bar_plot.html#_BarPlotter._barchart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._barchart" title="Link to this definition"></a></dt>
+<dd><p>Create a bar chart of the contributions to the integral index on a nuclide-wise basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]</span>) – A dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">contribution}</span></code>, where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the
+contribution of the nuclide to the integral index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._nested_barchart">
+<span class="sig-name descname"><span class="pre">_nested_barchart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_bar_plot.html#_BarPlotter._nested_barchart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._nested_barchart" title="Link to this definition"></a></dt>
+<dd><p>Create a bar chart of the contributions to the integral index on a nuclide-reaction-wise basis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._bar_plot._BarPlotter._style">
+<span class="sig-name descname"><span class="pre">_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_bar_plot.html#_BarPlotter._style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._bar_plot._BarPlotter._style" title="Link to this definition"></a></dt>
+<dd><p>Style the plot.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.viz._base_plotter">
+<span id="tsunami-ip-utils-viz-base-plotter-module"></span><h2>tsunami_ip_utils.viz._base_plotter module<a class="headerlink" href="#module-tsunami_ip_utils.viz._base_plotter" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._base_plotter._Plotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz._base_plotter.</span></span><span class="sig-name descname"><span class="pre">_Plotter</span></span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_base_plotter.html#_Plotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._base_plotter._Plotter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._base_plotter._Plotter._create_plot">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_base_plotter.html#_Plotter._create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._base_plotter._Plotter._create_plot" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._base_plotter._Plotter._add_to_subplot">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_add_to_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_base_plotter.html#_Plotter._add_to_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._base_plotter._Plotter._add_to_subplot" title="Link to this definition"></a></dt>
+<dd><p>Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span>) – The figure to add the plot to.</p></li>
+<li><p><strong>position</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></span>) – The position of the subplot to add the plot to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The figure with the plot added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._base_plotter._Plotter._get_plot">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_base_plotter.html#_Plotter._get_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._base_plotter._Plotter._get_plot" title="Link to this definition"></a></dt>
+<dd><p>Return the ‘plot’ object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._base_plotter._Plotter._style">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/_base_plotter.html#_Plotter._style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz._base_plotter._Plotter._style" title="Link to this definition"></a></dt>
+<dd><p>Style the plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz._base_plotter._Plotter._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz._base_plotter._Plotter._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.viz.matrix_plot">
+<span id="tsunami-ip-utils-viz-matrix-plot-module"></span><h2>tsunami_ip_utils.viz.matrix_plot module<a class="headerlink" href="#module-tsunami_ip_utils.viz.matrix_plot" title="Link to this heading"></a></h2>
+<p>This module contains the <a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot" title="tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">InteractiveMatrixPlot</span></code></a> class, which is a wrapper around a Dash app that displays a matrix of
+interactive plots. The matrix is constructed from a 2D numpy array of plot objects, where each plot object is an instance of
+either <a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend" title="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend</span></code></a> or
+<a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend" title="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.pie_plot.InteractivePieLegend</span></code></a>. The matrix is displayed in a Dash app, where each plot object is
+displayed in a separate cell. The user can interact with the plots by clicking on the legend to hide or show traces. The user
+can also save the state of the interactive matrix plot to a pickle file and load it back later. The <a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.load_interactive_matrix_plot" title="tsunami_ip_utils.viz.matrix_plot.load_interactive_matrix_plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_interactive_matrix_plot()</span></code></a>
+function is a convenience function that loads an interactive matrix plot from a saved state pickle file.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot._create_app">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">_create_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">external_stylesheets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#_create_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot._create_app" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot._create_column_headers">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">_create_column_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_cols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#_create_column_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot._create_column_headers" title="Link to this definition"></a></dt>
+<dd><p>Create column headers for the matrix plot. Each column header is a div element with the text ‘Application i’ where i is
+the column index. The column headers are styled to be centered and have a border on the right and bottom.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_cols</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Number of columns in the matrix plot.</p></li>
+<li><p><strong>labels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</span>) – List of labels for the columns of the matrix plot. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot._create_row_label">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">_create_row_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#_create_row_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot._create_row_label" title="Link to this definition"></a></dt>
+<dd><p>Create a row label for the matrix plot. The row label is a div element with the text ‘Experiment i’ where i is the row
+index. The row label is styled to be centered and have a border on the right and bottom. The text is rotated -90 degrees to
+make it vertical.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Row index of the matrix plot.</p></li>
+<li><p><strong>label</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – An optional label for the row (to use instead of <code class="docutils literal notranslate"><span class="pre">Experiment</span> <span class="pre">i</span></code>). Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Div</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A div element representing the row label.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot._create_plot_element">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">_create_plot_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#_create_plot_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot._create_plot_element" title="Link to this definition"></a></dt>
+<dd><p>Create a plot element based on the plot object. If the plot object is an instance of
+<a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend" title="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend</span></code></a>, or a <code class="docutils literal notranslate"><span class="pre">plotly.graph_objects.Figure</span></code>,
+the plot element is a <code class="docutils literal notranslate"><span class="pre">dcc.Graph</span></code> element. If the plot object is an instance of
+<a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend" title="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.pie_plot.InteractivePieLegend</span></code></a>, the plot element is an <code class="docutils literal notranslate"><span class="pre">html.Iframe</span></code> element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Graph</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Iframe</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot._create_update_figure_callback">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">_create_update_figure_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#_create_update_figure_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot._create_update_figure_callback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot._generate_layout">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">_generate_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#_generate_layout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot._generate_layout" title="Link to this definition"></a></dt>
+<dd><p>Generate the layout of the Dash app. The layout consists of an H1 element with the title ‘Matrix of Plots’, followed by
+a div element containing the rows of the matrix plot. The rows are displayed in a flex column with horizontal scrolling.
+The layout also includes a JavaScript script that listens for window resize events and resizes the Plotly plots
+accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dash</span></code></span>) – Dash app object.</p></li>
+<li><p><strong>rows</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Div</span></code>]</span>) – List of div elements representing the rows of the matrix plot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">InteractiveMatrixPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_objects_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#InteractiveMatrixPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Interactive matrix plot class that displays a matrix of interactive plots in a Dash app. The matrix is constructed from
+a 2D numpy array of plot objects, where each plot object is an instance of either
+<a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend" title="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend</span></code></a> or
+<a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend" title="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.pie_plot.InteractivePieLegend</span></code></a>. The matrix is displayed in a Dash app, where each plot object is
+displayed in a separate cell. The user can interact with the plots by clicking on the legend to hide or show traces. The user
+can also save the state of the interactive matrix plot to a pickle file and load it back later.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._app">
+<span class="sig-name descname"><span class="pre">_app</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dash</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._app" title="Link to this definition"></a></dt>
+<dd><p>Dash app object that displays the interactive matrix plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._plot_objects_array">
+<span class="sig-name descname"><span class="pre">_plot_objects_array</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></em><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._plot_objects_array" title="Link to this definition"></a></dt>
+<dd><p>2D numpy array of plot objects to be displayed in the matrix plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._open_browser">
+<span class="sig-name descname"><span class="pre">_open_browser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#InteractiveMatrixPlot._open_browser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._open_browser" title="Link to this definition"></a></dt>
+<dd><p>Open the browser to display the interactive matrix plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>port</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Port number of the Flask server.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.matrix_plot._interactive_matrix_plot">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.matrix_plot.</span></span><span class="sig-name descname"><span class="pre">_interactive_matrix_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_objects_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/matrix_plot.html#_interactive_matrix_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.matrix_plot._interactive_matrix_plot" title="Link to this definition"></a></dt>
+<dd><p>Create an interactive matrix plot from a 2D numpy array of plot objects. This function creates a Dash app that displays
+the matrix plot. The matrix is constructed from the plot objects array, where each plot object is an instance of either
+<a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend" title="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend</span></code></a> or <a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend" title="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">tsunami_ip_utils.viz.pie_plot.InteractivePieLegend</span></code></a>.
+The matrix is displayed in a Dash app, where each plot object is displayed in a separate cell. The user can interact with
+the plots by clicking on the legend to hide or show traces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plot_objects_array</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – 2D numpy array of plot objects to be displayed in the matrix plot.</p></li>
+<li><p><strong>labels</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>]]</span>) – Dictionary of lists containing the labels for the rows and columns of the matrix plot. Keys are <code class="docutils literal notranslate"><span class="pre">'applications'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'experiments'</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>. Most commonly, this is the sdf filename for the given application/experiment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot" title="tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">InteractiveMatrixPlot</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An instance of the <a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot" title="tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">InteractiveMatrixPlot</span></code></a> class that wraps the Dash app displaying the matrix plot.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.viz.pie_plot">
+<span id="tsunami-ip-utils-viz-pie-plot-module"></span><h2>tsunami_ip_utils.viz.pie_plot module<a class="headerlink" href="#module-tsunami_ip_utils.viz.pie_plot" title="Link to this heading"></a></h2>
+<p>Tools for creating pie charts of contributions to integral indices.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.pie_plot.</span></span><span class="sig-name descname"><span class="pre">_PiePlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integral_index_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_redudant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_PiePlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter" title="tsunami_ip_utils.viz._base_plotter._Plotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Plotter</span></code></a></p>
+<p>A class for creating static pie charts of contributions to integral indices.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._index_name">
+<span class="sig-name descname"><span class="pre">_index_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._index_name" title="Link to this definition"></a></dt>
+<dd><p>The name of the integral index whose contributions are being plotted (e.g. <code class="docutils literal notranslate"><span class="pre">'E'</span></code> or <code class="docutils literal notranslate"><span class="pre">'c_k'</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._plot_redundant">
+<span class="sig-name descname"><span class="pre">_plot_redundant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._plot_redundant" title="Link to this definition"></a></dt>
+<dd><p>Whether to plot redundant/irrelevant reactions in the pie chart.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._create_plot">
+<span class="sig-name descname"><span class="pre">_create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_PiePlotter._create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._create_plot" title="Link to this definition"></a></dt>
+<dd><p>Creates a pie chart of the given contributions to the integral index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]]]</span>) – <ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">nested</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then this should be a dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">contribution}</span></code>, where
+contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the contribution of the nuclide to the integral index.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">nested</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then this should be a dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">{reaction:</span> <span class="pre">contribution}}</span></code>,
+where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the contribution of the nuclide to the integral index
+through the given reaction.</p></li>
+</ul>
+</p></li>
+<li><p><strong>nested</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Wether the contributions are on a reaction-wise basis or not.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._add_to_subplot">
+<span class="sig-name descname"><span class="pre">_add_to_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_PiePlotter._add_to_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._add_to_subplot" title="Link to this definition"></a></dt>
+<dd><p>Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> – The figure to add the plot to.</p></li>
+<li><p><strong>position</strong> – The position of the subplot to add the plot to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure with the plot added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._get_plot">
+<span class="sig-name descname"><span class="pre">_get_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_PiePlotter._get_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._get_plot" title="Link to this definition"></a></dt>
+<dd><p>Return the ‘plot’ object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._nested_pie_chart">
+<span class="sig-name descname"><span class="pre">_nested_pie_chart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_PiePlotter._nested_pie_chart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._nested_pie_chart" title="Link to this definition"></a></dt>
+<dd><p>Create a pie chart of the contributions to the integral index on a nuclide-reaction-wise basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]]</span>) – A dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">{reaction:</span> <span class="pre">contribution}}</span></code>, where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object
+representing the contribution of the nuclide to the integral index through the given reaction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._pie_chart">
+<span class="sig-name descname"><span class="pre">_pie_chart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_PiePlotter._pie_chart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._pie_chart" title="Link to this definition"></a></dt>
+<dd><p>Create a pie chart of the contributions to the integral index on a nuclide-wise basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]</span>) – A dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">contribution}</span></code>, where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the
+contribution of the nuclide to the integral index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._style">
+<span class="sig-name descname"><span class="pre">_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_PiePlotter._style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._style" title="Link to this definition"></a></dt>
+<dd><p>Style the plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._PiePlotter._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._PiePlotter._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.pie_plot.</span></span><span class="sig-name descname"><span class="pre">_InteractivePiePlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integral_index_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_redundant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_InteractivePiePlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter" title="tsunami_ip_utils.viz._base_plotter._Plotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Plotter</span></code></a></p>
+<p>A class for creating interactive pie charts of contributions to integral indices.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._index_name">
+<span class="sig-name descname"><span class="pre">_index_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._index_name" title="Link to this definition"></a></dt>
+<dd><p>The name of the integral index whose contributions are being plotted (e.g. <code class="docutils literal notranslate"><span class="pre">'E'</span></code> or <code class="docutils literal notranslate"><span class="pre">'c_k'</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._plot_redundant">
+<span class="sig-name descname"><span class="pre">_plot_redundant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._plot_redundant" title="Link to this definition"></a></dt>
+<dd><p>Whether to plot redundant/irrelevant reactions in the pie chart.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_plot">
+<span class="sig-name descname"><span class="pre">_create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_InteractivePiePlotter._create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_plot" title="Link to this definition"></a></dt>
+<dd><p>Creates an interactive pie chart of the given contributions to the integral index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]]]</span>) – <ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">nested</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>, then this should be a dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">contribution}</span></code>, where
+contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the contribution of the nuclide to the integral index.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">nested</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then this should be a dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">{reaction:</span> <span class="pre">contribution}}</span></code>,
+where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the contribution of the nuclide to the integral index
+through the given reaction.</p></li>
+</ul>
+</p></li>
+<li><p><strong>nested</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Wether the contributions are on a reaction-wise basis or not.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._add_to_subplot">
+<span class="sig-name descname"><span class="pre">_add_to_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_InteractivePiePlotter._add_to_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._add_to_subplot" title="Link to this definition"></a></dt>
+<dd><p>Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> – The figure to add the plot to.</p></li>
+<li><p><strong>position</strong> – The position of the subplot to add the plot to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure with the plot added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._get_plot">
+<span class="sig-name descname"><span class="pre">_get_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_InteractivePiePlotter._get_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._get_plot" title="Link to this definition"></a></dt>
+<dd><p>Return the ‘plot’ object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code>, <a class="reference internal" href="../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend" title="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend"><code class="xref py py-class docutils literal notranslate"><span class="pre">InteractivePieLegend</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_sunburst_data">
+<span class="sig-name descname"><span class="pre">_create_sunburst_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_InteractivePiePlotter._create_sunburst_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_sunburst_data" title="Link to this definition"></a></dt>
+<dd><p>Create a pandas dataframe for a (not nested) sunburst chart of contributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]</span>) – A dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">contribution}</span></code>, where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object representing the
+contribution of the nuclide to the integral index.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The dataframe for creating the sunburst chart.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_nested_sunburst_data">
+<span class="sig-name descname"><span class="pre">_create_nested_sunburst_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_InteractivePiePlotter._create_nested_sunburst_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_nested_sunburst_data" title="Link to this definition"></a></dt>
+<dd><p>Create a pandas dataframe for a nested sunburst chart of contributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]]</span>) – A dictionary of the form <code class="docutils literal notranslate"><span class="pre">{nuclide:</span> <span class="pre">{reaction:</span> <span class="pre">contribution}}</span></code>, where contribution is a <code class="docutils literal notranslate"><span class="pre">ufloat</span></code> object
+representing the contribution of the nuclide to the integral index through the given reaction.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The dataframe for creating the sunburst chart.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._style">
+<span class="sig-name descname"><span class="pre">_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#_InteractivePiePlotter._style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._style" title="Link to this definition"></a></dt>
+<dd><p>Style the plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.pie_plot.</span></span><span class="sig-name descname"><span class="pre">InteractivePieLegend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#InteractivePieLegend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for creating an interactive legend for a sunburst chart.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._app">
+<span class="sig-name descname"><span class="pre">_app</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Flask</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._app" title="Link to this definition"></a></dt>
+<dd><p>The Flask webapp that will display the interactive legend.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._open_browser">
+<span class="sig-name descname"><span class="pre">_open_browser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/pie_plot.html#InteractivePieLegend._open_browser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._open_browser" title="Link to this definition"></a></dt>
+<dd><p>Open the browser to display the interactive sunburst chart</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>port</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The port at which the Flask server is running.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.viz.plot_utils">
+<span id="tsunami-ip-utils-viz-plot-utils-module"></span><h2>tsunami_ip_utils.viz.plot_utils module<a class="headerlink" href="#module-tsunami_ip_utils.viz.plot_utils" title="Link to this heading"></a></h2>
+<p>Various utility functions for creating interactive plots, including functions for generating plot objects from
+contributions and perturbations. These functions are used in the interactive plotting functions in the <code class="docutils literal notranslate"><span class="pre">viz</span></code> module.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.plot_utils._find_free_port">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.plot_utils.</span></span><span class="sig-name descname"><span class="pre">_find_free_port</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/plot_utils.html#_find_free_port"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.plot_utils._find_free_port" title="Link to this definition"></a></dt>
+<dd><p>Finds a free port on localhost for running a Flask/Dash server. This is done by creating a socket and binding it
+to an available port. The socket is then closed and the port number is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A free port number.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.plot_utils._determine_plot_type">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.plot_utils.</span></span><span class="sig-name descname"><span class="pre">_determine_plot_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contributions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_redundant_reactions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/plot_utils.html#_determine_plot_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.plot_utils._determine_plot_type" title="Link to this definition"></a></dt>
+<dd><p>Determines whether the contributions are nuclide-wise or nuclide-reaction-wise and whether to plot redundant
+reactions or not. Then converts the contributions (list of dictionaries) to a dictionary of contributions keyed by
+isotope then by reaction type if necessary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contributions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span>) – List of dictionaries containing the contributions to the similarity parameter for each
+nuclide or nuclide-reaction pair.</p></li>
+<li><p><strong>plot_redundant_reactions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether to plot redundant reactions (or irrelevant reactions) when considering
+nuclide-reaction-wise contributions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><dl class="simple">
+<dt>contributions</dt><dd><p>Contributions to the similarity parameter keyed by isotope then by reaction type (if necessary).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>nested_plot</dt><dd><p>Whether the plot is nested by nuclide then by reaction type.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.plot_utils._capture_html_as_image">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.plot_utils.</span></span><span class="sig-name descname"><span class="pre">_capture_html_as_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/plot_utils.html#_capture_html_as_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.plot_utils._capture_html_as_image" title="Link to this definition"></a></dt>
+<dd><p>Captures an HTML file as an image using Selenium WebDriver. This is useful for saving interactive plots as static
+images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>html_file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – Path to the HTML file to capture.</p></li>
+<li><p><strong>output_image</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pathlib.readthedocs.io/en/pep428/index.html#pathlib.Path" title="(in pathlib v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span>) – Path to save the output image</p></li>
+<li><p><strong>matrix</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether or not the html file is a matrix plot. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the function searches for a div element with a specific
+id to determine the necessary size of the webbrowser.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.viz.scatter_plot">
+<span id="tsunami-ip-utils-viz-scatter-plot-module"></span><h2>tsunami_ip_utils.viz.scatter_plot module<a class="headerlink" href="#module-tsunami_ip_utils.viz.scatter_plot" title="Link to this heading"></a></h2>
+<p>Tools for creating interactive and static scatter plots with error bars, linear regression lines, and correlation coefficient
+calculations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._replace_spearman_and_pearson">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">_replace_spearman_and_pearson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_pearson</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_spearman</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_replace_spearman_and_pearson"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._replace_spearman_and_pearson" title="Link to this definition"></a></dt>
+<dd><p>Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful
+for updating the correlation statistics in a scatter plot annotation interactively after the plot has been created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The text (scatter plot annotation) containing the Spearman and Pearson values to be updated. It is expected that the
+text contains the Spearman and Pearson values in the format <code class="docutils literal notranslate"><span class="pre">&quot;Spearman:</span> <span class="pre">&lt;b&gt;0.123456&lt;/b&gt;</span> <span class="pre">Pearson:</span> <span class="pre">&lt;b&gt;0.123456&lt;/b&gt;&quot;</span></code>.</p></li>
+<li><p><strong>new_pearson</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The new Pearson correlation coefficient value to replace the old value in the text.</p></li>
+<li><p><strong>new_spearman</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The new Spearman rank correlation coefficient value to replace the old value in the text.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The updated text with the new Spearman and Pearson values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._update_percent_difference">
+<span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">_update_percent_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_update_percent_difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._update_percent_difference" title="Link to this definition"></a></dt>
+<dd><p>Updates the percent difference in the given text with the new percent difference calculated using the new Pearson
+correlation coefficient value. This is useful for updating the percent difference in a scatter plot annotation interactively
+after the plot has been created. This is only valid for scatter plots generated by
+<a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.comparisons.correlation_comparison" title="tsunami_ip_utils.comparisons.correlation_comparison"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.comparisons.correlation_comparison()</span></code></a> or other plots that have the percent difference in the annotation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The text (scatter plot annotation) containing the percent difference to be updated. It is expected that the text
+contains the percent difference in the format <code class="docutils literal notranslate"><span class="pre">&quot;Percent</span> <span class="pre">Difference:</span> <span class="pre">&lt;b&gt;0.123456&lt;/b&gt;%&quot;</span></code> and the TSUNAMI-IP c_k value
+in the format <code class="docutils literal notranslate"><span class="pre">&quot;TSUNAMI-IP</span> <span class="pre">c_k:</span> <span class="pre">&lt;b&gt;0.123456+/-0.123456&lt;/b&gt;&quot;</span></code>.</p></li>
+<li><p><strong>reference_value</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The reference value to calculate the percent difference from. This is typically the (updated) Pearson correlation
+coefficient.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><dl class="simple">
+<dt>updated_text</dt><dd><p>The updated text with the new percent difference value.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>percent_difference</dt><dd><p>The new percent difference value with uncertainty.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">EnhancedPlotlyFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#EnhancedPlotlyFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot.EnhancedPlotlyFigure" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code></p>
+<p>This class wraps a plotly express figure object (intended for a scatter plot) and adds additional attributes for the
+summary statistics and linear regression data. This class is intended to be used with the <code class="xref py py-class docutils literal notranslate"><span class="pre">InteractiveScatterPlotter</span></code>
+class.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">_ScatterPlot</span></span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_ScatterPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz._base_plotter._Plotter" title="tsunami_ip_utils.viz._base_plotter._Plotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Plotter</span></code></a></p>
+<p>This class exists to add some additional functionality for calculating regressions and summary statistics that’s
+common to all types of scatter plots, interactive or otherwise</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlot._regression">
+<span class="sig-name descname"><span class="pre">_regression</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._regression" title="Link to this definition"></a></dt>
+<dd><p>A named tuple (<code class="docutils literal notranslate"><span class="pre">scipy.stats</span></code> <code class="docutils literal notranslate"><span class="pre">Linregress</span></code> object) containing the slope and intercept of the linear regression line
+as attributes <code class="docutils literal notranslate"><span class="pre">slope</span></code> and <code class="docutils literal notranslate"><span class="pre">intercept</span></code> respectively.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlot._pearson">
+<span class="sig-name descname"><span class="pre">_pearson</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._pearson" title="Link to this definition"></a></dt>
+<dd><p>The Pearson correlation coefficient.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlot._spearman">
+<span class="sig-name descname"><span class="pre">_spearman</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._spearman" title="Link to this definition"></a></dt>
+<dd><p>The Spearman rank correlation coefficient.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlot._summary_stats_text">
+<span class="sig-name descname"><span class="pre">_summary_stats_text</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._summary_stats_text" title="Link to this definition"></a></dt>
+<dd><p>A string containing the summary statistics for the scatter plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlot._get_summary_statistics">
+<span class="sig-name descname"><span class="pre">_get_summary_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_ScatterPlot._get_summary_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._get_summary_statistics" title="Link to this definition"></a></dt>
+<dd><p>Calculates the Pearson correlation coefficient, Spearman rank correlation coefficient, and linear regression
+parameters for the given x and y datasets. The linear regression parameters are the slope and intercept of the
+regression line. The Pearson and Spearman coefficients are also stored in the class instance as ‘pearson’ and
+‘spearman’ respectively. The slope and intercept are stored as ‘slope’ and ‘intercept’ respectively. The linear
+regression is stored as ‘regression’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – The x values of the scatter plot.</p></li>
+<li><p><strong>y</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – The y values of the scatter plot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlot._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">_ScatterPlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integral_index_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_redundant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_ScatterPlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot" title="tsunami_ip_utils.viz.scatter_plot._ScatterPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">_ScatterPlot</span></code></a></p>
+<p>A class for creating static scatter plots with error bars, linear regression lines, and correlation coefficient
+calculations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._nested">
+<span class="sig-name descname"><span class="pre">_nested</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._nested" title="Link to this definition"></a></dt>
+<dd><p>Whether the contributions are nested or not. This is unused in this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._index_name">
+<span class="sig-name descname"><span class="pre">_index_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._index_name" title="Link to this definition"></a></dt>
+<dd><p>The name of the integral index (whose contributions) being plotted. This is used only for the title of the plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_redundant">
+<span class="sig-name descname"><span class="pre">_plot_redundant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_redundant" title="Link to this definition"></a></dt>
+<dd><p>Whether to plot redundant reactions or not. This is unused in this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_type">
+<span class="sig-name descname"><span class="pre">_plot_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._plot_type" title="Link to this definition"></a></dt>
+<dd><p>Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._create_plot">
+<span class="sig-name descname"><span class="pre">_create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contribution_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_ScatterPlotter._create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._create_plot" title="Link to this definition"></a></dt>
+<dd><p>Creates a static scatter plot with error bars, linear regression line, and correlation coefficient calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contribution_pairs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]</span>) – A list of pairs of contributions to the integral index from the application and experiment.</p></li>
+<li><p><strong>isotopes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of isotopes represented by each contribution pair. This has the same length and it ordered the same
+as the contribution_pairs.</p></li>
+<li><p><strong>reactions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of reactions represented by each contribution pair. This has the same length and it ordered the same
+as the contribution_pairs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The set of isotopes and reactions is only necessary for creating labels in interactive plots (e.g. those made by
+<code class="xref py py-class docutils literal notranslate"><span class="pre">InteractiveScatterPlotter</span></code>), but is included here for consistency.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._get_plot">
+<span class="sig-name descname"><span class="pre">_get_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_ScatterPlotter._get_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._get_plot" title="Link to this definition"></a></dt>
+<dd><p>Return the ‘plot’ object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The plot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._add_to_subplot">
+<span class="sig-name descname"><span class="pre">_add_to_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_ScatterPlotter._add_to_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._add_to_subplot" title="Link to this definition"></a></dt>
+<dd><p>Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> – The figure to add the plot to.</p></li>
+<li><p><strong>position</strong> – The position of the subplot to add the plot to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The figure with the plot added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._style">
+<span class="sig-name descname"><span class="pre">_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_ScatterPlotter._style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._style" title="Link to this definition"></a></dt>
+<dd><p>Style the plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlotter._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">_InteractiveScatterPlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integral_index_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_redundant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractiveScatterPlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot" title="tsunami_ip_utils.viz.scatter_plot._ScatterPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">_ScatterPlot</span></code></a></p>
+<p>A class for creating <cite>interactive</cite> scatter plots with error bars, linear regression lines, and correlation coefficient
+calculations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._interactive_legend">
+<span class="sig-name descname"><span class="pre">_interactive_legend</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._interactive_legend" title="Link to this definition"></a></dt>
+<dd><p>Whether to include an interactive legend in the plot. This is used to toggle the visibility of the traces in the plot
+and interactively recalculate the regression and summary statistics.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._nested">
+<span class="sig-name descname"><span class="pre">_nested</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._nested" title="Link to this definition"></a></dt>
+<dd><p>Whether the contributions are nested or not. This is unused in this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._index_name">
+<span class="sig-name descname"><span class="pre">_index_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._index_name" title="Link to this definition"></a></dt>
+<dd><p>The name of the integral index (whose contributions) being plotted. This is used only for the title of the plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_redundant">
+<span class="sig-name descname"><span class="pre">_plot_redundant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_redundant" title="Link to this definition"></a></dt>
+<dd><p>Whether to plot redundant reactions or not. This is unused in this class.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_type">
+<span class="sig-name descname"><span class="pre">_plot_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._plot_type" title="Link to this definition"></a></dt>
+<dd><p>Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_plot">
+<span class="sig-name descname"><span class="pre">_create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contribution_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractiveScatterPlotter._create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_plot" title="Link to this definition"></a></dt>
+<dd><p>Create an interactive scatter plot with error bars, linear regression line, and correlation coefficient calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contribution_pairs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]</span>) – A list of pairs of contributions to the integral index from the application and experiment.</p></li>
+<li><p><strong>isotopes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of isotopes represented by each contribution pair. This has the same length and it ordered the same
+as the <code class="docutils literal notranslate"><span class="pre">contribution_pairs</span></code>.</p></li>
+<li><p><strong>reactions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of reactions represented by each contribution pair. This has the same length and it ordered the same
+as the <code class="docutils literal notranslate"><span class="pre">contribution_pairs</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_regression_and_stats">
+<span class="sig-name descname"><span class="pre">_add_regression_and_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractiveScatterPlotter._add_regression_and_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_regression_and_stats" title="Link to this definition"></a></dt>
+<dd><p>Add the linear regression line and correlation statistics to the plot. This method is called after the plot has been
+created. This method can also update a comparison with a TSUNAMI-IP calculated <span class="math notranslate nohighlight">\(c_k\)</span> value if it exists in the
+annotation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – The DataFrame containing the data for the scatter plot. This DataFrame should contain the columns <code class="docutils literal notranslate"><span class="pre">'Application</span>
+<span class="pre">&lt;integral_index_name&gt;</span> <span class="pre">Contribution'</span></code> and <code class="docutils literal notranslate"><span class="pre">'Experiment</span> <span class="pre">&lt;integral_index_name&gt;</span> <span class="pre">Contribution'</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_scatter_data">
+<span class="sig-name descname"><span class="pre">_create_scatter_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contribution_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotopes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reactions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractiveScatterPlotter._create_scatter_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._create_scatter_data" title="Link to this definition"></a></dt>
+<dd><p>Create a DataFrame from the given contribution pairs, isotopes, and reactions. This DataFrame is used to create the
+interactive scatter plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contribution_pairs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]</span>) – A list of pairs of contributions to the integral index from the application and experiment.</p></li>
+<li><p><strong>isotopes</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of isotopes represented by each contribution pair. This has the same length and it ordered the same
+as the <code class="docutils literal notranslate"><span class="pre">contribution_pairs</span></code>.</p></li>
+<li><p><strong>reactions</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The list of reactions represented by each contribution pair. This has the same length and it ordered the same
+as the <code class="docutils literal notranslate"><span class="pre">contribution_pairs</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_to_subplot">
+<span class="sig-name descname"><span class="pre">_add_to_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractiveScatterPlotter._add_to_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._add_to_subplot" title="Link to this definition"></a></dt>
+<dd><p>Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> – The figure to add the plot to.</p></li>
+<li><p><strong>position</strong> – The position of the subplot to add the plot to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure with the plot added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._get_plot">
+<span class="sig-name descname"><span class="pre">_get_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractiveScatterPlotter._get_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._get_plot" title="Link to this definition"></a></dt>
+<dd><p>Return the ‘plot’ object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The plot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._style">
+<span class="sig-name descname"><span class="pre">_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractiveScatterPlotter._style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter._style" title="Link to this definition"></a></dt>
+<dd><p>Style the plot.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">_InteractivePerturbationScatterPlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractivePerturbationScatterPlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._ScatterPlot" title="tsunami_ip_utils.viz.scatter_plot._ScatterPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">_ScatterPlot</span></code></a></p>
+<p>Class for creating an interactive scatter plot using the nuclear data sampling method (where perturbed cross section
+libraries are used to calculate sample points on the scatter plot).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._plot_type">
+<span class="sig-name descname"><span class="pre">_plot_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._plot_type" title="Link to this definition"></a></dt>
+<dd><p>Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._create_plot">
+<span class="sig-name descname"><span class="pre">_create_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractivePerturbationScatterPlotter._create_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._create_plot" title="Link to this definition"></a></dt>
+<dd><p>Create an interactive perturbation scatter plot with error bars, linear regression line, and correlation coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ufloat</span></code>]]</span>) – A list of perturbation points, each computed from sampled perturbed cross section libraries. These points are generated
+using the <a class="reference internal" href="../public_api/index.html#tsunami_ip_utils.perturbations.generate_points" title="tsunami_ip_utils.perturbations.generate_points"><code class="xref py py-func docutils literal notranslate"><span class="pre">tsunami_ip_utils.perturbations.generate_points()</span></code></a> function.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_regression_and_stats">
+<span class="sig-name descname"><span class="pre">_add_regression_and_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractivePerturbationScatterPlotter._add_regression_and_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_regression_and_stats" title="Link to this definition"></a></dt>
+<dd><p>Add the linear regression line and correlation statistics to the plot. This method is called after the plot has been
+created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span>) – The DataFrame containing the data for the scatter plot. This DataFrame should contain the columns <code class="docutils literal notranslate"><span class="pre">'Application'</span></code>
+and <code class="docutils literal notranslate"><span class="pre">'Experiment'</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_to_subplot">
+<span class="sig-name descname"><span class="pre">_add_to_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractivePerturbationScatterPlotter._add_to_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._add_to_subplot" title="Link to this definition"></a></dt>
+<dd><p>Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> – The figure to add the plot to.</p></li>
+<li><p><strong>position</strong> – The position of the subplot to add the plot to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The figure with the plot added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._get_plot">
+<span class="sig-name descname"><span class="pre">_get_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractivePerturbationScatterPlotter._get_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._get_plot" title="Link to this definition"></a></dt>
+<dd><p>Return the ‘plot’ object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The plot object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._style">
+<span class="sig-name descname"><span class="pre">_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#_InteractivePerturbationScatterPlotter._style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot._InteractivePerturbationScatterPlotter._style" title="Link to this definition"></a></dt>
+<dd><p>Style the plot.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tsunami_ip_utils.viz.scatter_plot.</span></span><span class="sig-name descname"><span class="pre">InteractiveScatterLegend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interactive_scatter_plot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#InteractiveScatterLegend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter" title="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter</span></code></a></p>
+<p>An implementation of an interactive legend (that automatically updates the regression and summary statistics following
+the exclusion of certain data in the scatter plot) for an interactive (Plotly) scatter plot.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;_abc._abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._abc_impl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._interactive_scatter_plot">
+<span class="sig-name descname"><span class="pre">_interactive_scatter_plot</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter" title="tsunami_ip_utils.viz.scatter_plot._InteractiveScatterPlotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">_InteractiveScatterPlotter</span></code></a></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._interactive_scatter_plot" title="Link to this definition"></a></dt>
+<dd><p>The interactive scatter plot object that the interactive legend is associated with.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._excluded_isotopes">
+<span class="sig-name descname"><span class="pre">_excluded_isotopes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._excluded_isotopes" title="Link to this definition"></a></dt>
+<dd><p>A list of isotopes that have been excluded from the scatter plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._app">
+<span class="sig-name descname"><span class="pre">_app</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dash</span></code></em><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._app" title="Link to this definition"></a></dt>
+<dd><p>The Dash application object for the interactive legend.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._setup_callbacks">
+<span class="sig-name descname"><span class="pre">_setup_callbacks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsunami_ip_utils/viz/scatter_plot.html#InteractiveScatterLegend._setup_callbacks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend._setup_callbacks" title="Link to this definition"></a></dt>
+<dd><p>Set up the Dash callbacks for the interactive legend.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-tsunami_ip_utils.viz.viz">
+<span id="tsunami-ip-utils-viz-viz-module"></span><h2>tsunami_ip_utils.viz.viz module<a class="headerlink" href="#module-tsunami_ip_utils.viz.viz" title="Link to this heading"></a></h2>
+</section>
+<section id="module-tsunami_ip_utils.viz">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-tsunami_ip_utils.viz" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Private API Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../paths.html" class="btn btn-neutral float-right" title="paths module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

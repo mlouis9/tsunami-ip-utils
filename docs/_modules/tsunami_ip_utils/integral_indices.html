@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsunami_ip_utils.integral_indices &mdash; tsunami_ip_utils 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=c1b525dc" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            tsunami_ip_utils
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../public_api/index.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../private_api/index.html">Private API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../paths.html">Paths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../report/index.html">Report</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tsunami_ip_utils</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tsunami_ip_utils.integral_indices</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tsunami_ip_utils.integral_indices</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">ufloat</span><span class="p">,</span> <span class="n">umath</span><span class="p">,</span> <span class="n">unumpy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils.readers</span> <span class="kn">import</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">,</span> <span class="n">read_uncertainty_contributions_out</span><span class="p">,</span> <span class="n">read_uncertainty_contributions_sdf</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils._error</span> <span class="kn">import</span> <span class="n">_unit_vector_uncertainty_propagation</span><span class="p">,</span> <span class="n">_dot_product_uncertainty_propagation</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">uncertainties.core</span> <span class="kn">import</span> <span class="n">Variable</span>
+<span class="kn">from</span> <span class="nn">tsunami_ip_utils._utils</span> <span class="kn">import</span> <span class="n">_convert_paths</span>
+
+<span class="k">def</span> <span class="nf">_calculate_E_from_sensitivity_vecs</span><span class="p">(</span><span class="n">application_vector</span><span class="p">:</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">,</span> <span class="n">experiment_vector</span><span class="p">:</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">,</span> 
+                                      <span class="n">application_filename</span><span class="p">:</span> <span class="n">Path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment_filename</span><span class="p">:</span> <span class="n">Path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                      <span class="n">uncertainties</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;automatic&#39;</span><span class="p">,</span> <span class="n">experiment_norm</span><span class="p">:</span> <span class="n">Variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                      <span class="n">application_norm</span><span class="p">:</span> <span class="n">Variable</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the integral index: E given the sensitivity vectors for an application and an experiment. **NOTE**: the </span>
+<span class="sd">    application and experiment filenames are used to break the correlation between the application and experiment vectors </span>
+<span class="sd">    (that should not exist). This is because the vectors are only correlated if the application and experiment are the same.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_vector</span>
+<span class="sd">        Sensitivity vector for the application.</span>
+<span class="sd">    experiment_vector</span>
+<span class="sd">        Sensitivity vector for the experiment.</span>
+<span class="sd">    application_filename</span>
+<span class="sd">        Filename of the application sdf file (only needed for automatic uncertianty propagation).</span>
+<span class="sd">    experiment_filename</span>
+<span class="sd">        Filename of the experiment sdf file (only needed for automatic uncertianty propagation).</span>
+<span class="sd">    uncertainties</span>
+<span class="sd">        Type of error propagation to use. Default is &#39;automatic&#39; which uses the uncertainties package.</span>
+<span class="sd">        If set to &#39;manual&#39;, then manual error propagation is used which is generally faster</span>
+<span class="sd">    experiment_norm</span>
+<span class="sd">        Norm of the experiment vector. If not provided, it is calculated. This is mainly used for</span>
+<span class="sd">        calculating E contributions, where the denominator is not actually the norm of the application and experiment</span>
+<span class="sd">        vectors.</span>
+<span class="sd">    application_norm</span>
+<span class="sd">        Norm of the application vector. If not provided, it is calculated. This is mainly used for</span>
+<span class="sd">        calculating E contributions, where the denominator is not actually the norm of the application and experiment</span>
+<span class="sd">        vectors.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Similarity parameter between the application and the experiment&quot;&quot;&quot;</span>
+    
+    <span class="n">norms_not_provided</span> <span class="o">=</span> <span class="p">(</span> <span class="n">experiment_norm</span> <span class="o">==</span> <span class="kc">None</span> <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span> <span class="n">application_norm</span> <span class="o">==</span> <span class="kc">None</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">uncertainties</span> <span class="o">==</span> <span class="s1">&#39;automatic&#39;</span><span class="p">:</span> <span class="c1"># Automatic error propagation with uncertainties package</span>
+        <span class="k">if</span> <span class="n">application_filename</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">experiment_filename</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Application and experiment filenames must be provided for automatic error propagation&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">norms_not_provided</span><span class="p">:</span>
+            <span class="n">application_norm</span> <span class="o">=</span> <span class="n">umath</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">application_vector</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">experiment_norm</span> <span class="o">=</span> <span class="n">umath</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">experiment_vector</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        
+        <span class="n">application_unit_vector</span> <span class="o">=</span> <span class="n">application_vector</span> <span class="o">/</span> <span class="n">application_norm</span>
+        <span class="n">experiment_unit_vector</span> <span class="o">=</span> <span class="n">experiment_vector</span> <span class="o">/</span> <span class="n">experiment_norm</span>
+
+        <span class="c1"># For some reason, the above introduces a correlation between the application and experiment vectors</span>
+        <span class="c1"># which should only be the case if the application and the experiment are the same, so we manually </span>
+        <span class="c1"># break this correlation otherwise</span>
+        
+        <span class="k">if</span> <span class="n">application_filename</span> <span class="o">!=</span> <span class="n">experiment_filename</span><span class="p">:</span>
+            <span class="c1"># Break dependency to treat as independent</span>
+            <span class="n">application_unit_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ufloat</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">application_unit_vector</span><span class="p">])</span>
+            <span class="n">experiment_unit_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ufloat</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">experiment_unit_vector</span><span class="p">])</span>
+
+        <span class="n">dot_product</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">application_unit_vector</span><span class="p">,</span> <span class="n">experiment_unit_vector</span><span class="p">)</span>
+
+        <span class="n">E</span> <span class="o">=</span> <span class="n">dot_product</span>
+        <span class="k">return</span> <span class="n">E</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Manual error propagation</span>
+
+        <span class="c1"># Same calculation for E</span>
+        <span class="k">if</span> <span class="n">norms_not_provided</span><span class="p">:</span>
+            <span class="n">application_norm</span> <span class="o">=</span> <span class="n">umath</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">application_vector</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">experiment_norm</span> <span class="o">=</span> <span class="n">umath</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">experiment_vector</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">application_unit_vector</span> <span class="o">=</span> <span class="n">application_vector</span> <span class="o">/</span> <span class="n">application_norm</span>
+        <span class="n">experiment_unit_vector</span> <span class="o">=</span> <span class="n">experiment_vector</span> <span class="o">/</span> <span class="n">experiment_norm</span>
+
+        <span class="n">dot_product</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">application_unit_vector</span><span class="p">,</span> <span class="n">experiment_unit_vector</span><span class="p">)</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">dot_product</span><span class="o">.</span><span class="n">n</span>
+        
+        <span class="c1"># ------------------------------------------</span>
+        <span class="c1"># Now manually perform the error propagation</span>
+        <span class="c1"># ------------------------------------------</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Idea: propagate uncertainty of components of each sensitivity vector to the normalized sensitivty vector</span>
+<span class="sd">        i.e. u / ||u|| = u^, v / ||v|| = v^</span>
+<span class="sd">        </span>
+<span class="sd">        E = u^ . v^</span>
+
+<span class="sd">        Since u^ and v^ are completely uncorrelated, we may first calculate the uncertainty of u^ and v^ separately then</span>
+<span class="sd">        use those to calculate the uncertainty of E.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Calculate the uncertainties in the unit vectors</span>
+        <span class="n">application_unit_vector_error</span> <span class="o">=</span> <span class="n">_unit_vector_uncertainty_propagation</span><span class="p">(</span><span class="n">application_vector</span><span class="p">)</span>
+        <span class="n">experiment_unit_vector_error</span> <span class="o">=</span> <span class="n">_unit_vector_uncertainty_propagation</span><span class="p">(</span><span class="n">experiment_vector</span><span class="p">)</span>
+
+        <span class="c1"># Construct application and experiment unit vectors as unumpy.uarray objects</span>
+        <span class="n">application_unit_vector</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span><span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">application_unit_vector</span><span class="p">),</span> \
+                                                    <span class="n">application_unit_vector_error</span><span class="p">)</span>
+        <span class="n">experiment_unit_vector</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span><span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">experiment_unit_vector</span><span class="p">),</span> <span class="n">experiment_unit_vector_error</span><span class="p">)</span>
+
+        <span class="c1"># Now calculate error in dot product to get the uncertainty in E</span>
+        <span class="n">E_uncertainty</span> <span class="o">=</span> <span class="n">_dot_product_uncertainty_propagation</span><span class="p">(</span><span class="n">application_unit_vector</span><span class="p">,</span> <span class="n">experiment_unit_vector</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">E_uncertainty</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_create_sensitivity_vector</span><span class="p">(</span><span class="n">sdfs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a senstivity vector from all of the sensitivity profiles from a specific application or experiment</span>
+<span class="sd">    by concatenating them together.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; sdfs = [ unumpy.uarray( [1, 2, 3], [0.1, 0.2, 0.3] ), unumpy.uarray( [4, 5, 6], [0.4, 0.5, 0.6] ) ]</span>
+<span class="sd">    &gt;&gt;&gt; _create_sensitivity_vector(sdfs)</span>
+<span class="sd">    array([1.0+/-0.1, 2.0+/-0.2, 3.0+/-0.3, 4.0+/-0.4, 5.0+/-0.5, 6.0+/-0.6],</span>
+<span class="sd">          dtype=object)</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">        List of sensitivity profiles for each nuclide-reaction pair in consideration.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Sensitivities from all of the sensitivity profiles combined into a single vector of length</span>
+<span class="sd">        ``sum( [ len(sdf_profile) for sdf_profile in sdfs ] )``&quot;&quot;&quot;</span>
+    <span class="n">uncertainties</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">unumpy</span><span class="o">.</span><span class="n">std_devs</span><span class="p">(</span><span class="n">sdf</span><span class="p">)</span> <span class="k">for</span> <span class="n">sdf</span> <span class="ow">in</span> <span class="n">sdfs</span><span class="p">])</span>
+    <span class="n">senstivities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">sdf</span><span class="p">)</span> <span class="k">for</span> <span class="n">sdf</span> <span class="ow">in</span> <span class="n">sdfs</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span><span class="n">senstivities</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="calculate_E">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.integral_indices.calculate_E">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_E</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> <span class="n">experiment_filenames</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]],</span> 
+                <span class="n">reaction_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the similarity parameter, E for each application with each available experiment given the application </span>
+<span class="sd">    and experiment sdf files</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_filenames</span>
+<span class="sd">        Paths to the application sdf files.</span>
+<span class="sd">    experiment_filenames</span>
+<span class="sd">        Paths to the experiment sdf files.</span>
+<span class="sd">    reaction_type </span>
+<span class="sd">        The type of reaction to consider in the calculation of E. Default is ``&#39;all``&#39; which considers all </span>
+<span class="sd">        reactions.</span>
+<span class="sd">    uncertainties </span>
+<span class="sd">        The type of uncertainty propagation to use. Default is ``&#39;automatic&#39;`` which uses the uncertainties</span>
+<span class="sd">        package for error propagation. If set to ``&#39;manual&#39;``, then manual error propagation is used.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Similarity parameter for each application with each experiment, shape: ``(len(application_filenames), len(experiment_filenames))``&quot;&quot;&quot;</span>
+
+    <span class="c1"># Read the application and experiment sdf files</span>
+
+    <span class="n">application_sdfs</span> <span class="o">=</span> <span class="p">[</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">convert_to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">application_filenames</span> <span class="p">]</span>
+    <span class="n">experiment_sdfs</span>  <span class="o">=</span> <span class="p">[</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">convert_to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">experiment_filenames</span> <span class="p">]</span>
+
+    <span class="c1"># Create a matrix to store the similarity parameter E for each application with each experiment</span>
+    <span class="n">E_vals</span> <span class="o">=</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">umatrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiment_sdfs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">application_sdfs</span><span class="p">)</span> <span class="p">)</span> <span class="p">),</span> \
+                            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiment_sdfs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">application_sdfs</span><span class="p">)</span> <span class="p">)</span> <span class="p">))</span>
+    
+    <span class="c1"># Now calculate the similarity parameter E for each application with each experiment</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">experiment_sdfs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">application</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">application_sdfs</span><span class="p">):</span>
+            <span class="c1"># Now add missing data to the application and experiment dictionaries</span>
+            <span class="n">all_isotopes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">sdf_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">sdf_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="n">_add_missing_reactions_and_nuclides</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">,</span> <span class="n">experiment</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">,</span> <span class="n">all_isotopes</span><span class="p">)</span>
+            
+            <span class="c1"># Sometimes the application and experiment dictionaries have different orders, which causes their sensitivity</span>
+            <span class="c1"># profiles and hence sensitivity vectors to be different. To fix this, we need to sort the dictionaries</span>
+
+            <span class="c1"># Sort the application by the experiment keys</span>
+            <span class="n">application</span><span class="o">.</span><span class="n">sdf_data</span> <span class="o">=</span> <span class="p">{</span> <span class="n">isotope</span><span class="p">:</span> <span class="p">{</span> <span class="n">reaction</span><span class="p">:</span> <span class="n">application</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">]</span> \
+                                               <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">sdf_data</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="p">}</span> \
+                                                <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">sdf_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">}</span>
+
+            <span class="n">application_profiles</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">get_sensitivity_profiles</span><span class="p">()</span>
+            <span class="n">experiment_profiles</span>  <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">get_sensitivity_profiles</span><span class="p">()</span>
+
+            <span class="n">application_vector</span> <span class="o">=</span> <span class="n">_create_sensitivity_vector</span><span class="p">(</span><span class="n">application_profiles</span><span class="p">)</span>
+            <span class="n">experiment_vector</span>  <span class="o">=</span> <span class="n">_create_sensitivity_vector</span><span class="p">(</span><span class="n">experiment_profiles</span><span class="p">)</span>
+
+            <span class="n">E_vals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">_calculate_E_from_sensitivity_vecs</span><span class="p">(</span><span class="n">application_vector</span><span class="p">,</span> <span class="n">experiment_vector</span><span class="p">,</span> \
+                                                             <span class="n">application_filenames</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">experiment_filenames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">uncertainties</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">E_vals</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">application</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">isotope</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">all_reactions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
+                                      <span class="n">application_norm</span><span class="p">:</span> <span class="n">Variable</span><span class="p">,</span> <span class="n">experiment_norm</span><span class="p">:</span> <span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate contributions to the similarity parameter E for each reaction type for a given isotope.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application</span>
+<span class="sd">        Dictionary of application sensitivity profiles.</span>
+<span class="sd">    experiment</span>
+<span class="sd">        Dictionary of experiment sensitivity profiles.</span>
+<span class="sd">    isotope</span>
+<span class="sd">        Isotope to consider.</span>
+<span class="sd">    all_reactions</span>
+<span class="sd">        List of all possible reaction types.</span>
+<span class="sd">    application_norm</span>
+<span class="sd">        Norm of the application sensitivity vector.</span>
+<span class="sd">    experiment_norm</span>
+<span class="sd">        Norm of the experiment sensitivity vector.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        List of dictionaries containing the contribution to the similarity parameter E for each</span>
+<span class="sd">        reaction type.&quot;&quot;&quot;</span>
+    
+    <span class="n">E_contributions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_reactions</span><span class="p">:</span>
+        <span class="n">application_vector</span> <span class="o">=</span> <span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">][</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span>
+        <span class="n">experiment_vector</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">][</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span>
+
+        <span class="n">E_contribution</span> <span class="o">=</span> <span class="n">_calculate_E_from_sensitivity_vecs</span><span class="p">(</span><span class="n">application_vector</span><span class="p">,</span> <span class="n">experiment_vector</span><span class="p">,</span> <span class="n">uncertainties</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span> \
+                                                           <span class="n">application_norm</span><span class="o">=</span><span class="n">application_norm</span><span class="p">,</span> <span class="n">experiment_norm</span><span class="o">=</span><span class="n">experiment_norm</span><span class="p">)</span>
+        <span class="n">E_contributions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;isotope&quot;</span><span class="p">:</span> <span class="n">isotope</span><span class="p">,</span>
+            <span class="s2">&quot;reaction_type&quot;</span><span class="p">:</span> <span class="n">reaction</span><span class="p">,</span>
+            <span class="s2">&quot;contribution&quot;</span><span class="p">:</span> <span class="n">E_contribution</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">E_contributions</span>
+
+<span class="k">def</span> <span class="nf">_add_missing_reactions_and_nuclides</span><span class="p">(</span><span class="n">application</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">all_isotopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
+                                       <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;sdfs&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add missing reactions and nuclides to the application and experiment dictionaries with an sdf profile of all zeros.</span>
+<span class="sd">    The set of all isotopes </span>
+<span class="sd">    **NOTE**: since dictionaries are passed by reference, this function does not return anything, but modifies the</span>
+<span class="sd">    application and experiment dictionaries in place.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application</span>
+<span class="sd">        Dictionary of application sensitivity profiles.</span>
+<span class="sd">    experiment</span>
+<span class="sd">        Dictionary of experiment sensitivity profiles.</span>
+<span class="sd">    all_isotopes</span>
+<span class="sd">        List of all isotopes in the application and experiment dictionaries.</span>
+<span class="sd">    mode</span>
+<span class="sd">        The mode to use for adding missing reactions and nuclides. Default is ``&#39;sdfs&#39;`` which adds sdf profiles to missing</span>
+<span class="sd">        reactions and nuclides. If set to ``&#39;contribution&#39;``, then the contributions to the similarity parameter E are set to zero</span>
+<span class="sd">        for missing nuclides and reactions.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        Set of all isotopes in the application and experiment dictionaries.&quot;&quot;&quot;</span>
+    <span class="c1"># Whether or not the supplied data is only isotopes or includes reactions</span>
+    <span class="n">isotopes_only</span> <span class="o">=</span>  <span class="nb">type</span><span class="p">(</span> <span class="n">application</span><span class="p">[</span> <span class="nb">list</span><span class="p">(</span> <span class="n">application</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">]</span> <span class="p">)</span> <span class="o">!=</span> <span class="nb">dict</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopes_only</span><span class="p">:</span>
+        <span class="n">application_reactions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span> <span class="n">key</span> <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">])</span>
+        <span class="n">experiment_reactions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span> <span class="n">key</span> <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">])</span>
+        <span class="n">all_reactions</span> <span class="o">=</span> <span class="n">application_reactions</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">experiment_reactions</span><span class="p">)</span>
+
+        <span class="c1"># Now, for any reactions that are in experiment but not application (and vice versa), they need to be added with an sdf</span>
+        <span class="c1"># profile of all zeros</span>
+
+        <span class="c1"># Get an arbitrary sdf profile to get the shape from</span>
+        <span class="n">first_application_nuclide</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">first_application_reaction</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">application</span><span class="p">[</span><span class="n">first_application_nuclide</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sdfs&#39;</span><span class="p">:</span>
+            <span class="n">zero_data</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;sensitivities&#39;</span><span class="p">:</span> <span class="n">application</span><span class="p">[</span><span class="n">first_application_nuclide</span><span class="p">][</span><span class="n">first_application_reaction</span><span class="p">][</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;contribution&#39;</span><span class="p">:</span>
+            <span class="n">zero_data</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Now define a function used for updating the reactions for a given isotope</span>
+        <span class="k">def</span> <span class="nf">update_reactions</span><span class="p">(</span><span class="n">isotope</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_reactions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">reaction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">isotope</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">isotope</span><span class="p">[</span><span class="n">reaction</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No reactions, only isotope totals</span>
+        <span class="n">all_reactions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sdfs&#39;</span><span class="p">:</span>
+            <span class="n">zero_data</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;sensitivities&#39;</span><span class="p">:</span> <span class="n">application</span><span class="p">[</span><span class="n">first_application_nuclide</span><span class="p">][</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span>
+            <span class="p">}</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;contribution&#39;</span><span class="p">:</span>
+            <span class="n">zero_data</span> <span class="o">=</span> <span class="n">ufloat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># ---------------------------------------</span>
+    <span class="c1"># Now add missing reactions and nuclides</span>
+    <span class="c1"># ---------------------------------------</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopes_only</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># If reaction is missing for this isotope, add it with an sdf profile of all zeros</span>
+            <span class="n">update_reactions</span><span class="p">(</span><span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># If reaction is missing for this isotope, add it with an sdf profile of all zeros</span>
+            <span class="n">update_reactions</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">])</span>
+
+    <span class="c1"># Now zero out nuclides that are not in the application or experiment</span>
+    <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">all_isotopes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">isotope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopes_only</span><span class="p">:</span>
+                <span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">reaction</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span> <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_reactions</span> <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">isotope</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopes_only</span><span class="p">:</span>
+                <span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">reaction</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span> <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_reactions</span> <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">all_reactions</span>
+
+<span class="k">def</span> <span class="nf">_get_nuclide_and_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">application</span><span class="p">:</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="n">RegionIntegratedSdfReader</span>
+                                                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the contributions to the similarity parameter E for each nuclide and for each reaction type for a given</span>
+<span class="sd">    application and experiment.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application</span>
+<span class="sd">        Contains application sensitivity profile dictionaries.</span>
+<span class="sd">    experiment</span>
+<span class="sd">        Contains experiment sensitivity profile dictionaries.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * nuclide_wise_contributions</span>
+<span class="sd">            List of dictionaries containing the contribution to the similarity parameter E.</span>
+<span class="sd">            for each nuclide</span>
+<span class="sd">        * nuclide_reaction_wise_contributions</span>
+<span class="sd">            List of dictionaries containing the contribution to the similarity.&quot;&quot;&quot;</span>
+
+    <span class="c1"># First, extract the sensitivity vectors for the application and experiment</span>
+    
+    <span class="c1"># Calculate |S_A| and |S_E| to normalize the E contributions properly</span>
+
+    <span class="n">application_vector</span> <span class="o">=</span> <span class="n">_create_sensitivity_vector</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">get_sensitivity_profiles</span><span class="p">())</span>
+    <span class="n">experiment_vector</span> <span class="o">=</span> <span class="n">_create_sensitivity_vector</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">get_sensitivity_profiles</span><span class="p">())</span>
+
+    <span class="n">application_norm</span> <span class="o">=</span> <span class="n">umath</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">application_vector</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">experiment_norm</span> <span class="o">=</span> <span class="n">umath</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">experiment_vector</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Now convert the application and experiment sdf&#39;s to dictionaries keyed by nuclide and reaction type</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">convert_to_dict</span><span class="p">()</span><span class="o">.</span><span class="n">sdf_data</span>
+    <span class="n">experiment</span>  <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">convert_to_dict</span><span class="p">()</span><span class="o">.</span><span class="n">sdf_data</span>
+
+    <span class="n">nuclide_wise_contributions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nuclide_reaction_wise_contributions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># All isotopes in the application and experiment</span>
+    <span class="n">all_isotopes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+    <span class="c1"># Since different nuclides can have different reactions, we need to consider all reactions for each nuclide (e.g. </span>
+    <span class="c1"># fissile isotopes will have fission reactions, while non-fissile isotopes will not)</span>
+    <span class="n">all_reactions</span> <span class="o">=</span> <span class="n">_add_missing_reactions_and_nuclides</span><span class="p">(</span><span class="n">application</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">all_isotopes</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">all_isotopes</span><span class="p">:</span>
+
+        <span class="c1"># For isotope-wise contribution, the sensitivity vector is all of the reaction sensitivities concatenated together</span>
+        <span class="n">application_vector</span> <span class="o">=</span> <span class="n">_create_sensitivity_vector</span><span class="p">([</span> <span class="n">application</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">][</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> \
+                                                        <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_reactions</span> <span class="p">]</span> <span class="p">)</span>
+        <span class="n">experiment_vector</span>  <span class="o">=</span> <span class="n">_create_sensitivity_vector</span><span class="p">([</span> <span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">][</span><span class="n">reaction</span><span class="p">][</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span> \
+                                                        <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">all_reactions</span> <span class="p">])</span>
+
+        <span class="n">E_isotope_contribution</span> <span class="o">=</span> <span class="n">_calculate_E_from_sensitivity_vecs</span><span class="p">(</span><span class="n">application_vector</span><span class="p">,</span> <span class="n">experiment_vector</span><span class="p">,</span> <span class="n">uncertainties</span><span class="o">=</span><span class="s1">&#39;manual&#39;</span><span class="p">,</span>
+                                                                   <span class="n">application_norm</span><span class="o">=</span><span class="n">application_norm</span><span class="p">,</span> \
+                                                                    <span class="n">experiment_norm</span><span class="o">=</span><span class="n">experiment_norm</span><span class="p">)</span>
+
+        <span class="n">nuclide_wise_contributions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">&quot;isotope&quot;</span><span class="p">:</span> <span class="n">isotope</span><span class="p">,</span>
+            <span class="s2">&quot;contribution&quot;</span><span class="p">:</span> <span class="n">E_isotope_contribution</span>
+        <span class="p">})</span>
+
+        <span class="c1"># For nuclide-reaction-wise contribution, we need to consider each reaction type</span>
+        <span class="n">nuclide_reaction_wise_contributions</span> <span class="o">+=</span> \
+            <span class="n">_get_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">application</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">all_reactions</span><span class="p">,</span> \
+                                              <span class="n">application_norm</span><span class="p">,</span> <span class="n">experiment_norm</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">nuclide_wise_contributions</span><span class="p">,</span> <span class="n">nuclide_reaction_wise_contributions</span>
+
+
+<div class="viewcode-block" id="calculate_E_contributions">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.integral_indices.calculate_E_contributions">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_E_contributions</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">experiment_filenames</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+                              <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">,</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the contributions to the similarity parameter E for each application with each available experiment </span>
+<span class="sd">    on a nuclide basis and on a nuclide-reaction basis.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_filenames</span>
+<span class="sd">        Paths to the application sdf files.</span>
+<span class="sd">    experiment_filenames</span>
+<span class="sd">        Paths to the experiment sdf files.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        * E_contributions_nuclide</span>
+<span class="sd">            Contributions to the similarity parameter E for each application with each</span>
+<span class="sd">            experiment on a nuclide basis.</span>
+<span class="sd">        * E_contributions_nuclide_reaction</span>
+<span class="sd">            Contributions to the similarity parameter E for each application with</span>
+<span class="sd">            each experiment on a nuclide-reaction basis.&quot;&quot;&quot;</span>
+    
+    <span class="n">application_sdfs</span> <span class="o">=</span> <span class="p">[</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">application_filenames</span> <span class="p">]</span>
+    <span class="n">experiment_sdfs</span>  <span class="o">=</span> <span class="p">[</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">experiment_filenames</span> <span class="p">]</span>
+    
+    <span class="c1"># Initialize np object arrays to store the E contributions</span>
+    <span class="n">E_nuclide_wise</span>          <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;application&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="n">E_nuclide_reaction_wise</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;application&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+
+    <span class="c1"># Calculate contributions to E for each application</span>
+    <span class="k">for</span> <span class="n">application</span> <span class="ow">in</span> <span class="n">application_sdfs</span><span class="p">:</span>
+        <span class="n">nuclide_wise_contributions</span><span class="p">,</span> <span class="n">nuclide_reaction_wise_contributions</span> <span class="o">=</span> \
+            <span class="n">_get_nuclide_and_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">application</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
+
+        <span class="n">E_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide_wise_contributions</span><span class="p">)</span>
+        <span class="n">E_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nuclide_reaction_wise_contributions</span>
+
+    <span class="c1"># Calculate contributions to E for each experiment</span>
+    <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">experiment_sdfs</span><span class="p">:</span>
+        <span class="n">nuclide_wise_contributions</span><span class="p">,</span> <span class="n">nuclide_reaction_wise_contributions</span> <span class="o">=</span> \
+            <span class="n">_get_nuclide_and_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">experiment</span><span class="p">)</span>
+
+        <span class="n">E_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide_wise_contributions</span><span class="p">)</span>
+        <span class="n">E_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nuclide_reaction_wise_contributions</span>
+
+    <span class="k">return</span> <span class="n">E_nuclide_wise</span><span class="p">,</span> <span class="n">E_nuclide_reaction_wise</span></div>
+
+
+
+<div class="viewcode-block" id="get_uncertainty_contributions">
+<a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.integral_indices.get_uncertainty_contributions">[docs]</a>
+<span class="nd">@_convert_paths</span>
+<span class="k">def</span> <span class="nf">get_uncertainty_contributions</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                  <span class="n">experiment_filenames</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">variance</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
+                                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span> <span class="n">Dict</span><span class="p">[</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">]</span> <span class="p">],</span> <span class="n">Dict</span><span class="p">[</span> <span class="nb">str</span><span class="p">,</span>  <span class="n">List</span><span class="p">[</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">]</span> <span class="p">]</span> <span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the contributions to the uncertainty in :math:`k_{\\text{eff}}` (i.e. :math:`\\frac{dk}{k}`) for each </span>
+<span class="sd">    application and each available experiment on a nuclide basis and on a nuclide-reaction basis from the</span>
+<span class="sd">    provided TSUNAMI-IP ``.out`` or ``.sdf`` files.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    application_filenames</span>
+<span class="sd">        (Optional) Paths to the application output (``.out``) or ``.sdf`` files.</span>
+<span class="sd">    experiment_filenames</span>
+<span class="sd">        (Optional) Paths to the experiment output (``.out``) or ``.sdf`` files.</span>
+<span class="sd">    variance</span>
+<span class="sd">        If the contributions to the nuclear data induced variance should be returned, default is ``False``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        - uncertainty_contributions_nuclide</span>
+<span class="sd">            List of contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and </span>
+<span class="sd">            each experiment on a nuclide basis. Keyed by ``&#39;application&#39;`` and ``&#39;experiment&#39;``.</span>
+<span class="sd">        - uncertainty_contributions_nuclide_reaction</span>
+<span class="sd">            List of contributions to the uncertainty in :math:`k_{\\text{eff}}` for each application and each experiment </span>
+<span class="sd">            on a nuclide-reaction basis. Keyed by ``&#39;application&#39;`` and ``&#39;experiment&#39;``.</span>
+<span class="sd">            </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If either the application or experiment filenames are not provided, then the corresponding output will be an empty list.</span>
+
+<span class="sd">    </span>
+<span class="sd">    Theory</span>
+<span class="sd">    ======</span>
+<span class="sd">    The nuclear-data induced varaince in :math:`k_{\\text{eff}}` (defined in </span>
+<span class="sd">    `Equation 6.3.34 &lt;https://scale-manual.ornl.gov/sams.html#equation-eq6-3-34&gt;`_ ) can be decomposed into contributions </span>
+<span class="sd">    from each nulicde-reaction covariance via `Equation 6.3.35 &lt;https://scale-manual.ornl.gov/sams.html#equation-eq6-3-35&gt;`_</span>
+<span class="sd">    in the SALE manual. The `total` uncertainty in :math:`k_{\\text{eff}}` (as well as the contributions on a nuclide-reaction</span>
+<span class="sd">    wise basis) can be calculated from these two definitions by simply taking the square root. For nuclide-reaction covariances</span>
+<span class="sd">    that are not principle submatrices, the contribution to the variance may be negative (as they are not guaranteed to be</span>
+<span class="sd">    positive definite), and so the uncertainty contribution may be (formally) imaginary. However, these contributions physically</span>
+<span class="sd">    represent anticorrelations in the nuclear data, and so TSUNAMI reports them as negative values, but with a note that there</span>
+<span class="sd">    is a special rule for handling these values (see the footer of the ``Uncertainty Information`` section in</span>
+<span class="sd">    `Example 6.6.3 &lt;https://scale-manual.ornl.gov/sams.html#list6-3-3&gt;`_ ).&quot;&quot;&quot;</span>
+    
+    <span class="n">dk_over_k_nuclide_wise</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;application&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">[]</span>    
+    <span class="p">}</span>
+    <span class="n">dk_over_k_nuclide_reaction_wise</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;application&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">[]</span>    
+    <span class="p">}</span>
+
+    <span class="n">application_filenames</span> <span class="o">=</span> <span class="n">application_filenames</span> <span class="k">if</span> <span class="n">application_filenames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">experiment_filenames</span> <span class="o">=</span> <span class="n">experiment_filenames</span> <span class="k">if</span> <span class="n">experiment_filenames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">all_filenames</span> <span class="o">=</span> <span class="n">application_filenames</span> <span class="o">+</span> <span class="n">experiment_filenames</span>
+
+    <span class="n">at_least_one_not_out</span> <span class="o">=</span> <span class="nb">any</span><span class="p">([</span> <span class="n">filename</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s1">&#39;.out&#39;</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">all_filenames</span> <span class="p">])</span>
+    <span class="n">all_sdf</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span> <span class="n">filename</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.sdf&#39;</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">application_filenames</span> <span class="o">+</span> <span class="n">experiment_filenames</span> <span class="p">])</span>
+    <span class="k">if</span> <span class="n">at_least_one_not_out</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">all_sdf</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All files must be either .out or .sdf files&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">all_sdf</span><span class="p">:</span>
+        <span class="c1"># Application</span>
+        <span class="k">if</span> <span class="n">application_filenames</span> <span class="o">!=</span> <span class="p">[]:</span>
+            <span class="n">dk_over_k_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">],</span> <span class="n">dk_over_k_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">read_uncertainty_contributions_sdf</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dk_over_k_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">dk_over_k_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Experiment</span>
+        <span class="k">if</span> <span class="n">experiment_filenames</span> <span class="o">!=</span> <span class="p">[]:</span>
+            <span class="n">dk_over_k_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">],</span> <span class="n">dk_over_k_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">read_uncertainty_contributions_sdf</span><span class="p">(</span><span class="n">experiment_filenames</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dk_over_k_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">dk_over_k_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">application_filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">application_filenames</span><span class="p">):</span>
+            <span class="n">dk_over_k_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dk_over_k_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;application&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">read_uncertainty_contributions_out</span><span class="p">(</span><span class="n">application_filename</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">experiment_filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">experiment_filenames</span><span class="p">):</span>
+            <span class="n">dk_over_k_nuclide_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">dk_over_k_nuclide_reaction_wise</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">read_uncertainty_contributions_out</span><span class="p">(</span><span class="n">experiment_filename</span><span class="p">)</span>
+            
+    <span class="k">if</span> <span class="n">variance</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dk_over_k_nuclide_wise</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># Now square all of the contributions for each system (application or experiment)</span>
+            <span class="k">for</span> <span class="n">contributions_list</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dk_over_k_nuclide_wise</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">dk_over_k_nuclide_reaction_wise</span><span class="p">[</span><span class="n">key</span><span class="p">]]:</span>
+                <span class="k">for</span> <span class="n">system</span> <span class="ow">in</span> <span class="n">contributions_list</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">nuclide_index</span><span class="p">,</span> <span class="n">contribution_dict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">system</span><span class="p">):</span>
+                        <span class="n">contribution</span> <span class="o">=</span> <span class="n">contribution_dict</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span>
+                        <span class="n">system</span><span class="p">[</span><span class="n">nuclide_index</span><span class="p">][</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">contribution</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="k">if</span> <span class="n">contribution</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="p">(</span><span class="n">contribution</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            
+    <span class="k">return</span> <span class="n">dk_over_k_nuclide_wise</span><span class="p">,</span> <span class="n">dk_over_k_nuclide_reaction_wise</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Matthew Louis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
