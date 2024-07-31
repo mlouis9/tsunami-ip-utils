@@ -182,7 +182,7 @@ def _create_plot_element(i: int, j: int, plot_object: Union[InteractiveScatterLe
         if isinstance(plot_object[0], matplotlib.figure.Figure):
             # Convert matplotlib figure to PNG image
             buf = io.BytesIO()
-            plt.tight_layout()
+            plot_object[0].tight_layout()
             plot_object[0].savefig(buf, format='png')
             buf.seek(0)
             plt.close(plot_object[0])  # Close the figure to prevent it from being captured
@@ -392,7 +392,7 @@ class InteractiveMatrixPlot:
                     if isinstance(plot_object[0], matplotlib.figure.Figure):
                         # Convert matplotlib figure to PNG image
                         buf = io.BytesIO()
-                        plt.tight_layout()
+                        plot_object[0].tight_layout()
                         plot_object[0].savefig(buf, format='png')
                         buf.seek(0)
                         plt.close(plot_object[0])  # Close the figure to prevent it from being captured
