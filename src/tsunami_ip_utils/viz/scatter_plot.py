@@ -214,8 +214,14 @@ class _ScatterPlot(_Plotter):
             }
 
         # Now create the summary statistics text for figure annotation
-        pearson_text = f"Pearson: <b>{self._pearson:1.6f}</b>"
-        spearman_text = f"Spearman: <b>{self._spearman:1.6f}</b>"
+        if self._plot_type == 'plotly':
+            pearson_text = f"Pearson: <b>{self._pearson:1.6f}</b>"
+            spearman_text = f"Spearman: <b>{self._spearman:1.6f}</b>"
+        elif self._plot_type == 'matplotlib':
+            pearson_text = f"Pearson: {self._pearson:1.6f}"
+            spearman_text = f"Spearman: {self._spearman:1.6f}"
+        else:
+            raise ValueError(("Unknown plot type, cannot format summary statistics text"))
         self._summary_stats_text = f"{pearson_text} {spearman_text}"
 
 
@@ -228,6 +234,8 @@ class _ScatterPlotter(_ScatterPlot):
     """The name of the integral index (whose contributions) being plotted. This is used only for the title of the plot."""
     _plot_redundant: bool
     """Whether to plot redundant reactions or not. This is unused in this class."""
+    _plot_type: str
+    """Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text."""
     def __init__(self, integral_index_name: str, nested: bool, plot_redundant: bool=False, **kwargs: dict) -> None:
         """Initializes a ScatterPlotter object with the given integral index name, nested status, and plot redundant reactions
         status. The nested and plot_redundant arguments are unused in this class.
@@ -245,6 +253,7 @@ class _ScatterPlotter(_ScatterPlot):
         self._nested = nested
         self._index_name = integral_index_name
         self._plot_redundant = plot_redundant
+        self._plot_type = 'matplotlib'
 
     def _create_plot(self, contribution_pairs: List[ufloat], isotopes: List[str], reactions: List[str]) -> None:
         """Creates a static scatter plot with error bars, linear regression line, and correlation coefficient calculations.
@@ -272,7 +281,7 @@ class _ScatterPlotter(_ScatterPlot):
         experiment_points         = [ contribution[1].n for contribution in contribution_pairs ]
         experiment_uncertainties  = [ contribution[1].s for contribution in contribution_pairs ]
 
-        self.fig = plt.errorbar(application_points, experiment_points, xerr=application_uncertainties, \
+        self.axs.errorbar(application_points, experiment_points, xerr=application_uncertainties, \
                                yerr=experiment_uncertainties, fmt='.', capsize=5)
         
         # Linear regression
@@ -330,6 +339,8 @@ class _InteractiveScatterPlotter(_ScatterPlot):
     """The name of the integral index (whose contributions) being plotted. This is used only for the title of the plot."""
     _plot_redundant: bool
     """Whether to plot redundant reactions or not. This is unused in this class."""
+    _plot_type: str
+    """Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text."""
     def __init__(self, integral_index_name: str, nested: bool, plot_redundant: bool=False, **kwargs: dict):
         """Initializes an ``InteractiveScatterPlotter`` object with the given options.
         
@@ -353,6 +364,7 @@ class _InteractiveScatterPlotter(_ScatterPlot):
         self._nested = nested
         self._index_name = integral_index_name
         self._plot_redundant = plot_redundant
+        self._plot_type = 'plotly'
 
     def _create_plot(self, contribution_pairs: List[ufloat], isotopes: List[str], reactions: List[str]) -> None:
         """Create an interactive scatter plot with error bars, linear regression line, and correlation coefficient calculations.
@@ -540,7 +552,10 @@ class _InteractiveScatterPlotter(_ScatterPlot):
 class _InteractivePerturbationScatterPlotter(_ScatterPlot):
     """Class for creating an interactive scatter plot using the nuclear data sampling method (where perturbed cross section
     libraries are used to calculate sample points on the scatter plot)."""
+    _plot_type: str
+    """Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text."""
     def __init__(self, **kwargs: dict):
+        self._plot_type = 'plotly'
         pass
 
     def _create_plot(self, points: List[Tuple[ufloat, ufloat]]) -> None:

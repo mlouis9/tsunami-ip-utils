@@ -84,6 +84,9 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
         - diagonal_type (str)
             Type of plot to create on the diagonal. Default is ``'interactive_pie'`` which creates an interactive
             pie chart.
+        - off_diagonal_type (str)
+            Type of plot to create off the diagonal. Default is ``'interactive_scatter'`` which creates an interactive
+            scatter plot.
         - interactive_contribution_legend (bool)
             Whether to make the legend interactive for the contribution plots. Default is ``True``.
         - interactive_correlation_legend (bool)
@@ -96,6 +99,7 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
     
     # Get options for legend interactivity and the diagonal plot type if supplied
     diagonal_type = kwargs.get('diagonal_type', 'interactive_pie')
+    off_diagonal_type = kwargs.get('off_diagonal_type', 'interactive_scatter')
     interactive_correlation_legend = kwargs.get('interactive_correlation_legend', True)
     interactive_contribution_legend = kwargs.get('interactive_contribution_legend', True)
     
@@ -118,11 +122,11 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
                     interactive_legend=interactive_contribution_legend,     
                 )
             else:
-                plot_objects_array[application_index, experiment_index] = \
+                plot_objects_array[application_index, experiment_index] =  \
                 correlation_plot(
                     contributions['application'][application_index], 
                     contributions['experiment'][experiment_index], 
-                    plot_type='interactive_scatter',
+                    plot_type=off_diagonal_type,
                     integral_index_name=integral_index_name, 
                     plot_redundant_reactions=True, 
                     interactive_legend=interactive_correlation_legend

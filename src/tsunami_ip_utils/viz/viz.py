@@ -155,7 +155,7 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
     # Create the plot and style it
     plotter._create_plot(contribution_pairs, isotopes, all_reactions)
 
-    return plotter.fig
+    return plotter._get_plot()
 
 
 def perturbation_plot(points: List[Tuple[ufloat, ufloat]]) -> EnhancedPlotlyFigure:
