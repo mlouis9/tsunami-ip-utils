@@ -1,4 +1,9 @@
 import os, sys
+
+src_path = os.path.abspath('../../src')
+ext_path = os.path.abspath('./_ext')
+project_path = os.path.abspath('../..')
+
 import logging
 from docutils.parsers.rst import Directive
 import inspect
@@ -18,9 +23,6 @@ from matplotlib.figure import Figure
 config.generating_docs = True # This is necessary for generating documentation properly
 config.cache_dir = Path(__file__).parent / '..' / '..' / 'examples' / 'data' / 'cached_xs_data'
 
-src_path = os.path.abspath('../../src')
-ext_path = os.path.abspath('./_ext')
-project_path = os.path.abspath('../..')
 sys.path.insert(0, src_path)
 sys.path.insert(0, ext_path)
 sys.path.insert(0, project_path)
