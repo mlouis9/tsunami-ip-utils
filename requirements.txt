@@ -13,3 +13,4 @@ webdriver-manager
 IPython
 pyprojroot
 kaleido
+openpyxl
