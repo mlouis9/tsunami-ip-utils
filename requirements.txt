@@ -8,3 +8,8 @@ dash
 h5py
 tqdm
 pyyaml
+selenium
+webdriver-manager
+IPython
+pyprojroot
+kaleido

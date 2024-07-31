@@ -28,6 +28,9 @@ pytest = "*"
 pyprojroot = "*"
 selenium = "*"
 webdriver-manager = "*"
+IPython = "*"
+pyprojroot = "*"
+kaleido = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
