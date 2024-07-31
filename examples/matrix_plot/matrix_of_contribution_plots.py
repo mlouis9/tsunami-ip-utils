@@ -12,7 +12,12 @@ of applications and experiments are the same.
 # ------------------------
 # Interactive matrix plots wrap several Plotly plots in an html grid that's served by a Dash app that allows users to interact
 # with each of the individual plots. This is useful for comparing multiple applications and experiments in a single figure.
-# Specifically, it is useful for viewing all combinations of a given set of SDF files in a single figure
+# Specifically, it is useful for viewing all combinations of a given set of SDF files in a single figure. 
+# 
+# **Note** that by default the the correlation plots in the off-diagonal cells are 
+# :class:`tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend` plots, which are fully interactive, and dynamically update
+# the calculated summary statistics and regression when points are excluded with the legend. However, this interactivity requires
+# clientiside python to run, and so is not represented in the documentation.
 
 from tsunami_ip_utils.viz.viz import matrix_plot
 from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_contributions
@@ -53,7 +58,7 @@ fig.show()
 fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive')
 fig.to_image( EXAMPLES / '_static' / 'matrix_plot.png' )
 
-# sphinx_gallery_thumbnail_path = '../../../examples/_static/matrix_plot.png'
+# sphinx_gallery_thumbnail_path = '../../examples/_static/matrix_plot.png'
 
 # %%
 # Note if the default, nondescriptive labels aren't preferred, an arbitrary dictionary of labels for the applications and
@@ -67,7 +72,17 @@ fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=la
 fig.show()
 
 # %%
+# Nuclide-Reaction-Wise Contributions
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The same can be done for the nuclide-reaction-wise contributions
+
+plot_objects_array_nuclide_reaction = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '(Δk/k)^2')
+fig = matrix_plot(plot_objects_array_nuclide_reaction, plot_type='interactive', labels=labels)
+fig.show()
+
+# %%
 # Static Matrix Plots
 # -------------------
-# Static matrix plots are used for creating an analogous figure using static matplotlib plots, so that it can be saved as a
-# static image. This is useful for creating publication-quality figures. This option is currently not implemented.
+# Static matrix plots are used for creating an analogous figure using static matplotlib plots. This implementation would have
+# no need for the html of the interactive matrix plot, but as it stands, the interactive plot can contain all static plots as
+# well (and a mixture of static and interactive plots), and so this feature has not yet been implemented.

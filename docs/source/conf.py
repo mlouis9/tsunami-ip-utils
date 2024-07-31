@@ -7,9 +7,13 @@ from pathlib import Path
 import uuid
 from tsunami_ip_utils import config
 from tsunami_ip_utils.viz.matrix_plot import InteractiveMatrixPlot
+from tsunami_ip_utils.viz.scatter_plot import InteractiveScatterLegend
+from tsunami_ip_utils.viz.pie_plot import InteractivePieLegend
 import subprocess
 from docutils import nodes
 from docutils.parsers.rst import roles
+import runpy
+from matplotlib.figure import Figure
 
 config.generating_docs = True # This is necessary for generating documentation properly
 config.cache_dir = Path(__file__).parent / '..' / '..' / 'examples' / 'data' / 'cached_xs_data'

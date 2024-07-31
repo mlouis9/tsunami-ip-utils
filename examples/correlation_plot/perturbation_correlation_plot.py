@@ -1,6 +1,6 @@
 """
-Generating a Perturbation Correlation Plot
-==========================================
+Perturbation Correlation Plots
+==============================
 
 This example demonstrates how to generate a perturbation correlation plot using the 
 :func:`tsunami_ip_utils.perturbations.generate_points` 

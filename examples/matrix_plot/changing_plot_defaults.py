@@ -54,3 +54,34 @@ plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(
 )
 fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=labels)
 fig.show()
+
+# %%
+# If a plot type for which a variant with an interactive legend exists (e.g. ``'interactive_pie'``) is used, the interactive 
+# legend can be turned off by setting the ``interactive_contribution_legend`` parameter to ``False``. These plots can also 
+# be saved to an image
+
+plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(
+    contributions_nuclide, 
+    '(Δk/k)^2',
+    diagonal_type='interactive_pie', # This is the default, but it is shown here for clarity
+    interactive_contribution_legend=False
+)
+fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=labels)
+fig.show()
+
+# %%
+# Changing the Off-Diagonal Plot Type
+# -----------------------------------
+# The off-diagonal plots can also be changed to a different type. By default, the off-diagonal plots are interactive scatter 
+# plots with an interactive legend, but they can just as easily be changed to a static matplotlib scatter plots
+
+plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(
+    contributions_nuclide, 
+    '$(\\Delta k/k)^2$', # Since all plots are matplotlib plots, pylatex formatting can be used to make the labels look nice
+    off_diagonal_type='scatter',
+    diagonal_type='bar',
+)
+fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive', labels=labels)
+fig.to_image( EXAMPLES / '_static' / 'matrix_bar_diagonal.png')
+
+# sphinx_gallery_thumbnail_path = '../../examples/_static/matrix_bar_diagonal.png'
