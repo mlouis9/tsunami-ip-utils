@@ -35,6 +35,7 @@ import base64
 import io
 import matplotlib
 import matplotlib.pyplot as plt
+import plotly.io as pio
 
 # Style constants
 GRAPH_STYLE = {
@@ -399,7 +400,8 @@ class InteractiveMatrixPlot:
                         encoded_image = base64.b64encode(buf.read()).decode("utf-8")
                         plot_element = html.Img(src='data:image/png;base64,{}'.format(encoded_image), style=GRAPH_STYLE)
                 else:
-                    plot_element = html.Div('Plot not available', style=GRAPH_STYLE)
+                    html_string = pio.to_html(plot_object, full_html=False)
+                    plot_element = html.Iframe(srcDoc=html_string, style=GRAPH_STYLE)
                 row.append(plot_element)
             rows.append(html.Div(row, style={'display': 'flex'}))
 
