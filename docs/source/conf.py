@@ -23,6 +23,14 @@ from docutils.parsers.rst import roles
 import runpy
 from matplotlib.figure import Figure
 
+def unexpand_home(path):
+    print(f"Initial Paht {path}")
+    home = str(Path.home())
+    str_path = str(path)
+    if str_path.startswith(home):
+        return Path(str_path.replace(home, '~'))
+    return path
+
 config.generating_docs = True # This is necessary for generating documentation properly
 config.cache_dir = Path(__file__).parent / '..' / '..' / 'examples' / 'data' / 'cached_xs_data'
 
@@ -39,17 +47,27 @@ copyright = '2024, Matthew Louis'
 author = 'Matthew Louis'
 release = '0.0.1'
 
-def unexpand_home(path):
-    home = str(Path.home())
-    str_path = str(path)
-    if str_path.startswith(home):
-        return Path('~' + str_path[len(home):])
-    return path
-
 # -- Plotly Image Scraper -----------------------------------------------------
+def get_relative_static_path(current_path, target_path):
+    """
+    Calculate a relative path from the current path to the target path.
+    """
+    # Convert both paths to absolute paths
+    current_abs_path = current_path.resolve()
+    target_abs_path = target_path.resolve()
+    
+    # Calculate the relative path from current to target
+    relative_path = os.path.relpath(target_abs_path, start=current_abs_path)
+    return Path(relative_path)
+
 def plotly_scraper(block, block_vars, gallery_conf):
     output_dir = Path(__file__).parent / "_static"
-    build_static = unexpand_home((Path(__file__).parent / ".." / "build" / "html" / "_static").resolve())
+  
+    path_current_example = Path(os.path.dirname(block_vars['src_file']))
+    path_static = Path(__file__).parent / "../../_static"
+    
+    # Calculate the relative path from current file to the static directory in the build
+    relative_static_path = get_relative_static_path(path_current_example, path_static)
 
     # Check if 'fig' is in the example_globals and if it can generate HTML
     fig = block_vars['example_globals'].get('fig', None)
@@ -88,7 +106,7 @@ def plotly_scraper(block, block_vars, gallery_conf):
         <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
     </div>
     <div class="iframe_container">
-        <iframe src="{build_static / plot_filename}" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+        <iframe src="{relative_static_path / plot_filename}" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
     </div>
     <script>
         function zoom(direction, element) {{
@@ -150,7 +168,7 @@ def plotly_scraper(block, block_vars, gallery_conf):
             html_rst = f"""
 .. raw:: html
 
-    <iframe src="{build_static / plot_filename}" width="100%" height="500" frameborder="0"></iframe>
+    <iframe src="{relative_static_path / plot_filename}" width="100%" height="500" frameborder="0"></iframe>
         """
 
         # Now delete fig from global variables to avoid it overwriting the next plot
