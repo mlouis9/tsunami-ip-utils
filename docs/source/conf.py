@@ -7,6 +7,9 @@ from pathlib import Path
 import uuid
 from tsunami_ip_utils import config
 from tsunami_ip_utils.viz.matrix_plot import InteractiveMatrixPlot
+import subprocess
+from docutils import nodes
+from docutils.parsers.rst import roles
 
 config.generating_docs = True # This is necessary for generating documentation properly
 config.cache_dir = Path(__file__).parent / '..' / '..' / 'examples' / 'data' / 'cached_xs_data'
@@ -34,6 +37,7 @@ release = '0.0.1'
 # -- Plotly Image Scraper -----------------------------------------------------
 def plotly_scraper(block, block_vars, gallery_conf):
     output_dir = Path(__file__).parent / "_static"
+    build_static = (Path(__file__).parent / ".." / "build" / "html" / "_static").resolve()
 
     # Check if 'fig' is in the example_globals and if it can generate HTML
     fig = block_vars['example_globals'].get('fig', None)
@@ -72,7 +76,7 @@ def plotly_scraper(block, block_vars, gallery_conf):
         <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
     </div>
     <div class="iframe_container">
-        <iframe src="../_static/{plot_filename}" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+        <iframe src="{build_static / plot_filename}" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
     </div>
     <script>
         function zoom(direction, element) {{
@@ -134,7 +138,7 @@ def plotly_scraper(block, block_vars, gallery_conf):
             html_rst = f"""
 .. raw:: html
 
-    <iframe src="../_static/{plot_filename}" width="100%" height="500" frameborder="0"></iframe>
+    <iframe src="{build_static / plot_filename}" width="100%" height="500" frameborder="0"></iframe>
         """
 
         # Now delete fig from global variables to avoid it overwriting the next plot
@@ -187,9 +191,10 @@ intersphinx_mapping = {
 }
 
 sphinx_gallery_conf = {
-    'examples_dirs': '../../examples',  # Path to example scripts
-    'gallery_dirs': 'auto_examples',  # Path to save gallery generated output
+    'examples_dirs': ['../../examples'],  # Path to example scripts
+    'gallery_dirs': ['auto_examples'],  # Path to save gallery generated output
     'filename_pattern': r'.*\.py$',  # Adjusted regex to ensure it captures all intended files
+    "backreferences_dir": "gen_modules/backreferences",
     'example_extensions': ['.py'],
     'image_scrapers': ('matplotlib', plotly_scraper),  # If using matplotlib for plots
     'doc_module': ('tsunami_ip_utils',),
@@ -240,15 +245,11 @@ class ApiTypeDirective(Directive):
         env = self.state.document.settings.env
         env.config.api_type = self.arguments[0]
         return []
-
-def setup(app):
-    app.add_config_value('api_type', 'public', 'env')
-    app.add_directive('api_type', ApiTypeDirective)
-    app.connect('autodoc-skip-member', skip_member)
-
-    # Add filter to Sphinx logger to suppress duplicate object warnings
-    logger = logging.getLogger('sphinx')
-    logger.addFilter(FilterDuplicateObjectWarnings())
+    
+def run_post_gallery_processing(app):
+    if app.builder.name == 'html':
+        # Your processing code here
+        subprocess.run(["python", "replace_header.py"])
 
 def has_private_members(obj):
     """Check if the given object has any private members."""
@@ -288,3 +289,18 @@ def skip_member(app, what, name, obj, skip, options):
         options['inherited-members'] = {}
 
     return skip
+    
+def pseudo_header(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    node = nodes.strong(text, text, classes=['pseudo-header'])
+    return [node], []
+
+def setup(app):
+    app.add_config_value('api_type', 'public', 'env')
+    app.add_directive('api_type', ApiTypeDirective)
+    roles.register_local_role('pseudoheader', pseudo_header)
+    app.connect('autodoc-skip-member', skip_member)
+    app.connect('builder-inited', run_post_gallery_processing)
+
+    # Add filter to Sphinx logger to suppress duplicate object warnings
+    logger = logging.getLogger('sphinx')
+    logger.addFilter(FilterDuplicateObjectWarnings())

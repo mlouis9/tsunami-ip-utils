@@ -58,3 +58,9 @@ span.eqno a.headerlink {
 button {
     display: inline-block;
 }
+
+.pseudo-header {
+    font-size: 1.5em; /* Adjust size as needed */
+    margin-top: 20px; /* Add some spacing above */
+    margin-bottom: 10px; /* And below */
+}

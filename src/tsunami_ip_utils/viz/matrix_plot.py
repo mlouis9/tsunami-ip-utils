@@ -185,6 +185,7 @@ def _create_plot_element(i: int, j: int, plot_object: Union[InteractiveScatterLe
             plt.tight_layout()
             plot_object[0].savefig(buf, format='png')
             buf.seek(0)
+            plt.close(plot_object[0])  # Close the figure to prevent it from being captured
             encoded_image = base64.b64encode(buf.read()).decode("utf-8")
             return html.Img(src='data:image/png;base64,{}'.format(encoded_image), style=GRAPH_STYLE)
     else:
@@ -394,6 +395,7 @@ class InteractiveMatrixPlot:
                         plt.tight_layout()
                         plot_object[0].savefig(buf, format='png')
                         buf.seek(0)
+                        plt.close(plot_object[0])  # Close the figure to prevent it from being captured
                         encoded_image = base64.b64encode(buf.read()).decode("utf-8")
                         plot_element = html.Img(src='data:image/png;base64,{}'.format(encoded_image), style=GRAPH_STYLE)
                 else:
