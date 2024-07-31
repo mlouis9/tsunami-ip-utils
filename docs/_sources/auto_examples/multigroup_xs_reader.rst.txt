@@ -134,7 +134,7 @@ The list of all available nuclide reactions can then be supplied to the function
 
 And the cross sections can be easily cached
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-75
+.. GENERATED FROM PYTHON SOURCE LINES 64-70
 
 .. code-block:: Python
 
@@ -144,10 +144,6 @@ And the cross sections can be easily cached
     with open(EXAMPLES / 'data' / 'dummy_56_v7.1.pkl', 'wb') as f:
         pickle.dump(out, f)
 
-    # Now compare the dump to the gold standard
-    import filecmp
-
-    assert filecmp.cmp(EXAMPLES / 'data' / 'dummy_56_v7.1.pkl', EXAMPLES / 'gold' / 'dummy_56_v7.1.pkl')
 
 
 
@@ -155,8 +151,7 @@ And the cross sections can be easily cached
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 76-81
+.. GENERATED FROM PYTHON SOURCE LINES 71-76
 
 A Future Improvement
 ---------------------
@@ -168,7 +163,7 @@ adding an additional flag to the :func:`tsunami_ip_utils.xs.read_multigroup_xs` 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.805 seconds)
+   **Total running time of the script:** (0 minutes 8.104 seconds)
 
 
 .. _sphx_glr_download_auto_examples_multigroup_xs_reader.py:

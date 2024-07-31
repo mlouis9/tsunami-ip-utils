@@ -107,6 +107,8 @@
 <span class="c1"># Number of xs perturbation samples available in SCALE</span>
 <span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">NUM_SAMPLES</span>
 
+<div class="viewcode-block" id="_generate_and_read_perturbed_library">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.perturbations._generate_and_read_perturbed_library">[docs]</a>
 <span class="k">def</span> <span class="nf">_generate_and_read_perturbed_library</span><span class="p">(</span><span class="n">base_library</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">perturbation_factors</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">sample_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> 
                                          <span class="n">all_nuclide_reactions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates and reads perturbed multigroup cross section libraries.</span>
@@ -173,7 +175,8 @@
     <span class="c1"># Now delete the output file</span>
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output_file_path</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">perturbed_xs</span>
+    <span class="k">return</span> <span class="n">perturbed_xs</span></div>
+
 
 <div class="viewcode-block" id="generate_points">
 <a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.perturbations.generate_points">[docs]</a>
@@ -366,6 +369,8 @@
 
         
 
+<div class="viewcode-block" id="_cache_perturbed_library">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.perturbations._cache_perturbed_library">[docs]</a>
 <span class="k">def</span> <span class="nf">_cache_perturbed_library</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Caches a single perturbed cross section library.</span>
 
@@ -403,7 +408,8 @@
         <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
 
 <div class="viewcode-block" id="cache_all_libraries">
 <a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.perturbations.cache_all_libraries">[docs]</a>

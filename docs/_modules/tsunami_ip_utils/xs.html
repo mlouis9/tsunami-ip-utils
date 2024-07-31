@@ -96,6 +96,8 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">random</span>
 
+<div class="viewcode-block" id="_parse_nuclide_reaction">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.xs._parse_nuclide_reaction">[docs]</a>
 <span class="k">def</span> <span class="nf">_parse_nuclide_reaction</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">energy_boundaries</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads a multigroup cross section ``.txt`` file produced by the extractor function and returns the energy-dependent </span>
 <span class="sd">    cross sections as a numpy array.</span>
@@ -134,8 +136,11 @@
         <span class="n">energy_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">energy_parser</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">asList</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">xs</span><span class="p">,</span> <span class="n">energy_boundaries</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">xs</span>
+        <span class="k">return</span> <span class="n">xs</span></div>
 
+
+<div class="viewcode-block" id="_parse_reactions_from_nuclide">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.xs._parse_reactions_from_nuclide">[docs]</a>
 <span class="k">def</span> <span class="nf">_parse_reactions_from_nuclide</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads a set of reactions (given by the list of reaction mt&#39;s) from a dump of all reactions for a single nuclide from</span>
 <span class="sd">    a SCALE library. Note this function requires that the dump included headers</span>
@@ -217,8 +222,11 @@
     <span class="k">if</span> <span class="n">parsed_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">reaction_mts</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not all reaction MTs were found in the data. Missing MTs: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">reaction_mts</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">set</span><span class="p">(</span><span class="n">parsed_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">. &quot;</span>
                          <span class="sa">f</span><span class="s2">&quot;This nuclide has the available MTs: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">all_mts</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">parsed_data</span>
+    <span class="k">return</span> <span class="n">parsed_data</span></div>
 
+
+<div class="viewcode-block" id="_parse_from_total_library">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.xs._parse_from_total_library">[docs]</a>
 <span class="k">def</span> <span class="nf">_parse_from_total_library</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span>
                               <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse selected nuclide-reactions from an entire cross section library dump.</span>
@@ -328,8 +336,11 @@
         <span class="n">all_nuclide_reactions</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">parsed_data_dict</span><span class="p">,</span> <span class="n">all_nuclide_reactions</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">parsed_data_dict</span>
+        <span class="k">return</span> <span class="n">parsed_data_dict</span></div>
 
+
+<div class="viewcode-block" id="_read_nuclide_reaction_from_multigroup_library">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.xs._read_nuclide_reaction_from_multigroup_library">[docs]</a>
 <span class="k">def</span> <span class="nf">_read_nuclide_reaction_from_multigroup_library</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">nuclide_zaid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reaction_mt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
                                                    <span class="n">parsing_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span><span class="o">=</span><span class="n">_parse_nuclide_reaction</span><span class="p">,</span> 
                                                    <span class="n">plot_option</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;plot&#39;</span><span class="p">,</span> <span class="n">energy_boundaries</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -398,8 +409,11 @@
 
     <span class="c1"># Now delete the output file</span>
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output_file_path</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">output</span>
+    <span class="k">return</span> <span class="n">output</span></div>
 
+
+<div class="viewcode-block" id="_read_reactions_from_nuclide">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.xs._read_reactions_from_nuclide">[docs]</a>
 <span class="k">def</span> <span class="nf">_read_reactions_from_nuclide</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">nuclide_zaid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reaction_mts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
                                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Function for reading a set of reactions from a given nuclide in a SCALE multigroup library.</span>
@@ -419,7 +433,8 @@
     <span class="n">output</span> <span class="o">=</span> <span class="n">_read_nuclide_reaction_from_multigroup_library</span><span class="p">(</span><span class="n">multigroup_library_path</span><span class="p">,</span> <span class="n">nuclide_zaid</span><span class="p">,</span> <span class="n">reaction_mt</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> \
                                                            <span class="n">parsing_function</span><span class="o">=</span><span class="n">_parse_reactions_from_nuclide</span><span class="p">,</span> \
                                                             <span class="n">reaction_mts</span><span class="o">=</span><span class="n">reaction_mts</span><span class="p">,</span> <span class="n">plot_option</span><span class="o">=</span><span class="s1">&#39;fido&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">output</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
 
 <div class="viewcode-block" id="read_multigroup_xs">
 <a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.xs.read_multigroup_xs">[docs]</a>

@@ -97,6 +97,8 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="kn">import</span> <span class="n">By</span>
 
+<div class="viewcode-block" id="_find_free_port">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils._find_free_port">[docs]</a>
 <span class="k">def</span> <span class="nf">_find_free_port</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds a free port on localhost for running a Flask/Dash server. This is done by creating a socket and binding it</span>
 <span class="sd">    to an available port. The socket is then closed and the port number is returned.</span>
@@ -108,8 +110,11 @@
     <span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># Let the OS pick an available port</span>
     <span class="n">port</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">port</span>
+    <span class="k">return</span> <span class="n">port</span></div>
 
+
+<div class="viewcode-block" id="_determine_plot_type">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils._determine_plot_type">[docs]</a>
 <span class="k">def</span> <span class="nf">_determine_plot_type</span><span class="p">(</span><span class="n">contributions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span> <span class="nb">dict</span> <span class="p">],</span> <span class="n">plot_redundant_reactions</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines whether the contributions are nuclide-wise or nuclide-reaction-wise and whether to plot redundant</span>
 <span class="sd">    reactions or not. Then converts the contributions (list of dictionaries) to a dictionary of contributions keyed by</span>
@@ -147,7 +152,8 @@
         <span class="n">nested_plot</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">contributions</span> <span class="o">=</span> <span class="p">{</span> <span class="n">contribution</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]:</span> <span class="n">contribution</span><span class="p">[</span><span class="s1">&#39;contribution&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">contributions</span> <span class="p">}</span>
 
-    <span class="k">return</span> <span class="n">contributions</span><span class="p">,</span> <span class="n">nested_plot</span>
+    <span class="k">return</span> <span class="n">contributions</span><span class="p">,</span> <span class="n">nested_plot</span></div>
+
 
 <div class="viewcode-block" id="generate_plot_objects_array_from_contributions">
 <a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils.generate_plot_objects_array_from_contributions">[docs]</a>
@@ -247,6 +253,8 @@
     <span class="k">return</span> <span class="n">plot_objects_array</span></div>
 
 
+<div class="viewcode-block" id="_capture_html_as_image">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.plot_utils._capture_html_as_image">[docs]</a>
 <span class="k">def</span> <span class="nf">_capture_html_as_image</span><span class="p">(</span><span class="n">html_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_image</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">matrix</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Captures an HTML file as an image using Selenium WebDriver. This is useful for saving interactive plots as static</span>
 <span class="sd">    images.</span>
@@ -291,7 +299,8 @@
 
     <span class="c1"># Take screenshot</span>
     <span class="n">driver</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_image</span><span class="p">))</span>
-    <span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div>
+
 </pre></div>
 
            </div>

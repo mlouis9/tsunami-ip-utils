@@ -50,7 +50,7 @@ perturbed cross section libraries, then cache them as ``.pkl`` files which can b
  .. code-block:: none
 
     Reading base library... 
-    Caching perturbed libraries:   0%|          | 0/1000 [00:00<?, ?it/s]    Caching perturbed libraries: 100%|██████████| 1000/1000 [00:00<00:00, 11983.62it/s]
+    Caching perturbed libraries:   0%|          | 0/1000 [00:00<?, ?it/s]    Caching perturbed libraries: 100%|██████████| 1000/1000 [00:00<00:00, 13144.79it/s]
 
 
 
@@ -68,7 +68,7 @@ the lines of code above.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.162 seconds)
+   **Total running time of the script:** (0 minutes 0.159 seconds)
 
 
 .. _sphx_glr_download_auto_examples_caching_cross_sections.py:

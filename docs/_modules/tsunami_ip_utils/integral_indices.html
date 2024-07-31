@@ -90,6 +90,8 @@
 <span class="kn">from</span> <span class="nn">uncertainties.core</span> <span class="kn">import</span> <span class="n">Variable</span>
 <span class="kn">from</span> <span class="nn">tsunami_ip_utils._utils</span> <span class="kn">import</span> <span class="n">_convert_paths</span>
 
+<div class="viewcode-block" id="_calculate_E_from_sensitivity_vecs">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.integral_indices._calculate_E_from_sensitivity_vecs">[docs]</a>
 <span class="k">def</span> <span class="nf">_calculate_E_from_sensitivity_vecs</span><span class="p">(</span><span class="n">application_vector</span><span class="p">:</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">,</span> <span class="n">experiment_vector</span><span class="p">:</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">,</span> 
                                       <span class="n">application_filename</span><span class="p">:</span> <span class="n">Path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment_filename</span><span class="p">:</span> <span class="n">Path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                                       <span class="n">uncertainties</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;automatic&#39;</span><span class="p">,</span> <span class="n">experiment_norm</span><span class="p">:</span> <span class="n">Variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
@@ -188,9 +190,12 @@
         <span class="c1"># Now calculate error in dot product to get the uncertainty in E</span>
         <span class="n">E_uncertainty</span> <span class="o">=</span> <span class="n">_dot_product_uncertainty_propagation</span><span class="p">(</span><span class="n">application_unit_vector</span><span class="p">,</span> <span class="n">experiment_unit_vector</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">E_uncertainty</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ufloat</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">E_uncertainty</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="_create_sensitivity_vector">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.integral_indices._create_sensitivity_vector">[docs]</a>
 <span class="k">def</span> <span class="nf">_create_sensitivity_vector</span><span class="p">(</span><span class="n">sdfs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a senstivity vector from all of the sensitivity profiles from a specific application or experiment</span>
 <span class="sd">    by concatenating them together.</span>
@@ -213,7 +218,8 @@
     <span class="n">uncertainties</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">unumpy</span><span class="o">.</span><span class="n">std_devs</span><span class="p">(</span><span class="n">sdf</span><span class="p">)</span> <span class="k">for</span> <span class="n">sdf</span> <span class="ow">in</span> <span class="n">sdfs</span><span class="p">])</span>
     <span class="n">senstivities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">unumpy</span><span class="o">.</span><span class="n">nominal_values</span><span class="p">(</span><span class="n">sdf</span><span class="p">)</span> <span class="k">for</span> <span class="n">sdf</span> <span class="ow">in</span> <span class="n">sdfs</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span><span class="n">senstivities</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">unumpy</span><span class="o">.</span><span class="n">uarray</span><span class="p">(</span><span class="n">senstivities</span><span class="p">,</span> <span class="n">uncertainties</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="calculate_E">
@@ -276,6 +282,8 @@
     <span class="k">return</span> <span class="n">E_vals</span></div>
 
 
+<div class="viewcode-block" id="_get_reaction_wise_E_contributions">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.integral_indices._get_reaction_wise_E_contributions">[docs]</a>
 <span class="k">def</span> <span class="nf">_get_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">application</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">isotope</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">all_reactions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
                                       <span class="n">application_norm</span><span class="p">:</span> <span class="n">Variable</span><span class="p">,</span> <span class="n">experiment_norm</span><span class="p">:</span> <span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate contributions to the similarity parameter E for each reaction type for a given isotope.</span>
@@ -313,8 +321,11 @@
             <span class="s2">&quot;contribution&quot;</span><span class="p">:</span> <span class="n">E_contribution</span>
         <span class="p">})</span>
 
-    <span class="k">return</span> <span class="n">E_contributions</span>
+    <span class="k">return</span> <span class="n">E_contributions</span></div>
 
+
+<div class="viewcode-block" id="_add_missing_reactions_and_nuclides">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.integral_indices._add_missing_reactions_and_nuclides">[docs]</a>
 <span class="k">def</span> <span class="nf">_add_missing_reactions_and_nuclides</span><span class="p">(</span><span class="n">application</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">all_isotopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
                                        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;sdfs&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add missing reactions and nuclides to the application and experiment dictionaries with an sdf profile of all zeros.</span>
@@ -401,8 +412,11 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">experiment</span><span class="p">[</span><span class="n">isotope</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">zero_data</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">all_reactions</span>
+    <span class="k">return</span> <span class="n">all_reactions</span></div>
 
+
+<div class="viewcode-block" id="_get_nuclide_and_reaction_wise_E_contributions">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.integral_indices._get_nuclide_and_reaction_wise_E_contributions">[docs]</a>
 <span class="k">def</span> <span class="nf">_get_nuclide_and_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">application</span><span class="p">:</span> <span class="n">RegionIntegratedSdfReader</span><span class="p">,</span> <span class="n">experiment</span><span class="p">:</span> <span class="n">RegionIntegratedSdfReader</span>
                                                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the contributions to the similarity parameter E for each nuclide and for each reaction type for a given</span>
@@ -469,7 +483,8 @@
             <span class="n">_get_reaction_wise_E_contributions</span><span class="p">(</span><span class="n">application</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">all_reactions</span><span class="p">,</span> \
                                               <span class="n">application_norm</span><span class="p">,</span> <span class="n">experiment_norm</span><span class="p">)</span>
         
-    <span class="k">return</span> <span class="n">nuclide_wise_contributions</span><span class="p">,</span> <span class="n">nuclide_reaction_wise_contributions</span>
+    <span class="k">return</span> <span class="n">nuclide_wise_contributions</span><span class="p">,</span> <span class="n">nuclide_reaction_wise_contributions</span></div>
+
 
 
 <div class="viewcode-block" id="calculate_E_contributions">

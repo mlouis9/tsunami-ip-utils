@@ -89,7 +89,7 @@ For a static pie chart, the ``diagonal_type`` should be set to ``'pie'``
         <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
     </div>
     <div class="iframe_container">
-        <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_a3c3ae31-c965-44c8-9760-3656685cfebc.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+        <iframe src="../../_static/plot_a7603212-a2e8-48be-90c7-2791e82533e0.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
     </div>
     <script>
         function zoom(direction, element) {
@@ -180,7 +180,7 @@ For a static pie chart, the ``diagonal_type`` should be set to ``'bar'``
         <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
     </div>
     <div class="iframe_container">
-        <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_47444f02-a58b-420e-86d2-8d697c774576.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+        <iframe src="../../_static/plot_9352c725-a9d7-4425-929b-024e505446c7.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
     </div>
     <script>
         function zoom(direction, element) {
@@ -272,7 +272,7 @@ be saved to an image
         <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
     </div>
     <div class="iframe_container">
-        <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_d436ed3d-4eb4-4244-8472-1074f8652af8.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+        <iframe src="../../_static/plot_81f0a56f-931b-4868-bc90-db381228151d.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
     </div>
     <script>
         function zoom(direction, element) {
@@ -365,7 +365,7 @@ plots with an interactive legend, but they can just as easily be changed to a st
         <button type="button" onclick="zoom(-1, this)">+ Zoom In</button>
     </div>
     <div class="iframe_container">
-        <iframe src="/home/mlouis9/projects/suli2024/main/docs/build/html/_static/plot_ed10f9a3-142a-48a8-b28c-b25983624337.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
+        <iframe src="../../_static/plot_0f5ca401-56d8-4dd5-994e-62a9e1b7b741.html" width="100%" height="100%" frameborder="0" class="myiframe"></iframe>
     </div>
     <script>
         function zoom(direction, element) {
@@ -430,7 +430,7 @@ plots with an interactive legend, but they can just as easily be changed to a st
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 32.816 seconds)
+   **Total running time of the script:** (0 minutes 34.820 seconds)
 
 
 .. _sphx_glr_download_auto_examples_matrix_plot_changing_plot_defaults.py:

@@ -116,8 +116,6 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the integral index whose contributions are being plotted (e.g. ``&#39;E&#39;`` or ``&#39;c_k&#39;``).&quot;&quot;&quot;</span>
     <span class="n">_plot_redundant</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether to plot redundant/irrelevant reactions in the pie chart.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="_PiePlotter.__init__">
-<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">,</span> <span class="n">plot_redudant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a pie chart of the contributions to the given integral index.</span>
 <span class="sd">        </span>
@@ -140,9 +138,10 @@
 <span class="sd">          being considered, then the irrelevant reactions should be excluded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span> <span class="o">=</span> <span class="n">integral_index_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redudant</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redudant</span>
     
+<div class="viewcode-block" id="_PiePlotter._create_plot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._create_plot">[docs]</a>
     <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]]],</span> <span class="n">nested</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a pie chart of the given contributions to the integral index.</span>
 <span class="sd">        </span>
@@ -165,14 +164,23 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pie_chart</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="_PiePlotter._add_to_subplot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._add_to_subplot">[docs]</a>
     <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="_PiePlotter._get_plot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._get_plot">[docs]</a>
     <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">Axes</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span></div>
 
+
+<div class="viewcode-block" id="_PiePlotter._nested_pie_chart">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._nested_pie_chart">[docs]</a>
     <span class="k">def</span> <span class="nf">_nested_pie_chart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pie chart of the contributions to the integral index on a nuclide-reaction-wise basis.</span>
 
@@ -284,8 +292,11 @@
         <span class="c1"># Add hatches to the negative contribution wedges</span>
         <span class="k">for</span> <span class="n">wedge</span><span class="p">,</span> <span class="n">hatch</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">outer_ring</span><span class="p">,</span> <span class="n">outer_hatches</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">hatch</span><span class="p">:</span>
-                <span class="n">wedge</span><span class="o">.</span><span class="n">set_hatch</span><span class="p">(</span><span class="n">hatch</span><span class="p">)</span>
+                <span class="n">wedge</span><span class="o">.</span><span class="n">set_hatch</span><span class="p">(</span><span class="n">hatch</span><span class="p">)</span></div>
+
         
+<div class="viewcode-block" id="_PiePlotter._pie_chart">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._pie_chart">[docs]</a>
     <span class="k">def</span> <span class="nf">_pie_chart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pie chart of the contributions to the integral index on a nuclide-wise basis.</span>
 <span class="sd">        </span>
@@ -305,8 +316,11 @@
 
         <span class="c1"># Applying hatching patterns to the wedges</span>
         <span class="k">for</span> <span class="n">wedge</span><span class="p">,</span> <span class="n">hatch</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wedges</span><span class="p">,</span> <span class="n">hatches</span><span class="p">):</span>
-            <span class="n">wedge</span><span class="o">.</span><span class="n">set_hatch</span><span class="p">(</span><span class="n">hatch</span><span class="p">)</span>
+            <span class="n">wedge</span><span class="o">.</span><span class="n">set_hatch</span><span class="p">(</span><span class="n">hatch</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="_PiePlotter._style">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._PiePlotter._style">[docs]</a>
     <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nested</span><span class="p">:</span>
             <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> (including redundant/irrelvant reactions)&#39;</span>
@@ -314,6 +328,7 @@
             <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axs</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title_text</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span> <span class="c1"># Pad set to avoid overlap with labels</span></div>
+</div>
 
 
 <div class="viewcode-block" id="_InteractivePiePlotter">
@@ -324,8 +339,6 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the integral index whose contributions are being plotted (e.g. ``&#39;E&#39;`` or ``&#39;c_k&#39;``).&quot;&quot;&quot;</span>
     <span class="n">_plot_redundant</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether to plot redundant/irrelevant reactions in the pie chart.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="_InteractivePiePlotter.__init__">
-<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integral_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_redundant</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a pie chart of the contributions to the given integral index.</span>
 <span class="sd">        </span>
@@ -358,9 +371,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">interactive_legend</span> <span class="o">=</span> <span class="kc">True</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span> <span class="o">=</span> <span class="n">integral_index_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redundant</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="o">=</span> <span class="n">plot_redundant</span>
 
-
+<div class="viewcode-block" id="_InteractivePiePlotter._create_plot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_plot">[docs]</a>
     <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]]],</span> <span class="n">nested</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an interactive pie chart of the given contributions to the integral index.</span>
 <span class="sd">        </span>
@@ -413,21 +427,30 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive_legend</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">InteractivePieLegend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">InteractivePieLegend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span></div>
+
 
 
     
+<div class="viewcode-block" id="_InteractivePiePlotter._add_to_subplot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._add_to_subplot">[docs]</a>
     <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive_legend</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Interactive legends are not supported when adding to a subplot&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
                 <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="k">return</span> <span class="n">fig</span>
+            <span class="k">return</span> <span class="n">fig</span></div>
 
+
+<div class="viewcode-block" id="_InteractivePiePlotter._get_plot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._get_plot">[docs]</a>
     <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">plotly</span><span class="o">.</span><span class="n">graph_objs</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">InteractivePieLegend</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span></div>
 
+
+<div class="viewcode-block" id="_InteractivePiePlotter._create_sunburst_data">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_sunburst_data">[docs]</a>
     <span class="k">def</span> <span class="nf">_create_sunburst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pandas dataframe for a (not nested) sunburst chart of contributions.</span>
 <span class="sd">        </span>
@@ -465,8 +488,11 @@
             <span class="n">data</span><span class="p">[</span><span class="s1">&#39;normalized_values&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">norm_nuclide_total</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
             <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="_InteractivePiePlotter._create_nested_sunburst_data">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._create_nested_sunburst_data">[docs]</a>
     <span class="k">def</span> <span class="nf">_create_nested_sunburst_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contributions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ufloat</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a pandas dataframe for a nested sunburst chart of contributions.</span>
 <span class="sd">        </span>
@@ -591,14 +617,18 @@
                     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;nuclide&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclide</span><span class="p">)</span>
 
 
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="_InteractivePiePlotter._style">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot._InteractivePiePlotter._style">[docs]</a>
     <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_redundant</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nested</span><span class="p">:</span>
             <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1"> (including redundant/irrelvant reactions)&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">title_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Contributions to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_name</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="n">title_text</span><span class="p">,</span> <span class="n">title_x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># &#39;title_x=0.5&#39; centers the title</span></div>
+</div>
 
 
 
@@ -746,6 +776,8 @@
             <span class="k">return</span> <span class="n">render_template_string</span><span class="p">(</span><span class="n">full_html</span><span class="p">)</span></div>
 
         
+<div class="viewcode-block" id="InteractivePieLegend._open_browser">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend._open_browser">[docs]</a>
     <span class="k">def</span> <span class="nf">_open_browser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Open the browser to display the interactive sunburst chart</span>
 
@@ -755,7 +787,8 @@
 <span class="sd">            The port at which the Flask server is running.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Now running at http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
-        <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+        <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="InteractivePieLegend.show">
 <a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.pie_plot.InteractivePieLegend.show">[docs]</a>

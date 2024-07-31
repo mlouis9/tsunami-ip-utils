@@ -86,10 +86,15 @@
 <div class="viewcode-block" id="_Plotter">
 <a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter">[docs]</a>
 <span class="k">class</span> <span class="nc">_Plotter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="_Plotter._create_plot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._create_plot">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">_create_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nested</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
 
+
+<div class="viewcode-block" id="_Plotter._add_to_subplot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._add_to_subplot">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">_add_to_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the plot (corresponding to the class instance) to the given figure subplot at the given position.</span>
@@ -104,8 +109,11 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">            The figure with the plot added.&quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
 
+
+<div class="viewcode-block" id="_Plotter._get_plot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._get_plot">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">_get_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the &#39;plot&#39; object.</span>
@@ -113,12 +121,16 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">            The plot object.&quot;&quot;&quot;</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
 
+
+<div class="viewcode-block" id="_Plotter._style">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz._base_plotter._Plotter._style">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">_style</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Style the plot.&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
+</div>
 
 </pre></div>
 

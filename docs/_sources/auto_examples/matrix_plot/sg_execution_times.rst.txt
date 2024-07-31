@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:10.785** total execution time for 5 files **from auto_examples/matrix_plot**:
+**01:14.429** total execution time for 5 files **from auto_examples/matrix_plot**:
 
 .. container::
 
@@ -33,15 +33,15 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_contribution_plots.py` (``matrix_of_contribution_plots.py``)
-     - 00:37.969
+     - 00:39.609
      - 0.0
    * - :ref:`sphx_glr_auto_examples_matrix_plot_changing_plot_defaults.py` (``changing_plot_defaults.py``)
-     - 00:32.816
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_perturbation_plots.py` (``matrix_of_perturbation_plots.py``)
-     - 00:00.000
+     - 00:34.820
      - 0.0
    * - :ref:`sphx_glr_auto_examples_matrix_plot_different_applications_and_experiments.py` (``different_applications_and_experiments.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_perturbation_plots.py` (``matrix_of_perturbation_plots.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_matrix_plot_nonsquare_plot.py` (``nonsquare_plot.py``)

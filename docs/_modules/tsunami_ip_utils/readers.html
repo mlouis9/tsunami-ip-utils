@@ -125,6 +125,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">energy_boundaries</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdf_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_sdf</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
         
+<div class="viewcode-block" id="SdfReader._read_sdf">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.readers.SdfReader._read_sdf">[docs]</a>
     <span class="k">def</span> <span class="nf">_read_sdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the SDF file and returns a dictionary of nuclide-reaction pairs and energy-dependent</span>
 <span class="sd">        sensitivities (with uncertainties)</span>
@@ -215,6 +217,7 @@
             <span class="k">del</span> <span class="n">match</span><span class="p">[</span><span class="s2">&quot;uncertainties&quot;</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">energy_boundaries</span><span class="p">,</span> <span class="n">sdf_data</span></div>
+</div>
 
         
 <div class="viewcode-block" id="RegionIntegratedSdfReader">
@@ -557,8 +560,11 @@
     <span class="k">pass</span></div>
 
 
+<div class="viewcode-block" id="_read_ck_contributions">
+<a class="viewcode-back" href="../../private_api/index.html#tsunami_ip_utils.readers._read_ck_contributions">[docs]</a>
 <span class="k">def</span> <span class="nf">_read_ck_contributions</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">pass</span>
+    <span class="k">pass</span></div>
+
 
 <div class="viewcode-block" id="read_uncertainty_contributions_out">
 <a class="viewcode-back" href="../../public_api/index.html#tsunami_ip_utils.readers.read_uncertainty_contributions_out">[docs]</a>

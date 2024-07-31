@@ -131,10 +131,15 @@
     <span class="s1">&#39;borderLeft&#39;</span><span class="p">:</span> <span class="s1">&#39;0px&#39;</span>
 <span class="p">}</span>
 
+<div class="viewcode-block" id="_create_app">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_app">[docs]</a>
 <span class="k">def</span> <span class="nf">_create_app</span><span class="p">(</span><span class="n">external_stylesheets</span><span class="p">):</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">dash</span><span class="o">.</span><span class="n">Dash</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">external_stylesheets</span><span class="o">=</span><span class="n">external_stylesheets</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">app</span>
+    <span class="k">return</span> <span class="n">app</span></div>
 
+
+<div class="viewcode-block" id="_create_column_headers">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_column_headers">[docs]</a>
 <span class="k">def</span> <span class="nf">_create_column_headers</span><span class="p">(</span><span class="n">num_cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create column headers for the matrix plot. Each column header is a div element with the text &#39;Application i&#39; where i is</span>
 <span class="sd">    the column index. The column headers are styled to be centered and have a border on the right and bottom.</span>
@@ -175,8 +180,11 @@
                 <span class="s1">&#39;justifyContent&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span>
             <span class="p">}</span>
         <span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">div</span>
+    <span class="k">return</span> <span class="n">div</span></div>
 
+
+<div class="viewcode-block" id="_create_row_label">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_row_label">[docs]</a>
 <span class="k">def</span> <span class="nf">_create_row_label</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a row label for the matrix plot. The row label is a div element with the text &#39;Experiment i&#39; where i is the row</span>
 <span class="sd">    index. The row label is styled to be centered and have a border on the right and bottom. The text is rotated -90 degrees to</span>
@@ -243,8 +251,11 @@
             <span class="p">}</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">div</span>
+    <span class="k">return</span> <span class="n">div</span></div>
 
+
+<div class="viewcode-block" id="_create_plot_element">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_plot_element">[docs]</a>
 <span class="k">def</span> <span class="nf">_create_plot_element</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">plot_object</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">InteractiveScatterLegend</span><span class="p">,</span> <span class="n">InteractivePieLegend</span><span class="p">,</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">]</span>
                         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">,</span> <span class="n">html</span><span class="o">.</span><span class="n">Iframe</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a plot element based on the plot object. If the plot object is an instance of </span>
@@ -272,8 +283,11 @@
             <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">html</span><span class="o">.</span><span class="n">Img</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s1">&#39;data:image/png;base64,</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">encoded_image</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">GRAPH_STYLE</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">plot_object</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">GRAPH_STYLE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dcc</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">plot_object</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">GRAPH_STYLE</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="_create_update_figure_callback">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._create_update_figure_callback">[docs]</a>
 <span class="k">def</span> <span class="nf">_create_update_figure_callback</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">graph_id</span><span class="p">,</span> <span class="n">app_instance</span><span class="p">):</span>
     <span class="nd">@app</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span>
         <span class="n">Output</span><span class="p">(</span><span class="n">graph_id</span><span class="p">,</span> <span class="s1">&#39;figure&#39;</span><span class="p">),</span>
@@ -312,8 +326,11 @@
 
             <span class="k">return</span> <span class="n">app_instance</span><span class="o">.</span><span class="n">fig</span>
 
-        <span class="k">return</span> <span class="n">dash</span><span class="o">.</span><span class="n">no_update</span>
+        <span class="k">return</span> <span class="n">dash</span><span class="o">.</span><span class="n">no_update</span></div>
 
+
+<div class="viewcode-block" id="_generate_layout">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._generate_layout">[docs]</a>
 <span class="k">def</span> <span class="nf">_generate_layout</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">dash</span><span class="o">.</span><span class="n">Dash</span><span class="p">,</span> <span class="n">rows</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate the layout of the Dash app. The layout consists of an H1 element with the title &#39;Matrix of Plots&#39;, followed by</span>
 <span class="sd">    a div element containing the rows of the matrix plot. The rows are displayed in a flex column with horizontal scrolling.</span>
@@ -337,7 +354,8 @@
 <span class="s2">            });</span>
 <span class="s2">        });</span>
 <span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
-    <span class="p">])</span>
+    <span class="p">])</span></div>
+
 
 <div class="viewcode-block" id="InteractiveMatrixPlot">
 <a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot">[docs]</a>
@@ -372,6 +390,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">labels</span></div>
 
     
+<div class="viewcode-block" id="InteractiveMatrixPlot._open_browser">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot._open_browser">[docs]</a>
     <span class="k">def</span> <span class="nf">_open_browser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Open the browser to display the interactive matrix plot.</span>
 <span class="sd">        </span>
@@ -381,7 +401,8 @@
 <span class="sd">            Port number of the Flask server.&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Now running at http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
         <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
+
 
 <div class="viewcode-block" id="InteractiveMatrixPlot.show">
 <a class="viewcode-back" href="../../../public_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot.show">[docs]</a>
@@ -576,6 +597,8 @@
 
 
 
+<div class="viewcode-block" id="_interactive_matrix_plot">
+<a class="viewcode-back" href="../../../private_api/tsunami_ip_utils.viz.html#tsunami_ip_utils.viz.matrix_plot._interactive_matrix_plot">[docs]</a>
 <span class="k">def</span> <span class="nf">_interactive_matrix_plot</span><span class="p">(</span><span class="n">plot_objects_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">InteractiveMatrixPlot</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an interactive matrix plot from a 2D numpy array of plot objects. This function creates a Dash app that displays</span>
 <span class="sd">    the matrix plot. The matrix is constructed from the plot objects array, where each plot object is an instance of either</span>
@@ -625,7 +648,8 @@
         <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">html</span><span class="o">.</span><span class="n">Div</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;display&#39;</span><span class="p">:</span> <span class="s1">&#39;flex&#39;</span><span class="p">}))</span>
 
     <span class="n">_generate_layout</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">InteractiveMatrixPlot</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot_objects_array</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">InteractiveMatrixPlot</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">plot_objects_array</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

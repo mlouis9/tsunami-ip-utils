@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:49.166** total execution time for 6 files **from auto_examples**:
+**01:12.657** total execution time for 6 files **from auto_examples**:
 
 .. container::
 
@@ -33,20 +33,20 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_compare_E.py` (``compare_E.py``)
-     - 00:49.166
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_caching_cross_sections.py` (``caching_cross_sections.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_multigroup_xs_reader.py` (``multigroup_xs_reader.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_sdf_readers.py` (``sdf_readers.py``)
-     - 00:00.000
+     - 00:47.107
      - 0.0
    * - :ref:`sphx_glr_auto_examples_uncertainty_contributions.py` (``uncertainty_contributions.py``)
-     - 00:00.000
+     - 00:08.988
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_multigroup_xs_reader.py` (``multigroup_xs_reader.py``)
+     - 00:08.104
      - 0.0
    * - :ref:`sphx_glr_auto_examples_visualizing_contributions.py` (``visualizing_contributions.py``)
-     - 00:00.000
+     - 00:06.787
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_sdf_readers.py` (``sdf_readers.py``)
+     - 00:01.512
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_caching_cross_sections.py` (``caching_cross_sections.py``)
+     - 00:00.159
      - 0.0

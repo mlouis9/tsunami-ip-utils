@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:49.166** total execution time for 13 files **from all galleries**:
+**02:34.506** total execution time for 13 files **from all galleries**:
 
 .. container::
 
@@ -33,41 +33,41 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_compare_E.py` (``../../examples/compare_E.py``)
-     - 00:49.166
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_caching_cross_sections.py` (``../../examples/caching_cross_sections.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_correlation_plot_contribution_correlation_plot.py` (``../../examples/correlation_plot/contribution_correlation_plot.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_correlation_plot_perturbation_correlation_plot.py` (``../../examples/correlation_plot/perturbation_correlation_plot.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_matrix_plot_changing_plot_defaults.py` (``../../examples/matrix_plot/changing_plot_defaults.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_matrix_plot_different_applications_and_experiments.py` (``../../examples/matrix_plot/different_applications_and_experiments.py``)
-     - 00:00.000
+     - 00:47.107
      - 0.0
    * - :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_contribution_plots.py` (``../../examples/matrix_plot/matrix_of_contribution_plots.py``)
+     - 00:39.609
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_matrix_plot_changing_plot_defaults.py` (``../../examples/matrix_plot/changing_plot_defaults.py``)
+     - 00:34.820
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_uncertainty_contributions.py` (``../../examples/uncertainty_contributions.py``)
+     - 00:08.988
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_multigroup_xs_reader.py` (``../../examples/multigroup_xs_reader.py``)
+     - 00:08.104
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_visualizing_contributions.py` (``../../examples/visualizing_contributions.py``)
+     - 00:06.787
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_correlation_plot_contribution_correlation_plot.py` (``../../examples/correlation_plot/contribution_correlation_plot.py``)
+     - 00:05.883
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_correlation_plot_perturbation_correlation_plot.py` (``../../examples/correlation_plot/perturbation_correlation_plot.py``)
+     - 00:01.537
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_sdf_readers.py` (``../../examples/sdf_readers.py``)
+     - 00:01.512
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_caching_cross_sections.py` (``../../examples/caching_cross_sections.py``)
+     - 00:00.159
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_matrix_plot_different_applications_and_experiments.py` (``../../examples/matrix_plot/different_applications_and_experiments.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_perturbation_plots.py` (``../../examples/matrix_plot/matrix_of_perturbation_plots.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_matrix_plot_nonsquare_plot.py` (``../../examples/matrix_plot/nonsquare_plot.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_multigroup_xs_reader.py` (``../../examples/multigroup_xs_reader.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_sdf_readers.py` (``../../examples/sdf_readers.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_uncertainty_contributions.py` (``../../examples/uncertainty_contributions.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_visualizing_contributions.py` (``../../examples/visualizing_contributions.py``)
      - 00:00.000
      - 0.0
