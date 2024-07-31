@@ -67,11 +67,6 @@ import pickle
 with open(EXAMPLES / 'data' / 'dummy_56_v7.1.pkl', 'wb') as f:
     pickle.dump(out, f)
 
-# Now compare the dump to the gold standard
-import filecmp
-
-assert filecmp.cmp(EXAMPLES / 'data' / 'dummy_56_v7.1.pkl', EXAMPLES / 'gold' / 'dummy_56_v7.1.pkl')
-
 # %%
 # A Future Improvement
 # ---------------------

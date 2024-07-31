@@ -39,10 +39,17 @@ copyright = '2024, Matthew Louis'
 author = 'Matthew Louis'
 release = '0.0.1'
 
+def unexpand_home(path):
+    home = str(Path.home())
+    path = str(path)
+    if path.startswith(home):
+        return '~' + path[len(home):]
+    return path
+
 # -- Plotly Image Scraper -----------------------------------------------------
 def plotly_scraper(block, block_vars, gallery_conf):
     output_dir = Path(__file__).parent / "_static"
-    build_static = (Path(__file__).parent / ".." / "build" / "html" / "_static").resolve()
+    build_static = unexpand_home((Path(__file__).parent / ".." / "build" / "html" / "_static").resolve())
 
     # Check if 'fig' is in the example_globals and if it can generate HTML
     fig = block_vars['example_globals'].get('fig', None)
@@ -189,7 +196,7 @@ html_css_files = [
 ]
 
 intersphinx_mapping = {
-    'tsunami_ip_utils': ('https://tsunami-ip-utils.readthedocs.io/en/latest', None),
+    'tsunami_ip_utils': ('https://mlouis9.github.io/tsunami_ip_utils/', None),
     'uncertainties': ('https://uncertainties.readthedocs.io/en/latest/', None),
     'pathlib': ('https://pathlib.readthedocs.io/en/pep428', None),
     'numpy': ('https://numpy.org/devdocs', None)
