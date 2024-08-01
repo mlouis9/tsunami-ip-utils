@@ -861,7 +861,7 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
         # Timer to open the browser shortly after the server starts
         if not config.generating_docs:
             threading.Timer(1, open_browser).start()
-        self._app.run_server(debug=False, host='localhost', port=port)
+            self._app.run_server(debug=False, host='localhost', port=port)
 
     def save_state(self, filename: typing.Optional[Union[str, Path]]=None) -> Optional[dict]:
         """Save the current state of the interactive scatter plot to a file. This method saves the state of the interactive
