@@ -38,8 +38,8 @@ from pathlib import Path
 import plotly.io as pio
 import tempfile
 from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
-import matplotlib
 import tsunami_ip_utils.config as config
+from matplotlib.patches import Rectangle
 
 def _replace_spearman_and_pearson(text: str, new_pearson: float, new_spearman: float) -> str:
     """Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful
@@ -336,30 +336,15 @@ class _ScatterPlotter(_ScatterPlot):
                 return width_fits and height_fits
             return True
 
-        def adjust_figsize():
-            fig_width, fig_height = self.fig.get_size_inches()
-            legend = self.axs.get_legend()
-            if legend:
-                # Estimate the width of the legend
-                renderer = self.fig.canvas.get_renderer()
-                bbox = legend.get_window_extent(renderer)
-                legend_width = bbox.width / self.fig.dpi
-                # Adjust the figure width to fit the legend
-                new_fig_width = fig_width + legend_width
-                self.fig.set_size_inches(new_fig_width, fig_height)
-
         # Initial legend attempt
         legend = update_legend(10)
-        adjust_figsize()
 
         # Try to fit the legend using direct size check
         if not legend_fits():
             # If the legend doesn't fit, scale the font size
             for fontsize in range(10, 5, -1):
                 legend = update_legend(fontsize)
-                adjust_figsize()
                 if legend_fits():
-                    num_to_exclude = 0
                     break
 
             # If still doesn't fit, exclude the smallest magnitudes
@@ -369,14 +354,11 @@ class _ScatterPlotter(_ScatterPlot):
                 while not legend_fits() and num_to_exclude < len(labels):
                     num_to_exclude += 1
                     self.axs.legend(handles[:-num_to_exclude], labels[:-num_to_exclude], bbox_to_anchor=(1, 1), loc='upper left')
-                    adjust_figsize()
-        else:
-            num_to_exclude = 0
 
-        # Ensure the figure is square at the end
-        fig_width, fig_height = self.fig.get_size_inches()
-        new_size = min(fig_width, fig_height)
-        self.fig.set_size_inches(new_size, new_size)
+                # Exclude an additional legend entry to make room for the annotation
+                num_to_exclude += 2
+                extra = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
+                self.axs.legend(handles[:-num_to_exclude] + [extra], labels[:-num_to_exclude] + ['others not shown'], bbox_to_anchor=(1, 1), loc='upper left')
 
         return num_to_exclude
 
@@ -392,22 +374,8 @@ class _ScatterPlotter(_ScatterPlot):
         self.axs.set_ylabel(f"Experiment {self._index_name} Contribution")
         self.axs.set_xlabel(f"Application {self._index_name} Contribution")
         self.axs.grid()
-        num_to_exclude = self._add_legend_with_scaling()
-
-        
-        if num_to_exclude != 0:
-            # Add additional legend entry showing excluded points
-            legend = self.axs.get_legend()
-            offset = matplotlib.text.OffsetFrom(legend, (1.0, 0.0))
-            
-            # Create annotation. Top right corner located -5 pixels below the offset point 
-            # (lower right corner of legend).
-            self.axs.annotate("others excluded ", xy=(0,0),size=10,
-                        xycoords='figure fraction', xytext=(0,-5), textcoords=offset, 
-                        horizontalalignment='right', verticalalignment='top')
-            # Draw the canvas for offset to take effect
-            self.fig.canvas.draw()
-
+        self._add_legend_with_scaling()
+        self.fig.tight_layout()
 
 def load_interactive_scatter_plot(filename: Union[str, Path]) -> InteractiveScatterLegend:
     """Loads an interactive scatter plot (with interactive legend) from a saved state file. This function is purely for 
