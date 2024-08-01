@@ -212,6 +212,8 @@ various aspects of the constituent datasets, and they could also be
 useful as similarity indices, though these applications are not explored
 in this work.
 
+.. _sec-correlation-coefficient:
+
 The Correlation Coefficient
 ---------------------------
 

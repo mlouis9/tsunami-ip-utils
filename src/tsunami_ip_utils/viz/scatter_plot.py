@@ -38,6 +38,7 @@ from pathlib import Path
 import plotly.io as pio
 import tempfile
 from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
+import matplotlib
 
 def _replace_spearman_and_pearson(text: str, new_pearson: float, new_spearman: float) -> str:
     """Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful
@@ -273,7 +274,7 @@ class _ScatterPlotter(_ScatterPlot):
         -----
         The set of isotopes and reactions is only necessary for creating labels in interactive plots (e.g. those made by 
         :class:`.InteractiveScatterPlotter`), but is included here for consistency."""
-        self.fig, self.axs = plt.subplots()
+        self.fig, self.axs = plt.subplots(figsize=(8, 8))
 
         # Extract the x and y values from the contribution pairs
         application_points        = [ contribution[0].n for contribution in contribution_pairs ]
@@ -281,8 +282,24 @@ class _ScatterPlotter(_ScatterPlot):
         experiment_points         = [ contribution[1].n for contribution in contribution_pairs ]
         experiment_uncertainties  = [ contribution[1].s for contribution in contribution_pairs ]
 
-        self.axs.errorbar(application_points, experiment_points, xerr=application_uncertainties, \
-                               yerr=experiment_uncertainties, fmt='.', capsize=5)
+        # Calculate the magnitude (absolute value of x ordinate plus absolute value of y ordinate)
+        magnitudes = [abs(application_points[i]) + abs(experiment_points[i]) for i in range(len(application_points))]
+
+        # Combine all lists to sort them together
+        combined = list(zip(magnitudes, application_points, application_uncertainties, experiment_points, experiment_uncertainties, isotopes))
+
+        # Sort the combined list by magnitudes
+        combined.sort(key=lambda x: x[0], reverse=True)
+
+        # Unzip the sorted lists
+        magnitudes, application_points, application_uncertainties, experiment_points, experiment_uncertainties, isotopes = zip(*combined)
+
+        # Define a color map
+        colors = plt.cm.rainbow(np.linspace(0, 1, len(application_points)))
+
+        # Plot each point with error bars and color by order of magnitude
+        for i, (x, xerr, y, yerr, color, isotope) in enumerate(zip(application_points, application_uncertainties, experiment_points, experiment_uncertainties, colors, isotopes)):
+            self.axs.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='.', capsize=5, color=color, label=isotope if isotope not in self.axs.get_legend_handles_labels()[1] else "")
         
         # Linear regression
         self._get_summary_statistics(application_points, experiment_points)
@@ -297,6 +314,62 @@ class _ScatterPlotter(_ScatterPlot):
 
         self._style()
 
+    def _add_legend_with_scaling(self):
+        def update_legend(fontsize):
+            legend = self.axs.legend(bbox_to_anchor=(1, 1), loc='upper left')
+            for text in legend.get_texts():
+                text.set_fontsize(fontsize)
+            return legend
+
+        def legend_fits():
+            fig_width, fig_height = self.fig.get_size_inches()
+            legend = self.axs.get_legend()
+            if legend:
+                # Estimate the width of the legend
+                renderer = self.fig.canvas.get_renderer()
+                bbox = legend.get_window_extent(renderer)
+                legend_width = bbox.width / self.fig.dpi
+                legend_height = bbox.height / self.fig.dpi
+                width_fits = fig_width - legend_width > 0.1  # Allow a margin for axes labels and other elements
+                height_fits = fig_height - legend_height > 0.1  # Allow a margin for axes labels and other elements
+                return width_fits and height_fits
+            return True
+
+        def adjust_figsize():
+            fig_width, fig_height = self.fig.get_size_inches()
+            legend = self.axs.get_legend()
+            if legend:
+                # Estimate the width of the legend
+                renderer = self.fig.canvas.get_renderer()
+                bbox = legend.get_window_extent(renderer)
+                legend_width = bbox.width / self.fig.dpi
+                # Adjust the figure width to fit the legend
+                new_fig_width = fig_width + legend_width
+                self.fig.set_size_inches(new_fig_width, fig_height)
+
+        # Initial legend attempt
+        legend = update_legend(10)
+        adjust_figsize()
+
+        # Try to fit the legend using direct size check
+        if not legend_fits():
+            # If the legend doesn't fit, scale the font size
+            for fontsize in range(10, 5, -1):
+                legend = update_legend(fontsize)
+                adjust_figsize()
+                if legend_fits():
+                    break
+
+            # If still doesn't fit, exclude the smallest magnitudes
+            if not legend_fits():
+                handles, labels = self.axs.get_legend_handles_labels()
+                num_to_exclude = 1
+                while not legend_fits() and num_to_exclude < len(labels):
+                    num_to_exclude += 1
+                    self.axs.legend(handles[:-num_to_exclude], labels[:-num_to_exclude], bbox_to_anchor=(1, 1), loc='upper left')
+                    adjust_figsize()
+
+
     def _get_plot(self) -> Tuple[Figure, Axes]:
         return self.fig, self.axs
         
@@ -309,6 +382,19 @@ class _ScatterPlotter(_ScatterPlot):
         self.axs.set_ylabel(f"Experiment {self._index_name} Contribution")
         self.axs.set_xlabel(f"Application {self._index_name} Contribution")
         self.axs.grid()
+        self._add_legend_with_scaling()
+
+        # Add additional legend entry showing excluded points
+        legend = self.axs.get_legend()
+        offset = matplotlib.text.OffsetFrom(legend, (1.0, 0.0))
+        
+        # Create annotation. Top right corner located -5 pixels below the offset point 
+        # (lower right corner of legend).
+        self.axs.annotate("others excluded ", xy=(0,0),size=10,
+                    xycoords='figure fraction', xytext=(0,-5), textcoords=offset, 
+                    horizontalalignment='right', verticalalignment='top')
+        # Draw the canvas for offset to take effect
+        self.fig.canvas.draw()
 
 
 def load_interactive_scatter_plot(filename: Union[str, Path]) -> InteractiveScatterLegend:
@@ -660,6 +746,8 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
     """A list of isotopes that have been excluded from the scatter plot."""
     _app: dash.Dash
     """The Dash application object for the interactive legend."""
+    _plot_type: str
+    """Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text."""
     def __init__(self, interactive_scatter_plot: _InteractiveScatterPlotter, df: pd.DataFrame):
         self._interactive_scatter_plot = interactive_scatter_plot
         self.fig = interactive_scatter_plot.fig
@@ -671,6 +759,7 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
             dcc.Graph(id='interactive-scatter', figure=self.fig, style={'height': '100vh'})
         ], style={'margin': 0})
         self._setup_callbacks()
+        self._plot_type = 'plotly'
 
     def _setup_callbacks(self):
         """Set up the Dash callbacks for the interactive legend."""
@@ -765,8 +854,8 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
 
         # Timer to open the browser shortly after the server starts
         threading.Timer(1, open_browser).start()
-
-        self._app.run_server(debug=False, host='localhost', port=port)
+        print('starting server')
+        self._app.run_server(debug=True, host='localhost', port=port)
 
     def save_state(self, filename: typing.Optional[Union[str, Path]]=None) -> Optional[dict]:
         """Save the current state of the interactive scatter plot to a file. This method saves the state of the interactive
