@@ -817,11 +817,10 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
         """Display the interactive scatter plot with the interactive legend in a web browser."""
         port = _find_free_port()
         # Function to open the browser
-        if not config.generating_docs:
-            def open_browser():
-                if not os.environ.get("WERKZEUG_RUN_MAIN"):
-                    print(f"Now running at http://localhost:{port}/")
-                    webbrowser.open(f"http://localhost:{port}/")
+        def open_browser():
+            if not os.environ.get("WERKZEUG_RUN_MAIN"):
+                print(f"Now running at http://localhost:{port}/")
+                webbrowser.open(f"http://localhost:{port}/")
 
         # Silence the Flask development server logging
         log = open(os.devnull, 'w')
@@ -860,8 +859,8 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
         '''
 
         # Timer to open the browser shortly after the server starts
-        threading.Timer(1, open_browser).start()
-        print('starting server')
+        if not config.generating_docs:
+            threading.Timer(1, open_browser).start()
         self._app.run_server(debug=False, host='localhost', port=port)
 
     def save_state(self, filename: typing.Optional[Union[str, Path]]=None) -> Optional[dict]:
