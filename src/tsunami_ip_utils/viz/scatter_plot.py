@@ -359,6 +359,7 @@ class _ScatterPlotter(_ScatterPlot):
                 legend = update_legend(fontsize)
                 adjust_figsize()
                 if legend_fits():
+                    num_to_exclude = 0
                     break
 
             # If still doesn't fit, exclude the smallest magnitudes
@@ -369,12 +370,15 @@ class _ScatterPlotter(_ScatterPlot):
                     num_to_exclude += 1
                     self.axs.legend(handles[:-num_to_exclude], labels[:-num_to_exclude], bbox_to_anchor=(1, 1), loc='upper left')
                     adjust_figsize()
+        else:
+            num_to_exclude = 0
 
         # Ensure the figure is square at the end
         fig_width, fig_height = self.fig.get_size_inches()
-        new_size = max(fig_width, fig_height)
+        new_size = min(fig_width, fig_height)
         self.fig.set_size_inches(new_size, new_size)
 
+        return num_to_exclude
 
     def _get_plot(self) -> Tuple[Figure, Axes]:
         return self.fig, self.axs
@@ -388,19 +392,21 @@ class _ScatterPlotter(_ScatterPlot):
         self.axs.set_ylabel(f"Experiment {self._index_name} Contribution")
         self.axs.set_xlabel(f"Application {self._index_name} Contribution")
         self.axs.grid()
-        self._add_legend_with_scaling()
+        num_to_exclude = self._add_legend_with_scaling()
 
-        # Add additional legend entry showing excluded points
-        legend = self.axs.get_legend()
-        offset = matplotlib.text.OffsetFrom(legend, (1.0, 0.0))
         
-        # Create annotation. Top right corner located -5 pixels below the offset point 
-        # (lower right corner of legend).
-        self.axs.annotate("others excluded ", xy=(0,0),size=10,
-                    xycoords='figure fraction', xytext=(0,-5), textcoords=offset, 
-                    horizontalalignment='right', verticalalignment='top')
-        # Draw the canvas for offset to take effect
-        self.fig.canvas.draw()
+        if num_to_exclude != 0:
+            # Add additional legend entry showing excluded points
+            legend = self.axs.get_legend()
+            offset = matplotlib.text.OffsetFrom(legend, (1.0, 0.0))
+            
+            # Create annotation. Top right corner located -5 pixels below the offset point 
+            # (lower right corner of legend).
+            self.axs.annotate("others excluded ", xy=(0,0),size=10,
+                        xycoords='figure fraction', xytext=(0,-5), textcoords=offset, 
+                        horizontalalignment='right', verticalalignment='top')
+            # Draw the canvas for offset to take effect
+            self.fig.canvas.draw()
 
 
 def load_interactive_scatter_plot(filename: Union[str, Path]) -> InteractiveScatterLegend:

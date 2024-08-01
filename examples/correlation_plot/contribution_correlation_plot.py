@@ -98,7 +98,7 @@ fig.show()
 # ^^^^^^^^^^^^^^^^^^^^^^^
 
 application_contributions = contributions_nuclide_reaction['application'][0] # Note that the contributions are nuclide_reaction now
-experiment_contributions = contributions_nuclide_reaction['experiment'][0]
+experiment_contributions  = contributions_nuclide_reaction['experiment'][0]
 fig, axs = correlation_plot(
     application_contributions, 
     experiment_contributions, 
