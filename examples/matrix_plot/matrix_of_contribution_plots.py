@@ -2,7 +2,7 @@
 Matrix of Contribution Correlation Plots
 ========================================
 The first type of (interactive) similarity plot that we will view in matrix form is the contribution correlation plot discussed
-in :ref:`sphx_glr_auto_examples_contribution_correlation_plot.py`. This shows the contribution correlation plot between all
+in :ref:`sphx_glr_auto_examples_correlation_plot_contribution_correlation_plot.py`. This shows the contribution correlation plot between all
 pairs of applications and experiments in a (symmetric) matrix. First we consider the case of a square matrix where the set
 of applications and experiments are the same.
 """
@@ -32,7 +32,11 @@ experiment_files = application_files
 # :func:`tsunami_ip_utils.integral_indices.get_uncertainty_contributions` (described in 
 # :ref:`sphx_glr_auto_examples_uncertainty_contributions.py`).
 
-contributions_nuclide, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files)
+contributions_nuclide, contributions_nuclide_reaction = get_uncertainty_contributions(
+    application_files, 
+    experiment_files, 
+    variance=True
+)
 
 # %%
 # Nuclide-Wise Contributions

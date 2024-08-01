@@ -39,6 +39,7 @@ import plotly.io as pio
 import tempfile
 from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
 import matplotlib
+import tsunami_ip_utils.config as config
 
 def _replace_spearman_and_pearson(text: str, new_pearson: float, new_spearman: float) -> str:
     """Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful
@@ -368,6 +369,11 @@ class _ScatterPlotter(_ScatterPlot):
                     num_to_exclude += 1
                     self.axs.legend(handles[:-num_to_exclude], labels[:-num_to_exclude], bbox_to_anchor=(1, 1), loc='upper left')
                     adjust_figsize()
+
+        # Ensure the figure is square at the end
+        fig_width, fig_height = self.fig.get_size_inches()
+        new_size = max(fig_width, fig_height)
+        self.fig.set_size_inches(new_size, new_size)
 
 
     def _get_plot(self) -> Tuple[Figure, Axes]:
@@ -811,10 +817,11 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
         """Display the interactive scatter plot with the interactive legend in a web browser."""
         port = _find_free_port()
         # Function to open the browser
-        def open_browser():
-            if not os.environ.get("WERKZEUG_RUN_MAIN"):
-                print(f"Now running at http://localhost:{port}/")
-                webbrowser.open(f"http://localhost:{port}/")
+        if not config.generating_docs:
+            def open_browser():
+                if not os.environ.get("WERKZEUG_RUN_MAIN"):
+                    print(f"Now running at http://localhost:{port}/")
+                    webbrowser.open(f"http://localhost:{port}/")
 
         # Silence the Flask development server logging
         log = open(os.devnull, 'w')
