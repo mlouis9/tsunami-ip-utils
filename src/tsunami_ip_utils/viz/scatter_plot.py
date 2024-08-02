@@ -268,8 +268,9 @@ class _ScatterPlotter(_ScatterPlot):
             The list of isotopes represented by each contribution pair. This has the same length and it ordered the same
             as the contribution_pairs.
         reactions
-            The list of reactions represented by each contribution pair. This has the same length and it ordered the same
-            as the contribution_pairs. 
+            The list of all reactions. For consistency, this is the same for all isotopes, so there may be cases where an
+            isotope has a reaction that isn't actually possible (e.g. c-12 fission) but is included for consistency with the
+            expeirment/application, and the contribution is zero. 
         
         Notes
         -----
@@ -283,27 +284,66 @@ class _ScatterPlotter(_ScatterPlot):
         experiment_points         = [ contribution[1].n for contribution in contribution_pairs ]
         experiment_uncertainties  = [ contribution[1].s for contribution in contribution_pairs ]
 
+        if reactions != []:
+            isotopes_and_reactions = [ f"{isotope} : {reaction}" for isotope in isotopes for reaction in reactions ]
+        else:
+            isotopes_and_reactions = isotopes
+
+        # Now filter out (0,0) points, which don't contribute to either the application or the experiment, these are
+        # usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set
+        # of reactions only
+
+        indices = [ index for index, (application_point, experiment_point) in enumerate( zip( application_points, experiment_points ) )
+                    if application_point == 0 and experiment_point == 0 ]
+        
+        application_points        = [ point for index, point in enumerate(application_points) if index not in indices ]
+        application_uncertainties = [ point for index, point in enumerate(application_uncertainties) if index not in indices ]
+        experiment_points         = [ point for index, point in enumerate(experiment_points) if index not in indices ]
+        experiment_uncertainties  = [ point for index, point in enumerate(experiment_uncertainties) if index not in indices ]
+        isotopes_and_reactions    = [ point for index, point in enumerate(isotopes_and_reactions) if index not in indices ]
+
+        self._get_summary_statistics(application_points, experiment_points)
+
+        # define a color map
+        if reactions != []:
+            unique_isotopes = sorted(set([isotope_reaction.split(' : ')[0] for isotope_reaction in isotopes_and_reactions]))
+            colors = plt.cm.rainbow(np.linspace(0, 1, len(isotopes)))
+            isotope_to_color = {isotope: color for isotope, color in zip(unique_isotopes, colors)}
+            colors = [ isotope_to_color[pair.split(' : ')[0]] for pair in isotopes_and_reactions ]
+        else:
+            colors = plt.cm.rainbow(np.linspace(0, 1, len(isotopes_and_reactions)))
+
         # Calculate the magnitude (absolute value of x ordinate plus absolute value of y ordinate)
         magnitudes = [abs(application_points[i]) + abs(experiment_points[i]) for i in range(len(application_points))]
 
         # Combine all lists to sort them together
-        combined = list(zip(magnitudes, application_points, application_uncertainties, experiment_points, experiment_uncertainties, isotopes))
+        combined = list(zip(
+            magnitudes,
+            application_points,
+            experiment_points,
+            application_uncertainties,
+            experiment_uncertainties,
+            isotopes_and_reactions,
+            colors,
+        ))
 
-        # Sort the combined list by magnitudes
-        combined.sort(key=lambda x: x[0], reverse=True)
+        # Sort the combined list by magnitudes, application points, and experiment points
+        combined.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
 
         # Unzip the sorted lists
-        magnitudes, application_points, application_uncertainties, experiment_points, experiment_uncertainties, isotopes = zip(*combined)
-
-        # Define a color map
-        colors = plt.cm.rainbow(np.linspace(0, 1, len(application_points)))
+        magnitudes, application_points, experiment_points, application_uncertainties, experiment_uncertainties, \
+            isotopes_and_reactions, colors = zip(*combined)
 
         # Plot each point with error bars and color by order of magnitude
-        for i, (x, xerr, y, yerr, color, isotope) in enumerate(zip(application_points, application_uncertainties, experiment_points, experiment_uncertainties, colors, isotopes)):
-            self.axs.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='.', capsize=5, color=color, label=isotope if isotope not in self.axs.get_legend_handles_labels()[1] else "")
-        
-        # Linear regression
-        self._get_summary_statistics(application_points, experiment_points)
+        for x, xerr, y, yerr, color, isotope_and_reaction in zip(
+            application_points, 
+            application_uncertainties, 
+            experiment_points, 
+            experiment_uncertainties, 
+            colors, 
+            isotopes_and_reactions
+        ):
+            self.axs.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='.', capsize=5, color=color, label=f"{isotope_and_reaction}")
 
         # Plot the regression line
         x = np.linspace(min(application_points), max(application_points), 100)
@@ -312,17 +352,33 @@ class _ScatterPlotter(_ScatterPlot):
 
         self.axs.text(0.05, 0.95, self._summary_stats_text, transform=self.axs.transAxes, fontsize=12,
                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
-
+        
         self._style()
 
     def _add_legend_with_scaling(self):
-        def update_legend(fontsize):
-            legend = self.axs.legend(bbox_to_anchor=(1, 1), loc='upper left')
-            for text in legend.get_texts():
-                text.set_fontsize(fontsize)
-            return legend
+        def _adjust_margin_for_legend():
+            # Check if the axes has a visible legend
+            if self.axs.get_legend() and self.axs.get_legend().get_visible():
+                legend = self.axs.get_legend()
+                # Get the bounding box of the legend in display coordinates
+                legend_bbox = legend.get_window_extent()
+                # Transform to figure fraction
+                legend_bbox_transformed = self.fig.transFigure.inverted().transform_bbox(legend_bbox)
+                # Calculate required shift for this legend
+                shift = legend_bbox_transformed.x1 - 1.0
 
-        def legend_fits():
+                # Adjust the right margin of the figure if necessary
+                if shift > 0:
+                    # Update figure width to allow for extra legend padding
+                    original_width = self.fig.get_figwidth()
+                    new_width = original_width / (1 - shift)
+                    self.fig.set_figwidth(new_width)
+
+                    # Update the right margin of the figure to allow for the legend
+                    new_right_margin = 1 - shift
+                    self.fig.subplots_adjust(right=new_right_margin)
+        
+        def _legend_fits():
             fig_width, fig_height = self.fig.get_size_inches()
             legend = self.axs.get_legend()
             if legend:
@@ -336,31 +392,30 @@ class _ScatterPlotter(_ScatterPlot):
                 return width_fits and height_fits
             return True
 
-        # Initial legend attempt
-        legend = update_legend(10)
+        # Create legend and adjust the horizontal margin so the legend fits in the figure
+        self.axs.legend(bbox_to_anchor=(1, 1), loc='upper left')
+        _adjust_margin_for_legend()
 
-        # Try to fit the legend using direct size check
-        if not legend_fits():
-            # If the legend doesn't fit, scale the font size
-            for fontsize in range(10, 5, -1):
-                legend = update_legend(fontsize)
-                if legend_fits():
-                    break
+        # -----------------------------------------------------------------------
+        # Now try to make the legend fit vertically by adjusting visible entries
+        # -----------------------------------------------------------------------
 
-            # If still doesn't fit, exclude the smallest magnitudes
-            if not legend_fits():
-                handles, labels = self.axs.get_legend_handles_labels()
-                num_to_exclude = 1
-                while not legend_fits() and num_to_exclude < len(labels):
-                    num_to_exclude += 1
-                    self.axs.legend(handles[:-num_to_exclude], labels[:-num_to_exclude], bbox_to_anchor=(1, 1), loc='upper left')
+        if not _legend_fits():
+            handles, labels = self.axs.get_legend_handles_labels()
+            num_to_exclude = len(labels) - 35 if len(labels) > 35 else 1
+            modified_labels = labels.copy()  # Copy original labels
+            while not _legend_fits() and num_to_exclude < len(labels):
+                # Prepend an underscore to the labels of the entries to be hidden from the end of the list
+                for i in range(num_to_exclude):
+                    modified_labels[-i] = '_' + labels[-i]
+                num_to_exclude += 1
+                self.axs.legend(handles, modified_labels, bbox_to_anchor=(1, 1), loc='upper left')
+            
+            extra = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
+            modified_labels.append('others not shown')
+            handles.append(extra)
+            self.axs.legend(handles, modified_labels, bbox_to_anchor=(1, 1), loc='upper left')
 
-                # Exclude an additional legend entry to make room for the annotation
-                num_to_exclude += 2
-                extra = Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0)
-                self.axs.legend(handles[:-num_to_exclude] + [extra], labels[:-num_to_exclude] + ['others not shown'], bbox_to_anchor=(1, 1), loc='upper left')
-
-        return num_to_exclude
 
     def _get_plot(self) -> Tuple[Figure, Axes]:
         return self.fig, self.axs
@@ -567,7 +622,7 @@ class _InteractiveScatterPlotter(_ScatterPlot):
         reactions
             The list of reactions represented by each contribution pair. This has the same length and it ordered the same
             as the ``contribution_pairs``."""
-        
+
         data = {
             f'Application {self._index_name} Contribution': [cp[0].n for cp in contribution_pairs],
             f'Experiment {self._index_name} Contribution': [cp[1].n for cp in contribution_pairs],

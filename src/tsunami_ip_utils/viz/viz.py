@@ -19,6 +19,7 @@ import plotly
 from tsunami_ip_utils.viz.scatter_plot import InteractiveScatterLegend
 from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure
 from tsunami_ip_utils.viz.matrix_plot import InteractiveMatrixPlot
+import copy
 
 def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_index_name: str='E', 
                       plot_redundant_reactions: bool=True, **kwargs: dict
@@ -153,7 +154,7 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
         raise ValueError(f"Unsupported plot type: {plot_type}")
 
     # Create the plot and style it
-    plotter._create_plot(contribution_pairs, isotopes, all_reactions)
+    plotter._create_plot(copy.deepcopy(contribution_pairs), isotopes, all_reactions)
 
     return plotter._get_plot()
 
