@@ -481,11 +481,11 @@ def get_uncertainty_contributions(application_filenames: Optional[Union[ List[st
     
     dk_over_k_nuclide_wise = {
         'application': [],
-        'experiment': []    
+        'experiment': [],
     }
     dk_over_k_nuclide_reaction_wise = {
         'application': [],
-        'experiment': []    
+        'experiment': [],
     }
 
     application_filenames = application_filenames if application_filenames is not None else []
@@ -530,5 +530,15 @@ def get_uncertainty_contributions(application_filenames: Optional[Union[ List[st
                     for nuclide_index, contribution_dict in enumerate(system):
                         contribution = contribution_dict['contribution']
                         system[nuclide_index]['contribution'] = (contribution)**2 if contribution > 0 else -(contribution)**2
-            
+
+    # Add filenames to contribution dictionary for use by other functions
+    dk_over_k_nuclide_wise['filenames'] = {
+        'application': application_filenames,
+        'experiment': experiment_filenames
+    }
+    dk_over_k_nuclide_reaction_wise['filenames'] = {
+        'application': application_filenames,
+        'experiment': experiment_filenames
+    }
+        
     return dk_over_k_nuclide_wise, dk_over_k_nuclide_reaction_wise

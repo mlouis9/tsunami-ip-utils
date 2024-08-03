@@ -13,7 +13,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-from selenium.webdriver.common.by import By
+from typing import Union
 
 def _find_free_port() -> int:
     """Finds a free port on localhost for running a Flask/Dash server. This is done by creating a socket and binding it
@@ -67,8 +67,8 @@ def _determine_plot_type(contributions: List[ dict ], plot_redundant_reactions: 
 
     return contributions, nested_plot
 
-def generate_plot_objects_array_from_contributions(contributions: Dict[ str, List[ unumpy.uarray ] ], integral_index_name: str, 
-                                                   **kwargs: dict) -> np.ndarray:
+def generate_plot_objects_array_from_contributions(contributions: Dict[ str, List[ unumpy.uarray ] ], 
+                                                   integral_index_name: str, **kwargs: dict) -> np.ndarray:
     """Generate a matrix of plot objects (for creating a matrix plot) for the given contributions to an arbitrary integral index.
     This is valid for plots of :math:`\\Delta k/k` contributions, :math:`E` contributions, :math:`c_k` contributions, etc..
     
@@ -105,13 +105,15 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
     
     num_applications = len(contributions['application'])
     num_experiments = len(contributions['experiment'])
+    application_files = contributions['filenames']['application']
+    experiment_files = contributions['filenames']['experiment']
 
     # Construct plot matrix
     plot_objects_array = np.empty( ( num_applications, num_experiments ), dtype=object )
 
-    for application_index in range(num_applications):
-        for experiment_index in range(num_experiments):
-            if experiment_index == application_index:
+    for application_index, application_file in enumerate(application_files):
+        for experiment_index, experiment_file in enumerate(experiment_files):
+            if experiment_file == application_file:
                 # On the diagonal, make a contribution plot, as a correlation plot is not useful when comparing the same
                 # application and experiment
                 plot_objects_array[application_index, experiment_index] = \

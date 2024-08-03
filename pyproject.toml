@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "tsunami_ip_utils"
-version = "0.0.4"
+version = "0.1.0"
 description = "A tool for visualizing similarity data from the SCALE code: TSUNAMI-IP"
 authors = [
     "Matthew Louis <matthewlouis31@gmail.com>"
 ]
 license = "MIT"
 readme = "README.md"
-documentation = "https://tsunami-ip-utils.readthedocs.io"
+documentation = "https://mlouis9.github.io/tsunami_ip_utils"
 include = ["src/tsunami_ip_utils/config.yaml"]
 
 # Dependencies section: specify your package dependencies here
@@ -25,7 +25,6 @@ tqdm = "*"
 pyyaml = "*"
 pytest-mpl = "*"
 pytest = "*"
-pyprojroot = "*"
 selenium = "*"
 webdriver-manager = "*"
 IPython = "*"
