@@ -201,7 +201,7 @@ A Correlation Based Approach
 
 To aid in understanding the contributions of individual sensitivities
 and nuclear data uncertainties necessary in the computation of Eq.
-`[eq-ck] <#eq-ck>`__, visualization tools can be used to graphically
+:eq:`eq-ck`, visualization tools can be used to graphically
 inspect the contributors to the integral value. This approach would
 allow practitioners to interpret the similarity between two systems as
 the degree to which they are correlated and would allow outliers to be

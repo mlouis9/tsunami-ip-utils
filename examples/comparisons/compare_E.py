@@ -52,7 +52,7 @@ for E_type in data.keys():
 # Test that the calculated E comparison is the same as the gold standard
 for E_type in data.keys():
     dumped_data = pd.read_excel( f"{E_type}_comparison.xlsx"  )
-    gold_data   = pd.read_excel( f"gold/{E_type}_comparison.xlsx" )
+    gold_data   = pd.read_excel( f"{EXAMPLES}/gold/{E_type}_comparison.xlsx" )
 
     assert dumped_data.equals( gold_data )
 

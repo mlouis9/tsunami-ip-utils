@@ -15,3 +15,4 @@ def remove_header_from_rst(filepath, header_to_replace, replacement_header):
 
 remove_header_from_rst('source/auto_examples/matrix_plot/index.rst', ':pseudoheader:`Matrix Plots`', 'Matrix Plots\n------------')
 remove_header_from_rst('source/auto_examples/correlation_plot/index.rst', ':pseudoheader:`Correlation Plots`', 'Correlation Plots\n-----------------')
+remove_header_from_rst('source/auto_examples/comparisons/index.rst', ':pseudoheader:`Comparisons`', 'Comparisons\n-----------')

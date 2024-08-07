@@ -50,7 +50,7 @@ points = generate_points(application_files, experiment_files, base_library, pert
 
 from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_perturbations
 
-plot_objects = generate_plot_objects_array_from_perturbations(points, application_files, experiment_files)
+plot_objects = generate_plot_objects_array_from_perturbations(points)
 
 # %%
 # Create the Matrix Plot
