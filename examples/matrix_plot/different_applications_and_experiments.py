@@ -7,7 +7,7 @@ itself, and so contribution plots aren't shown.
 """
 
 # %%
-# The input is exactly as described in :ref:`sph_glr_auto_examples_matrix_plot_matrix_of_contribution_plots.py`, except that the
+# The input is exactly as described in :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_contribution_plots.py`, except that the
 # applications and experiments lists include different SDF files.
 
 from tsunami_ip_utils.viz.viz import matrix_plot
@@ -32,3 +32,11 @@ plot_objects_array = generate_plot_objects_array_from_contributions(
 
 fig = matrix_plot(plot_objects_array, plot_type='interactive', labels=labels)
 fig.show()
+
+# %%
+# Now the plot can also be saved to an image
+
+fig = matrix_plot(plot_objects_array, plot_type='interactive')
+fig.to_image( EXAMPLES / '_static' / 'different_applications_and_experiments_matrix.png' )
+
+# sphinx_gallery_thumbnail_path = '../../examples/_static/different_applications_and_experiments_matrix.png'

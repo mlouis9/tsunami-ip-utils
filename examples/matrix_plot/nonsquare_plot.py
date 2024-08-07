@@ -83,3 +83,11 @@ labels['experiments'] = [ labels['experiments'][index] for index in sorted_indic
 # now plot the sorted matrix
 fig = matrix_plot(sorted_plot_objects_array, plot_type='interactive', labels=labels)
 fig.show()
+
+# %%
+# A static image of the plot can be saved using the :meth:`tsunami_ip_utils.viz.matrix_plot.InteractiveMatrixPlot.to_image` method
+
+fig = matrix_plot(plot_objects_array[:4, :], plot_type='interactive') # Note we're only saving a portion of the matrix to get a nice image
+fig.to_image( EXAMPLES / '_static' / 'nonsquare_matrix.png' )
+
+# sphinx_gallery_thumbnail_path = '../../examples/_static/nonsquare_matrix.png'

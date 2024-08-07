@@ -17,7 +17,8 @@ of applications and experiments are the same.
 # **Note** that by default the the correlation plots in the off-diagonal cells are 
 # :class:`tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend` plots, which are fully interactive, and dynamically update
 # the calculated summary statistics and regression when points are excluded with the legend. However, this interactivity requires
-# clientiside python to run, and so is not represented in the documentation.
+# clientiside python to run, and so is not represented in the documentation. The off-diagonal plot types can be changed, and doing so
+# is documented in :ref:`sphx_glr_auto_examples_matrix_plot_changing_plot_defaults.py`.
 
 from tsunami_ip_utils.viz.viz import matrix_plot
 from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_contributions
