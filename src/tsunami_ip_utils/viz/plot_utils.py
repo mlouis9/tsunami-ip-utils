@@ -143,7 +143,7 @@ def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> 
     Parameters
     ----------
     points_array
-        2D numpy array of points generated from the perturbation test. Shape ``(num_applications, num_experiments)``.
+        2D numpy array of points generated from the perturbation test. Shape ``( num_applications, num_experiments )``.
             
     Returns
     -------
@@ -152,12 +152,12 @@ def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> 
     
     # Construct plot matrix
     num_applications, num_experiments, _, _ = np.shape(points_array)
-    plot_objects_array = np.empty( ( num_applications, num_experiments ), dtype=object)
+    plot_objects_array = np.empty( ( num_experiments, num_applications ), dtype=object)
 
-    for i, row in enumerate(points_array):
-        for j, _ in enumerate(row):
-            fig = perturbation_plot(points_array[i, j])
-            plot_objects_array[i, j] = fig
+    for application_index, row in enumerate(points_array):
+        for experiment_index, _ in enumerate(row):
+            fig = perturbation_plot(points_array[application_index, experiment_index])
+            plot_objects_array[experiment_index, application_index] = fig
 
     return plot_objects_array
 
