@@ -109,14 +109,14 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
     experiment_files = contributions['filenames']['experiment']
 
     # Construct plot matrix
-    plot_objects_array = np.empty( ( num_applications, num_experiments ), dtype=object )
+    plot_objects_array = np.empty( ( num_experiments, num_applications ), dtype=object )
 
     for application_index, application_file in enumerate(application_files):
         for experiment_index, experiment_file in enumerate(experiment_files):
             if experiment_file == application_file:
                 # On the diagonal, make a contribution plot, as a correlation plot is not useful when comparing the same
                 # application and experiment
-                plot_objects_array[application_index, experiment_index] = \
+                plot_objects_array[experiment_index, application_index] = \
                 contribution_plot(
                     contributions['application'][application_index],
                     plot_type=diagonal_type,
@@ -124,7 +124,7 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
                     interactive_legend=interactive_contribution_legend,     
                 )
             else:
-                plot_objects_array[application_index, experiment_index] =  \
+                plot_objects_array[experiment_index, application_index] =  \
                 correlation_plot(
                     contributions['application'][application_index], 
                     contributions['experiment'][experiment_index], 
