@@ -89,3 +89,8 @@ comparisons, fig = correlation_comparison(
 
 fig.show()
 print(comparisons)
+
+# %%
+# Note that for these examples, adding more poins hardly changes the agreement, because the TSUNAMI_IP :math:`c_k` values are ~1, only
+# a small number of points are needed to get a small uncertainty on the correlation coefficient (see :ref:`the technical manual <sec-pearson-coefficient>`
+# for details).

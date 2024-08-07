@@ -217,6 +217,8 @@ in this work.
 The Correlation Coefficient
 ---------------------------
 
+.. _sec-pearson-coefficient:
+
 Pearson’s Coefficient
 ~~~~~~~~~~~~~~~~~~~~~
 
