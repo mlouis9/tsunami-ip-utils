@@ -385,7 +385,7 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
     # Create matrix plot
     # ===================
     if make_plot:
-        fig = matrix_plot(plot_objects_array, 'interactive')
+        fig = matrix_plot(plot_objects_array, 'interactive', **matrix_plot_kwargs)
 
         return comparisons, fig
     else:

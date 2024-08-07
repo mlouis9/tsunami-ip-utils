@@ -37,7 +37,7 @@ fig.show()
 
 # %%
 # This plot just shows the calcualted Pearson and Spearman correlation coefficients, and does not show the comparison to the TSUNAMI-IP
-# calculated :math:`c_k`. To generate a comparison like this, please refer to the :ref:`sphx_glr_auto_examples_compare_ck.py`
+# calculated :math:`c_k`. To generate a comparison like this, please refer to the :ref:`sphx_glr_auto_examples_comparisons_compare_matrix_perturbations.py`
 # example. Please note that since the Pearson and Spearman correlation coefficients are being computed from a finite sample size, the
 # values necessarily have a sampling distribution with some uncertainty. This uncertainty is generally less than 5% for a sample size
 # greater than 200, but this depends on the value of :math:`c_k` (see :ref:`the technical manual <manual-final-results>` for

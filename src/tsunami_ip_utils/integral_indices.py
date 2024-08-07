@@ -395,7 +395,7 @@ def _get_nuclide_and_reaction_wise_E_contributions(application: RegionIntegrated
 
 
 def calculate_E_contributions(application_filenames: List[str], experiment_filenames: List[str]
-                              ) -> Tuple[unumpy.uarray, unumpy.uarray]:
+                              ) -> Tuple[Dict[str, unumpy.uarray], Dict[str, unumpy.uarray]]:
     """Calculates the contributions to the similarity parameter E for each application with each available experiment 
     on a nuclide basis and on a nuclide-reaction basis.
     

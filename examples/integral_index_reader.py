@@ -44,7 +44,7 @@ for key, value in integral_indices.items():
 
 from tsunami_ip_utils.integral_indices import get_integral_indices
 
-application_sdfs = [ EXAMPLES / 'data' / 'example_sdfs' / 'MCT' / f'MIX-COMP-THERM-002-00{i}S.sdf' for i in range(1, 7) ]
+application_sdfs = [ EXAMPLES / 'data' / 'example_sdfs' / 'HMF' / f'HEU-MET-FAST-003-00{i}.sdf' for i in range(1, 13) ]
 experiment_sdfs = application_sdfs
 coverx_library = '252groupcov7.1'
 integral_indices = get_integral_indices(application_sdfs, experiment_sdfs, coverx_library=coverx_library)
