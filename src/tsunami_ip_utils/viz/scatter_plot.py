@@ -353,6 +353,16 @@ class _ScatterPlotter(_ScatterPlot):
         self.axs.text(0.05, 0.95, self._summary_stats_text, transform=self.axs.transAxes, fontsize=12,
                 verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
         
+        # Now set summary statistics as attributes of the figure so they can be accessed later and used for sorting, etc.
+        self.fig.statistics = {
+            'pearson': self._pearson,
+            'spearman': self._spearman
+        }
+        self.fig.regression = {
+            'slope': self._slope,
+            'intercept': self._intercept
+        }
+
         self._style()
 
     def _add_legend_with_scaling(self):
@@ -783,6 +793,10 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
     """The Dash application object for the interactive legend."""
     _plot_type: str
     """Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text."""
+    statistics: dict
+    """A dictionary containing the Pearson and Spearman correlation coefficients."""
+    regression: dict
+    """A dictionary containing the slope and intercept of the linear regression line."""
     def __init__(self, interactive_scatter_plot: _InteractiveScatterPlotter, df: pd.DataFrame):
         self._interactive_scatter_plot = interactive_scatter_plot
         self.fig = interactive_scatter_plot.fig
@@ -795,6 +809,8 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
         ], style={'margin': 0})
         self._setup_callbacks()
         self._plot_type = 'plotly'
+        self.statistics = self.fig.statistics
+        self.regression = self.fig.regression
 
     def _setup_callbacks(self):
         """Set up the Dash callbacks for the interactive legend."""
