@@ -419,24 +419,34 @@ def calculate_E_contributions(application_filenames: List[str], experiment_filen
     experiment_sdfs  = [ RegionIntegratedSdfReader(filename) for filename in experiment_filenames ]
     
     # Initialize np object arrays to store the E contributions
-    E_nuclide_wise          = {'application': [], 'experiment': []}
-    E_nuclide_reaction_wise = {'application': [], 'experiment': []}
+    E_nuclide_wise          = {'contribution': {'application': [], 'experiment': []}}
+    E_nuclide_reaction_wise = {'contribution': {'application': [], 'experiment': []}}
 
     # Calculate contributions to E for each application
     for application in application_sdfs:
         nuclide_wise_contributions, nuclide_reaction_wise_contributions = \
             _get_nuclide_and_reaction_wise_E_contributions(application, application)
 
-        E_nuclide_wise['application'].append(nuclide_wise_contributions)
-        E_nuclide_reaction_wise['application'] = nuclide_reaction_wise_contributions
+        E_nuclide_wise['contribution']['application'].append(nuclide_wise_contributions)
+        E_nuclide_reaction_wise['contribution']['application'] = nuclide_reaction_wise_contributions
 
     # Calculate contributions to E for each experiment
     for experiment in experiment_sdfs:
         nuclide_wise_contributions, nuclide_reaction_wise_contributions = \
             _get_nuclide_and_reaction_wise_E_contributions(experiment, experiment)
 
-        E_nuclide_wise['experiment'].append(nuclide_wise_contributions)
-        E_nuclide_reaction_wise['experiment'] = nuclide_reaction_wise_contributions
+        E_nuclide_wise['contribution']['experiment'].append(nuclide_wise_contributions)
+        E_nuclide_reaction_wise['contribution']['experiment'] = nuclide_reaction_wise_contributions
+
+    E_nuclide_wise['filenames'] = {
+        'application': application_filenames,
+        'experiment': experiment_filenames
+    }
+
+    E_nuclide_reaction_wise['filenames'] = {
+        'application': application_filenames,
+        'experiment': experiment_filenames
+    }
 
     return E_nuclide_wise, E_nuclide_reaction_wise
 

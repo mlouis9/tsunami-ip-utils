@@ -199,8 +199,9 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
                            base_library: Optional[Union[str, Path]]=None, 
                            perturbation_factors: Optional[Union[str, Path]]=None, 
                            num_perturbations: Optional[int]=None, make_plot: bool=True, 
-                           num_cores: int=multiprocessing.cpu_count() - 2
-                           ) -> Tuple[pd.DataFrame, Any]:
+                           num_cores: int=multiprocessing.cpu_count() - 2,
+                           plot_objects_kwargs: dict={},
+                           matrix_plot_kwargs: dict={}) -> Tuple[pd.DataFrame, Any]:
     """Function that compares the calculated similarity parameter :math:`c_k` (calculated using the cross section sampling method) 
     with the TSUNAMI-IP output for each application and each experiment. NOTE: that the experiment sdfs and application sdfs
     must correspond with those in hte TSUNAMI-IP input file.
@@ -237,7 +238,11 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
         Whether to generate the matrix plot. Default is ``True``.
     num_cores
         If ``make_plot`` is ``False``, the number of cores to use for multiprocessing. Default is two less than the number
-        of available cores.  
+        of available cores.
+    plot_objects_kwargs
+        Optional keyword arguments to pass when generating the plot objects.
+    matrix_plot_kwargs
+        Optional keyword arguments to pass when generating the matrix plot.
     
     Returns
     -------
@@ -245,7 +250,8 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
             A pandas DataFrame containing the calculated integral index values, the TSUNAMI-IP values, and the percent
             difference between the two values.
         * matrix_plot
-            The matrix plot object containing the integral index values and the percent difference.
+            If ``make_plot=True``, the matrix plot object containing the integral index values and the percent difference,
+            otherwise the output is just ``comparisons``.
     """
 
     # ===================================
@@ -285,7 +291,7 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
             if make_plot:
                 points_array = generate_points(application_files, experiment_files, base_library, perturbation_factors, 
                                                num_perturbations)
-                plot_objects_array = generate_plot_objects_array_from_perturbations(points_array)
+                plot_objects_array = generate_plot_objects_array_from_perturbations(points_array, **plot_objects_kwargs)
             else:
                 num_applications = len(application_files)
                 num_experiments = len(experiment_files)
@@ -304,25 +310,26 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
                 
 
         case 'uncertainty_contributions_nuclide':
-            contributions_nuclide, _ = get_uncertainty_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide, '%Δk/k') \
+            contributions_nuclide, _ = get_uncertainty_contributions(application_files, experiment_files, variance=True)
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide, '%(Δk/k)^2', **plot_objects_kwargs) \
                                     if make_plot else None
 
         case 'uncertainty_contributions_nuclide_reaction':
-            _, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files)
-            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '%Δk/k') \
+            _, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files, variance=True)
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '%(Δk/k)^2', **plot_objects_kwargs) \
                                     if make_plot else None
 
         case 'E_contributions_nuclide':
             contributions_nuclide, _ =  calculate_E_contributions(application_files, experiment_files)
+            
             plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide, 
-                                                                                integral_index_name) \
+                                                                                integral_index_name, **plot_objects_kwargs) \
                                     if make_plot else None
 
         case 'E_contributions_nuclide_reaction':
             _, contributions_nuclide_reaction =  calculate_E_contributions(application_files, experiment_files)
             plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, 
-                                                                                integral_index_name) \
+                                                                                integral_index_name, **plot_objects_kwargs) \
                                     if make_plot else None
 
         case 'c_k_contributions':
