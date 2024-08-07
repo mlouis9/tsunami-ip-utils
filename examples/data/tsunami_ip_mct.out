@@ -1,0 +1,562 @@
+ *******************************************************************************
+ *                                                                             *
+ *                                 SCALE 6.3.1                                 *
+ *                                -------------                                *
+ *                                   2023-02                                   *
+ *                                                                             *
+ *           SCALE:  A Comprehensive Modeling and Simulation Suite             *
+ *                   for Nuclear Safety Analysis and Design                    *
+ *                                                                             *
+ *                      Reactor and Nuclear Systems Division                   *
+ *                        Oak Ridge National Laboratory                        *
+ *                                                                             *
+ *                           http://scale.ornl.gov                             *
+ *                            scalehelp@ornl.gov                               *
+ *                                                                             *
+ *******************************************************************************
+ *******************************************************************************
+
+                  Job Information
+                  ---------------
+      Job started on mlouis9-G7-7500 on Wed 2024-08-07 03:54:47
+      Working directory: /tmp/scale.mlouis9.1969620
+      Input file name  : /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/tsunami_ip.inp
+      Output file name : /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/tsunami_ip.out
+      SCALE executable : /home/mlouis9/codes/SCALE-6.3.1/bin/scale
+
+ *******************************************************************************
+
+
+    module tsunami-ip will be called on Wed Aug  7 15:54:48 2024.
+    sequence specification record:=tsunami-ip
+Input Data:
+
+      Sphere Models
+      
+      read parameters
+          e c
+          prtparts
+          values
+          coverx="252groupcov7.1"
+      end parameters
+      
+      read applications
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-001S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-002S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-003S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-004S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-005S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-006S.sdf
+      end applications
+      
+      read experiments
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-001S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-002S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-003S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-004S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-005S.sdf
+          /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-006S.sdf
+      end experiments
+      
+      
+end
+
+1
+
+
+
+
+
+
+        ************************************************************************************************************************
+        ************************************************************************************************************************
+        ************************************************************************************************************************
+        *****                                                                                                              *****
+        *****                                       program verification information                                       *****
+        *****                                                                                                              *****
+        *****                                   code system:  SCALE    version:  6.3.1                                     *****
+        *****                                                                                                              *****
+        ************************************************************************************************************************
+        ************************************************************************************************************************
+        *****                                                                                                              *****
+        *****                                                                                                              *****
+        *****              program:  tsunami-ip                                                                            *****
+        *****                                                                                                              *****
+        *****        creation date:  25_jul_2024                                                                           *****
+        *****                                                                                                              *****
+        *****              library:  /home/mlouis9/codes/SCALE-6.3.1/bin                                                   *****
+        *****                                                                                                              *****
+        *****                                                                                                              *****
+        *****            prod code:  tsunami-ip                                                                            *****
+        *****                                                                                                              *****
+        *****              version:  6.3.1                                                                                 *****
+        *****                                                                                                              *****
+        *****              jobname:  mlouis9                                                                               *****
+        *****                                                                                                              *****
+        *****         machine name:  mlouis9-G7-7500                                                                       *****
+        *****                                                                                                              *****
+        *****    date of execution:  07_aug_2024                                                                           *****
+        *****                                                                                                              *****
+        *****    time of execution:  15:54:48.83                                                                           *****
+        *****                                                                                                              *****
+        *****                                                                                                              *****
+        ************************************************************************************************************************
+        ************************************************************************************************************************
+        ************************************************************************************************************************
+
+
+ -----------------------------------------------------------------------------------------------------------------------------------
+ |                                                                                                                                 |
+ |        TSUNAMI-IP:  Tools for Sensitivity and UNcertainty Analysis Methodology Implementation - Indices and Parameters          |
+ |                                                                                                                                 |
+ |                                                                                                                                 |
+ |                                                                                                                                 |
+ -----------------------------------------------------------------------------------------------------------------------------------
+ |                                                                                                                                 |
+ |                                                  TSUNAMI-IP Parameter Table                                                     |
+ |                                                                                                                                 |
+ |  PARAMETER      VALUE                                   DESCRIPTION                                                             |
+ |                                                                                                                                 |
+ |  absolute       false           Print uncertainty values and penalty assessments in absolute format.  This is the default       |
+ |                                 format. Relative format can be specified using the "rel" keyword in the APPLICATIONS,           |
+ |                                 EXPERIMENTS, or RESPONSE input blocks.                                                          |
+ |                                                                                                                                 |
+ |  c              true            Compute c(k) values for each application compared to each experiment.                           |
+ |                                                                                                                                 |
+ |  c_long         false           Produces extended c(k) output edit for each application compared to each experiment.            |
+ |                                 Sets c to true.                                                                                 |
+ |                                                                                                                                 |
+ |  cechck=        .5000           Level of E and c(k) values that trigger the cediff warning.  If E or c(k) are below this        |
+ |                                 value, no warning is printed.                                                                   |
+ |                                                                                                                                 |
+ |  cediff=        .1000           If the E and c(k) values for a given application and experiment differ by more than             |
+ |                                 cediff, a warning message is printed.                                                           |
+ |                                                                                                                                 |
+ |  coverx=        "252groupcov7.1"Name of cross section covariance data file.                                                     |
+ |                                                                                                                                 |
+ |  cov_fix        false           Replace zero and large values on diagonal of cross-section covariance data with user            |
+ |                                 input values and dcov value.                                                                    |
+ |                                                                                                                                 |
+ |  cp             false           Compute and print completeness parameter for each application.                                  |
+ |                                                                                                                                 |
+ |  csummary       false           Print summary table of c(k) values that meet or exceed the cvalue limit.  Sets c to true.       |
+ |                                                                                                                                 |
+ |  cvalue=        .9000           Threshold value of c(k) for inclusion in the summary table.                                     |
+ |                                                                                                                                 |
+ |  cr             false           Compute c(r) values for each application compared to each experiment.                           |
+ |                                                                                                                                 |
+ |  cr_long        false           Produces extended c(r) output edit for each application compared to each experiment.            |
+ |                                 Sets cr to true.                                                                                |
+ |                                                                                                                                 |
+ |  crsummary      false           Print summary table of c(r) values that meet or exceed the crvalue limit.  Sets cr to           |
+ |                                 true.                                                                                           |
+ |                                                                                                                                 |
+ |  crvalue=       .9000           Threshold value of c(r) for inclusion in the summary table.                                     |
+ |                                                                                                                                 |
+ |  e              true            Compute E(sum) values for each application compared to each experiment.                         |
+ |                                                                                                                                 |
+ |  esummary       false           Print summary table of E(sum) values that meet or exceed the evalue limit.  Sets e to           |
+ |                                 true.                                                                                           |
+ |                                                                                                                                 |
+ |  evalue=        .9000           Threshold value of E(sum) for inclusion in the summary table.                                   |
+ |                                                                                                                                 |
+ |  g              false           Compute G values.                                                                               |
+ |                                                                                                                                 |
+ |  gsummary       false           Print summary table of G values that meet or exceed the gvalue limit.  Sets g to true.          |
+ |                                                                                                                                 |
+ |  gvalue=        .9000           Threshold value of G for inclusion in summary table.                                            |
+ |                                                                                                                                 |
+ |  html           false           Generate output in html format in addition to the standard text output.                         |
+ |                                                                                                                                 |
+ |  inptcase       false           Set the SCALE free form reader to leave the case of the input data as read.                     |
+ |                                                                                                                                 |
+ |  large_cov=     10.0000         Cutoff fractional standard deviation value for cov_fix.  Covariance data with                   |
+ |                                 uncertainties larger than large_cov are replaced with user-defined or default values.           |
+ |                                                                                                                                 |
+ |  lg             false           Compute g values for fission, capture and scatter for each nuclide for each experiment          |
+ |                                 compared to each application and print them in a table if the application's sensitivity         |
+ |                                 for the corresponding nuclide-reaction pair is greater than or equal to sencut.                 |
+ |                                                                                                                                 |
+ |  lgall          false           Print g values for fission, capture and scatter for all nuclides for all experiments for        |
+ |                                 each application.                                                                               |
+ |                                                                                                                                 |
+ |  lggroups       false           Print a table listing the number of experiments that are at least as sensitive as the           |
+ |                                 application for each group for each reaction requested in the REACTIONS input block.            |
+ |                                                                                                                                 |
+ |  lgsum          false           Prints a summary table of g for each application for each experiment that exceeds lgvalue       |
+ |                                 for each nuclide's capture, fission and scatter reactions.                                      |
+ |                                                                                                                                 |
+ |  lgvalue=       .9000           Threshold value of g for inclusion in summary table.                                            |
+ |                                                                                                                                 |
+ |  nixlim=        10              Minimum number of experiments with group-wise values exceeding senfac times the                 |
+ |                                 group-wise value for the application for the group-wise value to be added to the                |
+ |                                 completeness parameter.                                                                         |
+ |                                                                                                                                 |
+ |  penalty        false           Creates penalty assessment based on differences in the application's sensitivity profile        |
+ |                                 for a particular nuclide-reaction pair, and the corresponding composite profile for all         |
+ |                                 qualifying experiments.                                                                         |
+ |                                                                                                                                 |
+ |  pencut=        0.0000E+00      Cutoff value for excluding sensitivities from the penalty calculation.  If the sum of the       |
+ |                                 absolute values of the energy-dependent sensitivity data for a particular nuclide-reaction      |
+ |                                 pair is below this number, the nuclide-reaction pair will not be included in the penalty        |
+ |                                 calculation.                                                                                    |
+ |                                                                                                                                 |
+ |  penlgv=        0.0000E+00      Use only nuclide-reaction pairs with g values exceeding penlgv in the penalty assessment.       |
+ |                                                                                                                                 |
+ |  penlong        false           Print detailed edits of components of penalty assessments.                                      |
+ |                                                                                                                                 |
+ |  penminx=       10              Minimum number of qualifying experiments for each application for penalty calculation.          |
+ |                                                                                                                                 |
+ |  penusec        true            Use only experiments with c(k) values exceeding cvalue in the penalty assessment.  Sets c       |
+ |                                 to true.                                                                                        |
+ |                                                                                                                                 |
+ |  penusee        false           Use only experiments with E(sum) values exceeding evalue in the penalty assessment.  Sets       |
+ |                                 e to true.                                                                                      |
+ |                                                                                                                                 |
+ |  penuseg        false           Use only experiments with G values exceeding gvalue in the penalty assessment.  Sets g to       |
+ |                                 true.                                                                                           |
+ |                                                                                                                                 |
+ |  penwarn        false           Print list of warning messages noting the experiments and nuclide-reaction pairs that           |
+ |                                 were excluded from the penalty calculation.                                                     |
+ |                                                                                                                                 |
+ |  plot           false           Produces Ptolemy formatted plot (.ptp) files for integral values and  composite                 |
+ |                                 sensitivity data.                                                                               |
+ |                                                                                                                                 |
+ |  prtcomp        false           Print "composite" of experiment sensitivity profiles for reactions selected in  REACTIONS       |
+ |                                 input block and write data to sensitivity data file.  Sets g to true.                           |
+ |                                                                                                                                 |
+ |  prtmtrix       false           Prints directory of data available on the cross section covariance data library.                |
+ |                                                                                                                                 |
+ |  prtnotcv       false           Print a table summarizing the non-coverage for the nuclide-reaction pairs entered in the        |
+ |                                 REACTIONS input block.  Sets g to true.                                                         |
+ |                                                                                                                                 |
+ |  prtparts       true            Print the components of E and G for fission capture in scatter in the values table.             |
+ |                                                                                                                                 |
+ |  relative       true            Print uncertainty values and penalty assessments in relative format.  This is the default       |
+ |                                 format. Absolute format can be specified using the "abs" keyword in the APPLICATIONS,           |
+ |                                 EXPERIMENTS, or RESPONSE input blocks.                                                          |
+ |                                                                                                                                 |
+ |  return_work_covfalse           Option to copy the working covariance data file back to the return directory.                   |
+ |                                                                                                                                 |
+ |  sencut=        .0100           Cutoff value for ignoring low valued sensitivities in nuclide-reaction specific edit            |
+ |                                 tables.                                                                                         |
+ |                                                                                                                                 |
+ |  senfac=        .9000           Value used in calculation of completeness parameter.  Group-wise sensitivity for the            |
+ |                                 application is counted as validated by the experiment if the sensitivity from the               |
+ |                                 experiment is greater than the application sensitivity times senfac.                            |
+ |                                                                                                                                 |
+ |  uncert         false           Computes uncertainty in response due to covariance data.                                        |
+ |                                                                                                                                 |
+ |  uncert_long    false           Prints extended table of uncertainty in response due to covariance data. sets uncert to         |
+ |                                 true.                                                                                           |
+ |                                                                                                                                 |
+ |  use_dcov       false           Use user-defined default covariance data, udcov, for nuclide reaction pairs not included        |
+ |                                 on the covariance data file. The user-defined data will be used in the fourth penalty           |
+ |                                 assessment as well as the computation of c(k) and uncertainty calculations.                     |
+ |                                                                                                                                 |
+ |  udcov=          0.0500         User-defined default value of standard deviation in cross-section data to use for               |
+ |                                 nuclide-reaction pairs for which covariance data are not available on the selected data         |
+ |                                 file.                                                                                           |
+ |                                                                                                                                 |
+ |  udcov_corr=     1.0000         User-defined default correlation value to use for nuclide-reaction pairs for which              |
+ |                                 covariance data are not available on the selected data file.                                    |
+ |                                                                                                                                 |
+ |  udcov_corr_typezone            User-defined default correlation in cross-section data to use for nuclide-reaction pairs        |
+ |                                 for which covariance data are not available on the selected data file.  (long, zone,            |
+ |                                 short)                                                                                          |
+ |                                                                                                                                 |
+ |  udcov_fast=     0.0000         User-defined default value of standard deviation in cross-section data to use for fast          |
+ |                                 data for nuclide-reaction pairs for which covariance data are not available on the              |
+ |                                 selected data file.                                                                             |
+ |                                                                                                                                 |
+ |  udcov_inter=    0.0000         User-defined default value of standard deviation in cross-section data to use for               |
+ |                                 intermediate data for nuclide-reaction pairs for which covariance data are not available        |
+ |                                 on the selected data file.                                                                      |
+ |                                                                                                                                 |
+ |  udcov_therm=    0.0000         User-defined default value of standard deviation in cross-section data to use for thermal       |
+ |                                 data for nuclide-reaction pairs for which covariance data are not available on the              |
+ |                                 selected data file.                                                                             |
+ |                                                                                                                                 |
+ |  use_diff_groupstrue            Allow sensitivity data files to have different energy group structures.                         |
+ |                                                                                                                                 |
+ |  use_icov       false           Use user-defined data input in COVARIANCE input data block in place of udcov value for          |
+ |                                 user input nuclide-reaction pairs that are not on the covariance data file.  The                |
+ |                                 user-defined data will be used in the fourth penalty assessment as well as the computation      |
+ |                                 of c(k) and uncertainty calculations.                                                           |
+ |                                                                                                                                 |
+ |  usename        false           Use the name of the sensitivity data file in place of its title in all output.                  |
+ |                                                                                                                                 |
+ |  uslstats       false           Produces USLSTATS input files for trending analysis with all experiments for each global        |
+ |                                 integral index (c(k), E, and G) requested for each application                                  |
+ |                                                                                                                                 |
+ |  uslsummary     false           Produces USLSTATS input files for trending analysis with experiments exceeding cutoff           |
+ |                                 value (cvalue, crvalue, evalue or gvalue) for each global integral index (c(k), E, and G)       |
+ |                                 requested for each application                                                                  |
+ |                                                                                                                                 |
+ |  usl_uncert     false           Includes uncertainty in k-eff due to cross section covariance data from k-eff uncertainty       |
+ |                                 written to USLSTATS input files.                                                                |
+ |                                                                                                                                 |
+ |  usl_p=         .9990           Value of P in USLSTATS input files.  P is the portion of the population falling above the       |
+ |                                 lower tolerance level                                                                           |
+ |                                                                                                                                 |
+ |  usl_1-g=       .9500           Value of 1-gamma in USLSTATS input files.  1-gamma is the confidence on the fit.                |
+ |                                                                                                                                 |
+ |  usl_alpha=     .9990           Value of alpha in USLSTATS input files.  Alpha is the confidence on the proportion of P.        |
+ |                                                                                                                                 |
+ |  usl_xmin=      .0000           Value of x(min) in USLSTATS input files.  X(min) is the minimum value of the parameter x.       |
+ |                                                                                                                                 |
+ |  usl_xmax=      1.0000          Value of x(max) in USLSTATS input files.  X(max) is the maximum value of the parameter x.       |
+ |                                                                                                                                 |
+ |  usl_sigs=      -.0030          Value of sigma(s) in USLSTATS input files.  If a positive value is entered, it is applied       |
+ |                                 as the total uncertainty for each experiment. If a negative or zero value is entered, it        |
+ |                                 is used as the experimental measurement uncertainty and any Monte Carlo and cross section       |
+ |                                 uncertainties are added quadratically to the absolute value of usl_sigs for each                |
+ |                                 experiment.                                                                                     |
+ |                                                                                                                                 |
+ |  usl_dkm=       .0500           Value of delta-k(m) in USLSTATS input files.  Delta-k(m) is the administrative margin           |
+ |                                 used to ensure subcriticality.                                                                  |
+ |                                                                                                                                 |
+ |  values         true            Print all computed "global" indices (E, c(k), and G) in a table for each application.  If       |
+ |                                 prtparts is input, also include the partial values.                                             |
+ |                                                                                                                                 |
+ -----------------------------------------------------------------------------------------------------------------------------------
+ |                                                                                                                                 |
+ |                                                       Applications List                                                         |
+ |                                                                                                                                 |
+ |  APPLICATION         DESCRIPTION                                                                                                |
+ |                                                                                                                                 |
+ |       1         Title: mixed-comp-therm-002-001s (experiment pnl-30)                                                            |
+ |                 Name: mixed-comp-therm-002-001s (e, Type: keff    , Format: Relative                                            |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       2         Title: mixed-comp-therm-002-002s (experiment pnl-31)                                                            |
+ |                 Name: mixed-comp-therm-002-002s (e, Type: keff    , Format: Relative                                            |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       3         Title: mixed-comp-therm-002-003s (experiment pnl-32)                                                            |
+ |                 Name: mixed-comp-therm-002-003s (e, Type: keff    , Format: Relative                                            |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       4         Title: mixed-comp-therm-002-004s (experiment pnl-33)                                                            |
+ |                 Name: mixed-comp-therm-002-004s (e, Type: keff    , Format: Relative                                            |
+ |                 252 groups, 709 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       5         Title: mixed-comp-therm-002-005s (experiment pnl-34)                                                            |
+ |                 Name: mixed-comp-therm-002-005s (e, Type: keff    , Format: Relative                                            |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       6         Title: mixed-comp-therm-002-006s (experiment pnl-35)                                                            |
+ |                 Name: mixed-comp-therm-002-006s (e, Type: keff    , Format: Relative                                            |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |                                                                                                                                 |
+ -----------------------------------------------------------------------------------------------------------------------------------
+ |                                                                                                                                 |
+ |                                                       Experiments List                                                          |
+ |                                                                                                                                 |
+ |  EXPERIMENT          DESCRIPTION                                                                                                |
+ |                                                                                                                                 |
+ |       1         Title: mixed-comp-therm-002-001s (experiment pnl-30)                                                            |
+ |                 Name: mixed-comp-therm-002-001s (e, Type: keff    , Format: Relative                                            |
+ |                 Filename: /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-001S.sdf                    |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       2         Title: mixed-comp-therm-002-002s (experiment pnl-31)                                                            |
+ |                 Name: mixed-comp-therm-002-002s (e, Type: keff    , Format: Relative                                            |
+ |                 Filename: /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-002S.sdf                    |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       3         Title: mixed-comp-therm-002-003s (experiment pnl-32)                                                            |
+ |                 Name: mixed-comp-therm-002-003s (e, Type: keff    , Format: Relative                                            |
+ |                 Filename: /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-003S.sdf                    |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       4         Title: mixed-comp-therm-002-004s (experiment pnl-33)                                                            |
+ |                 Name: mixed-comp-therm-002-004s (e, Type: keff    , Format: Relative                                            |
+ |                 Filename: /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-004S.sdf                    |
+ |                 252 groups, 709 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       5         Title: mixed-comp-therm-002-005s (experiment pnl-34)                                                            |
+ |                 Name: mixed-comp-therm-002-005s (e, Type: keff    , Format: Relative                                            |
+ |                 Filename: /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-005S.sdf                    |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |       6         Title: mixed-comp-therm-002-006s (experiment pnl-35)                                                            |
+ |                 Name: mixed-comp-therm-002-006s (e, Type: keff    , Format: Relative                                            |
+ |                 Filename: /home/mlouis9/projects/suli2024/Matthew_VALID_sdfs/MCT/MIX-COMP-THERM-002-006S.sdf                    |
+ |                 252 groups, 704 Sensitivity profiles                                                                            |
+ |                                                                                                                                 |
+ |                                                                                                                                 |
+ -----------------------------------------------------------------------------------------------------------------------------------
+
+
+ Generating working covariance matrix ...
+
+
+
+
+ Working covariance matrix created for future processing.
+
+
+ -----------------------------------------------------------------------------------------------------------------------------------
+ |                                                                                                                                 |
+                               Chi-fission spectrum sensitivities on SDF files are constrained.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+ |                                                                                                                                 |
+ -----------------------------------------------------------------------------------------------------------------------------------
+
+ This run will include 6 applications compared to 6 experiments.
+
+
+ Application 1 of 6
+
+ ------------------------------------------------------------------------------------------------------------------------
+     Application:  mixed-comp-therm-002-001s (e                                                    
+ ------------------------------------------------------------------------------------------------------------------------
+
+
+ -----------------------------------------------------------------
+ Integral Values for Application #1
+ -----------------------------------------------------------------
+
+            Experiment              Type     Value      s.d.        c(k)   s.d.     E     s.d.   E(fis)  s.d.   E(cap)  s.d.   E(sct)  s.d.  
+  --------------------------------- -------- ---------- ---------  ------ ------  ------ ------  ------ ------  ------ ------  ------ ------ 
+     0 mixed-comp-therm-002-001s (e keff      1.0014E+0 1.9200E-4  1.0000 0.0005  1.0000 0.0007  1.0000 0.0074  1.0000 0.0062  1.0000 0.1690 
+     1 mixed-comp-therm-002-001s (e keff      1.0014E+0 1.9200E-4  1.0000 0.0005  1.0000 0.0007  1.0000 0.0074  1.0000 0.0062  1.0000 0.1690 
+     2 mixed-comp-therm-002-002s (e keff      1.0021E+0 1.6700E-4  0.9897 0.0005  0.9910 0.0005  0.9984 0.0066  0.9286 0.0060  0.9830 0.1599 
+     3 mixed-comp-therm-002-003s (e keff      1.0017E+0 2.0900E-4  0.9694 0.0004  0.9740 0.0006  0.9716 0.0072  0.9463 0.0058  0.9461 0.1543 
+     4 mixed-comp-therm-002-004s (e keff      1.0061E+0 1.6200E-4  0.9381 0.0014  0.9603 0.0005  0.9829 0.0056  0.7276 0.0050  0.9375 0.2897 
+     5 mixed-comp-therm-002-005s (e keff      1.0042E+0 1.9400E-4  0.9392 0.0003  0.9541 0.0006  0.9525 0.0067  0.8919 0.0053  0.9113 0.1747 
+     6 mixed-comp-therm-002-006s (e keff      1.0062E+0 1.4900E-4  0.8983 0.0003  0.9420 0.0005  0.9643 0.0055  0.7141 0.0047  0.8837 0.4451 
+ 
+ 
+
+ Application 2 of 6
+
+ ------------------------------------------------------------------------------------------------------------------------
+     Application:  mixed-comp-therm-002-002s (e                                                    
+ ------------------------------------------------------------------------------------------------------------------------
+
+
+ -----------------------------------------------------------------
+ Integral Values for Application #2
+ -----------------------------------------------------------------
+
+            Experiment              Type     Value      s.d.        c(k)   s.d.     E     s.d.   E(fis)  s.d.   E(cap)  s.d.   E(sct)  s.d.  
+  --------------------------------- -------- ---------- ---------  ------ ------  ------ ------  ------ ------  ------ ------  ------ ------ 
+     0 mixed-comp-therm-002-002s (e keff      1.0021E+0 1.6700E-4  1.0000 0.0005  1.0000 0.0004  1.0000 0.0059  1.0000 0.0060  1.0000 0.1448 
+     1 mixed-comp-therm-002-001s (e keff      1.0014E+0 1.9200E-4  0.9897 0.0005  0.9910 0.0005  0.9984 0.0066  0.9286 0.0060  0.9830 0.1599 
+     2 mixed-comp-therm-002-002s (e keff      1.0021E+0 1.6700E-4  1.0000 0.0005  1.0000 0.0004  1.0000 0.0059  1.0000 0.0060  1.0000 0.1448 
+     3 mixed-comp-therm-002-003s (e keff      1.0017E+0 2.0900E-4  0.9405 0.0004  0.9473 0.0004  0.9581 0.0063  0.8122 0.0055  0.8962 0.1359 
+     4 mixed-comp-therm-002-004s (e keff      1.0061E+0 1.6200E-4  0.9573 0.0016  0.9670 0.0004  0.9736 0.0050  0.8725 0.0049  0.9311 0.2822 
+     5 mixed-comp-therm-002-005s (e keff      1.0042E+0 1.9400E-4  0.9123 0.0004  0.9217 0.0004  0.9356 0.0058  0.7326 0.0050  0.8507 0.1562 
+     6 mixed-comp-therm-002-006s (e keff      1.0062E+0 1.4900E-4  0.9160 0.0003  0.9408 0.0004  0.9504 0.0049  0.8197 0.0045  0.8563 0.4593 
+ 
+ 
+
+ Application 3 of 6
+
+ ------------------------------------------------------------------------------------------------------------------------
+     Application:  mixed-comp-therm-002-003s (e                                                    
+ ------------------------------------------------------------------------------------------------------------------------
+
+
+ -----------------------------------------------------------------
+ Integral Values for Application #3
+ -----------------------------------------------------------------
+
+            Experiment              Type     Value      s.d.        c(k)   s.d.     E     s.d.   E(fis)  s.d.   E(cap)  s.d.   E(sct)  s.d.  
+  --------------------------------- -------- ---------- ---------  ------ ------  ------ ------  ------ ------  ------ ------  ------ ------ 
+     0 mixed-comp-therm-002-003s (e keff      1.0017E+0 2.0900E-4  1.0000 0.0003  1.0000 0.0005  1.0000 0.0073  1.0000 0.0057  1.0000 0.1420 
+     1 mixed-comp-therm-002-001s (e keff      1.0014E+0 1.9200E-4  0.9694 0.0004  0.9740 0.0006  0.9716 0.0072  0.9463 0.0058  0.9461 0.1543 
+     2 mixed-comp-therm-002-002s (e keff      1.0021E+0 1.6700E-4  0.9405 0.0004  0.9473 0.0004  0.9581 0.0063  0.8122 0.0055  0.8962 0.1359 
+     3 mixed-comp-therm-002-003s (e keff      1.0017E+0 2.0900E-4  1.0000 0.0003  1.0000 0.0005  1.0000 0.0073  1.0000 0.0057  1.0000 0.1420 
+     4 mixed-comp-therm-002-004s (e keff      1.0061E+0 1.6200E-4  0.9374 0.0008  0.9634 0.0004  0.9970 0.0056  0.7085 0.0047  0.9180 0.2754 
+     5 mixed-comp-therm-002-005s (e keff      1.0042E+0 1.9400E-4  0.9917 0.0003  0.9966 0.0005  0.9975 0.0070  0.9889 0.0053  0.9943 0.1666 
+     6 mixed-comp-therm-002-006s (e keff      1.0062E+0 1.4900E-4  0.9215 0.0003  0.9668 0.0004  0.9990 0.0056  0.7464 0.0045  0.9056 0.4582 
+ 
+ 
+
+ Application 4 of 6
+
+ ------------------------------------------------------------------------------------------------------------------------
+     Application:  mixed-comp-therm-002-004s (e                                                    
+ ------------------------------------------------------------------------------------------------------------------------
+
+
+ -----------------------------------------------------------------
+ Integral Values for Application #4
+ -----------------------------------------------------------------
+
+            Experiment              Type     Value      s.d.        c(k)   s.d.     E     s.d.   E(fis)  s.d.   E(cap)  s.d.   E(sct)  s.d.  
+  --------------------------------- -------- ---------- ---------  ------ ------  ------ ------  ------ ------  ------ ------  ------ ------ 
+     0 mixed-comp-therm-002-004s (e keff      1.0061E+0 1.6200E-4  1.0000 0.0003  1.0000 0.0003  1.0000 0.0045  1.0000 0.0042  1.0000 0.5368 
+     1 mixed-comp-therm-002-001s (e keff      1.0014E+0 1.9200E-4  0.9381 0.0003  0.9603 0.0005  0.9829 0.0056  0.7276 0.0050  0.9375 0.2897 
+     2 mixed-comp-therm-002-002s (e keff      1.0021E+0 1.6700E-4  0.9573 0.0003  0.9670 0.0004  0.9736 0.0050  0.8725 0.0049  0.9311 0.2822 
+     3 mixed-comp-therm-002-003s (e keff      1.0017E+0 2.0900E-4  0.9374 0.0003  0.9634 0.0004  0.9970 0.0056  0.7085 0.0047  0.9180 0.2754 
+     4 mixed-comp-therm-002-004s (e keff      1.0061E+0 1.6200E-4  1.0000 0.0003  1.0000 0.0003  1.0000 0.0045  1.0000 0.0042  1.0000 0.5368 
+     5 mixed-comp-therm-002-005s (e keff      1.0042E+0 1.9400E-4  0.9434 0.0003  0.9544 0.0004  0.9901 0.0053  0.6732 0.0044  0.9008 0.3139 
+     6 mixed-comp-therm-002-006s (e keff      1.0062E+0 1.4900E-4  0.9919 0.0002  0.9948 0.0003  0.9961 0.0045  0.9861 0.0040  0.9810 0.8229 
+ 
+ 
+
+ Application 5 of 6
+
+ ------------------------------------------------------------------------------------------------------------------------
+     Application:  mixed-comp-therm-002-005s (e                                                    
+ ------------------------------------------------------------------------------------------------------------------------
+
+
+ -----------------------------------------------------------------
+ Integral Values for Application #5
+ -----------------------------------------------------------------
+
+            Experiment              Type     Value      s.d.        c(k)   s.d.     E     s.d.   E(fis)  s.d.   E(cap)  s.d.   E(sct)  s.d.  
+  --------------------------------- -------- ---------- ---------  ------ ------  ------ ------  ------ ------  ------ ------  ------ ------ 
+     0 mixed-comp-therm-002-005s (e keff      1.0042E+0 1.9400E-4  1.0000 0.0002  1.0000 0.0005  1.0000 0.0067  1.0000 0.0049  1.0000 0.1952 
+     1 mixed-comp-therm-002-001s (e keff      1.0014E+0 1.9200E-4  0.9392 0.0003  0.9541 0.0006  0.9525 0.0067  0.8919 0.0053  0.9113 0.1747 
+     2 mixed-comp-therm-002-002s (e keff      1.0021E+0 1.6700E-4  0.9123 0.0004  0.9217 0.0004  0.9356 0.0058  0.7326 0.0050  0.8507 0.1562 
+     3 mixed-comp-therm-002-003s (e keff      1.0017E+0 2.0900E-4  0.9917 0.0003  0.9966 0.0005  0.9975 0.0070  0.9889 0.0053  0.9943 0.1666 
+     4 mixed-comp-therm-002-004s (e keff      1.0061E+0 1.6200E-4  0.9434 0.0007  0.9544 0.0004  0.9901 0.0053  0.6732 0.0044  0.9008 0.3139 
+     5 mixed-comp-therm-002-005s (e keff      1.0042E+0 1.9400E-4  1.0000 0.0002  1.0000 0.0005  1.0000 0.0067  1.0000 0.0049  1.0000 0.1952 
+     6 mixed-comp-therm-002-006s (e keff      1.0062E+0 1.4900E-4  0.9431 0.0002  0.9658 0.0004  0.9984 0.0053  0.7341 0.0042  0.9044 0.5153 
+ 
+ 
+
+ Application 6 of 6
+
+ ------------------------------------------------------------------------------------------------------------------------
+     Application:  mixed-comp-therm-002-006s (e                                                    
+ ------------------------------------------------------------------------------------------------------------------------
+
+
+ -----------------------------------------------------------------
+ Integral Values for Application #6
+ -----------------------------------------------------------------
+
+            Experiment              Type     Value      s.d.        c(k)   s.d.     E     s.d.   E(fis)  s.d.   E(cap)  s.d.   E(sct)  s.d.  
+  --------------------------------- -------- ---------- ---------  ------ ------  ------ ------  ------ ------  ------ ------  ------ ------ 
+     0 mixed-comp-therm-002-006s (e keff      1.0062E+0 1.4900E-4  1.0000 0.0002  1.0000 0.0004  1.0000 0.0045  1.0000 0.0038  1.0000 1.1460 
+     1 mixed-comp-therm-002-001s (e keff      1.0014E+0 1.9200E-4  0.8983 0.0003  0.9420 0.0005  0.9643 0.0055  0.7141 0.0047  0.8837 0.4451 
+     2 mixed-comp-therm-002-002s (e keff      1.0021E+0 1.6700E-4  0.9160 0.0003  0.9408 0.0004  0.9504 0.0049  0.8197 0.0045  0.8563 0.4593 
+     3 mixed-comp-therm-002-003s (e keff      1.0017E+0 2.0900E-4  0.9215 0.0003  0.9668 0.0004  0.9990 0.0056  0.7464 0.0045  0.9056 0.4582 
+     4 mixed-comp-therm-002-004s (e keff      1.0061E+0 1.6200E-4  0.9919 0.0009  0.9948 0.0003  0.9961 0.0045  0.9861 0.0040  0.9810 0.8229 
+     5 mixed-comp-therm-002-005s (e keff      1.0042E+0 1.9400E-4  0.9431 0.0002  0.9658 0.0004  0.9984 0.0053  0.7341 0.0042  0.9044 0.5153 
+     6 mixed-comp-therm-002-006s (e keff      1.0062E+0 1.4900E-4  1.0000 0.0002  1.0000 0.0004  1.0000 0.0045  1.0000 0.0038  1.0000 1.1460 
+ 
+ 
+
+
+ -------------------------------------------------------------------------------------------------------------------------------
+                                                 TSUNAMI-IP Execution Complete                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+ -------------------------------------------------------------------------------------------------------------------------------
+    module tsunami-ip used 31.7954 seconds cpu time for the current pass.
+
+    module tsunami-ip is finished. completion code    0. total cpu time used 5.526e-06 seconds.
+
+
+    SCALE is finished on Wed Aug  7 15:55:20 2024.
+-------------------------- Summary --------------------------
+tsunami-ip finished. used 31.7969 seconds.
+SCALE driver required a maximum of 84.88 MiB of RAM.
+------------------------ End Summary ------------------------
+

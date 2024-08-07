@@ -1,3 +1,4 @@
 perturbed_library.txt
 dummy_56_v7.1.pkl
-!tsunami_ip.out
+!tsunami_ip_mct.out
+!tsunami_ip_hmf.out
