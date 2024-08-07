@@ -7,6 +7,11 @@ from typing import List, Set, Tuple, Dict, Union, Optional
 from pathlib import Path
 from uncertainties.core import Variable
 from tsunami_ip_utils._utils import _convert_paths
+import os
+from tempfile import NamedTemporaryFile
+from string import Template
+import subprocess
+from tsunami_ip_utils.readers import read_integral_indices
 
 def _calculate_E_from_sensitivity_vecs(application_vector: unumpy.uarray, experiment_vector: unumpy.uarray, 
                                       application_filename: Path=None, experiment_filename: Path=None, 
@@ -542,3 +547,57 @@ def get_uncertainty_contributions(application_filenames: Optional[Union[ List[st
     }
         
     return dk_over_k_nuclide_wise, dk_over_k_nuclide_reaction_wise
+
+def get_integral_indices(application_sdfs: Union[ List[str], List[Path] ], experiment_sdfs: Union[ List[str], List[Path] ],
+                         coverx_library='252groupcov7.1') -> Dict[str, unumpy.uarray]:
+    """Gets the TSUNAMI-IP computed integral indices for a set of application and experiment sdfs
+    
+    Parameters
+    ----------
+    application_sdfs
+        List of paths to the application SDF files.
+    experiment_sdfs
+        List of paths to the experiment SDF files.
+    coverx_library
+        The covariance library to use. Default is ``'252groupcov7.1'``. This must be explicitly specified, and must correspond
+        to the multigroup library used to generate the SDF files.
+    
+    Returns
+    -------
+        Tuple of dictionaries containing the integral indices for the applications and experiments. The dictionaries have keys:
+        ``'c_k'``, ``'E_total'``, ``'E_fission'``, ``'E_capture'``, and ``'E_scatter'``.
+    """
+
+    # Template the TSUNAMI-IP input file with the application and experiment filenames
+    current_dir = Path(__file__).parent
+    with open(current_dir / "input_files" / "tsunami_ip_base_input.inp", 'r') as f:
+        input_template = Template(f.read())
+
+    # Convert the application and experiment SDF paths to strings
+    application_sdfs = [ str(filename) for filename in application_sdfs ]
+    experiment_sdfs = [ str(filename) for filename in experiment_sdfs ]
+
+    # Now template the input file
+    tsunami_ip_input = input_template.safe_substitute(
+        application_filenames='\n'.join(application_sdfs),
+        experiment_filenames='\n'.join(experiment_sdfs),
+        coverx_library=coverx_library
+    )
+
+    # Now write the input file to a temorary file and run it
+    with NamedTemporaryFile('w', delete=False) as f:
+        f.write(tsunami_ip_input)
+        input_filename = f.name
+
+    # Run the TSUNAMI-IP calculation
+    process = subprocess.Popen( ['scalerte', input_filename], cwd=str( Path( input_filename ).parent ) )
+    process.wait()
+
+    # Read the integral indices
+    integral_matrices = read_integral_indices(f"{input_filename}.out")
+
+    # Remove the temporary input and output files
+    os.remove(input_filename)
+    os.remove(f"{input_filename}.out")
+
+    return integral_matrices
