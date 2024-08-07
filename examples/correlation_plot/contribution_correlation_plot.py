@@ -19,8 +19,7 @@ experiment_files = [ EXAMPLES / 'data' / 'example_sdfs' / 'MCT' / f'MIX-COMP-THE
 
 contributions_nuclide, contributions_nuclide_reaction = get_uncertainty_contributions(
     application_files, 
-    experiment_files, 
-    variance=True
+    experiment_files,
 )
 
 # %%
@@ -35,12 +34,18 @@ contributions_nuclide, contributions_nuclide_reaction = get_uncertainty_contribu
 # The default plot type of the :func:`tsunami_ip_utils.viz.viz.correlation_plot` function is a matplotlib scatter plot.
 
 application_contributions = contributions_nuclide['application'][0]
-experiment_contributions = contributions_nuclide['experiment'][0]
+experiment_contributions  = contributions_nuclide['experiment'][0]
 fig, axs = correlation_plot(
     application_contributions, 
     experiment_contributions, 
     integral_index_name='$(Δk/k)^2$'
 )
+
+# Note that the generated figure object is special, and has attributes relating to the regression and correlation coefficients
+# that are shown in the plot. These are accessible as follows:
+print(fig.statistics)
+print(fig.regression)
+
 plt.show()
 
 # %%
@@ -61,6 +66,11 @@ fig = correlation_plot(
     integral_index_name='(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
     plot_type='interactive_scatter'
 )
+
+# Like before, the generated figure object also has information about the regression and correlation coefficients
+print(fig.statistics)
+print(fig.regression)
+
 fig.show()
 
 # %%
@@ -102,7 +112,7 @@ experiment_contributions  = contributions_nuclide_reaction['experiment'][0]
 fig, axs = correlation_plot(
     application_contributions, 
     experiment_contributions, 
-    integral_index_name='$(Δk/k)^2$'
+    integral_index_name='$(\\Delta k/k)^2$'
 )
 plt.show()
 

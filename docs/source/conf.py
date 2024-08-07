@@ -20,8 +20,6 @@ from tsunami_ip_utils.viz.pie_plot import InteractivePieLegend
 import subprocess
 from docutils import nodes
 from docutils.parsers.rst import roles
-import runpy
-from matplotlib.figure import Figure
 
 def unexpand_home(path):
     print(f"Initial Paht {path}")

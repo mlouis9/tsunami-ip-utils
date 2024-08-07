@@ -16,7 +16,7 @@ from tsunami_ip_utils.viz import perturbation_plot
 from paths import EXAMPLES
 
 multigroup_library = EXAMPLES / 'data' / 'dummy_56_v7.1'
-perturbation_factors = Path("/home/mlouis9/codes/SCALE-6.3.1/data/perturb/252n.v7.1")
+perturbation_factors = Path("~/codes/SCALE-6.3.1/data/perturb/252n.v7.1")
 
 cache_all_libraries(multigroup_library, perturbation_factors)
 
