@@ -2,7 +2,7 @@
 contributions and perturbations. These functions are used in the interactive plotting functions in the ``viz`` module."""
 
 import socket
-from tsunami_ip_utils._utils import _filter_redundant_reactions, _isotope_reaction_list_to_nested_dict
+from tsunami_ip_utils.utils import _filter_redundant_reactions, _isotope_reaction_list_to_nested_dict
 import numpy as np
 from typing import Dict, List, Tuple
 from uncertainties import unumpy

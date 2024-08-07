@@ -15,7 +15,7 @@ from tsunami_ip_utils.viz.plot_utils import generate_plot_objects_array_from_per
 from tsunami_ip_utils.integral_indices import get_uncertainty_contributions, calculate_E_contributions
 from tsunami_ip_utils.viz import matrix_plot
 import multiprocessing
-from tsunami_ip_utils._utils import _run_and_read_TSUNAMI_IP, _convert_paths
+from tsunami_ip_utils.utils import _run_and_read_TSUNAMI_IP, _convert_paths
 
 def E_calculation_comparison(application_filenames: Union[List[str], List[Path]], 
                              experiment_filenames: Union[List[str], List[Path]], coverx_library: str="252groupcov7.1", 

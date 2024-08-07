@@ -6,12 +6,14 @@ from copy import deepcopy
 from typing import List, Set, Tuple, Dict, Union, Optional
 from pathlib import Path
 from uncertainties.core import Variable
-from tsunami_ip_utils._utils import _convert_paths
+from tsunami_ip_utils.utils import _convert_paths
 import os
 from tempfile import NamedTemporaryFile
+import tempfile
 from string import Template
 import subprocess
 from tsunami_ip_utils.readers import read_integral_indices
+from tsunami_ip_utils.utils import modify_sdf_names
 
 def _calculate_E_from_sensitivity_vecs(application_vector: unumpy.uarray, experiment_vector: unumpy.uarray, 
                                       application_filename: Path=None, experiment_filename: Path=None, 
@@ -548,6 +550,7 @@ def get_uncertainty_contributions(application_filenames: Optional[Union[ List[st
         
     return dk_over_k_nuclide_wise, dk_over_k_nuclide_reaction_wise
 
+@_convert_paths
 def get_integral_indices(application_sdfs: Union[ List[str], List[Path] ], experiment_sdfs: Union[ List[str], List[Path] ],
                          coverx_library='252groupcov7.1') -> Dict[str, unumpy.uarray]:
     """Gets the TSUNAMI-IP computed integral indices for a set of application and experiment sdfs
@@ -572,6 +575,17 @@ def get_integral_indices(application_sdfs: Union[ List[str], List[Path] ], exper
     current_dir = Path(__file__).parent
     with open(current_dir / "input_files" / "tsunami_ip_base_input.inp", 'r') as f:
         input_template = Template(f.read())
+
+    # -------------------------------------------
+    # Modify the sdf file names to exclude spaces
+    # -------------------------------------------
+    # This is necessary for the reader to correctly parse the TSUNAMI-IP output
+    output_directory = Path( tempfile.gettempdir() )
+    modify_sdf_names(list(set(application_sdfs + experiment_sdfs)), output_directory=output_directory)
+
+    # Update the application and experiment SDF paths to the paths to the SDFs with modified names
+    application_sdfs = [ output_directory / sdf_file.name for sdf_file in application_sdfs ]
+    experiment_sdfs = [ output_directory / sdf_file.name for sdf_file in experiment_sdfs ]
 
     # Convert the application and experiment SDF paths to strings
     application_sdfs = [ str(filename) for filename in application_sdfs ]
@@ -599,5 +613,10 @@ def get_integral_indices(application_sdfs: Union[ List[str], List[Path] ], exper
     # Remove the temporary input and output files
     os.remove(input_filename)
     os.remove(f"{input_filename}.out")
+
+    # Now remove the temporary SDF files with modified names
+    for sdf_file in application_sdfs + experiment_sdfs:
+        if Path(sdf_file).exists():
+            os.remove(sdf_file)
 
     return integral_matrices

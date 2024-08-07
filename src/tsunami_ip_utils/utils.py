@@ -4,7 +4,7 @@ from uncertainties import ufloat
 from pathlib import Path
 from typing import Callable
 import functools
-from typing import List, Union
+from typing import List, Union, Optional
 import tempfile
 from string import Template
 import subprocess
@@ -157,3 +157,41 @@ def _run_and_read_TSUNAMI_IP(application_filenames: Union[List[str], List[Path]]
 
     return tsunami_ip_output
 
+@_convert_paths
+def modify_sdf_names(sdf_paths: Union[ List[str], List[Path] ], overwrite: bool=True, 
+                     output_directory: Optional[Union[str, Path]]=None) -> None:
+    """Takes in a list of paths to SDF files, and if the annotated name in the SDF file contains a space in it, it removes the space
+    so that it can be properly parsed by the relevant readers.
+    
+    Parameters
+    ----------
+    sdf_paths
+        List of paths to the SDF files.
+    overwrite
+        Whether to overwrite the original SDF files with the modified names. Default is ``True``. If ``False``, the modified SDF files
+        are prefixed with ``'modified_'``, unless an output directory is specified (if it is the same as the directory containing the original
+        SDFs, this is equivalent to setting ``overwrite=True``).
+    output_directory
+        The directory to save the modified SDF files. If ``None``, the modified SDF files are saved in the
+        same directory as the original SDF files.
+    """
+    
+    for sdf_path in sdf_paths:
+        with open(sdf_path, 'r') as f:
+            sdf_contents = f.readlines()
+        
+        # Remove whitespace from name
+        sdf_contents[0] = '-'.join(sdf_contents[0].split()) +'\n'
+
+        if output_directory is not None: # Specified output directory
+            if isinstance(output_directory, str):
+                output_directory = Path(output_directory)
+            with open(output_directory / sdf_path.name, 'w') as f:
+                f.writelines(sdf_contents)
+        elif overwrite:
+            with open(sdf_path, 'w') as f:
+                f.writelines(sdf_contents)
+        else: # Save in same directory
+            with open(sdf_path.parent / f"modified_{sdf_path.name}", 'w') as f:
+                f.writelines(sdf_contents)
+        

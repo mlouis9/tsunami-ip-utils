@@ -10,7 +10,7 @@ from typing import List, Dict, Tuple, Union, Optional
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
-from tsunami_ip_utils._utils import _parse_ufloats
+from tsunami_ip_utils.utils import _parse_ufloats
 from tsunami_ip_utils import config
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes

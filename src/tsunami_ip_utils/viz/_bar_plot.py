@@ -7,7 +7,7 @@ from ._base_plotter import _Plotter
 import numpy as np
 from typing import Dict, Union, Tuple
 from uncertainties import ufloat
-from tsunami_ip_utils._utils import _isotope_reaction_list_to_nested_dict
+from tsunami_ip_utils.utils import _isotope_reaction_list_to_nested_dict
 import matplotlib as mpl
 
 mpl.rcParams['hatch.linewidth'] = 0.25

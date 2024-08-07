@@ -786,6 +786,10 @@ def read_integral_indices(filename: Union[str, Path]) -> Dict[str, unumpy.uarray
     integral_values = Suppress(header + table_header) + data_block
     parsed_integral_values = integral_values.searchString(data)
 
+    if len(parsed_integral_values) == 0:
+        raise ValueError("No integral values found in the output file. Please ensure that the output/TSUNAMI-IP input files are "
+                         "formatted correctly.")
+
     # Parse the integral value tables into a uarray
     num_applications = len(parsed_integral_values)
     num_experiments = len(parsed_integral_values[0]) - 1 # First row seems to be a repeat, i.e. in the output it's "experiment 0"

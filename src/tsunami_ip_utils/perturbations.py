@@ -2,7 +2,7 @@
 experiment pair to generate a similarity scatter plot"""
 
 from tsunami_ip_utils.readers import RegionIntegratedSdfReader, read_region_integrated_h5_sdf
-from tsunami_ip_utils._utils import _convert_paths
+from tsunami_ip_utils.utils import _convert_paths
 from pathlib import Path
 from tsunami_ip_utils.xs import read_multigroup_xs
 import pickle
@@ -11,7 +11,7 @@ import tempfile
 from string import Template
 import subprocess
 import time
-from tsunami_ip_utils._utils import _filter_by_nuclie_reaction_dict
+from tsunami_ip_utils.utils import _filter_by_nuclie_reaction_dict
 import multiprocessing
 from multiprocessing import Pool
 from tqdm import tqdm

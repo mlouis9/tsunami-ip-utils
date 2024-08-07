@@ -19,7 +19,7 @@ from tsunami_ip_utils.readers import read_integral_indices
 from paths import EXAMPLES
 
 # Path to the .out file
-out_file = EXAMPLES / 'data' / 'tsunami_ip.out'
+out_file = EXAMPLES / 'data' / 'tsunami_ip_hmf.out'
 
 # Read the integral indices
 integral_indices = read_integral_indices(out_file)
@@ -44,10 +44,50 @@ for key, value in integral_indices.items():
 
 from tsunami_ip_utils.integral_indices import get_integral_indices
 
-application_sdfs = [ EXAMPLES / 'data' / 'example_sdfs' / 'HMF' / f'HEU-MET-FAST-003-00{i}.sdf' for i in range(1, 13) ]
+application_sdfs = [ EXAMPLES / 'data' / 'example_sdfs' / 'MCT' / f'MIX-COMP-THERM-002-00{i}S.sdf' for i in range(1, 7) ]
 experiment_sdfs = application_sdfs
 coverx_library = '252groupcov7.1'
 integral_indices = get_integral_indices(application_sdfs, experiment_sdfs, coverx_library=coverx_library)
+
+# Print the integral indices
+for key, value in integral_indices.items():
+    print(f'{key}:\n{value}\n')
+
+# %%
+# Spaces in Annotated Names
+# -------------------------
+# In each SDF file, the first line contains an annotated name for the SDF file, that is used to identify the SDF in the TSUNAMI-IP
+# output tables. If these names contain spaces (as some of those provided in the MCT directory do), they can cause the
+# :func:`tsnami_ip_utils.readers.read_integral_indices` function to fail. For example, the following code will raise an error:
+
+try:
+    integral_indices = read_integral_indices(EXAMPLES / 'data' / 'tsunami_ip_mct.out')
+    print(integral_indices)
+except Exception as e:
+    print(e)
+
+# %%
+# This is because of the spaces in the following SDF annotated names (that were used to generate the TSUNAMI-IP output file):
+
+sdf_paths = [ EXAMPLES / 'data' / 'example_sdfs' / 'MCT' / f'MIX-COMP-THERM-002-00{i}S.sdf' for i in range(1, 7) ]
+
+for sdf_path in sdf_paths:
+    with open(sdf_path, 'r') as f:
+        print(f.readline())
+
+# %%
+# So if you have SDFs with names that contain spaces, you should either use the 
+# :func:`tsunami_ip_utils.integral_indices.get_integral_indices`, which will handle these names by replacing whitespace with ``'-'``,
+# or you can manually replace the whitespaces in the SDF annotated names using the :func:`tsunami_ip_utils.utils.modify_sdf_names`
+# function. Below is an example showing the correct output using the :func:`tsunami_ip_utils.integral_indices.get_integral_indices`
+# function:
+
+from tsunami_ip_utils.integral_indices import get_integral_indices
+
+application_sdfs = [ EXAMPLES / 'data' / 'example_sdfs' / 'MCT' / f'MIX-COMP-THERM-002-00{i}S.sdf' for i in range(1, 7) ]
+experiment_sdfs = application_sdfs
+coverx_library = '252groupcov7.1'
+integral_indices = get_integral_indices(application_sdfs, experiment_sdfs, coverx_library)
 
 # Print the integral indices
 for key, value in integral_indices.items():
