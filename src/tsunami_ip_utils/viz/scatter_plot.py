@@ -40,6 +40,7 @@ import tempfile
 from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
 import tsunami_ip_utils.config as config
 from matplotlib.patches import Rectangle
+import multiprocessing
 
 def _replace_spearman_and_pearson(text: str, new_pearson: float, new_spearman: float) -> str:
     """Replaces the Spearman and Pearson values in the given text with the new values provided using regex. This is useful
@@ -343,7 +344,7 @@ class _ScatterPlotter(_ScatterPlot):
             colors, 
             isotopes_and_reactions
         ):
-            self.axs.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='.', capsize=5, color=color, label=f"{isotope_and_reaction}")
+            self.axs.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='.', capsize=3, color=color, label=f"{isotope_and_reaction}")
 
         # Plot the regression line
         x = np.linspace(min(application_points), max(application_points), 100)
@@ -680,6 +681,58 @@ class _InteractiveScatterPlotter(_ScatterPlot):
         self.fig.update_layout(title_text=title_text, title_x=0.5)  # 'title_x=0.5' centers the title
 
 
+class _PerturbationScatterPlotter(_ScatterPlot):
+    """Class for creating a matplotlib scatter plot using the nuclear data sampling method (where perturbed cross section
+    libraries are used to calculate sample points on the scatter plot)."""
+    _plot_type: str
+    """Whether the plot is a matplolib or plotly plot. This is used to determine how to format the summary statistics text."""
+    def __init__(self, **kwargs: dict):
+        self._plot_type = 'matplotlib'
+
+    def _create_plot(self, points: List[Tuple[ufloat, ufloat]]) -> None:
+        """Create a matplotlib scatter plot with error bars, linear regression line, and correlation coefficient calculations.
+        
+        Parameters
+        ----------
+        points
+            A list of perturbation points, each computed from sampled perturbed cross section libraries. These points are generated
+            using the :func:`tsunami_ip_utils.perturbations.generate_points` function."""
+        
+        self.fig, self.axs = plt.subplots(figsize=(8, 8))
+
+        # Extract the x and y values from the contribution pairs
+        application_points        = [ point[0].n for point in points ]
+        application_uncertainties = [ point[0].s for point in points ]
+        experiment_points         = [ point[1].n for point in points ]
+        experiment_uncertainties  = [ point[1].s for point in points ]
+
+        self._get_summary_statistics(application_points, experiment_points)
+
+        self.axs.errorbar(application_points, experiment_points, xerr=application_uncertainties, yerr=experiment_uncertainties, fmt='.', capsize=3)
+
+        # Plot the regression line
+        x = np.linspace(min(application_points), max(application_points), 100)
+        y = self._slope * x + self._intercept
+        self.axs.plot(x, y, 'r', label='Linear fit')
+
+        self.axs.text(0.05, 0.95, self._summary_stats_text, transform=self.axs.transAxes, fontsize=12,
+                verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
+
+        self._style()
+
+    def _get_plot(self) -> Tuple[Figure, Axes]:
+        return self.fig, self.axs
+        
+    def _add_to_subplot(self, fig, position) -> Figure:
+        return fig.add_subplot(position, sharex=self.axs, sharey=self.axs)
+    
+    def _style(self):
+        self.axs.set_xlabel('Application')
+        self.axs.set_ylabel('Experiment')
+        self.axs.grid()
+        pass
+
+
 class _InteractivePerturbationScatterPlotter(_ScatterPlot):
     """Class for creating an interactive scatter plot using the nuclear data sampling method (where perturbed cross section
     libraries are used to calculate sample points on the scatter plot)."""
@@ -855,7 +908,7 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
 
         @self._app.server.route('/shutdown', methods=['POST'])
         def shutdown():
-            os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
+            os.kill(os.getpid(), signal.SIGKILL)  # Send the SIGKILL signal to the current process
             return 'Server shutting down...'
 
     def show(self) -> None:
@@ -905,8 +958,11 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
 
         # Timer to open the browser shortly after the server starts
         if not config.generating_docs:
+            proc = multiprocessing.Process(target=self._app.run, kwargs={'host': 'localhost', 'port': port})
+            proc.start()
+
             threading.Timer(1, open_browser).start()
-            self._app.run_server(debug=False, host='localhost', port=port)
+            proc.join()
 
     def save_state(self, filename: typing.Optional[Union[str, Path]]=None) -> Optional[dict]:
         """Save the current state of the interactive scatter plot to a file. This method saves the state of the interactive

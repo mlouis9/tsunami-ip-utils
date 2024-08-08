@@ -136,7 +136,7 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
 
     return plot_objects_array
 
-def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> np.ndarray:
+def generate_plot_objects_array_from_perturbations(points_array: np.ndarray, **kwargs) -> np.ndarray:
     """Generate a matrix of plot objects (for creating a matrix plot) from a numpy array of perturbation points. This is
     used for a matrix of perturbation plots only.
     
@@ -156,7 +156,7 @@ def generate_plot_objects_array_from_perturbations(points_array: np.ndarray) -> 
 
     for application_index, row in enumerate(points_array):
         for experiment_index, _ in enumerate(row):
-            fig = perturbation_plot(points_array[application_index, experiment_index])
+            fig = perturbation_plot(points_array[application_index, experiment_index], **kwargs)
             plot_objects_array[experiment_index, application_index] = fig
 
     return plot_objects_array

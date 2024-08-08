@@ -18,6 +18,7 @@ from tsunami_ip_utils.viz.pie_plot import InteractivePieLegend
 import plotly
 from tsunami_ip_utils.viz.scatter_plot import InteractiveScatterLegend
 from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure
+from tsunami_ip_utils.viz.scatter_plot import _PerturbationScatterPlotter
 from tsunami_ip_utils.viz.matrix_plot import InteractiveMatrixPlot
 import copy
 
@@ -159,7 +160,7 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
     return plotter._get_plot()
 
 
-def perturbation_plot(points: List[Tuple[ufloat, ufloat]]) -> EnhancedPlotlyFigure:
+def perturbation_plot(points: List[Tuple[ufloat, ufloat]], plot_type: str='interactive_scatter') -> EnhancedPlotlyFigure:
     """Plots the perturbation points for a given application-experiment pair for which the perturbation points have already
     been calculated.
     
@@ -167,13 +168,25 @@ def perturbation_plot(points: List[Tuple[ufloat, ufloat]]) -> EnhancedPlotlyFigu
     ----------
     points: 
         List of tuples containing the perturbation points for the application-experiment pair.
+    plot_type
+        Type of plot to create. Default is ``'scatter'`` which creates a matplotlib scatter plot. Other options
+        are ``'interactive_scatter'``, which creates a Plotly scatter plot.
         
     Returns
     -------
         A (enhanced) Plotly figure object which can be displayed by calling ``fig.show()``."""
     
     # Extracting data
-    plotter = _InteractivePerturbationScatterPlotter()
+    plotters = {
+        'interactive_scatter': _InteractivePerturbationScatterPlotter(),
+        'scatter': _PerturbationScatterPlotter(),
+    }
+
+    # Get the requested plotter
+    plotter = plotters.get(plot_type)
+    if plotter is None:
+        raise ValueError(f"Unsupported plot type: {plot_type}")
+
     plotter._create_plot(points)
 
     return plotter._get_plot()

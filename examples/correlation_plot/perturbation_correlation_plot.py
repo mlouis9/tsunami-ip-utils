@@ -21,6 +21,8 @@ perturbation_factors = Path("~/codes/SCALE-6.3.1/data/perturb/56n.v7.1")
 cache_all_libraries(multigroup_library, perturbation_factors)
 
 # %%
+# Interactive Scatter Plot
+# ------------------------
 # More details on caching libraries and why it is necessary are provided in :ref:`sphx_glr_auto_examples_caching_cross_sections.py`.
 # Using these cached libraries, we can now generate the perturbation points for the perturbation correlation plot. Note we specify the
 # number of perturbed points to generate (corresponding to the number of perturbed cross section library samples in the cache directory
@@ -32,12 +34,12 @@ num_perturbations = 50
 points = generate_points(application, experiment, multigroup_library, \
             perturbation_factors, num_perturbations)
 
-fig = perturbation_plot(points)
+fig = perturbation_plot(points, plot_type='interactive_scatter')
 fig.show()
 
 # %%
 # This plot just shows the calcualted Pearson and Spearman correlation coefficients, and does not show the comparison to the TSUNAMI-IP
-# calculated :math:`c_k`. To generate a comparison like this, please refer to the :ref:`sphx_glr_auto_examples_comparisons_compare_matrix_perturbations.py`
+# calculated :math:`c_k`. To generate a comparison like this, please refer to the :ref:`sphx_glr_auto_examples_comparisons_compare_matrix_perturbation.py`
 # example. Please note that since the Pearson and Spearman correlation coefficients are being computed from a finite sample size, the
 # values necessarily have a sampling distribution with some uncertainty. This uncertainty is generally less than 5% for a sample size
 # greater than 200, but this depends on the value of :math:`c_k` (see :ref:`the technical manual <manual-final-results>` for
@@ -50,3 +52,13 @@ with open( EXAMPLES / '_static' / 'perturbation_plot.png', 'wb' ) as f:
     f.write( fig.to_image('png') )
 
 # sphinx_gallery_thumbnail_path = '../../examples/_static/perturbation_plot.png'
+
+# %%
+# Matplotlib Scatter Plot
+# -----------------------
+# The perturbation plot can also be generated as a matplotlib scatter plot using the following code block:
+
+import matplotlib.pyplot as plt
+
+fig, axs = perturbation_plot(points, plot_type='scatter')
+plt.show()

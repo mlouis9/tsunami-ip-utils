@@ -23,6 +23,7 @@ from pathlib import Path
 from tsunami_ip_utils import config
 import tempfile
 from tsunami_ip_utils.viz.plot_utils import _capture_html_as_image
+import multiprocessing
 
 plt.rcParams['hatch.linewidth'] = 0.6
 
@@ -532,7 +533,7 @@ class InteractivePieLegend:
         @self._app.route('/shutdown', methods=['POST'])
         def shutdown():
             """Function to shutdown the server"""
-            os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
+            os.kill(os.getpid(), signal.SIGKILL)  # Send the SIGKILL signal to the current process
             return 'Server shutting down...'
 
         @self._app.route('/')
@@ -675,11 +676,12 @@ class InteractivePieLegend:
 
         port = _find_free_port()
         if not config.generating_docs:
+            proc = multiprocessing.Process(target=self._app.run, kwargs={'host': 'localhost', 'port': port})
+            proc.start()
+
             if open_browser:
                 threading.Timer(1, self._open_browser(port)).start()
-
-            
-            self._app.run(host='localhost', port=port)
+            proc.join()
 
     def serve(self):
         """Start the Flask server to display the interactive sunburst chart without a browser tab."""

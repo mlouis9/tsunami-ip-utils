@@ -85,6 +85,7 @@ comparisons, fig = correlation_comparison(
     base_library=multigroup_library,
     perturbation_factors=perturbation_factors,
     num_perturbations=num_perturbations,
+    plot_objects_kwargs={'plot_type': 'scatter'},
 )
 
 fig.show()

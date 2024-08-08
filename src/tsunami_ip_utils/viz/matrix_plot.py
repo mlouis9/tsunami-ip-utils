@@ -247,14 +247,6 @@ def _generate_layout(app: dash.Dash, rows: List[html.Div]) -> None:
     app.layout = html.Div([
         html.H1("Matrix of Plots", style={'textAlign': 'center', 'marginLeft': '121px'}),
         html.Div(rows, id='matrix-plot',style={'display': 'flex', 'flexDirection': 'column', 'width': '100%', 'overflowX': 'auto'}),
-        html.Script("""
-        window.addEventListener('resize', function() {
-            const graphs = Array.from(document.querySelectorAll('.js-plotly-plot'));
-            graphs.forEach(graph => {
-                Plotly.Plots.resize(graph);
-            });
-        });
-        """)
     ])
 
 class InteractiveMatrixPlot:
@@ -313,9 +305,12 @@ class InteractiveMatrixPlot:
 
         port = _find_free_port()
         if not config.generating_docs:
+            proc = multiprocessing.Process(target=self._app.run, kwargs={'host': 'localhost', 'port': port})
+            proc.start()
+
             if open_browser:
                 threading.Timer(1, self._open_browser(port)).start()
-            self._app.run(host='localhost', port=port, debug=False)
+            proc.join()
     
     def save_state(self, filename: Union[str, Path]) -> None:
         """Save the state of the interactive matrix plot to a pickle file. The state includes the 2D numpy array of plot objects
@@ -495,7 +490,7 @@ def _interactive_matrix_plot(plot_objects_array: np.ndarray, labels: Optional[Di
     @app.server.route('/shutdown', methods=['POST'])
     def shutdown():
         """Function to shutdown the server"""
-        os.kill(os.getpid(), signal.SIGINT)  # Send the SIGINT signal to the current process
+        os.kill(os.getpid(), signal.SIGKILL)  # Send the SIGKILL signal to the current process
         return 'Server shutting down...'
 
     num_rows = plot_objects_array.shape[0]
