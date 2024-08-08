@@ -228,6 +228,16 @@ class _ScatterPlot(_Plotter):
         self._summary_stats_text = f"{pearson_text} {spearman_text}"
 
 
+def unique_ordered_list(strings):
+    seen = set()        # Set to track seen strings
+    result = []         # List to maintain order of first appearances
+    for s in strings:
+        if s not in seen:   # Check if the string is not in the set
+            seen.add(s)     # Add string to the set
+            result.append(s)  # Append string to the result list
+    return result
+
+
 class _ScatterPlotter(_ScatterPlot):
     """A class for creating static scatter plots with error bars, linear regression lines, and correlation coefficient
     calculations."""
@@ -269,9 +279,8 @@ class _ScatterPlotter(_ScatterPlot):
             The list of isotopes represented by each contribution pair. This has the same length and it ordered the same
             as the contribution_pairs.
         reactions
-            The list of all reactions. For consistency, this is the same for all isotopes, so there may be cases where an
-            isotope has a reaction that isn't actually possible (e.g. c-12 fission) but is included for consistency with the
-            expeirment/application, and the contribution is zero. 
+            The list of reactions represented by each contribution pair. This has the same length and it ordered the same
+            as the contribution_pairs. Note if only nuclide-wise contributions are given, this list will be empty.
         
         Notes
         -----
@@ -286,54 +295,20 @@ class _ScatterPlotter(_ScatterPlot):
         experiment_uncertainties  = [ contribution[1].s for contribution in contribution_pairs ]
 
         if reactions != []:
-            isotopes_and_reactions = [ f"{isotope} : {reaction}" for isotope in isotopes for reaction in reactions ]
+            isotopes_and_reactions = [ f"{isotope} : {reaction}" for isotope, reaction in zip(isotopes, reactions) ]
         else:
             isotopes_and_reactions = isotopes
-
-        # Now filter out (0,0) points, which don't contribute to either the application or the experiment, these are
-        # usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set
-        # of reactions only
-
-        indices = [ index for index, (application_point, experiment_point) in enumerate( zip( application_points, experiment_points ) )
-                    if application_point == 0 and experiment_point == 0 ]
-        
-        application_points        = [ point for index, point in enumerate(application_points) if index not in indices ]
-        application_uncertainties = [ point for index, point in enumerate(application_uncertainties) if index not in indices ]
-        experiment_points         = [ point for index, point in enumerate(experiment_points) if index not in indices ]
-        experiment_uncertainties  = [ point for index, point in enumerate(experiment_uncertainties) if index not in indices ]
-        isotopes_and_reactions    = [ point for index, point in enumerate(isotopes_and_reactions) if index not in indices ]
 
         self._get_summary_statistics(application_points, experiment_points)
 
         # define a color map
         if reactions != []:
-            unique_isotopes = sorted(set([isotope_reaction.split(' : ')[0] for isotope_reaction in isotopes_and_reactions]))
+            unique_isotopes = unique_ordered_list(isotopes)
             colors = plt.cm.rainbow(np.linspace(0, 1, len(isotopes)))
             isotope_to_color = {isotope: color for isotope, color in zip(unique_isotopes, colors)}
             colors = [ isotope_to_color[pair.split(' : ')[0]] for pair in isotopes_and_reactions ]
         else:
             colors = plt.cm.rainbow(np.linspace(0, 1, len(isotopes_and_reactions)))
-
-        # Calculate the magnitude (absolute value of x ordinate plus absolute value of y ordinate)
-        magnitudes = [abs(application_points[i]) + abs(experiment_points[i]) for i in range(len(application_points))]
-
-        # Combine all lists to sort them together
-        combined = list(zip(
-            magnitudes,
-            application_points,
-            experiment_points,
-            application_uncertainties,
-            experiment_uncertainties,
-            isotopes_and_reactions,
-            colors,
-        ))
-
-        # Sort the combined list by magnitudes, application points, and experiment points
-        combined.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
-
-        # Unzip the sorted lists
-        magnitudes, application_points, experiment_points, application_uncertainties, experiment_uncertainties, \
-            isotopes_and_reactions, colors = zip(*combined)
 
         # Plot each point with error bars and color by order of magnitude
         for x, xerr, y, yerr, color, isotope_and_reaction in zip(
@@ -639,25 +614,12 @@ class _InteractiveScatterPlotter(_ScatterPlot):
             f'Experiment {self._index_name} Contribution': [cp[1].n for cp in contribution_pairs],
             'Application Uncertainty': [cp[0].s for cp in contribution_pairs],
             'Experiment Uncertainty': [cp[1].s for cp in contribution_pairs],
-            'Isotope': [],
+            'Isotope': isotopes,
         }
 
         # Add nuclides and reactions (if they exist) to the data dictionary
-        if reactions == []:
-            for isotope in isotopes:
-                data['Isotope'].append(isotope)
-        else:
-            data['Reaction'] = []
-            for isotope in isotopes:
-                for reaction in reactions:
-                    data['Isotope'].append(isotope)
-                    data['Reaction'].append(reaction)
-
-        # Now filter out (0,0) points, which don't contribute to either the application or the experiment, these are
-        # usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set
-        # of reactions only
-        data = { key: [val for val, app, exp in zip(data[key], data[f'Application {self._index_name} Contribution'], \
-                    data[f'Experiment {self._index_name} Contribution']) if app != 0 or exp != 0] for key in data }
+        if reactions != []:
+            data['Reaction'] = reactions
 
         return pd.DataFrame(data)
 

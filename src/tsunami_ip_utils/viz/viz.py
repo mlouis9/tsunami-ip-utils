@@ -75,6 +75,80 @@ def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_
     return plotter._get_plot()
 
 
+def _prepare_contribution_pairs(application_contributions: List[dict], experiment_contributions: List[dict], 
+                                plot_redundant_reactions: bool) -> Tuple[List[Tuple[ufloat, ufloat]], List[str], List[str], bool]:
+    """Prepares the contribution pairs for plotting by parsing the contributions into a form that's easy to plot.
+
+    Parameters
+    ----------
+    application_contributions
+        List of dictionaries containing the contributions to the similarity parameter for the application.
+    experiment_contributions
+        List of dictionaries containing the contributions to the similarity parameter for the experiment.
+    plot_redundant_reactions
+        Whether to plot redundant reactions (or irrelevant reactions) when considering
+        nuclide-reaction-wise contributions.
+    
+    Returns
+    -------
+        A tuple containing the contribution pairs, isotopes, reactions, and whether the contributions are nested."""
+    
+    # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
+    application_contributions, application_nested = _determine_plot_type(application_contributions, plot_redundant_reactions)
+    experiment_contributions, experiment_nested = _determine_plot_type(experiment_contributions, plot_redundant_reactions)
+
+    if application_nested != experiment_nested:
+        raise ValueError("Application and experiment contributions must have the same nested structure")
+    else:
+        nested = application_nested # They are be the same, so arbitrarily choose one
+
+    # Get the list of isotopes for which contributions are available
+    isotopes = list(set(application_contributions.keys()).union(experiment_contributions.keys()))
+
+    all_reactions = _add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
+
+    # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
+    contribution_pairs = []
+    if nested:
+        for isotope in isotopes:
+            for reaction in all_reactions:
+                contribution_pairs.append((application_contributions[isotope][reaction], \
+                                           experiment_contributions[isotope][reaction]))
+    else:
+        for isotope in isotopes:
+            contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
+
+    # Get a list of isotopes corresponding to each contribution pair
+    if all_reactions != []:
+        reactions = [reaction for isotope in isotopes for reaction in all_reactions]
+        isotopes = [isotope for isotope in isotopes for reaction in all_reactions]
+    else:
+        reactions = []
+        # isotopes = isotopes
+
+    # Now filter out (0,0) points, which don't contribute to either the application or the experiment, these are
+    # usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set
+    # of reactions only
+
+    indices = [ index for index, (application_point, experiment_point) in enumerate( contribution_pairs )
+                    if application_point.n == 0 and experiment_point.n == 0 ]
+    isotopes = [ isotope for index, isotope in enumerate(isotopes) if index not in indices ]
+    contribution_pairs = [ (application_point, experiment_point) for index, (application_point, experiment_point) in enumerate(contribution_pairs) if index not in indices ]
+
+    if all_reactions != []:
+        reactions = [ reaction for index, reaction in enumerate(reactions) if index not in indices ]
+
+    # Now sort the contributions by magnitude
+    if all_reactions != []:
+        combined_data = zip(contribution_pairs, isotopes, reactions)
+        contribution_pairs, isotopes, reactions = zip(*sorted(combined_data, key=lambda x: x[0][0].n + x[0][1].n, reverse=True))
+    else:
+        combined_data = zip(contribution_pairs, isotopes)
+        contribution_pairs, isotopes = zip(*sorted(combined_data, key=lambda x: x[0][0].n + x[0][1].n, reverse=True))
+
+    return contribution_pairs, isotopes, reactions, nested
+
+
 def correlation_plot(application_contributions: List[dict], experiment_contributions: List[dict], plot_type: str='scatter', 
                      integral_index_name: str='E', plot_redundant_reactions: bool=True, **kwargs: dict
                      ) -> Union[Tuple[Figure, Axes], EnhancedPlotlyFigure, InteractiveScatterLegend]:
@@ -119,30 +193,12 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
     return a :class:`.EnhancedPlotlyFigure` object, which is a wrapper of Plotly's ``Figure`` class, which has additional
     attributes related to the statistics of the scatter plot."""
 
-    # Determine if the contributions are nuclide-wise or nuclide-reaction-wise
-    application_contributions, application_nested = _determine_plot_type(application_contributions, plot_redundant_reactions)
-    experiment_contributions, experiment_nested = _determine_plot_type(experiment_contributions, plot_redundant_reactions)
-
-    if application_nested != experiment_nested:
-        raise ValueError("Application and experiment contributions must have the same nested structure")
-    else:
-        nested = application_nested # They are be the same, so arbitrarily choose one
-
-    # Get the list of isotopes for which contributions are available
-    isotopes = list(set(application_contributions.keys()).union(experiment_contributions.keys()))
-
-    all_reactions = _add_missing_reactions_and_nuclides(application_contributions, experiment_contributions, isotopes, mode='contribution')
-
-    # Now convert the contributions for the application and experiment into a list of x, y pairs for plotting
-    contribution_pairs = []
-    if nested:
-        for isotope in isotopes:
-            for reaction in all_reactions:
-                contribution_pairs.append((application_contributions[isotope][reaction], \
-                                           experiment_contributions[isotope][reaction]))
-    else:
-        for isotope in isotopes:
-            contribution_pairs.append((application_contributions[isotope], experiment_contributions[isotope]))
+    # First prepare the contribution pairs and parse them into a form that's easy to plot
+    contribution_pairs, isotopes, reactions, nested = _prepare_contribution_pairs(
+        application_contributions, 
+        experiment_contributions,
+        plot_redundant_reactions,
+    )
 
     plotters = {
         'scatter': _ScatterPlotter(integral_index_name, plot_redundant_reactions, nested, **kwargs),
@@ -155,7 +211,7 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
         raise ValueError(f"Unsupported plot type: {plot_type}")
 
     # Create the plot and style it
-    plotter._create_plot(copy.deepcopy(contribution_pairs), isotopes, all_reactions)
+    plotter._create_plot(copy.deepcopy(contribution_pairs), isotopes, reactions)
 
     return plotter._get_plot()
 
