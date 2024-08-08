@@ -944,6 +944,8 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
             * Otherwise, ``None`` is returned."""
         state = {
             'fig': self.fig.to_dict(),
+            'statistics': self.statistics,
+            'regression': self.regression,
             'df': self.df.to_dict(),
             'excluded_isotopes': self._excluded_isotopes,
             'index_name': self._index_name,
@@ -984,7 +986,9 @@ class InteractiveScatterLegend(_InteractiveScatterPlotter):
             state = data_dict
 
         # Recreate the _InteractiveScatterPlotter instance from the saved state
-        fig = go.Figure(state['fig'])
+        fig = EnhancedPlotlyFigure(state['fig'])
+        fig.statistics = state['statistics']
+        fig.regression = state['regression']
         index_name = state['index_name']
         nested = state['nested']
         interactive_scatter_plot = _InteractiveScatterPlotter(index_name, nested)

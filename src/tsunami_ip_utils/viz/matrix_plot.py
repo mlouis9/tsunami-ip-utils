@@ -335,7 +335,7 @@ class InteractiveMatrixPlot:
                     self.plot_types[i,j] = "InteractivePieLegend"
 
         with open(filename, 'wb') as f:
-            pickle.dump( ( self._plot_objects_array, self.plot_types ) , f)
+            pickle.dump( ( self._plot_objects_array, self.plot_types, self._labels ) , f)
 
     @classmethod
     def load_state(self, filename: Union[str, Path]) -> InteractiveMatrixPlot:
@@ -350,7 +350,7 @@ class InteractiveMatrixPlot:
         -------
             An reserialized instance of the :class:`InteractiveMatrixPlot` class."""
         with open(filename, 'rb') as f:
-            plot_objects_array, plot_types = pickle.load(f)
+            plot_objects_array, plot_types, labels = pickle.load(f)
             # Reserialize interactive scatter legends
             for i, row in enumerate(plot_objects_array):
                 for j, plot_object in enumerate(row):
@@ -359,7 +359,7 @@ class InteractiveMatrixPlot:
                     elif plot_types[i,j] == "InteractivePieLegend":
                         plot_objects_array[i,j] = InteractivePieLegend.load_state(data_dict=plot_object)
 
-        return _interactive_matrix_plot(plot_objects_array)
+        return _interactive_matrix_plot(plot_objects_array, labels=labels)
 
     def write_html(self, filename: Optional[Union[str, Path]]=None) -> None:
         """Write the HTML content of the interactive matrix plot to a file.
@@ -470,7 +470,7 @@ def load_interactive_matrix_plot(filename):
     return InteractiveMatrixPlot.load_state(filename)
 
 
-def _interactive_matrix_plot(plot_objects_array: np.ndarray, labels: Optional[Dict[str, List]]) -> InteractiveMatrixPlot:
+def _interactive_matrix_plot(plot_objects_array: np.ndarray, labels: Optional[Dict[str, List]]=None) -> InteractiveMatrixPlot:
     """Create an interactive matrix plot from a 2D numpy array of plot objects. This function creates a Dash app that displays
     the matrix plot. The matrix is constructed from the plot objects array, where each plot object is an instance of either
     :class:`tsunami_ip_utils.viz.scatter_plot.InteractiveScatterLegend` or :class:`tsunami_ip_utils.viz.pie_plot.InteractivePieLegend`.
