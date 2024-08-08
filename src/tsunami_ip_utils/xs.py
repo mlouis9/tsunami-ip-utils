@@ -13,6 +13,8 @@ import re
 from typing import Union, Tuple, Dict, Any, Callable, List
 import typing
 import random
+import requests
+from bs4 import BeautifulSoup
 
 def _parse_nuclide_reaction(filename: Union[str, Path], energy_boundaries: bool=False) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """Reads a multigroup cross section ``.txt`` file produced by the extractor function and returns the energy-dependent 
@@ -470,3 +472,70 @@ def perturb_multigroup_xs_dump(filename: Union[str, Path],  max_perturb_factor: 
             f.writelines(perturbed_data)
     else:
         return perturbed_data
+    
+def get_scale_multigroup_structure(num_groups: int) -> np.ndarray:
+    """Return the multigroup structure for a SCALE library with a given number of groups.
+    
+    Parameters
+    ----------
+    num_groups : int
+        The number of groups in the SCALE library.
+        
+    Returns
+    -------
+    np.ndarray
+        A 2D numpy array with the first column as the group number and the second column as the energy (in eV). Note the
+        energies are default sorted in ascending order.
+    """
+
+    SCALE_XS_LIBRARY_URL = 'https://scale-manual.ornl.gov/XSLib.html'
+
+    # Mapping of number of groups to table id in the SCALE manual
+    num_groups_to_table_id = {
+        252: 'table-10-1-8',
+        56: 'table-10-1-9',
+        302: 'table-302g',
+    }
+
+    # Get the table id
+    table_id = num_groups_to_table_id.get(num_groups)
+    if table_id is None:
+        raise ValueError(f"No table found for {num_groups} groups")
+
+    # Send a GET request
+    response = requests.get(SCALE_XS_LIBRARY_URL)
+    response.raise_for_status()  # ensures we notice bad responses
+
+    # Parse the HTML
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Find the table by an identifier - class, id, or maybe the exact path
+    table = soup.find('table', {'id': 'table-10-1-9'})  # Example class
+
+    # Extract data
+    data = []
+    for row in table.find_all('tr'):
+        columns = row.find_all('td')
+        data.append([col.text.strip() for col in columns])
+
+
+    # Process the table into multigroup structure
+    multigroup_structure = []
+    for line in data:
+        if line != []:
+            pass
+        number_of_entries = len(line)
+        # Now parse each pair of entries in the line
+        for i in range(0, number_of_entries, 2):
+            if line[i] != '' and line[i+1] != '':
+                group_number = int(line[i])
+                energy = float(line[i+1])
+                multigroup_structure.append((group_number, energy))
+                
+    multigroup_structure = np.array(multigroup_structure)
+
+    # Now sort in ascending (energy) order
+    sorted_indices = np.argsort(multigroup_structure[:, 1])
+    multigroup_structure = multigroup_structure[sorted_indices]
+
+    return multigroup_structure
