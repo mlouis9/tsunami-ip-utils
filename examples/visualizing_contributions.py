@@ -39,7 +39,7 @@ contributions = uncertainty_contributions_nuclide['application'][0]
 from tsunami_ip_utils.viz.viz import contribution_plot
 import matplotlib.pyplot as plt
 
-fig, axs = contribution_plot(contributions, plot_type='bar',integral_index_name='$(\\Delta k/k)^2$')
+fig, axs = contribution_plot(contributions, plot_type='bar',integral_index_name='$\\%(\\Delta k/k)^2$')
 plt.tight_layout()
 plt.show()
 
@@ -48,7 +48,7 @@ plt.show()
 # ^^^^^^^^^
 # The contributions can also be plotted as a matplotlib pie chart.
 
-fig, axs = contribution_plot(contributions, plot_type='pie',integral_index_name='$(\\Delta k/k)^2$')
+fig, axs = contribution_plot(contributions, plot_type='pie',integral_index_name='$\\%(\\Delta k/k)^2$')
 plt.tight_layout()
 plt.show()
 
@@ -57,7 +57,7 @@ plt.show()
 # ^^^^^^^^^^^^^^^^^^^^^
 # The contributions can also be plotted as an interactive plotly pie chart.
 
-fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='(Δk/k)^2', interactive_legend=False)
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='%(Δk/k)^2', interactive_legend=False)
 fig.show()
 
 # %%
@@ -66,7 +66,7 @@ fig.show()
 # The contributions can also be plotted as an interactive plotly pie chart with an interactive legend. This feature has
 # yet to be formally implemented in Plotly Express (although an issue is open `here <https://github.com/plotly/plotly.py/issues/4692>`_ ).
 
-fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='(Δk/k)^2', interactive_legend=True)
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='%(Δk/k)^2', interactive_legend=True)
 fig.show()
 
 # %%
@@ -84,7 +84,7 @@ fig.show()
 
 contributions = uncertainty_contributions_nuclide_reaction['application'][0]
 
-fig, axs = contribution_plot(contributions, plot_type='bar',integral_index_name='$(\\Delta k/k)^2$')
+fig, axs = contribution_plot(contributions, plot_type='bar',integral_index_name='$\\%(\\Delta k/k)^2$')
 plt.tight_layout()
 plt.show()
 
@@ -99,7 +99,7 @@ plt.show()
 # Pie Chart
 # ^^^^^^^^^
 
-fig, axs = contribution_plot(contributions, plot_type='pie',integral_index_name='$(\\Delta k/k)^2$')
+fig, axs = contribution_plot(contributions, plot_type='pie',integral_index_name='$\\%(\\Delta k/k)^2$')
 plt.tight_layout()
 plt.show()
 
@@ -113,7 +113,7 @@ plt.show()
 # Interactive Pie Chart
 # ^^^^^^^^^^^^^^^^^^^^^
 
-fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='(Δk/k)^2', interactive_legend=False)
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='%(Δk/k)^2', interactive_legend=False)
 fig.show()
 
 # %%
@@ -128,7 +128,7 @@ fig.show()
 # Interactive Pie Chart With Interactive Legend
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='(Δk/k)^2', interactive_legend=True)
+fig = contribution_plot(contributions, plot_type='interactive_pie', integral_index_name='%(Δk/k)^2', interactive_legend=True)
 fig.show()
 
 # %%

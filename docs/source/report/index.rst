@@ -414,6 +414,8 @@ one could define the (formally) imaginary standard deviations to be
 
 This is the approach used in the SAMS sequence.
 
+.. _sec-contribution-results:
+
 Results and Implementation
 --------------------------
 

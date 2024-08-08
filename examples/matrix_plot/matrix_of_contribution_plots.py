@@ -47,13 +47,13 @@ contributions_nuclide, contributions_nuclide_reaction = get_uncertainty_contribu
 # This function takes a dictionary of contributions and the name of the integral index, and returns a numpy array of plot objects
 # that can be passed to the :func:`tsunami_ip_utils.viz.viz.matrix_plot` function.
 
-plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(contributions_nuclide, '(Δk/k)^2')
+plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(contributions_nuclide, '%(Δk/k)^2')
 
 # %%
 # Now the matrix plot can easily be generated
 
 fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive')
-fig.show()
+fig.write_html('test.html')
 
 # %%
 # This plot is fully interactive. You can hold shift and scroll using the mousewheel to scroll horizontally, or just use the
@@ -81,7 +81,7 @@ fig.show()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The same can be done for the nuclide-reaction-wise contributions
 
-plot_objects_array_nuclide_reaction = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '(Δk/k)^2')
+plot_objects_array_nuclide_reaction = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '%(Δk/k)^2')
 fig = matrix_plot(plot_objects_array_nuclide_reaction, plot_type='interactive', labels=labels)
 fig.show()
 

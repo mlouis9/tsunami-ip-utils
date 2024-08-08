@@ -4,9 +4,9 @@ Matrix Perturbation Correlation Comparison
 This example demonstrates how to generate a matrix comparison plot for the perturbation correlation method (described in 
 :ref:`sphx_glr_auto_examples_matrix_plot_matrix_of_perturbation_plots.py` and 
 :ref:`sphx_glr_auto_examples_correlation_plot_perturbation_correlation_plot.py`). This example compares the calculated correlation
-correlation coefficient to the TSUNAMI-IP calculated :math:`c_k` value for a set of SDFs computed from the HMF series of critical
-experiments [Bess2019]_. **Note** before running this example, please ensure that the necessary cross section libraries are cached
-by running the :ref:`sphx_glr_auto_examples_correlation_plot_perturbation_correlation_plot.py` example.)
+correlation coefficient to the TSUNAMI-IP calculated :math:`c_k` value for a set of dummy SDFs taken becuase they only use cross
+sections available in the dummy 56 group library. **Note** before running this example, please ensure that the necessary cross section 
+libraries are cached by running the :ref:`sphx_glr_auto_examples_correlation_plot_perturbation_correlation_plot.py` example.)
 """
 
 # %%
@@ -76,6 +76,10 @@ print(comparisons)
 # using static matplotlib plots and including labels
 
 num_perturbations = 200
+labels = {
+    'applications': [ application_file.name for application_file in application_sdfs ],
+    'experiments': [ experiment_file.name for experiment_file in experiment_sdfs ],
+}
 comparisons, fig = correlation_comparison(
     integral_index_matrix=c_k,
     integral_index_name='c_k',
@@ -86,6 +90,7 @@ comparisons, fig = correlation_comparison(
     perturbation_factors=perturbation_factors,
     num_perturbations=num_perturbations,
     plot_objects_kwargs={'plot_type': 'scatter'},
+    matrix_plot_kwargs={'labels': labels}
 )
 
 fig.show()
@@ -95,3 +100,47 @@ print(comparisons)
 # Note that for these examples, adding more poins hardly changes the agreement, because the TSUNAMI_IP :math:`c_k` values are ~1, only
 # a small number of points are needed to get a small uncertainty on the correlation coefficient (see :ref:`the technical manual <sec-pearson-coefficient>`
 # for details).
+
+# %%
+# These plots can also be saved to an image
+
+comparisons, fig = correlation_comparison(
+    integral_index_matrix=c_k,
+    integral_index_name='c_k',
+    application_files=application_sdfs, 
+    experiment_files=experiment_sdfs, 
+    method='perturbation',
+    base_library=multigroup_library,
+    perturbation_factors=perturbation_factors,
+    num_perturbations=num_perturbations,
+    plot_objects_kwargs={'plot_type': 'scatter'},
+    matrix_plot_kwargs={'labels': labels}
+)
+fig.to_image( EXAMPLES / '_static' / 'perturbation_matrix_comparison.png' )
+
+# sphinx_gallery_thumbnail_path = '../../examples/_static/perturbation_matrix_comparison.png'
+
+# %%
+# A Comparison Without a Plot
+# ---------------------------
+# Sometimes generating the plots themselves can be extremely memory intensive when making a matrix plot comparison over an entire
+# series of critical experiments, so sometimes it is desirable to generate the comparison without the plot. This can be done by
+# passing ``make_plot=False`` to the :func:`tsunami_ip_utils.comparisons.correlation_comparison` function. This will return only
+# the comparisons dataframe.
+
+comparisons = correlation_comparison(
+    integral_index_matrix=c_k,
+    integral_index_name='c_k',
+    application_files=application_sdfs, 
+    experiment_files=experiment_sdfs, 
+    method='perturbation',
+    base_library=multigroup_library,
+    perturbation_factors=perturbation_factors,
+    num_perturbations=num_perturbations,
+    make_plot=False,
+)
+print(comparisons)
+
+# %%
+# Note also that, since generating points for perturbation plots can be time consuming, this function by default runs in parallel
+# with two less than the number of cores available on your machine. This can be changed by passing the ``num_cores`` argument.

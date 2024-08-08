@@ -6,7 +6,7 @@ correlation plot.
 """
 
 # %%
-# First, we import the necessary modules, and generate teh uncertainty contributions for the desired application and experiment
+# First, we import the necessary modules, and generate the uncertainty contributions for the desired application and experiment
 # pair (as described in :ref:`sphx_glr_auto_examples_uncertainty_contributions.py`).
 
 from tsunami_ip_utils.viz.viz import correlation_plot
@@ -38,7 +38,7 @@ experiment_contributions  = contributions_nuclide['experiment'][0]
 fig, axs = correlation_plot(
     application_contributions, 
     experiment_contributions, 
-    integral_index_name='$(Δk/k)^2$'
+    integral_index_name='$\\%(\\Delta k/k)^2$'
 )
 
 # Note that the generated figure object is special, and has attributes relating to the regression and correlation coefficients
@@ -63,7 +63,7 @@ plt.show()
 fig = correlation_plot(
     application_contributions, 
     experiment_contributions, 
-    integral_index_name='(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
+    integral_index_name='%(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
     plot_type='interactive_scatter'
 )
 
@@ -85,7 +85,7 @@ fig.show()
 fig = correlation_plot(
     application_contributions, 
     experiment_contributions, 
-    integral_index_name='(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
+    integral_index_name='%(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
     plot_type='interactive_scatter',
     interactive_legend=True,
 )
@@ -112,7 +112,7 @@ experiment_contributions  = contributions_nuclide_reaction['experiment'][0]
 fig, axs = correlation_plot(
     application_contributions, 
     experiment_contributions, 
-    integral_index_name='$(\\Delta k/k)^2$'
+    integral_index_name='$\\%(\\Delta k/k)^2$'
 )
 plt.show()
 
@@ -123,7 +123,7 @@ plt.show()
 fig = correlation_plot(
     application_contributions, 
     experiment_contributions, 
-    integral_index_name='(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
+    integral_index_name='%(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
     plot_type='interactive_scatter'
 )
 fig.show()
@@ -135,7 +135,7 @@ fig.show()
 fig = correlation_plot(
     application_contributions, 
     experiment_contributions, 
-    integral_index_name='(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
+    integral_index_name='%(Δk/k)^2', # Note that Plotly plots don't support pylatex in labels, so we just use a plain string
     plot_type='interactive_scatter',
     interactive_legend=True,
 )
