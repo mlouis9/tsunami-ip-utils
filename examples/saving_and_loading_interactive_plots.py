@@ -74,7 +74,7 @@ fig.show()
 fig = load_interactive_scatter_plot( EXAMPLES / 'scatter_plot.pkl' )
 fig.to_image( EXAMPLES / '_static' / 'loaded_scatter_plot.png' )
 
-# sphinx_gallery_thumbnail_path = '../examples/_static/loaded_scatter_plot.png'
+# sphinx_gallery_thumbnail_path = '../../examples/_static/loaded_scatter_plot.png'
 
 # %%
 # Other Interactive Plots

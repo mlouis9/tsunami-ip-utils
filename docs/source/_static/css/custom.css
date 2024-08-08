@@ -64,3 +64,8 @@ button {
     margin-top: 20px; /* Add some spacing above */
     margin-bottom: 10px; /* And below */
 }
+
+/* Modify the content width of the sphinx readthedocs theme */
+.wy-nav-content {
+    max-width: 1200px !important;
+}
