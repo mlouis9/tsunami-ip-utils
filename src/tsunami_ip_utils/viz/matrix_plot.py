@@ -36,6 +36,9 @@ import io
 import matplotlib
 import matplotlib.pyplot as plt
 import plotly.io as pio
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Style constants
 GRAPH_STYLE = {
@@ -422,11 +425,17 @@ class InteractiveMatrixPlot:
             # Load the Dash app in the headless browser
             driver.get(f"http://localhost:{port}")
 
-            # Wait for the app to finish loading (you can adjust the sleep time if needed)
-            time.sleep(1)
-
+            # Use WebDriverWait to wait for the matrix-plot div to be loaded
+            WebDriverWait(driver, 200).until(
+                EC.presence_of_element_located((By.ID, "matrix-plot"))
+            )
+            
             # Capture the fully rendered HTML content
-            html_content = driver.page_source
+            start_time = time.time()
+            html_content = driver.execute_script("return document.documentElement.outerHTML")
+            end_time = time.time()
+
+            print("Time taken to capture HTML content:", end_time - start_time, "seconds")
 
             # Write the HTML content to the specified file
             if filename is not None:
