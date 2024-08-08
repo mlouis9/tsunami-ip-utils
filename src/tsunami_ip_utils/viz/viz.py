@@ -21,6 +21,7 @@ from tsunami_ip_utils.viz.scatter_plot import EnhancedPlotlyFigure
 from tsunami_ip_utils.viz.scatter_plot import _PerturbationScatterPlotter
 from tsunami_ip_utils.viz.matrix_plot import InteractiveMatrixPlot
 import copy
+import tsunami_ip_utils.config as config
 
 def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_index_name: str='E', 
                       plot_redundant_reactions: bool=True, **kwargs: dict
@@ -292,7 +293,9 @@ class BlockingFigureWrapper:
         # Show the figure
         self._figure.show()
 
-        input("Press Enter to continue...")
+        if not config.generating_docs:
+            # Block the program until the user presses Enter
+            input("Press Enter to continue...")
 
     def __getattr__(self, name):
         """Delegate all other attribute access to the wrapped matplotlib figure instance."""
@@ -305,7 +308,7 @@ def generate_heatmap_from_comparison(comparisons: Union[str, Path, pd.DataFrame]
     
     Parameters
     ----------
-    comparisos
+    comparisons
         Path to the comparison excel file OR the the pandas dataframe containing the comparison data.
     base_fontsize
         Base font size for the heatmap (there is some heuristic for scaling fontsize with matrix size). Default is 6.

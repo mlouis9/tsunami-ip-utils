@@ -1,7 +1,7 @@
 """
-Uncertainty Contributions
-=========================
-This example demonstrates how to read (nuclear-data induced) uncertainty contributions from a set of TSUNAMI-B SDF files.
+Uncertainty/Variance Contributions
+==================================
+This example demonstrates how to read (nuclear-data induced) uncertainty/variance contributions from a set of TSUNAMI-B SDF files.
 """
 
 # Getting the Contributions

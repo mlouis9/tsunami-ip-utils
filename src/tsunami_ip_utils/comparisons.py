@@ -226,8 +226,9 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
         TSUNAMI ``.sdf`` files).
     method
         The method for visualizing the given integral index. Allowed values of ``'perturbation'``, 
-        ``'uncertainty_contributions_nuclide'``, ``'uncertainty_contributions_nuclide_reaction'``, 
-        ``'E_contributions_nuclide'``, ``'E_contributions_nuclide_reaction'``, ``'c_k_contributions'``. 
+        ``'uncertainty_contributions_nuclide'``, ``'uncertainty_contributions_nuclide_reaction'``, ``'variance_contributions_nuclide'``,
+        ``'variance_contributions_nuclide_reaction'``. ``'E_contributions_nuclide'``, ``'E_contributions_nuclide_reaction'``, 
+        ``'c_k_contributions'``, 
     base_library
         Path to the base library
     perturbation_factors
@@ -270,7 +271,8 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
         raise ValueError("The method is 'perturbation', and some of the required additional parameters are missing.")
 
     method_for_calculating_c_k = method in ['uncertainty_contributions_nuclide', 'uncertainty_contributions_nuclide_reaction',
-                                                'perturbation', 'c_k_contributions']
+                                            'variance_contributions_nuclide', 'variance_contributions_nuclide_reaction',
+                                            'perturbation', 'c_k_contributions']
     method_for_calculating_E = method in ['E_contributions_nuclide', 'E_contributions_nuclide_reaction']
     if integral_index_name == 'c_k' and not method_for_calculating_c_k:
         raise ValueError("The integral index name is 'c_k', but a method for calculating c_k was not selected, instead"
@@ -310,11 +312,21 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
                 
 
         case 'uncertainty_contributions_nuclide':
+            contributions_nuclide, _ = get_uncertainty_contributions(application_files, experiment_files)
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide, '%Δk/k', **plot_objects_kwargs) \
+                                    if make_plot else None
+
+        case 'uncertainty_contributions_nuclide_reaction':
+            _, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files)
+            plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '%Δk/k', **plot_objects_kwargs) \
+                                    if make_plot else None
+            
+        case 'variance_contributions_nuclide':
             contributions_nuclide, _ = get_uncertainty_contributions(application_files, experiment_files, variance=True)
             plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide, '%(Δk/k)^2', **plot_objects_kwargs) \
                                     if make_plot else None
 
-        case 'uncertainty_contributions_nuclide_reaction':
+        case 'variance_contributions_nuclide_reaction':
             _, contributions_nuclide_reaction = get_uncertainty_contributions(application_files, experiment_files, variance=True)
             plot_objects_array = generate_plot_objects_array_from_contributions(contributions_nuclide_reaction, '%(Δk/k)^2', **plot_objects_kwargs) \
                                     if make_plot else None
@@ -334,7 +346,6 @@ def correlation_comparison(integral_index_matrix: unumpy.uarray, integral_index_
 
         case 'c_k_contributions':
             raise NotImplementedError("The method 'c_k_contributions' is not yet implemented.")
-            # plot_objects_array = generate_plot_objects_from_array_contributions(integral_index_matrix, )
 
     # ==============================
     # Update plots with annotations

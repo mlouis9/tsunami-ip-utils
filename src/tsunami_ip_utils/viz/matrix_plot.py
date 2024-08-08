@@ -431,11 +431,7 @@ class InteractiveMatrixPlot:
             )
             
             # Capture the fully rendered HTML content
-            start_time = time.time()
             html_content = driver.execute_script("return document.documentElement.outerHTML")
-            end_time = time.time()
-
-            print("Time taken to capture HTML content:", end_time - start_time, "seconds")
 
             # Write the HTML content to the specified file
             if filename is not None:

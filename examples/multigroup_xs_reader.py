@@ -68,6 +68,48 @@ with open(EXAMPLES / 'data' / 'dummy_56_v7.1.pkl', 'wb') as f:
     pickle.dump(out, f)
 
 # %%
+# Getting the Energy Structure
+# ----------------------------
+# By default the reader doesn't return the energy group structure (this is something that could be improved in the future), but if
+# you're examining SCALE built-in cross section libraries, the energy group structure can be obtained from the 
+# :func:`tsunami_ip_utils.xs.get_scale_multigroup_structure` function. This function scrapes the SCALE manual for the energy
+# group structure of a given SCALE library.
+
+from tsunami_ip_utils.xs import get_scale_multigroup_structure
+
+num_groups = 56
+multigroup_structure = get_scale_multigroup_structure(num_groups)
+
+print(multigroup_structure)
+
+# %%
+# We can easily plot cross section data using the energy group structure. The following code snippet demonstrates how to plot
+# the u-235 fission cross section
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+u235_fission_xs = out['92235']['18']
+
+# To get the cross sections to be visually constant within each energy group, we need to repeat the cross sections and add in the
+# implied lower energy bound of 1E-05 eV
+u235_fission_xs = u235_fission_xs.repeat(2)
+modified_energies = np.zeros_like(u235_fission_xs)
+
+energies = multigroup_structure[:, 1]
+modified_energies[0] = 1E-05
+modified_energies[-1] = energies[-1]
+modified_energies[1:] = np.repeat(energies, 2)[:-1]
+
+plt.plot(modified_energies, u235_fission_xs)
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('Energy (eV)')
+plt.ylabel('Cross Section (b)')
+plt.grid()
+plt.show()
+
+# %%
 # A Future Improvement
 # ---------------------
 # It is unfortunate that to cache a cross section library, the library must be read twice (the most consuming part is making

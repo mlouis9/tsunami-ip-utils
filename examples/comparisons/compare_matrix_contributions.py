@@ -18,7 +18,7 @@ experiments [Bess2019]_.
 from tsunami_ip_utils.integral_indices import get_integral_indices
 from paths import EXAMPLES
 
-application_sdfs = [ EXAMPLES / 'data' / 'example_sdfs' / 'HMF' / f'HEU-MET-FAST-003-00{i}.sdf' for i in range(9, 13) ]
+application_sdfs = [ EXAMPLES / 'data' / 'example_sdfs' / 'HMF' / f'HEU-MET-FAST-003-00{i}.sdf' for i in range(1, 8) ]
 experiment_sdfs = application_sdfs
 
 # Get the TSUNAMI-IP integral indices
@@ -67,6 +67,20 @@ comparisons, fig = correlation_comparison(
 fig.show()
 
 # %%
+# We can also generate an image of the comparison
+
+comparisons, fig = correlation_comparison(
+    integral_index_matrix=c_k,
+    integral_index_name='c_k',
+    application_files=application_sdfs, 
+    experiment_files=experiment_sdfs, 
+    method='uncertainty_contributions_nuclide',
+)
+fig.to_image( EXAMPLES / '_static' / 'contribution_matrix_comparison.png' )
+
+# sphinx_gallery_thumbnail_path = '../../examples/_static/contribution_matrix_comparison.png'
+
+# %%
 # Generating a Comparison Heatmap
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # We can also generate a heatmap of the comparison between the calculated correlation coefficient and the TSUNAMI-IP :math:`c_k` values
@@ -83,3 +97,12 @@ print(plot_dict.keys())
 # :func:`tsunami_ip_utils.comparisons_correlation_comparison` function and returns a dictionary of matplotlib heatmaps. From the
 # output above you can see that the function contains heatmaps of the calculated value, the TSUNAMI-IP value, and the percent
 # difference between the two. Note that this function was used to generate the plots shown in the :ref:`technical manual <sec-contribution-results>`.
+
+fig, axs = plot_dict['Calculated']
+fig.show()
+
+fig, axs = plot_dict['TSUNAMI-IP']
+fig.show()
+
+fig, axs = plot_dict['Percent Difference']
+fig.show()
