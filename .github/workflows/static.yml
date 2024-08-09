@@ -15,8 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup SSH for private repository access
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.GITLAB_SSH_KEY }}
+
+      - name: Add gitlab.gitlab-matthew-louis-code.com to SSH known_hosts
+        run: ssh-keyscan gitlab.gitlab-matthew-louis-code.com >> ~/.ssh/known_hosts
+
       - name: Clone GitLab repository
-        run: git clone --branch gh-pages https://gitlab.gitlab-matthew-louis-code.com/root/tsunami_ip_utils.git gitlab-repo
+        run: git clone --branch gh-pages git@gitlab.gitlab-matthew-louis-code.com:root/tsunami_ip_utils.git gitlab-repo
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
