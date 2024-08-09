@@ -1,0 +1,43 @@
+name: Deploy static content from GitLab to GitHub Pages
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone GitLab repository
+        run: |
+          apt-get update
+          apt-get install -y git
+          git clone --branch gh-pages git@gitlab.gitlab-matthew-louis-code.com:root/tsunami_ip_utils.git gitlab-repo
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact from 'docs' folder
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './gitlab-repo/docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
