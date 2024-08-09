@@ -8,6 +8,7 @@ This package is [published on PyPI](https://pypi.org/project/tsunami-ip-utils/),
 ```
 pip install tsunami_ip_utils
 ```
+Note many of the features require a valid SCALE installation (SCALE is an export controlled code and can be requested from [RSICC](https://rsicc.ornl.gov/)), and all fo the SCALE binaries to be on PATH.
 
 # Documentation and Examples
 If you're interested in running some examples, just clone this repository via the instructions [here](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository#cloning-a-repository) and navigate to the `examples` directory.
