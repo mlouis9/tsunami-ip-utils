@@ -77,7 +77,8 @@ def contribution_plot(contributions: List[Dict], plot_type: str='bar', integral_
 
 
 def _prepare_contribution_pairs(application_contributions: List[dict], experiment_contributions: List[dict], 
-                                plot_redundant_reactions: bool) -> Tuple[List[Tuple[ufloat, ufloat]], List[str], List[str], bool]:
+                                plot_redundant_reactions: bool, plot_dissimilar_nuclides: bool
+                                ) -> Tuple[List[Tuple[ufloat, ufloat]], List[str], List[str], bool]:
     """Prepares the contribution pairs for plotting by parsing the contributions into a form that's easy to plot.
 
     Parameters
@@ -89,6 +90,9 @@ def _prepare_contribution_pairs(application_contributions: List[dict], experimen
     plot_redundant_reactions
         Whether to plot redundant reactions (or irrelevant reactions) when considering
         nuclide-reaction-wise contributions.
+    plot_dissimilar_nuclides
+        Whether to plot points with an application or experiment contribution of zero. These points correspond to nuclides
+        which are present in an application but not the experiment (or vice versa).
     
     Returns
     -------
@@ -131,8 +135,13 @@ def _prepare_contribution_pairs(application_contributions: List[dict], experimen
     # usually chi, nubar, or fission reactions for nonfissile isotopes that are added for consistency with the set
     # of reactions only
 
-    indices = [ index for index, (application_point, experiment_point) in enumerate( contribution_pairs )
-                    if application_point.n == 0 and experiment_point.n == 0 ]
+    if plot_dissimilar_nuclides: # Filter out only (0, 0) points
+        indices = [ index for index, (application_point, experiment_point) in enumerate( contribution_pairs )
+                        if application_point.n == 0 and experiment_point.n == 0 ]
+    else: # Filter out (0, 0), (0, y), and (x, 0) points
+        indices = [ index for index, (application_point, experiment_point) in enumerate( contribution_pairs )
+                        if application_point.n == 0 or experiment_point.n == 0 ]
+    
     isotopes = [ isotope for index, isotope in enumerate(isotopes) if index not in indices ]
     contribution_pairs = [ (application_point, experiment_point) for index, (application_point, experiment_point) in enumerate(contribution_pairs) if index not in indices ]
 
@@ -151,8 +160,8 @@ def _prepare_contribution_pairs(application_contributions: List[dict], experimen
 
 
 def correlation_plot(application_contributions: List[dict], experiment_contributions: List[dict], plot_type: str='scatter', 
-                     integral_index_name: str='E', plot_redundant_reactions: bool=True, **kwargs: dict
-                     ) -> Union[Tuple[Figure, Axes], EnhancedPlotlyFigure, InteractiveScatterLegend]:
+                     integral_index_name: str='E', plot_redundant_reactions: bool=True, plot_dissimilar_nuclides: bool=True, 
+                     **kwargs: dict) -> Union[Tuple[Figure, Axes], EnhancedPlotlyFigure, InteractiveScatterLegend]:
     """Creates a correlation plot for a given application-experiment pair for which the contributions to the similarity
     parameter are given.
     
@@ -172,6 +181,9 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
     plot_redundant_reactions
         Whether to plot redundant reactions (or irrelevant reactions) when considering
         nuclide-reaction-wise contributions. Default is ``True``.
+    plot_dissimilar_nuclides
+        Whether to plot points with an application or experiment contribution of zero. These points correspond to nuclides
+        which are present in an application but not the experiment (or vice versa).
     kwargs
         Additional keyword arguments to pass to the plotting function.
 
@@ -199,6 +211,7 @@ def correlation_plot(application_contributions: List[dict], experiment_contribut
         application_contributions, 
         experiment_contributions,
         plot_redundant_reactions,
+        plot_dissimilar_nuclides,
     )
 
     plotters = {

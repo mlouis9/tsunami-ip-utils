@@ -53,7 +53,7 @@ plot_objects_array_nuclide = generate_plot_objects_array_from_contributions(cont
 # Now the matrix plot can easily be generated
 
 fig = matrix_plot(plot_objects_array_nuclide, plot_type='interactive')
-fig.write_html('test.html')
+fig.show()
 
 # %%
 # This plot is fully interactive. You can hold shift and scroll using the mousewheel to scroll horizontally, or just use the

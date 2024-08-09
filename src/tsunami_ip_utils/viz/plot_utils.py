@@ -68,7 +68,8 @@ def _determine_plot_type(contributions: List[ dict ], plot_redundant_reactions: 
     return contributions, nested_plot
 
 def generate_plot_objects_array_from_contributions(contributions: Dict[ str, List[ unumpy.uarray ] ], 
-                                                   integral_index_name: str, **kwargs: dict) -> np.ndarray:
+                                                   integral_index_name: str, plot_dissimilar_nuclides: bool=True,
+                                                    **kwargs: dict) -> np.ndarray:
     """Generate a matrix of plot objects (for creating a matrix plot) for the given contributions to an arbitrary integral index.
     This is valid for plots of :math:`\\Delta k/k` contributions, :math:`E` contributions, :math:`c_k` contributions, etc..
     
@@ -78,6 +79,9 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
         Dictionary of a list of contributions to the integral index keyed by application or experiment.
     integral_index_name
         Name of the integral index being plotted.
+    plot_dissimilar_nuclides
+        Whether to plot points with an application or experiment contribution of zero in the scatter plots. These points correspond 
+        to nuclides which are present in an application but not the experiment (or vice versa).
     kwargs
         Additional keyword arguments. The following are supported:
         
@@ -131,7 +135,8 @@ def generate_plot_objects_array_from_contributions(contributions: Dict[ str, Lis
                     plot_type=off_diagonal_type,
                     integral_index_name=integral_index_name, 
                     plot_redundant_reactions=True, 
-                    interactive_legend=interactive_correlation_legend
+                    plot_dissimilar_nuclides=plot_dissimilar_nuclides,
+                    interactive_legend=interactive_correlation_legend,
                 )
 
     return plot_objects_array
