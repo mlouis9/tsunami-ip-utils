@@ -15,12 +15,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up SSH key
-        run: |
-          ssh-keyscan gitlab.gitlab-matthew-louis-code.com >> ~/.ssh/known_hosts
-
       - name: Clone GitLab repository
-        run: git clone --branch gh-pages git@gitlab.gitlab-matthew-louis-code.com:root/tsunami_ip_utils.git gitlab-repo
+        run: git clone --branch gh-pages https://gitlab.gitlab-matthew-louis-code.com/root/tsunami_ip_utils.git gitlab-repo
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
