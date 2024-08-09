@@ -15,6 +15,7 @@ jobs:
           chmod 600 ~/.ssh/is_rsa
           ssh-keyscan gitlab.gitlab-matthew-louis-code.com >> ~/.ssh/known_hosts
 
+
       - name: Clone GitLab repository
         run: git clone --branch gh-pages git@gitlab.gitlab-matthew-louis-code.com:root/tsunami_ip_utils.git gitlab-repo
 
