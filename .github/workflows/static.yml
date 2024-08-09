@@ -17,9 +17,6 @@ jobs:
 
       - name: Set up SSH key
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/is_rsa
           ssh-keyscan gitlab.gitlab-matthew-louis-code.com >> ~/.ssh/known_hosts
 
       - name: Clone GitLab repository
